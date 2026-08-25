@@ -4,6 +4,7 @@
   "private": true,
   "description": "Documentation site for the YuanZhu AI interior-design mini program (frontend + backend + deployment).",
   "type": "module",
+  "packageManager": "pnpm@10.28.2",
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
