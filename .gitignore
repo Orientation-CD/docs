@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# VitePress build output
+.vitepress/dist/
+.vitepress/cache/
+
+# Editor / OS
+.DS_Store
+*.swp
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
