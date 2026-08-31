@@ -19,20 +19,20 @@ the Frontend, Backend, Deploy and Reference sections.
         │  (uni-app + Vue 3)   │  HTTPS     │   FastAPI (API)        │
         │  WeChat DevTools/App │───────────►│   /api/v1/*            │
         └──────────────────────┘            │                        │
-                ▲                            │   ┌──────────────────┐ │
+                ▲                           │   ┌──────────────────┐ │
                 │  direct upload (presigned)│   │ ARQ Submit Worker│ │
         ┌───────┴──────────────┐            │   └───────┬──────────┘ │
         │   Object Storage     │◄───────────│   ┌───────▼──────────┐ │
         │ (MinIO / Aliyun OSS) │            │   │ ARQ Poll Worker  │ │
         └──────────────────────┘            │   └───────┬──────────┘ │
-                ▲                            │           │            │
-                │ result images / report     │   ┌───────▼──────────┐ │
+                ▲                           │           │            │
+                │ result images / report    │   ┌───────▼──────────┐ │
         ┌───────┴──────────────┐            │   │  AI Provider     │ │
         │   AI Image Provider  │◄───────────│   │ (Seedream etc.)  │ │
         │  (large model, HTTP) │            │   └──────────────────┘ │
         └──────────────────────┘            └────────────────────────┘
-                                            │  PostgreSQL │ Redis │
-                                            └─────────────┴───────┘
+                                            │  PostgreSQL │ Redis    │
+                                            └─────────────┴──────────┘
 ```
 
 ## Components and their roles
