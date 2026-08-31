@@ -8,8 +8,8 @@ the Frontend, Backend, Deploy and Reference sections.
 
 ```
         ┌─────────────────────────────────────────────────────────────────┐
-        │                        WeChat (Tencent)                          │
-        │   identity (code2session / phone)        WeChat Pay (JSAPI)      │
+        │                        WeChat (Tencent)                         │
+        │   identity (code2session / phone)        WeChat Pay (JSAPI)     │
         └───────▲─────────────────────────────────────▲───────────────────┘
                 │                                     │
                 │ wx.login / phone auth / pay         │ payment notify
