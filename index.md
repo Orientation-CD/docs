@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "YuanZhu AI Docs"
   text: "From zero to hero"
-  tagline: "The complete developer documentation for the YuanZhu AI interior-design WeChat mini program — frontend, backend, deployment and end-to-end reference."
+  tagline: "The complete developer documentation for the YuanZhu AI interior-design WeChat mini program — frontend, backend, Admin console, deployment and end-to-end reference."
   actions:
     - theme: brand
       text: Get Started
@@ -27,20 +27,24 @@ features:
     link: /frontend/overview
   - icon: 🧩
     title: Backend
-    details: Deep dive into the FastAPI backend — API, ARQ workers, PostgreSQL, Redis, object storage, billing, reports and the AI provider layer.
+    details: Deep dive into the FastAPI backend — API, ARQ workers, PostgreSQL, Redis, object storage, billing, reports and the multi-provider AI layer.
     link: /backend/overview
+  - icon: 🛠️
+    title: Admin Console (Studio Control)
+    details: The operations console for product and ops — dashboard, users, workspaces, billing, campaigns, prompts, report templates, and the model-provider catalog.
+    link: /admin/overview
   - icon: ☁️
     title: Deploy
     details: Run the local Docker Compose stack and deploy to Alibaba Cloud SAE — from first smoke test to production promotion and rollback.
     link: /deploy/local-stack
   - icon: 🔗
     title: Reference
-    details: REST API overview, data model, configuration, and full end-to-end call chains for every open API — trace the data flow from button tap to response.
+    details: REST API overview, data model, configuration, and the OpenAPI surface for the backend service.
     link: /reference/rest-api
-  - icon: 📚
-    title: Contributing to Docs
-    details: This site is built with VitePress and auto-deploys to GitHub Pages on every push. Learn how to edit, build and preview it.
-    link: /get-started/faq
+  - icon: 🧭
+    title: End-to-End Call Chains
+    details: Full traceable data flows — login, design-job lifecycle, asset upload, payments, reports and workspaces — from button tap to database and provider.
+    link: /reference/flows/wechat-login-flow
 ---
 
 ## What is YuanZhu AI?
@@ -65,17 +69,24 @@ organization:
 - **Frontend** — everything about the mini program: tech stack, pages and
   subpackages, the repository layer, build modes, and key user flows.
 - **Backend** — everything about the API service: modules, workers, the
-  database, object storage, Redis, billing, reports and the AI provider layer.
-- **Deploy** — how to run locally with Docker Compose and how to deploy to
-  Alibaba Cloud SAE, including CI/CD and production safeguards.
-- **Reference** — the API surface and full end-to-end call chains: for every
-  open API you can trace exactly what happens from the user tapping a button in
-  the mini program to the final response, including every intermediate hop
-  (Redis, workers, providers, database, WeChat).
+  database, object storage, Redis, billing, reports, workspaces and the AI provider layer.
+- **Admin Console (Studio Control)** — the operations web app: dashboard and alerts,
+  users and accounts, workspaces, billing and tokens, campaigns, marketing, finance,
+  performance, design jobs, assets, legal documents, prompt and report templates, and
+  the model-provider catalog.
+- **Deploy** — how to run locally with Docker Compose (per-developer parallel stacks)
+  and how to deploy to Alibaba Cloud SAE, including CI/CD, namespace-safe tooling,
+  migration credential separation and production safeguards.
+- **Reference** — the API surface: REST overview, data model, configuration reference,
+  and OpenAPI.
+- **End-to-End Call Chains** — for every open API you can trace exactly what happens
+  from the user tapping a button in the mini program to the final response, including
+  every intermediate hop (Redis, ARQ workers, providers, database, WeChat).
 
 > **Reading order.** If you are new to the project, start at
 > [Introduction](/get-started/introduction), then follow
 > [Architecture Overview](/get-started/architecture), then the **Quick Start**.
-> After you have the stack running, explore Frontend and Backend. Use
-> **Reference** whenever you want to understand a specific API or data flow in
-> depth.
+> After you have the stack running, explore Frontend and Backend. Use the
+> **Admin Console** section when operating the product, **Deploy** when shipping to the
+> cloud, and **Reference / End-to-End Call Chains** whenever you want to understand a
+> specific API or data flow in depth.

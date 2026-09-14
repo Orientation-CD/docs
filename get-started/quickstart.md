@@ -10,8 +10,8 @@ minutes, with **zero backend infrastructure** of your own. You will run:
 ::: tip Why mock mode first?
 The local stack ships with a **mock WeChat identity provider**, a **mock
 payment provider** and a **mock AI image provider**. This lets you exercise the
-whole flow — login, submit a design job, watch the workers run, get a result —
-**without any real credentials or model costs**.
+whole flow — login, submit a design job or voice summary, watch the workers
+run, get a result — **without any real credentials or model costs**.
 :::
 
 ## 1. Prerequisites
@@ -25,13 +25,6 @@ Install these tools first:
 | **Node.js ≥ 18** | Run the frontend toolchain | `node --version` |
 | **pnpm** | Frontend package manager | `pnpm --version` |
 | **WeChat DevTools** | Open / preview the mini program | WeChat Developer Tools desktop app |
-
-::: tip macOS note
-On macOS the backend deploy scripts require **Bash 4+** (the system `/bin/bash`
-is 3.2). For local development with `create_stack.sh` a normal shell is fine;
-only the SAE deploy scripts need Bash 4. See
-[SAE Deployment Runbook](/deploy/sae-deployment) for details.
-:::
 
 ## 2. Get the code
 
@@ -57,13 +50,13 @@ cd YuanZhu-AI
 # Prepare the .env file (Compose reads shared settings from it)
 cp .env.example .env
 
-# Create the default stack: port 9090, mock WeChat, MinIO storage
-./scripts/create_stack.sh
+# Create the default stack. The frontend's api-local mode expects port 8080.
+./scripts/create_stack.sh --port 8080
 ```
 
 The script prints the published endpoints. On the default settings you get:
 
-- **API**: `http://localhost:9090`
+- **API**: `http://localhost:8080`
 - **MinIO API / console**: derived from the API port
 - **PostgreSQL**: `postgresql://floorplan:floorplan@localhost:5432/floorplan`
 - **Redis**: `redis://localhost:6379/0`
@@ -72,11 +65,11 @@ The stack includes:
 
 | Service | Role |
 | --- | --- |
-| `db` | PostgreSQL 16 |
-| `redis` | Redis 7 |
+| `db` | PostgreSQL |
+| `redis` | Redis |
 | `minio` / `minio-init` | S3-compatible object storage |
 | `migrate` | Runs Alembic migrations, then exits |
-| `api` | FastAPI service on port 9090 |
+| `api` | FastAPI service on the chosen port |
 | `submit-worker` | ARQ submit worker |
 | `poll-worker` | ARQ poll worker |
 | `mock-wechat-identity-provider` | Fakes WeChat `code2session` / phone |
@@ -85,7 +78,7 @@ The stack includes:
 
 ::: tip Verify it's healthy
 ```bash
-curl http://localhost:9090/health/ready
+curl http://localhost:8080/health/ready
 ```
 returns `{"status":"ready"}` when PostgreSQL and Redis are reachable and the
 database is migrated.
@@ -93,12 +86,7 @@ database is migrated.
 
 ### Other stack flavors
 
-The launcher supports different combinations of WeChat and storage:
-
 ```bash
-# Port 8080 (used by the frontend test example), mock WeChat, MinIO
-./scripts/create_stack.sh --port 8080 --wechat mock --storage minio --secret .env
-
 # Real WeChat (needs WECHAT_APP_ID / WECHAT_MINI_PROGRAM_APP_SECRET in .env)
 ./scripts/create_stack.sh --port 8080 --wechat real --storage minio --secret .env
 
@@ -117,25 +105,29 @@ Open a second terminal, then:
 cd wechat_mini_program
 pnpm install
 
-# Mock mode — no backend needed at all (fastest for UI work)
+# UI-only mock mode — no backend needed at all (fastest for UI work):
 pnpm dev:mp-weixin:mock
 ```
 
-When you want to talk to the **real local backend**, use the API mode with a
+When you want to talk to the **real local backend**, use API mode with a
 **mock login/payment** (so no WeChat credentials are required):
 
 ```bash
-# API mode against http://127.0.0.1:8080 (or your stack port)
+# API mode against http://127.0.0.1:8080 (matches the stack above)
 pnpm dev:mp-weixin:api-local
 ```
 
 ::: tip Which port?
 `dev:mp-weixin:api-local` targets `http://127.0.0.1:8080` by default. If you
-started the stack on `9090` instead, run:
+started the stack on a different port, override it:
 ```bash
 VITE_API_BASE_URL=http://127.0.0.1:9090 pnpm dev:mp-weixin:api-local
 ```
 :::
+
+Both dev scripts also set `VITE_SHOW_BACKEND_STATUS=true` and
+`VITE_ENABLE_SUBSCRIPTION_SCENARIOS=true`, so you get a connection overlay and a
+subscription-state switcher in "我的 → 权益管理".
 
 ## 5. Open the mini program in WeChat DevTools
 
@@ -144,34 +136,44 @@ VITE_API_BASE_URL=http://127.0.0.1:9090 pnpm dev:mp-weixin:api-local
    - Dev (HMR) build: `wechat_mini_program/dist/dev/mp-weixin`
    - Production build: `wechat_mini_program/dist/build/mp-weixin`
 3. Set your **AppID** to the project's WeChat AppID
-   (`wxec0d577de41255aa` — ask a maintainer for the AppSecret; it must **never**
-   be committed).
-4. WeChat DevTools compiles and opens the mini program simulator.
+   (`wxec0d577de41255aa`). The AppSecret lives **only** on the backend and
+   must never be committed to the frontend repo.
+4. Because `api-local` talks to loopback HTTP, enable
+   **"不校验合法域名"** (Settings → Project Settings → "Do not verify legal
+   domains/TLS") in DevTools.
+5. DevTools compiles and opens the mini program simulator.
 
-You should see the **ad splash → brand splash → home page** with the six feature
+You should see the **ad splash → brand splash → home page** with the feature
 cards. Tap any feature to walk through the flow.
 
 ::: tip Phone testing
-To run the mini program on a real phone against your local backend, connect the
-phone and Mac to the same LAN and use:
+To run the mini program on a real phone against your local backend, connect
+the phone and Mac to the same LAN and use:
 ```bash
-./scripts/build_mp-weixin.sh          # auto-detects your LAN IP, port 8080
 pnpm build:mp-weixin:api-device-wechat
 ```
+The build script refuses to run unless `VITE_API_BASE_URL` points at a reachable
+LAN address.
 :::
 
 ## 6. First "hello world" design job
 
 With the API-mode frontend open in the simulator:
 
-1. Open any feature (e.g. **Interior design**).
+1. Open any image feature (e.g. **室内设计**). The home screen runs a token
+   precheck; in mock registration mode you will have plenty of tokens.
 2. Pick a room photo from the simulator's local files.
-3. Complete the steps and tap **Submit**.
-4. The frontend will trigger the **WeChat registration/login gate** — in mock
-   mode it succeeds automatically without a phone number.
-5. Watch the design job page: the frontend **polls** the backend while the
-   workers run the job against the **mock image provider**.
-6. A result image appears, and you can generate a **design report**.
+3. Complete the steps and tap **提交**.
+4. The frontend triggers the **WeChat registration/login gate** — in
+   `api-local` (mock auth) it succeeds automatically without a phone number.
+5. The design job page **polls** the backend while the workers run the job
+   against the **mock image provider**.
+6. A result image appears.
+
+To try the new voice flow, open **录音需求总结**, record a short take (or pick
+an MP3/M4A from chat), optionally fill in client info (last name, salutation,
+project name), and submit. When the job completes you land on the markdown
+summary page, where you can play back the recording **and pause/resume** it.
 
 You can watch the backend do the work in real time:
 
@@ -183,10 +185,11 @@ docker compose logs -f api submit-worker poll-worker
 
 | Problem | Likely cause / fix |
 | --- | --- |
-| `curl http://localhost:9090/health/ready` fails | Stack not up — run `docker compose logs api` and `./scripts/create_stack.sh` again |
-| Frontend shows "无法连接后端服务" | `VITE_API_BASE_URL` wrong, or mini program not on HTTPS/loopback — use `api-local` mode |
+| `curl http://localhost:8080/health/ready` fails | Stack not up — run `docker compose logs api` and `./scripts/create_stack.sh` again |
+| Frontend shows "无法连接后端服务" | `VITE_API_BASE_URL` wrong, or the mini program is reaching a non-HTTPS, non-loopback address — use `api-local` mode |
 | Port already in use | Choose a different `--port` (1024–22527) |
-| Mock login fails in DevTools | Some WeChat DevTools versions need "不校验合法域名" (skip domain validation) enabled for local HTTP testing |
+| Mock login fails in DevTools | Enable "不校验合法域名" (skip domain validation) for local HTTP testing |
+| Recording picker says privacy is undeclared | Accept the WeChat privacy prompt, or update the mini program's user-privacy statement in the mp admin console |
 
 ## Next steps
 

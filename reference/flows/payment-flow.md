@@ -1,136 +1,160 @@
 # Payment Flow (End-to-End)
 
-This is the full call chain for **buying tokens or a subscription with WeChat
-Pay** — from tapping "购买" in the mini program's store to tokens appearing on
-the account (or the subscription activating).
+This is the full call chain for **buying tokens or a subscription** — from opening the
+billing page to receiving credit. It covers both a token package and a subscription, the
+WeChat JSAPI hand-off, the async callback, and the (dev-only) mock shortcut.
 
-## Part 0 — User taps buy (frontend)
+## Part 0 — Frontend opens billing
 
 ```
-User opens 购买权益 (store) → taps a token package or subscription
+User opens billing / plans
         │
         ▼
-Frontend pkg-account (Billing repository)
-  1. GET /api/v1/billing/catalog → list packages & plans
-  2. user taps "购买" on a package
-  3. POST /api/v1/token-purchases   (or /api/v1/subscriptions)
-       body: { package_id / plan_id, ... }
+GET /v1/billing/catalog
+  (billing_api.py → /v1/billing/catalog)
+  → TokenPackages + SubscriptionPlans + current entitlements
+Frontend pkg-plans + pkg-account/services
+  (plansPage.ts, mockWallet.ts for local mock mode)
 ```
 
-## Part 1 — Backend creates the checkout
+## Part 1a — Create a token purchase
 
 ```
-POST /api/v1/token-purchases   (billing_api.py:create_token_purchase)
+POST /v1/token-purchases
+  body: { package_id }
         │
         ▼
-FastAPI
-  1. authenticate (get_current_user)
-  2. load the TokenPackage / SubscriptionPlan from catalog
-  3. enforce pending-order limit (WECHAT_TOKEN_PURCHASE_PENDING_LIMIT)
-  4. create PaymentOrder:
-       kind = token_purchase | subscription
-       status = pending
-       amount = package.price
-       expires_at = now + WECHAT_PAYMENT_EXPIRE_SECONDS
-  5. return { payment_order_id, ... }
+billing_api.py: create_token_purchase
+  1. get_current_user; ensure_payment_mode(settings)
+       WECHAT_PAY_MODE = mock | live | disabled
+  2. load TokenPackages row (active), resolve price in CNY fen
+  3. payment_response_lock: serialize concurrent order creation
+  4. idempotency on (user_id, package_id, openid)
+  5. insert payment_orders row:
+       status=PENDING, type=token_purchase,
+       provider_order_id=<wechat out_trade_no>,
+       amount_in_fen
+  6. return PaymentOrderResponse { id, status, amount, ... }
 ```
 
-## Part 2 — Client asks for payment parameters
+## Part 1b — Create a subscription
 
 ```
-POST /api/v1/payments/{payment_order_id}/pay
+POST /v1/subscriptions
+  body: { plan_id }
         │
         ▼
-FastAPI → wechat_pay.py
-  1. authenticate; load the pending order (must belong to user, not expired)
-  2. call WeChat Pay JSAPI to create a prepay transaction
-       (mock mode: mock-payment-provider; real mode: api.weixin.qq.com)
+billing_api.py: create_subscription
+  1. get_current_user; load SubscriptionPlans row
+  2. validate interval (monthly/yearly), price, trial, cap
+  3. check active subscription slot
+  4. payment_response_lock; idempotency on (user_id, plan_id, period_start)
+  5. insert payment_orders row (type=subscription) + subscription state row
+  6. return PaymentOrderResponse
+```
+
+## Part 2 — Get the JSAPI pay params
+
+```
+POST /v1/payments/{payment_order_id}/pay
+  body: {}            (or { openid? })
+        │
+        ▼
+billing_api.py: resume_owned_payment / pay
+  1. load payment_orders row owned by user
+  2. checkout_openid(user, payment_type) → openid (mini-program JSAPI requires it)
+  3. wechat_pay.create_jsapi_order(...):
+       POST https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi
+       with merchant serial + private key signing (wechat_pay.py)
        ──► prepay_id
-  3. build the JSAPI payment parameters:
-       { timeStamp, nonceStr, package: "prepay_id=...",
-         signType: "RSA", paySign }
-  4. return them to the mini program
+  4. package the JSAPI params:
+       { appId, timeStamp, nonceStr, package: "prepay_id=...",
+         signType: "RSA", paySign: <signed> }
+  5. return payment params + payment_status
 ```
 
-## Part 3 — User pays in WeChat
+```
+Frontend pkg-account/services/payment.ts
+  paymentBridge.pay(paymentParams)
+    └─ uni.requestPayment({ provider: "wx", ...paymentParams })
+        ──► WeChat paysheet UI
+```
+
+## Part 3 — WeChat calls the callback (async)
 
 ```
-Frontend paymentBridge.pay(parameters)  (pkg-account/services/payment.ts)
-  uni.requestPayment({ provider: "wxpay", timeStamp, nonceStr,
-                       package, signType, paySign })
+WeChat servers ──► POST /v1/webhooks/wechat/payments
+  (webhook_router prefix /v1/webhooks/wechat)
         │
         ▼
-WeChat shows the payment sheet; user confirms.
-  success → frontend waits for the order to become paid
-  cancel  → frontend shows "已取消微信支付"
+billing_api.py: wechat_pay_notification
+  1. decrypt the WeChat Pay V3 notification (AES-GCM, api v3 key)
+  2. idempotent by event id into wechat_payment_events
+  3. load payment_orders by provider_order_id (out_trade_no)
+  4. if SUCCESS:
+       billing.complete_payment_order(db, order)
+         • mark payment_orders.status = PAID, paid_at
+         • if token_purchase → insert purchased_token_batches
+             + credit user.remaining_tokens (token_ledger_entries: PURCHASE)
+         • if subscription → activate/renew subscription
+             (add_subscription_interval, set expires_at)
+         • notify entitlement update
+  5. return 204 No Content
 ```
 
-Note: `requestPayment` success only means WeChat accepted it — **the real
-authority is the server-side payment notify**.
+Refunds arrive on the parallel route `POST /v1/webhooks/wechat/refunds`
+(`refund_notification`), which records the refund and debits the ledger.
 
-## Part 4 — WeChat Pay notifies the backend
-
-```
-WeChat Pay (server) ──► POST /api/v1/webhooks/wechat/payments
-        │   (signed payload: out_trade_no, amount, transaction_id, ...)
-        ▼
-FastAPI → billing_api.py (webhook) + wechat_pay.py
-  1. verify the notification SIGNATURE with the WeChat Pay public key
-     (reject unsigned / tampered payloads)
-  2. verify amount, merchant, out_trade_no match the stored order
-  3. load PaymentOrder by out_trade_no
-     • already paid → idempotent ack (no double credit)
-  4. mark order status = paid
-  5. credit the purchase:
-       • token purchase → PurchasedTokenBatch + TokenLedgerEntry(TOKEN_PURCHASE)
-                          remaining_tokens += amount
-       • subscription  → UserSubscription status = active,
-                          grant the monthly allowance
-  6. return the required WeChat success acknowledgement
-```
-
-## Part 5 — Frontend confirms
+## Part 4 — Frontend learns the result
 
 ```
-Frontend polls GET /api/v1/payments/{payment_order_id} (or refreshes orders)
-  • status = paid → show success, refresh token balance / subscription page
+Frontend polls / resumes:
+  POST /v1/payments/{id}/pay     (resume a pending order, refresh pay params)
+  GET  /v1/payments             (PaymentHistoryResponse)
+  GET  /v1/payments/{id}         (payment_detail)
 ```
 
-If the user closed the mini program before the notify arrived, the order is
-still credited server-side — the next time they open orders/tokens they see it.
+The mini program does **not** trust the front end's view of the pay result alone —
+entitlements are granted server-side from the verified callback. The frontend just polls
+until `payment_orders.status = PAID`.
 
-## Part 6 — Failure & reconciliation
+## Order lifecycle
 
-- **Expired order**: cron `reconcile_old_pending_payments` closes stale pending
-  orders (`WECHAT_PAYMENT_EXPIRE_SECONDS`).
-- **Closed order**: user can `POST /api/v1/payments/{id}/close`.
-- **Refunds**: `POST /api/v1/payments/{id}/refunds` → `RefundOrder`;
-  WeChat refund notify (`/v1/webhooks/wechat/refunds`) confirms.
-- **Subscription expiry**: cron `process_subscription_expirations` expires
-  ended subscriptions (first version = manual renewal, no auto-charge).
+```
+PENDING ──(callback SUCCESS)──► PAID ──(refund callback)──► REFUNDED
+   │
+   └──(POST /v1/payments/{id}/close, or timeout)──► CLOSED
+```
 
-## Data written during this flow
+Expired pending orders are swept by a cron (`close_payment_orders`) so they cannot linger
+forever.
+
+## Dev / cloud-test shortcut
+
+In `WECHAT_PAY_MODE=mock` (local + cloud-test), the mock payment provider
+(`mock-payment-provider:8081`) stands in for WeChat:
+
+```
+POST /v1/billing/mock/payments/{id}/complete   (mock_complete_payment)
+  → marks the order paid, credits tokens/subscription
+```
+
+The mini program routes through `paymentBridge`; in mock mode it resolves to this local
+complete instead of `uni.requestPayment`. Real WeChat Pay requires a valid merchant
+certificate (`WECHAT_PAY_MERCHANT_*`) and the live mode.
+
+## Data written
 
 | Table | What |
 | --- | --- |
-| `payment_orders` | order row (pending → paid / closed) |
-| `purchased_token_batches` | credited batch (token purchase) |
-| `token_ledger_entries` | `TOKEN_PURCHASE` / subscription allowance credit |
-| `user_subscriptions` | active subscription row |
-| `wechat_payment_events` | inbound notify audit log |
-| `refund_orders` | refund row (if refunded) |
-
-## Modes
-
-- **Mock (local)**: `WECHAT_PAY_MODE=mock` + `MOCK_PAYMENT_ENDPOINTS_ENABLED` —
-  the whole flow works against `mock-payment-provider`, and you can complete a
-  payment via `/mock/payments/{id}/complete`.
-- **Real (production)**: `WECHAT_PAY_MODE=live` with real merchant keys,
-  `WECHAT_PAYMENT_NOTIFY_URL` set, and the real WeChat Pay APIs.
+| `payment_orders` | one row per purchase/subscription order |
+| `wechat_payment_events` | decrypted, idempotency-checked callback events |
+| `purchased_token_batches` | token grant after PAID (token purchases) |
+| `token_ledger_entries` | `PURCHASE` credit / refund debit |
+| subscription state rows | activated/renewed on subscription orders |
 
 ## Related call chains
 
-- [WeChat Login Flow](/reference/flows/wechat-login-flow) — the JWT protecting
-  these endpoints.
-- [Design Job Lifecycle](/reference/flows/design-job-lifecycle) — how tokens
-  are spent.
+- [Design Job Lifecycle](/reference/flows/design-job-lifecycle) — where tokens are
+  spent.
+- [WeChat Login Flow](/reference/flows/wechat-login-flow) — JWT protects all routes.

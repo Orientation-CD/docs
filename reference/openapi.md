@@ -1,72 +1,127 @@
 # OpenAPI
 
-The backend is built on FastAPI, so every endpoint ships with an **automatic,
-always-current OpenAPI specification**. This page explains where to find it and
-how the frontend uses it to stay in sync.
+FastAPI auto-generates an OpenAPI (Swagger) document from the decorated routes.
+This page explains how to reach it, what is and is not included, and the key
+request/response schemas you will encounter.
 
-## The live spec
+## Accessing the document
 
-With the backend running, FastAPI serves:
+While the API is running:
 
-| URL | Content |
-| --- | --- |
-| `<api-origin>/openapi.json` | The machine-readable OpenAPI document |
-| `<api-origin>/docs` | Swagger UI (interactive, try endpoints) |
-| `<api-origin>/redoc` | ReDoc (alternative viewer) |
-
-Locally: `http://localhost:9090/docs`.
-
-## What it contains
-
-- Every route under `/api/v1` with its method and path.
-- **Request bodies** and **response schemas** derived from `app/models.py`
-  (Pydantic) — exact field names, types, required flags.
-- **Query parameters**, **path parameters**, auth requirements.
-- Error contract conventions (FastAPI `detail`).
-
-This is the **authoritative contract** — when in doubt, read it from
-`/docs` rather than guessing from this documentation.
-
-## How the frontend stays in sync
-
-The mini program does **not** use a generated SDK at runtime. Instead, the repo
-pins itself to the contract through checks (see
-[Frontend → Testing](/frontend/testing)):
-
-- `scripts/check-openapi-snapshot.mjs` — a committed **OpenAPI snapshot** is
-  compared against the expected contract.
-- `scripts/check-api-dtos.mjs` — `src/api/dto/*` (TypeScript DTOs) must match.
-- `scripts/check-contract-fixtures.mjs` — fixtures match.
-
-When the backend contract changes, a developer regenerates the snapshot:
-
-```bash
-pnpm openapi:update     # in the frontend repo
+```
+http://localhost:8000/openapi.json     # raw JSON schema
+http://localhost:8000/docs            # Swagger UI interactive playground
 ```
 
-and commits the updated snapshot + DTOs together with the backend change. CI
-then enforces parity.
+The document title and version are set in `app/main.py` (`FastAPI(title=...,
+version="0.3.0")`). In production the same document is served under the edge
+prefix, e.g. `https://api.example.com/api/openapi.json`.
 
-## Generating a client (optional)
+## What is included
 
-If you want a typed client for other consumers (e.g. a Node service, Postman,
-or OpenAPI generators), you can:
+The generated schema covers every route with a `response_model` and an open
+declaration:
 
-1. Start the backend.
-2. Download `openapi.json`.
-3. Feed it to your favourite generator (e.g. `openapi-generator`, Postman
-   import, or `openapi-typescript` for TS types).
+| Tag | Router | Notes |
+| --- | --- | --- |
+| `authentication` | `auth_router` | register, login, wechat-login, refresh, logout |
+| `design` | `design_router` | me, workspaces, prompt templates, design jobs, report discovery |
+| `assets` | `asset_api.router` | upload intents, completion, list/read/delete |
+| `billing` | `billing_api.router` | catalog, subscriptions, token purchases, payments, refunds, workspace |
+| `wechat-webhooks` | `webhook_router` | payment/refund notify (server-to-server) |
+| `workspaces` | `workspace_api.router` | workspace CRUD, share invitations |
+| `rewards` | `referral_api.router` | referral invitations, rewards |
+| `legal` | `legal_router` | current legal documents |
+| `health` | root `router` | `/health/live`, `/health/ready` |
 
-The project's own mini program keeps hand-maintained DTOs + contract checks
-instead, which keeps the compiled bundle small and explicit.
+## What is excluded
 
-## Endpoint map
+Routes declared with `include_in_schema=False` are **not** published. These are
+the admin server-rendered form actions (login, logout, user suspend /
+reactivate / archive, provider and prompt admin forms), because they are HTML
+form posts with CSRF tokens rather than JSON APIs. They still function but are
+documented under [Authentication](/backend/authentication) instead of here.
 
-For a human-readable map of every endpoint with links to full call chains, see
-[REST API Overview](/reference/rest-api).
+The `/mock/*` payment helpers are only mounted when
+`MOCK_PAYMENT_ENDPOINTS_ENABLED=true`; they appear in the schema only then.
 
-## Next steps
+## Authentication in the playground
 
-- [REST API Overview](/reference/rest-api)
-- [Data Model](/reference/data-model)
-- [Configuration Reference](/reference/configuration)
+Protected routes declare a `BearerAuth` security scheme (via
+`HTTPBearer`). In Swagger UI you can paste a real access token into the
+**Authorize** dialog:
+
+```
+Authorization: Bearer <access_token>
+```
+
+The admin web routes do **not** use this scheme — they rely on the signed
+browser cookie set by `/admin/login`.
+
+## Key schemas
+
+These Pydantic models in `app/models.py` shape the most important requests and
+responses.
+
+### Auth
+
+- `RegisterRequest` / `TokenResponse` — register (phone + password) and receive
+  `{ access_token, refresh_token, ... }`.
+- `WeChatLoginResponse` — WeChat login result.
+- `UserResponse` — current user profile + token balance.
+
+### Design jobs
+
+- `DesignJobCreate` — create request (job type, asset ids, prompt selection).
+- `DesignJobResponse` — one job: status, progress, result, error code.
+- `DesignJobListResponse` — paginated list.
+- `PromptTemplateListResponse` / `PromptTemplateResponse` — selectable prompts
+  with variables and options.
+- `ReportItemDiscoveryResponse` — available report sections.
+
+### Assets
+
+- `AssetUploadIntentCreateRequest` / `AssetUploadIntentResponse` — request and
+  the presigned upload form.
+- `AssetCompletionResponse` — final asset metadata.
+- `AssetListResponse` / `AssetResponse` — listing and read.
+
+### Billing
+
+- `BillingCatalogResponse` — plans + packages.
+- `PaymentOrderResponse` / `PaymentHistoryResponse` — order lifecycle.
+- `RefundOrderResponse` — refund state.
+
+### Workspaces & referrals
+
+- `WorkspaceListResponse` / `WorkspaceDetailResponse` — workspace summaries.
+- `ReferralInvitationCreateResponse` / `RewardListResponse` /
+  `RewardClaimResponse` — referral flows.
+
+## Idempotency
+
+Several POST routes require an `Idempotency-Key` header (8–128 chars). This is
+declared on the operation, so the playground shows it as a required header
+parameter for upload intents, referral creation/accept, reward claim, and
+payment actions.
+
+## Generating a client SDK
+
+Because the document is standard OpenAPI, you can generate a typed client from
+`/openapi.json`, for example:
+
+```bash
+# Download the schema
+curl http://localhost:8000/openapi.json -o openapi.json
+
+# (example) generate a TypeScript client
+npx openapi-typescript openapi.json -o api.d.ts
+```
+
+Additive-only API evolution means generated clients should ignore unknown
+fields.
+
+## Read next
+
+- [REST API](/reference/rest-api) — the full route table.
+- [Data Model](/reference/data-model) — the backing tables.

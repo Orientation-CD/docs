@@ -1,146 +1,154 @@
 # Assets & Object Storage
 
-Every image in the system — user uploads, generated renderings, report assets,
-legal documents — lives in **S3-compatible object storage**. This page explains
-the asset model, the upload path, and how the backend signs and verifies
-storage operations.
+An **asset** is a binary the user (or a provider) contributes to a design job:
+an uploaded floor plan image, a recorded conversation audio file, or a document.
+The bytes live in S3-compatible object storage; the metadata lives in
+PostgreSQL. This page explains the upload-intent → direct-upload → completion
+flow, the storage abstraction, and cleanup. Routes are in `app/asset_api.py`;
+the transactional logic is in `app/assets.py` and `app/asset_completion.py`;
+the storage client is `app/storage.py`.
 
-## Storage backends
+## Why direct upload?
 
-| Environment | Backend | `STORAGE_BACKEND` |
+Uploading large floor plans through the FastAPI process would tie up API
+connections and worker memory. Instead the Mini Program uploads **directly to
+object storage** using a presigned form the API issues. The API only brokers a
+short-lived, constrained upload form and later verifies the result — it never
+sees the bytes in the request body.
+
+```
+ Mini Program            FastAPI API                  S3 / MinIO / OSS
+     │  POST /assets/upload-intents ──►  (validate, mint form)
+     │  ◄──── presigned upload form + asset_id
+     │  PUT bytes ───────────────────────────────────────►  (stored as temporary version)
+     │  POST /assets/{id}/complete ──►  (verify object, promote)
+     │  ◄──── final asset metadata
+```
+
+## Asset types and roles
+
+Assets are typed rows in the `assets` table with sub-tables per kind:
+
+| Kind | Metadata table | Used for |
 | --- | --- | --- |
-| Local / dev | MinIO | `s3` (endpoint = MinIO) |
-| Production | Aliyun OSS | `s3` (endpoint = OSS) |
+| image | `images` | uploaded floor plans, rendered provider outputs, report images |
+| audio | `audio_assets` | customer conversation recordings fed to `voice_summary` |
+| document | `documents` | uploaded reference documents |
 
-The abstraction is `app/storage.py` → `ObjectStorage`, which wraps an S3 client
-with **two endpoint personalities**:
+Each asset has a `purpose` (what it will be used for) and, when linked to a
+job, a `design_job_assets.role` (the expected input role such as floor plan,
+mood board, or reference). `asset_display_metadata` holds cached display labels.
 
-- **`S3_ENDPOINT`** — server-side endpoint (backend & workers talk here).
-- **`S3_PRESIGN_ENDPOINT`** — the endpoint embedded in **presigned URLs** handed
-  to the mini program / browser (must be publicly reachable, HTTPS).
+## Upload intents
 
-## The asset model
-
-An **asset** is a metadata row in PostgreSQL pointing at one object in storage:
-
-| Field | Meaning |
-| --- | --- |
-| `id` | UUID |
-| `type` | `IMAGE` (the current type) |
-| `purpose` | `DESIGN_JOB_INPUT`, result, report asset, legal doc |
-| `role` | For inputs: `image` / `masked_image` / `reference_image` |
-| `status` | `PENDING_UPLOAD` → `READY` |
-| `object_key` | Storage key |
-| `content_type`, `size_bytes`, `content_sha256`, `object_etag` | Integrity metadata |
-| `width`, `height` | Image dimensions (after completion) |
-| `asset_expires_at` | For temporary inputs (retention window) |
-
-## Upload path (frontend uploads directly)
-
-The backend **never proxies image bytes**. The flow is:
-
-```
-Mini program                          Backend                          Object storage
-    │ POST /api/v1/assets/upload-intents │                                 │
-    ├───────────────────────────────────►│ 1. validate + create asset      │
-    │ ◄──────────────────────────────────┤    (PENDING_UPLOAD)             │
-    │ { asset_id, upload: { url, fields, expires_at } }                    │
-    │                                    │                                 │
-    │ POST <presigned upload URL>  ──────┼────────────────────────────────►│ 2. direct upload
-    │    (multipart, signed fields)      │                                 │
-    │                                    │                                 │
-    │ POST /api/v1/assets/{id}/complete  │                                 │
-    ├───────────────────────────────────►│ 3. verify object + finalize     │
-    │ ◄──────────────────────────────────┤    → READY (sha256, etag, dims) │
-    │ { content_type, size_bytes, ... }  │                                 │
-```
-
-### 1. Upload intent — `POST /api/v1/assets/upload-intents`
-
-The mini program requests permission to upload an asset:
+`POST /api/v1/assets/upload-intents` (bearer auth) creates or replays an upload
+intent. The caller sends:
 
 ```json
 {
-  "type": "IMAGE",
-  "purpose": "DESIGN_JOB_INPUT",
-  "role": "image",
-  "original_filename": "room.jpg",
+  "type": "image",
+  "purpose": "design_input",
+  "role": "floor_plan",
+  "original_filename": "my-floorplan.jpg",
   "content_type": "image/jpeg",
-  "size_bytes": 123456
+  "size_bytes": 1820000
 }
 ```
 
-The backend (`asset_api.py`):
+and a required header:
 
-- Validates the request (type/purpose/role/size against
-  `MAX_UPLOAD_BYTES`/`MAX_IMAGE_PIXELS`).
-- Creates/returns the asset row (`PENDING_UPLOAD`), idempotently.
-- Builds a **presigned POST form** (S3 POST policy) with the object key and
-  signed fields, valid for `S3_UPLOAD_FORM_SECONDS`.
-- Returns `{ asset_id, upload: { method, url, fields, expires_at } }`.
-- If the asset already exists and is `READY`, returns `READY` without a new
-  form (idempotent retry).
+```
+Idempotency-Key: <8..128 chars, chosen by the client>
+```
 
-### 2. Direct upload
+The server (`app/assets.py:create_upload_intent`):
 
-The mini program uploads the file **directly to storage** with
-`uni.uploadFile` using the presigned form. The backend is not in the data path.
+1. Rate-limits per user (`ASSET_UPLOAD_INTENT_RATE_LIMIT_ATTEMPTS` /
+   `_WINDOW_SECONDS`).
+2. Enforces size/type limits (`MAX_UPLOAD_BYTES`, `MAX_REQUEST_BYTES`,
+   `MAX_IMAGE_PIXELS`) and purpose authorization.
+3. Creates an `asset_upload_intents` row and a temporary `assets` row.
+4. Asks `ObjectStorage` to mint a **presigned upload form** valid for
+   `S3_UPLOAD_FORM_SECONDS` (default 900s).
+5. Returns the form fields + URL + `asset_id`.
 
-### 3. Complete — `POST /api/v1/assets/{id}/complete`
+Replaying the same `Idempotency-Key` returns the **same** intent (HTTP 200 on
+replay, 201 on create), so a network retry never double-creates an asset.
 
-The mini program confirms the upload. The backend:
+## Completion
 
-- Verifies the object exists in storage and matches expected size.
-- Computes/verifies `content_sha256` and captures `object_etag`, `width`,
-  `height`.
-- Marks the asset `READY`.
+After the Mini Program PUTs the bytes to object storage, it calls:
 
-## Temporary input retention
+```
+POST /api/v1/assets/{asset_id}/complete
+```
 
-Uploaded design inputs are **temporary**: they have `asset_expires_at` and are
-deleted by the cron `cleanup_expired_temp_assets` if not consumed by a design
-job in time. **Reserving** a design job binds its input assets so they survive
-until job completion; unused temp assets are cleaned up automatically.
+`complete_asset_upload` (`app/asset_completion.py`):
 
-## Design-job asset binding
+1. Rate-limits per user (`ASSET_UPLOAD_COMPLETION_RATE_LIMIT_*`).
+2. Verifies the object actually exists in storage and that its size/type match
+   the declared intent.
+3. For images, decodes and validates pixels (`MAX_IMAGE_PIXELS`); for audio,
+   validates the recording format.
+4. Promotes the temporary asset to a finalized, usable asset row.
+5. If the upload was stored as a separate temporary version, deletes that
+   version (best-effort; failures are logged and retried by cleanup).
 
-When a design job is created, its input assets are **bound** to the job
-(`design_job_asset_finalization.py`). At completion:
+Only completed assets can be referenced by a design job.
 
-- The provider **result image** is written to storage (workers upload it).
-- The result asset is attached to the job (with dimensions).
-- The input assets may be freed / retained per policy.
+## Listing and reading
 
-## Reading results
+`GET /api/v1/assets` lists the caller's assets (paginated). Admin paths can
+list across users. Preview URLs are signed on demand
+(`S3_PRESIGN_SECONDS`, default 3600s) — the API never serves bytes itself.
 
-- Result/report images are served via **short-lived presigned GET URLs**
-  (`url_expires_at`), so clients always have time-boxed access and nothing is
-  publicly readable without a signature.
-- `PROVIDER_OUTPUT_HOSTS` restricts which hosts workers may fetch provider
-  results from (anti-SSRF).
+## Storage abstraction (`app/storage.py`)
 
-## Report assets & legal documents
+`ObjectStorage` is the backend-agnostic interface the rest of the code uses;
+implementations are selected by `STORAGE_BACKEND`:
 
-- Report system assets (covers, mood boards, renderings) live under
-  configurable base paths (`REPORT_GLOBAL_ASSET_PREFIX`, `REPORT_WORKSPACE_ASSET_PREFIX`).
-- **Legal documents** (privacy policy, terms) are objects too; they can be
-  served from a public HTTPS origin (`LEGAL_DOCUMENTS_PUBLIC_BASE_URL`) or from
-  the private bucket.
+| Setting | Local | Production |
+| --- | --- | --- |
+| `STORAGE_BACKEND` | `s3` (Compose MinIO overlay) | `s3` |
+| `S3_BUCKET` | isolated local bucket | private cloud bucket |
+| `S3_ENDPOINT` | MinIO | e.g. `https://s3.oss-cn-chengdu-internal.aliyuncs.com` |
+| `S3_PRESIGN_ENDPOINT` | MinIO | public OSS endpoint for browser/mini-program URLs |
+| `S3_FORCE_PATH_STYLE` | true (MinIO) | false (OSS virtual-hosted) |
+| `S3_SIGNATURE_VERSION` | `s3v4` | `s3` (OSS compatibility requirement) |
 
-## Security properties
+The storage client supports `put`, `get`, presigned upload forms, presigned
+reads, multipart (`S3_MULTIPART_THRESHOLD_BYTES`,
+`S3_TRANSFER_CHUNK_BYTES`), and server-side encryption
+(`S3_SERVER_SIDE_ENCRYPTION=AES256`). Report assets are namespaced by workspace
+under `REPORT_WORKSPACE_ASSET_PREFIX` with a shared `REPORT_GLOBAL_ASSET_PREFIX`.
 
-- Presigned URLs are **time-limited** and scoped to one object.
-- Direct upload means the backend never handles large image payloads in
-  request memory.
-- Upload URL validation (HTTPS, registered domains) happens on the client too.
-- Storage keys are server-generated; client filenames are sanitized.
-- Anti-SSRF: provider result fetches are restricted to allow-listed hosts.
+## Temporary lifecycle & cleanup
 
-## Full call chain
+Uploads that are never completed, provider staging artifacts, and old report
+results are cleaned by periodic worker jobs:
 
-See [Asset Upload Flow](/reference/flows/asset-upload-flow).
+| Setting | Default | Meaning |
+| --- | --- | --- |
+| `ASSET_TEMPORARY_RETENTION_SECONDS` | 259200 (3 d) | how long an un-completed upload stays |
+| `ASSET_CLEANUP_SCHEDULE_MINUTE` | 0 | minute-of-hour the cleanup runs |
+| `ASSET_CLEANUP_BATCH_SIZE` / `_MAX_BATCHES` | 100 / 10 | batches per run |
+| `PROVIDER_STAGING_RETENTION_SECONDS` | 259200 | provider-staged input/output retention |
+| `REPORT_RESULT_CLEANUP_MINIMUM_AGE_SECONDS` | 3600 | don't delete report results younger than this |
 
-## Next steps
+`process_cleanup_temporary_assets` and `process_cleanup_provider_staging_artifacts`
+run on **both** worker pools; `process_cleanup_report_result_artifacts` runs on
+the poll worker (see [Architecture](/backend/architecture)).
 
-- [Design Jobs](/backend/design-jobs) — how assets feed jobs.
-- [Reports](/backend/reports) — report asset handling.
+## Safety notes
+
+- Upload intents reject oversized or disallowed content types up front, so the
+  client fails fast instead of uploading a rejected blob.
+- Object keys never include user-supplied filenames verbatim; names are
+  sanitized and namespaced by workspace.
+- Preview/reading URLs are presigned and time-limited; the API itself does not
+  proxy binary bytes.
+
+## Read next
+
+- [Design Jobs](/backend/design-jobs) — how completed assets become job inputs.
+- [Reports](/backend/reports) — how report library objects are read from storage.

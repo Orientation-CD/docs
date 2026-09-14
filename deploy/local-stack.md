@@ -1,123 +1,242 @@
 # Local Development Stack
 
-The backend repository ships one Docker Compose topology with several launcher
-entry points. This page explains the full picture so you can run, debug and
-extend the local environment with confidence.
+The backend repository (`YuanZhu-AI`) ships one Docker Compose file (`docker-compose.yml`)
+that describes the *entire* local topology — database, cache, object storage, the API,
+both ARQ workers, and three fake external services (WeChat identity, WeChat Pay, and the
+AI image provider). You almost never invoke `docker compose` directly; instead you use
+the launcher `scripts/create_stack.sh`, which derives collision-free ports, wires
+secrets, and waits for health.
 
-## Compose services
+This page explains every service, port, and environment variable so you can run, debug,
+and extend the local environment with confidence.
 
-The `docker-compose.yml` defines (see [Backend Getting Started](/backend/getting-started)
-for the quick commands):
+## Prerequisites
 
-| Service | Image | Role |
+- Docker Desktop with the Compose plugin.
+- A Python 3.12 virtualenv at `.venv/` (the launcher uses `.venv/bin/python` to parse
+  your `.env`; it falls back to `python3`).
+- A copy of `.env` (copy from `.env.example`). The launcher refuses to start without it.
+
+## Quick start
+
+From the repository root:
+
+```bash
+cp .env.example .env
+./scripts/create_stack.sh
+```
+
+With no arguments this starts the **default stack**: API on host port `9090`, mock
+WeChat, mock payment, mock image provider, and local MinIO object storage. When it
+finishes it prints the API URL, the browser-visible LAN API URL, and the browser asset
+endpoint, then runs `docker compose exec api alembic current` so you can confirm the
+schema version.
+
+## Compose services — full inventory
+
+Every service name below is the exact name used in `docker-compose.yml`. The runtime
+services build the same project image (`Dockerfile`, stage `runtime`); the test runners
+build the `e2e` stage.
+
+| Service (container) | Image / target | Role | In-container port | Host port |
+| --- | --- | --- | --- | --- |
+| `db` | `postgres:16-alpine` | PostgreSQL 16, named volume `postgres-data` | 5432 | internal only |
+| `redis` | `redis:7-alpine` | Redis 7, AOF enabled, named volume `redis-data` | 6379 | internal only |
+| `minio` | `quay.io/minio/minio` | S3-compatible storage (profile `minio`) | 9000 / 9001 | derived band (see below) |
+| `minio-init` | `quay.io/minio/mc` | Creates buckets, enables versioning, seeds mock image | — | — |
+| `migrate` | project `runtime` | Runs `alembic upgrade head`, then exits | — | — |
+| `mock-image-provider` | project `runtime` | Fakes the AI provider (`app.mock_image_server`) | 8082 | internal only |
+| `mock-payment-provider` | project `runtime` | Fakes WeChat Pay (`app.mock_payment_server`) | 8081 | internal only |
+| `mock-wechat-identity-provider` | project `runtime` | Fakes WeChat login (`app.mock_wechat_identity_server`) | 8083 | internal only |
+| `api` | project `runtime` | FastAPI / uvicorn (6 workers) | 9090 | `${API_PORT:-9090}` |
+| `submit-worker` | project `runtime` | ARQ, `app.worker.SubmitWorkerSettings` | — | — |
+| `poll-worker` | project `runtime` | ARQ, `app.worker.PollWorkerSettings` | — | — |
+| `cloudflared-named` | `cloudflare/cloudflared` | Named Cloudflare tunnel (profile `real-wechat-named`) | — | — |
+| `cloudflared-quick` | `cloudflare/cloudflared` | Quick Cloudflare tunnel (profile `real-wechat-quick`) | — | — |
+| `smoke` | project `e2e` | Runs `pytest smoke_tests -m smoke` (profile `smoke`) | — | — |
+| `e2e-admin` | project `e2e` | E2E admin actor (profile `e2e`) | — | — |
+| `e2e-user` | project `e2e` | E2E user actor (profile `e2e`) | — | — |
+
+### Profiles
+
+Services are gated by Compose profiles so a plain `docker compose up` starts only the
+minimum needed to develop:
+
+| Profile | Pulled in by | Services it adds |
 | --- | --- | --- |
-| `db` | `postgres:16-alpine` | PostgreSQL 16 (named volume `postgres-data`) |
-| `redis` | `redis:7-alpine` | Redis 7, append-only (named volume `redis-data`) |
-| `minio` + `minio-init` | `quay.io/minio/...` | S3-compatible storage; creates buckets, enables versioning, seeds the mock provider image |
-| `migrate` | project runtime image | Runs `alembic upgrade head`, then exits |
-| `api` | project runtime image | FastAPI on the API port (default 9090) |
-| `submit-worker` | project runtime image | ARQ submit worker |
-| `poll-worker` | project runtime image | ARQ poll worker |
-| `mock-image-provider` | project runtime image | Fakes the AI provider (`app/mock_image_server.py`) |
-| `mock-payment-provider` | project runtime image | Fakes WeChat Pay (`app/mock_payment_server.py`) |
-| `mock-wechat-identity-provider` | project runtime image | Fakes WeChat identity (`app/mock_wechat_identity_server.py`) |
-| `cloudflared-*` | `cloudflare/cloudflared` | Optional public tunnels for real-WeChat testing |
-| `smoke` / `e2e-*` | e2e image | Test runners (profiles) |
+| (default) | `create_stack.sh` | `db`, `redis`, `migrate`, `mock-image-provider`, `api`, `submit-worker`, `poll-worker` |
+| `minio` | `--storage minio` | `minio`, `minio-init` |
+| `mock-wechat` | `--wechat mock` | `mock-payment-provider`, `mock-wechat-identity-provider` |
+| `real-wechat-named` | `--wechat real --tunnel named` | `cloudflared-named` |
+| `real-wechat-quick` | `--wechat real --tunnel quick` | `cloudflared-quick` |
+| `smoke` | manual / CI | `smoke` |
+| `e2e` | CI / endurance | `e2e-admin`, `e2e-user` |
 
-Mock providers are gated behind **profiles**:
+## Parallel development sessions (user-selected ports)
 
-- `minio` profile — MinIO + init.
-- `mock-wechat` profile — mock payment + mock WeChat identity.
-- `smoke` / `e2e` profiles — test runners.
-- `real-wechat-named` / `real-wechat-quick` — Cloudflare tunnels.
+The launcher derives every published port from **one API port** you choose. This is what
+lets several developers (or several stacks on one machine) run side-by-side without
+collisions.
 
-## The launcher (`create_stack.sh`)
+```bash
+# Developer A uses the default
+./scripts/create_stack.sh --port 9090
 
-`scripts/create_stack.sh` is a thin orchestration over Compose that:
+# Developer B picks a different API port
+./scripts/create_stack.sh --port 9100
+```
 
-1. Validates the requested `--wechat` / `--storage` modes against `.env`.
-2. Derives MinIO ports from the API port using **three non-overlapping port
-   bands** (deterministic, collision-free mapping; e.g. API 8080 → MinIO API
-   `29584` / console `51088`; API 9090 → `30594` / `52098`).
-3. Removes any conflicting Compose project from the same repo (preserving named
-   volumes) and refuses to touch unrelated containers.
-4. Starts the stack and waits for health.
+The API port must be between `1024` and `22527`. The MinIO ports are computed by
+`scripts/stack_ports.py` into three non-overlapping port bands
+(`(65535 - 1024 + 1) / 3 = 21504` wide):
 
-### Modes
+| API port | MinIO API port | MinIO console port | Compose project name |
+| --- | --- | --- | --- |
+| `9090` (default) | `30594` | `52098` | `yuanzhu-9090` |
+| `9100` | `30604` | `52108` | `yuanzhu-9100` |
+| `1024` | `22528` | `43056` | `yuanzhu-1024` |
 
-| Mode | Required `.env` keys |
+Rules enforced by the launcher:
+
+- The Compose project defaults to `yuanzhu-<API_PORT>` (override with `--project`).
+- If the API port is already published by a **different** YuanZhu stack from this repo,
+  the old stack is removed (its named volumes are preserved).
+- If the port is owned by an **unrelated** container or a host process, the launcher
+  stops and asks you to free it or pick another port — it never kills foreign processes.
+- Derived MinIO ports that collide with another stack cause a hard failure; ports are
+  never reassigned dynamically.
+
+## The launcher (`scripts/create_stack.sh`)
+
+```text
+./scripts/create_stack.sh [options]
+
+  --port PORT        Host/API port (default: 9090, range 1024-22527)
+  --ip HOST          Browser-visible host; auto-detect LAN IPv4 when omitted
+  --wechat mock|real WeChat identity mode (default: mock)
+  --tunnel named|quick  Public callback tunnel for real WeChat (default: named)
+  --storage minio|oss   Object storage mode (default: minio)
+  --secret FILE      Dotenv file (default: .env)
+  --project NAME     Compose project (default: yuanzhu-PORT)
+```
+
+What it does, in order:
+
+1. Validates flags and that `--secret` exists.
+2. Auto-detects the LAN IPv4 (unless `--ip` is given) so `S3_PRESIGN_ENDPOINT` and
+   `PUBLIC_API_BASE_URL` are browser-reachable.
+3. Derives MinIO ports via `scripts/stack_ports.py` and checks them for collisions.
+4. Removes conflicting YuanZhu stacks from this repo (volumes retained).
+5. Brings up MinIO (if selected), waits for it healthy, then runs `minio-init`.
+6. Starts the mock WeChat/payment servers in `mock` mode.
+7. Force-recreates `db`, `redis`, `migrate`, `mock-image-provider`, `api`,
+   `submit-worker`, `poll-worker`.
+8. Polls `http://127.0.0.1:<port>/health/ready` until ready (up to
+   `STACK_READY_TIMEOUT_SECONDS`, default 300 s).
+9. In `real` mode, brings up the Cloudflare tunnel and probes the WeChat Pay callback
+   until it returns the expected `401`.
+
+## WeChat and storage modes
+
+| Mode | Required keys in `.env` |
 | --- | --- |
-| `--wechat mock` | none (isolated mock credentials) |
-| `--wechat real` | `WECHAT_APP_ID`, `WECHAT_MINI_PROGRAM_APP_SECRET` |
+| `--wechat mock` | none (uses built-in mock credentials) |
+| `--wechat real` | `WECHAT_APP_ID`, `WECHAT_MINI_PROGRAM_APP_SECRET`, `WECHAT_PAY_MERCHANT_ID`, `WECHAT_PAY_API_V3_KEY`, `WECHAT_PAY_MERCHANT_SERIAL`, `WECHAT_PAY_MERCHANT_PRIVATE_KEY_FILE`, `WECHAT_PAY_PUBLIC_KEY_ID`, `WECHAT_PAY_PUBLIC_KEY_FILE`; for `--tunnel named` also `WECHAT_PAYMENT_NOTIFY_URL`, `CLOUDFLARE_TUNNEL_TOKEN` |
 | `--storage minio` | none (local MinIO defaults) |
-| `--storage oss` | `S3_BUCKET`, `S3_REGION`, `S3_PRESIGN_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` |
+| `--storage oss` | `S3_BUCKET`, `S3_REGION`, `S3_PRESIGN_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, optionally `S3_SIGNATURE_VERSION` |
 
-For OSS mode the bucket needs **versioning enabled** and CORS allowing the LAN
-frontend origin; use the signature mode supported by the target
-(`S3_SIGNATURE_VERSION=s3` for Aliyun OSS compatibility). The public
-`S3_PRESIGN_ENDPOINT` must be reachable from the browser and must **not**
-contain `-internal.aliyuncs.com`.
+For `--storage oss`, `S3_PRESIGN_ENDPOINT` must be browser-reachable and must **not**
+contain `-internal.aliyuncs.com` (a local machine cannot reach VPC-only endpoints). The
+OSS bucket needs versioning enabled and CORS allowing the LAN frontend origin. Use
+`S3_SIGNATURE_VERSION=s3` for the Aliyun OSS compatibility endpoint.
 
-## Environment wiring
+## Key environment variables
 
-The Compose file uses `x-app-environment` anchors for shared settings. Key
-defaults:
+The Compose file shares settings through the `x-app-environment` YAML anchor. These are
+the variables you will actually touch (full list in `.env.example`):
 
-- `DATABASE_URL` → `postgresql+asyncpg://floorplan:floorplan@db:5432/floorplan`
-- `REDIS_URL` → `redis://redis:6379/0`
-- `PUBLIC_API_BASE_URL` → `http://localhost:9090`
-- `STORAGE_BACKEND=s3`, `S3_ENDPOINT=http://minio:9000`,
-  `S3_PRESIGN_ENDPOINT=http://localhost:9000`
-- Mock WeChat/Pay endpoints enabled (`MOCK_WECHAT_IDENTITY_ENDPOINTS_ENABLED`,
-  `MOCK_PAYMENT_ENDPOINTS_ENABLED`), `WECHAT_PAY_MODE=mock`.
-- Secrets mounted from `tests/resources/keys/` mock merchant keys.
+| Variable | Default in Compose | Meaning |
+| --- | --- | --- |
+| `DATABASE_URL` | `postgresql+asyncpg://floorplan:floorplan@db:5432/floorplan` | Async SQLAlchemy DB URL |
+| `REDIS_URL` | `redis://redis:6379/0` | ARQ queue + cache |
+| `PUBLIC_API_BASE_URL` | `http://<client-host>:<port>` | Public API origin the browser uses |
+| `ENVIRONMENT` | `development` | App environment (cloud sets this per namespace) |
+| `STORAGE_BACKEND` | `s3` | `local` or `s3` |
+| `S3_BUCKET` | `backend` | Object bucket |
+| `S3_ENDPOINT` | `http://minio:9000` | Server-side S3 endpoint |
+| `S3_PRESIGN_ENDPOINT` | `http://<client-host>:<minio-port>` | Browser-facing presign endpoint |
+| `S3_ACCESS_KEY` / `S3_SECRET_KEY` | `admin` / `password` | MinIO credentials |
+| `S3_SIGNATURE_VERSION` | `s3v4` | MinIO; use `s3` for Aliyun OSS |
+| `WECHAT_PAY_MODE` | `mock` | `mock` / `live` / `disabled` |
+| `WECHAT_CODE_TO_SESSION_URL` | `http://mock-wechat-identity-provider:8083/sns/jscode2session` | `jscode2session` exchange |
+| `WECHAT_PHONE_NUMBER_URL` | `http://mock-wechat-identity-provider:8083/wxa/business/getuserphonenumber` | Phone code exchange |
+| `PROVIDER_BASE_URL` | `http://mock-image-provider:8082` | Default image provider |
+| `PROVIDER_ADAPTER` | `mock_async` | Adapter until an admin saves DB provider config |
+| `INITIAL_USER_TOKENS` | `1000` | New-user starter balance |
+| `INITIAL_USER_ALLOWED_WORKSPACES` | `2` | Personal + one owned enterprise |
+| `REPORT_VIEW_TOKEN_SECONDS` | `30` (Compose) / `300` (example) | Report view-token TTL |
 
-Secrets are passed via Docker **secrets** (`wechat_pay_merchant_private_key`,
-`wechat_pay_public_key`) — see the `secrets:` block at the bottom of
-`docker-compose.yml`.
+Secrets are mounted as Docker secrets rather than baked into the image:
+`wechat_pay_merchant_private_key` and `wechat_pay_public_key` default to
+`tests/resources/keys/mock_wechat_private_key.pem` and
+`tests/resources/keys/mock_wechat_public_key.pem`. For `--wechat real`, set
+`WECHAT_PAY_MERCHANT_PRIVATE_KEY_FILE` / `WECHAT_PAY_PUBLIC_KEY_FILE` to host paths and
+the launcher mounts them read-only under `/run/secrets`.
+
+## Health checks
+
+| Endpoint | What it proves |
+| --- | --- |
+| `GET /health/live` | Process is up (no dependencies). |
+| `GET /health/ready` | PostgreSQL reachable, Redis reachable, migrations applied, config loaded. The launcher waits on this. |
+
+Container-level healthchecks back them: `pg_isready -U floorplan -d floorplan` for `db`,
+`redis-cli ping` for `redis`, and an HTTP probe of `/health` for each mock server. The
+`api` service `depends_on: migrate: service_completed_successfully`, so migrations
+always finish before the API starts.
 
 ## Data persistence
 
-- Named volumes (`postgres-data`, `redis-data`, `minio-data`) are **never
-  purged** by the launcher.
-- Recreating the same stack (same `--port`) preserves both its URLs and its
-  volumes.
-- Use a distinct `--port` or `--project` when you need two independent stacks.
+- Named volumes `postgres-data`, `redis-data`, `minio-data` are **never purged** by the
+  launcher. Recreating a stack on the same `--port` preserves its URLs and its data.
+- Use a distinct `--port` (or `--project`) when you want two independent, disposable
+  stacks.
+- E2E / endurance runs (`profile: e2e`) run with `--volumes --remove-orphans` teardown
+  and are self-cleaning.
 
-## Smoke & E2E
+## Smoke and E2E runners
 
-Two launcher scripts exercise the live stack:
+Two launcher scripts exercise a live stack:
 
 ```bash
 ./scripts/run_smoke_tests.sh      # smoke paths against the API
 ./scripts/run_e2e_tests.sh        # user/admin E2E actors
 ```
 
-Both can run in **local mode** (create a stack) or **cloud mode** (use an
-existing remote stack). They authenticate to the existing cloud Admin site to
-sync prompt/billing config and report templates, then run against the local
-stack. They **never** export provider credentials and refuse
+Both run in **local mode** (create a stack) or **cloud mode** (target an existing remote
+stack, e.g. `--local localhost --port 6060`). In cloud mode they authenticate to the
+existing cloud Admin site to sync prompt/billing config and report templates, then run
+against the remote API. They never export provider credentials and refuse
 `ENVIRONMENT=production`.
 
-## Config sync for tests
-
-Before test traffic, the runners replace disposable local configuration with a
-validated JSON snapshot from cloud (prompt templates, job types, plans,
-packages, legal documents) and install exactly
-`tests/resources/report_config.json` + `tests/resources/report_template.html`.
-The importer requires `--confirm-reset-local-config` and refuses production.
+Before test traffic the runners replace disposable local configuration with a validated
+JSON snapshot from cloud (prompt templates, job types, plans, packages, legal
+documents) and install exactly `tests/resources/report_config.json` +
+`tests/resources/report_template.html`. The importer requires
+`--confirm-reset-local-config` and refuses production.
 
 ## Troubleshooting
 
 | Problem | Fix |
 | --- | --- |
-| Port conflict on MinIO bands | Stop the other process or choose another API port |
-| `curl /health/ready` fails | `docker compose logs api`; ensure `migrate` completed |
-| Real WeChat tests need a public URL | Use `cloudflared-*` profiles with a tunnel token |
-| OSS uploads fail | Check CORS, versioning, and that `S3_PRESIGN_ENDPOINT` is public |
+| Port conflict on MinIO bands | Stop the other process or choose another `--port` |
+| `/health/ready` returns 503 | `docker compose logs api`; confirm `migrate` completed; check PostgreSQL/Redis |
+| Real WeChat tests need a public URL | Use `cloudflared-named` (token) or `cloudflared-quick` (auto URL) profiles |
+| OSS uploads fail | Check CORS, bucket versioning, and that `S3_PRESIGN_ENDPOINT` is public |
+| Two stacks fight over a port | Give each its own `--port`; project names are `yuanzhu-<port>` |
 
 ## Next steps
 
 - [Cloud Architecture (Aliyun SAE)](/deploy/cloud-architecture) — how the same
   topology runs in production.
-- [Backend Getting Started](/backend/getting-started) — quick commands.
+- [SAE Deployment Runbook](/deploy/sae-deployment) — step-by-step cloud deployment.
