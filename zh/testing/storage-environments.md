@@ -40,7 +40,7 @@ ETag、完成校验和清理逻辑；但它不能证明阿里云特有的端点�
 
 ## 使用独立的密钥文件
 
-保留原始 `.env` 作为运维/部署配置源，在 `YuanZhu-AI` 仓库根目录创建两份
+保留原始 `.env` 作为运维/部署配置的参考输入，在 `YuanZhu-AI` 仓库根目录创建两份
 被 Git 忽略、权限受限的测试配置：
 
 - `.env.minio-test`：Mock 微信 + 本地 MinIO；
@@ -87,6 +87,133 @@ S3_PRESIGN_SECONDS=3600
 
 MinIO 配置不要复制任何 OSS 凭据或端点。launcher 会注入
 `http://minio:9000`、浏览器可访问的派生端口、本地凭据、`s3v4` 和 path-style。
+
+## `.env`、Compose 与 runner 的关系
+
+`.env` 不会被脚本或 Compose 改写。这里的“覆盖”是指：Compose 创建容器时，
+同名变量的最终值可能来自优先级更高的来源，而不是指磁盘上的 `.env` 内容被修改。
+
+对本地测试来说，`.env.minio-test` 或 `.env.oss-test` 是**静态输入和密钥来源**，
+而不是所有运行时变量的唯一权威来源。端口、容器内数据库地址、存储拓扑、Mock/真实
+微信模式等值必须根据本次命令动态派生。如果让历史 `.env` 值无条件胜出，测试反而
+可能访问旧端口、云数据库或错误的 bucket。
+
+整个传递链如下：
+
+```text
+命令参数（--port / --storage / --wechat / --secret）
+                    +
+选中的 dotenv 文件（.env.minio-test 或 .env.oss-test）
+                    │
+                    ▼
+runner 临时 export 测试控制变量
+                    │
+                    ▼
+create_stack.sh 校验输入并临时 export STACK_*
+                    │
+                    ▼
+Docker Compose 插值 ${...}
+                    │
+       ┌────────────┴────────────┐
+       ▼                         ▼
+service env_file             service environment
+（基础值和密钥）             （拓扑派生值；同名时胜出）
+       └────────────┬────────────┘
+                    ▼
+             容器进程环境变量
+                    ▼
+          应用 Settings / 测试进程读取
+```
+
+### 两次不同的“读取”
+
+同一份 `--secret` 文件在 Compose 中承担两个不同角色：
+
+1. `docker compose --env-file FILE` 为 `docker-compose.yml` 中的 `${NAME}` 提供
+   **插值输入**。对当前命令而言，调用 shell 中已 `export` 的同名变量优先于该文件，
+   再没有值才使用 `${NAME:-default}` 的默认值。
+2. 服务声明中的 `env_file: "${STACK_SECRET_FILE:-.env}"` 将文件内容作为
+   **容器基础环境**注入。服务声明中的 `environment:` 对同名变量拥有更高优先级。
+
+所以最终运行值不是简单的“读取 `.env`”，而是：
+
+```text
+容器最终值 = environment 显式映射
+          > env_file 注入值
+          > 镜像 ENV / 应用默认值
+```
+
+这里的 `>` 表示同名时左侧胜出。当前 runner 没有依赖 `docker compose run -e`；
+如果人工使用 `-e`，它又是一次更高优先级的显式覆盖。
+
+### 三个脚本分别做什么
+
+| 入口 | 职责 | 是否修改 dotenv 文件？ | 是否产生临时环境变量？ |
+| --- | --- | --- | --- |
+| `create_stack.sh` | 根据端口、主机、微信和存储模式创建/重建本地 API、worker、PostgreSQL、Redis、Mock 服务，以及 MinIO（如选择） | 否 | 是；生成 `STACK_*` 并只用于它启动的 Compose 进程 |
+| `run_smoke_tests.sh` | 配置 focused smoke、调用 `create_stack.sh`、同步云端配置快照、从 API 容器回读最终存储配置，再启动 `smoke` 测试容器 | 否 | 是；生成 `SMOKE_*`、覆盖率和测试专用 `STACK_*` |
+| `run_e2e_tests.sh` | 配置 E2E/coverage、调用 `create_stack.sh`、同步云端配置快照、从 API 容器回读最终配置，再启动 E2E actors | 否 | 是；生成 `E2E_*`、覆盖率和测试专用 `STACK_*` |
+
+`run_smoke_tests.sh` 和本地模式的 `run_e2e_tests.sh` 都把 `create_stack.sh`
+作为子进程运行。子进程中的 `export STACK_*` 不会反向进入父 runner。因此 runner 在
+stack 启动后执行 `docker compose exec api printenv ...`，把 API 容器实际得到的
+`S3_*`、provider host 和公开 API 地址读回来，再传给 smoke/E2E 容器。这样测试客户端
+与被测 API 使用的是同一组最终值，而不是各自猜测。
+
+云端 E2E 是另一条路径：它不创建本地 stack，直接使用 `--cloud` 指向的远端 API，
+并要求所选 secret 文件提供远端测试所需的数据库、Redis 和 Admin 配置。
+
+### 按变量判断最终来源
+
+| 变量类别 | 本地运行时的最终来源 |
+| --- | --- |
+| `DATABASE_URL`、`REDIS_URL` | `docker-compose.yml` 的 `environment:` 固定为本地 `db` / `redis` 服务；dotenv 中的同名值会被容器环境覆盖 |
+| `PUBLIC_API_BASE_URL` | `create_stack.sh` 根据 `--ip` 和 `--port` 生成 `STACK_PUBLIC_API_BASE_URL`，Compose 再映射为容器变量 |
+| `S3_*`（MinIO） | `create_stack.sh` 生成容器端点、浏览器端点、本地凭据、签名和 path-style 设置 |
+| `S3_*`（OSS） | bucket、region、公开 endpoint 和凭据先从所选 secret 文件读取；launcher 校验并转换为 `STACK_S3_*`，Compose 再映射为容器变量 |
+| 微信相关变量 | `--wechat mock` 时由 launcher 生成 Mock 值；`--wechat real` 时由 launcher 从所选 secret 文件读取、校验后映射 |
+| `JWT_SECRET`、Admin 和配置加密密钥 | 通常直接由服务的 `env_file` 注入，除非该服务另有显式 `environment:` 映射 |
+| Smoke/E2E 时限、覆盖率和 actor 配置 | 由对应 runner 临时导出，并只传给该次 Compose/测试进程 |
+| 未被任何上层设置的变量 | 应用 `Settings` 还会尝试当前工作目录的 `.env`，最后才使用字段默认值；容器镜像通过 `.dockerignore` 排除了仓库 `.env`，正常 Compose 容器不会依赖这一层 |
+
+几个具体例子：
+
+- `.env.minio-test` 即使误写了 `S3_ENDPOINT`，MinIO 模式仍会把容器内最终值设为
+  `http://minio:9000`，因为 Compose 的显式 `environment:` 映射优先。
+- `.env.oss-test` 的 `S3_BUCKET` 是有效输入；launcher 读取并校验它，然后通过
+  `STACK_S3_BUCKET` 映射到 API、worker 和测试容器。
+- dotenv 中的云数据库 `DATABASE_URL` 不会成为本地 API 的运行值；Compose 明确
+  注入 `db` 容器地址。
+- `LEGAL_DOCUMENTS_PUBLIC_BASE_URL` 没有相应的本地拓扑覆盖时，会直接从 `env_file`
+  进入容器。这正是测试 profile 要删除陈旧值的原因：不是删除 Compose 的能力，
+  而是避免一个本不该参与本地测试的基础输入成为最终值。
+
+生产部署不使用这套本地优先级作为配置权威。SAE 的环境变量、密钥和部署配置才是
+生产容器的输入；本页的 `.env.*-test` 只服务本地测试。
+
+应用的 Pydantic `Settings` 配置了 `env_file=".env"`，因此直接在宿主机运行 Python
+时，进程环境优先，其次才是当前目录的 `.env`，最后是代码默认值。Docker 构建通过
+`.dockerignore` 排除了 `.env`；在 Compose 容器内，应用实际读取的是前述合并后的
+容器进程环境，不会再打开宿主机上的 secret 文件。
+
+### 如何查看真正的运行值
+
+不要靠打开 `.env` 猜测。stack 启动后，从目标容器读取所关心的非敏感键：
+
+```bash
+docker compose \
+  --env-file .env.minio-test \
+  -p "yuanzhu-${DEV_TEST_PORT}" \
+  exec --no-TTY api printenv S3_ENDPOINT
+
+docker compose \
+  --env-file .env.minio-test \
+  -p "yuanzhu-${DEV_TEST_PORT}" \
+  exec --no-TTY api printenv PUBLIC_API_BASE_URL
+```
+
+`docker compose ... config --quiet` 只验证合并结果，不输出密钥。不要把不带
+`--quiet` 的完整 `config` 输出粘贴到日志或工单，因为渲染结果可能包含 secret。
 
 ## 运行前检查
 

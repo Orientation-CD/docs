@@ -45,7 +45,7 @@ Running `run_smoke_tests.sh` or local `run_e2e_tests.sh` does.
 
 ## Use separate secret files
 
-Keep the original `.env` as the operator/deployment source. Create two ignored,
+Keep the original `.env` as a reference input for operations and deployment. Create two ignored,
 permission-restricted profiles in the `YuanZhu-AI` repository root:
 
 - `.env.minio-test` for mock-WeChat tests with local MinIO;
@@ -94,6 +94,149 @@ Do not place these settings in either local profile:
 For MinIO, do not copy any OSS credential or endpoint. The launcher injects the
 container endpoint `http://minio:9000`, a browser-visible derived host port, local
 credentials, `s3v4`, and path-style addressing.
+
+## How `.env`, Compose, and the runners relate
+
+Neither the scripts nor Compose rewrites `.env`. In this documentation, an
+"override" means that a higher-precedence source supplies the final value of a
+same-named variable while Compose creates a container. It does not mean the dotenv
+file on disk is changed.
+
+For local tests, `.env.minio-test` or `.env.oss-test` is the **static-input and
+secret source**, not the sole authority for every runtime value. Ports, in-container
+database addresses, storage topology, and mock/real WeChat mode must be derived for
+the current command. Letting historical dotenv values always win could send a test
+to an old port, a cloud database, or the wrong bucket.
+
+The complete data path is:
+
+```text
+command flags (--port / --storage / --wechat / --secret)
+                    +
+selected dotenv file (.env.minio-test or .env.oss-test)
+                    │
+                    ▼
+runner temporarily exports test controls
+                    │
+                    ▼
+create_stack.sh validates inputs and temporarily exports STACK_*
+                    │
+                    ▼
+Docker Compose interpolates ${...}
+                    │
+       ┌────────────┴────────────┐
+       ▼                         ▼
+service env_file             service environment
+(base values/secrets)        (derived topology; wins on duplicate keys)
+       └────────────┬────────────┘
+                    ▼
+          container process environment
+                    ▼
+        application Settings / test process
+```
+
+### Two different reads of the same file
+
+The selected `--secret` file has two distinct Compose roles:
+
+1. `docker compose --env-file FILE` supplies **interpolation inputs** for `${NAME}`
+   expressions in `docker-compose.yml`. For these commands, an already-exported
+   same-named shell variable wins over the file; `${NAME:-default}` is used only
+   when neither provides a value.
+2. A service declaration such as `env_file: "${STACK_SECRET_FILE:-.env}"` injects
+   the file as the **base container environment**. The service's `environment:`
+   block wins when it declares the same variable.
+
+The effective runtime rule is therefore:
+
+```text
+final container value = explicit service environment mapping
+                      > env_file value
+                      > image ENV / application default
+```
+
+Here, `>` means "wins for a duplicate key." The current runners do not rely on
+`docker compose run -e`; a manually supplied `-e` would be another explicit,
+higher-precedence override.
+
+### What each script does
+
+| Entry point | Responsibility | Modifies a dotenv file? | Creates temporary environment variables? |
+| --- | --- | --- | --- |
+| `create_stack.sh` | Creates/recreates the local API, workers, PostgreSQL, Redis, mock services, and MinIO when selected, based on port, host, WeChat mode, and storage mode | No | Yes; it creates `STACK_*` values only for the Compose processes it starts |
+| `run_smoke_tests.sh` | Configures a focused smoke run, calls `create_stack.sh`, imports the cloud configuration snapshot, reads the effective storage settings back from the API container, then starts the `smoke` container | No | Yes; it creates `SMOKE_*`, coverage, and test-specific `STACK_*` values |
+| `run_e2e_tests.sh` | Configures E2E/coverage, calls `create_stack.sh`, imports the cloud configuration snapshot, reads effective settings back from the API container, then starts E2E actors | No | Yes; it creates `E2E_*`, coverage, and test-specific `STACK_*` values |
+
+`run_smoke_tests.sh` and local-mode `run_e2e_tests.sh` invoke `create_stack.sh` as a
+child process. An `export STACK_*` in that child cannot flow backward into its parent
+runner. After startup, the runner therefore calls
+`docker compose exec api printenv ...` to retrieve the API container's actual
+`S3_*`, provider host, and public API values, and then passes those values to the
+smoke/E2E container. The client and API use the same effective configuration instead
+of independently guessing it.
+
+Cloud E2E is a separate path: it does not create a local stack. It targets the remote
+API supplied by `--cloud` and requires the selected secret file to provide the remote
+test database, Redis, and Admin configuration.
+
+### Determine the final source by variable category
+
+| Variable category | Effective source in a local run |
+| --- | --- |
+| `DATABASE_URL`, `REDIS_URL` | The `docker-compose.yml` `environment:` block fixes these to the local `db` and `redis` services; same-named dotenv entries are overridden in the container |
+| `PUBLIC_API_BASE_URL` | `create_stack.sh` derives `STACK_PUBLIC_API_BASE_URL` from `--ip` and `--port`; Compose maps it into the container |
+| `S3_*` (MinIO) | `create_stack.sh` generates the container endpoint, browser endpoint, local credentials, signature, and path-style settings |
+| `S3_*` (OSS) | The bucket, region, public endpoint, and credentials are read from the selected secret file; the launcher validates them, creates `STACK_S3_*`, and Compose maps them into containers |
+| WeChat settings | `--wechat mock` makes the launcher generate mock values; `--wechat real` makes it read and validate values from the selected secret file |
+| `JWT_SECRET`, Admin, and configuration-encryption secrets | Usually injected directly by the service `env_file`, unless that service has an explicit `environment:` mapping for the same key |
+| Smoke/E2E timing, coverage, and actor controls | Temporarily exported by the corresponding runner and passed only to that Compose/test invocation |
+| Anything absent from all higher layers | Application `Settings` also checks `.env` in its current working directory before using field defaults; `.dockerignore` excludes the repository `.env` from the image, so a normal Compose container does not depend on this layer |
+
+Concrete examples:
+
+- Even if `.env.minio-test` mistakenly contains `S3_ENDPOINT`, MinIO mode gives the
+  container `http://minio:9000` because the explicit Compose `environment:` mapping
+  wins.
+- `S3_BUCKET` in `.env.oss-test` is a valid input. The launcher reads and validates
+  it, then maps `STACK_S3_BUCKET` into the API, worker, and test containers.
+- A cloud `DATABASE_URL` in the dotenv file does not become the local API value;
+  Compose explicitly injects the `db` container address.
+- When `LEGAL_DOCUMENTS_PUBLIC_BASE_URL` has no local-topology override, it passes
+  directly from `env_file` into the container. That is why stale values are removed
+  from test profiles: the goal is not to remove a Compose capability, but to prevent
+  an irrelevant base input from becoming the effective runtime value.
+
+Production does not use this local precedence model as its configuration authority.
+SAE environment variables, secrets, and deployment configuration are the inputs to
+production containers. The `.env.*-test` files described here are only for local
+testing.
+
+The Pydantic application `Settings` declares `env_file=".env"`. When Python runs
+directly on the host, process environment variables win, followed by the current
+directory's `.env`, then code defaults. Docker excludes `.env` through `.dockerignore`;
+inside a Compose container, the application reads the merged container process
+environment described above and does not reopen the host secret file.
+
+### Inspect the actual runtime value
+
+Do not infer a running container's configuration by looking at `.env`. After startup,
+read only the non-sensitive key you need from the target container:
+
+```bash
+docker compose \
+  --env-file .env.minio-test \
+  -p "yuanzhu-${DEV_TEST_PORT}" \
+  exec --no-TTY api printenv S3_ENDPOINT
+
+docker compose \
+  --env-file .env.minio-test \
+  -p "yuanzhu-${DEV_TEST_PORT}" \
+  exec --no-TTY api printenv PUBLIC_API_BASE_URL
+```
+
+`docker compose ... config --quiet` validates the merged model without printing
+secret values. Do not paste full `config` output without `--quiet` into logs or issues,
+because the rendered model may contain secrets.
 
 ## Preflight checks
 
