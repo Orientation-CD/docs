@@ -86,6 +86,14 @@ function sidebarEn() {
         ],
       },
     ],
+    "/testing/": [
+      {
+        text: "Testing",
+        items: [
+          { text: "Local MinIO and Alibaba OSS", link: "/testing/storage-environments" },
+        ],
+      },
+    ],
     "/reference/": [
       {
         text: "Reference",
@@ -192,6 +200,14 @@ function sidebarZh() {
         ],
       },
     ],
+    "/testing/": [
+      {
+        text: "测试",
+        items: [
+          { text: "本地 MinIO 与阿里云 OSS", link: "/testing/storage-environments" },
+        ],
+      },
+    ],
     "/reference/": [
       {
         text: "参考",
@@ -225,6 +241,7 @@ function navEn() {
     { text: "Backend", link: "/backend/overview" },
     { text: "Admin", link: "/admin/overview" },
     { text: "Deploy", link: "/deploy/local-stack" },
+    { text: "Testing", link: "/testing/storage-environments" },
     { text: "Reference", link: "/reference/rest-api" },
   ];
 }
@@ -237,6 +254,7 @@ function navZh() {
     { text: "后端", link: "/backend/overview" },
     { text: "管理后台", link: "/admin/overview" },
     { text: "部署", link: "/deploy/local-stack" },
+    { text: "测试", link: "/testing/storage-environments" },
     { text: "参考", link: "/reference/rest-api" },
   ];
 }
