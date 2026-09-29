@@ -102,6 +102,7 @@ function sidebarEn() {
           { text: "Data Model", link: "/reference/data-model" },
           { text: "Configuration Reference", link: "/reference/configuration" },
           { text: "OpenAPI", link: "/reference/openapi" },
+          { text: "Douyin Payment Guide", link: "/reference/douyin-payment" },
         ],
       },
       {
@@ -216,6 +217,7 @@ function sidebarZh() {
           { text: "数据模型", link: "/reference/data-model" },
           { text: "配置参考", link: "/reference/configuration" },
           { text: "OpenAPI", link: "/reference/openapi" },
+          { text: "抖音支付接入指南", link: "/reference/douyin-payment" },
         ],
       },
       {
