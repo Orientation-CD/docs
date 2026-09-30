@@ -42,22 +42,27 @@ UI 结果，后端要等微信带签名的回调（或服务端主动查询）�
 
 ### 代码导航表（Code navigation map）
 
-下面每个 Step 编号与上面时序图一一对应。"代码位置"按
-**`文件 → 函数`（行号）** 的格式书写，方便你直接从时序图跳到源码。
+时序图用了 `autonumber`，因此**每条消息**都会显示编号（1–11）；灰色的
+`Note over BE` 是服务端内部处理，**不占编号**。下表每一行与时序图中带编号
+的消息**严格一一对应**。"代码位置"按 **`文件 → 函数`（行号）** 书写。
 
-| Step | 哪一方 | 做什么 | 代码位置 |
+| Step | 图中的消息 | 做什么 | 代码位置 |
 |---|---|---|---|
-| 1 | **小程序前端** | 用户在商店页点**购买** | `src/pkg-account/pages/store/index.vue` → `runCheckout()`（L181） |
-| 2 | **小程序前端** | 构造带 `Idempotency-Key` 的购买请求 | `src/pkg-account/repositories/purchaseRequest.ts` → `buildSubscriptionPurchaseRequest`（L74）/ `buildTokenPurchaseRequest`（L83）→ `executePurchaseRequest`（L92） |
-| 3 | **小程序前端** | 校验参数、拉起微信收银台 | `src/pkg-account/services/payment.ts` → `requestWechatPayment`（L60）→ `uni.requestPayment({ provider: "wxpay", ... })` |
-| 4 | **开发者服务端** | JWT 鉴权、服务端定价、幂等、插入 `PaymentOrder`(PENDING) | `app/billing_api.py` → `create_subscription`（L517）/ `create_token_purchase`（L653）；辅助：`ensure_payment_mode`（L229）、`checkout_openid`（L239）、`serialize_billing_order_creation`（L198） |
-| 5 | **开发者服务端** | 调微信 JSAPI 下单接口、签客户端支付参数 | `app/wechat_pay.py` → `create_checkout`（L242）；`checkout_app_id`（L199）、`_payment_parameters`（L208） |
-| 6 | **小程序前端** | 用户确认 / 取消（仅 UI 结果） | 同 Step 3（`success` / `fail` 回调） |
-| 7 | **微信服务器** | 异步回调开发者服务端 | `POST /v1/webhooks/wechat/payments` |
-| 8 | **开发者服务端** | 验签、AES-GCM 解密、幂等、结算入账 | `app/billing_api.py` → `wechat_pay_notification`（L1408）；`app/wechat_pay.py` → `callback`（L356）；`app/billing.py` → `complete_payment_order`（L855） |
-| 9 | **小程序前端** | 轮询直到 `status:"paid"` | `src/pkg-account/repositories/paymentReconciliation.ts` → poller；由 `store/index.vue` 的 `applyOrder`（L178）应用结果 |
-| M1 | **开发者服务端** | Mock 模式：模拟支付成功 | `app/billing_api.py` → `mock_complete_payment`（L764）→ 复用 `complete_payment_order` |
-| M2 | **开发者服务端** | Mock 模式：模拟退款成功 | `app/billing_api.py` → `mock_complete_refund`（L1011） |
+| 1 | `MP→BE` POST `/v1/token-purchases` 或 `/v1/subscriptions` | 用户点**购买**；前端构造带 `Idempotency-Key` 的请求并发出 | 前端：`src/pkg-account/pages/store/index.vue` → `runCheckout()`（L181）；`src/pkg-account/repositories/purchaseRequest.ts` → `buildSubscriptionPurchaseRequest`（L74）/ `buildTokenPurchaseRequest`（L83）→ `executePurchaseRequest`（L92） |
+| — | （Note over BE） | 后端接收：JWT 鉴权、服务端定价、幂等、插入 `PaymentOrder`(PENDING) | `app/billing_api.py` → `create_subscription`（L517）/ `create_token_purchase`（L653）；辅助：`ensure_payment_mode`（L229）、`checkout_openid`（L239）、`serialize_billing_order_creation`（L198） |
+| 2 | `BE→WX` JSAPI 下单 API | 后端调微信创建交易单（商户私钥签名） | `app/wechat_pay.py` → `create_checkout`（L242）→ SDK `pay()` → `POST /v3/pay/transactions/jsapi` |
+| 3 | `WX→BE` prepay_id | 微信返回预支付交易会话标识 | 在 `create_checkout` 内（同 Step 2，取返回值） |
+| 4 | `BE→MP` `payment_parameters` | 后端对**客户端**支付参数签名并返回 | `app/wechat_pay.py` → `checkout_app_id`（L199）、`_payment_parameters`（L208） |
+| 5 | `MP→MP` `uni.requestPayment` | 前端校验参数并调用收银台桥 | `src/pkg-account/services/payment.ts` → `requestWechatPayment`（L60） |
+| 6 | `MP→WX` 打开收银台 | 微信渲染用户收银台 | 同 Step 5（`uni.requestPayment` 内部） |
+| 7 | `WX→MP` 确认 / 取消 | 用户确认或取消——仅 UI 结果，不构成支付凭证 | `requestWechatPayment` 的 `success` / `fail` 回调；`cancelled()`（L54）识别取消 |
+| 8 | `WX→BE` webhook | 微信 POST 带签名+加密的支付结果 | 入口：`app/billing_api.py` → `wechat_pay_notification`（L1408）；验签+解密：`app/wechat_pay.py` → `callback`（L356） |
+| 9 | `BE→WX` 204 | 后端应答（幂等） | `wechat_pay_notification`（L1408）末尾——持久化事件、返回 204 |
+| — | （Note over BE） | 后端结算：`complete_payment_order` → PAID + 积分入账 | `app/billing.py` → `complete_payment_order`（L855） |
+| 10 | `MP→BE` GET `/v1/payments/{id}` | 前端轮询直到订单 `paid` | `src/pkg-account/repositories/paymentReconciliation.ts` → poller；由 `store/index.vue` 的 `applyOrder`（L178）应用结果 |
+| 11 | `BE→MP` `status:"paid"` | 轮询拿到最终状态 | 同 Step 10（poller 响应） |
+| M1 | — | Mock 模式：模拟支付成功（不在图中） | `app/billing_api.py` → `mock_complete_payment`（L764）→ 复用 `complete_payment_order` |
+| M2 | — | Mock 模式：模拟退款成功（不在图中） | `app/billing_api.py` → `mock_complete_refund`（L1011） |
 
 > 行号对应当前 `main` / `ui-integration` 最新头；若版本漂移，直接搜函数名。
 

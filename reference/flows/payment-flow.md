@@ -47,23 +47,28 @@ collects the UI result, while the backend waits for WeChat's signed callback
 
 ### Code navigation map
 
-Every numbered step below is the same step in the sequence diagram above.
-"Where in code" uses the convention **`file → function` (line)**, so you can
-jump straight from the diagram to the source.
+The sequence diagram uses `autonumber`, so every **message** gets a visible
+number (1–11); the gray `Note over BE` boxes are internal server work and are
+**not numbered**. Each row below matches the numbered message in the diagram
+one-to-one. "Where in code" uses the convention **`file → function` (line)**.
 
-| Step | Actor | What happens | Where in code |
+| Step | Message in diagram | What happens | Where in code |
 |---|---|---|---|
-| 1 | **Mini program** | User taps **Buy** on the store page | `src/pkg-account/pages/store/index.vue` → `runCheckout()` (L181) |
-| 2 | **Mini program** | Build the purchase request with `Idempotency-Key` | `src/pkg-account/repositories/purchaseRequest.ts` → `buildSubscriptionPurchaseRequest` (L74) / `buildTokenPurchaseRequest` (L83) → `executePurchaseRequest` (L92) |
-| 3 | **Mini program** | Validate params, open the WeChat paysheet | `src/pkg-account/services/payment.ts` → `requestWechatPayment` (L60) → `uni.requestPayment({ provider: "wxpay", ... })` |
-| 4 | **Developer server** | Auth (JWT), server-side pricing, idempotency, insert `PaymentOrder` (PENDING) | `app/billing_api.py` → `create_subscription` (L517) / `create_token_purchase` (L653); helpers: `ensure_payment_mode` (L229), `checkout_openid` (L239), `serialize_billing_order_creation` (L198) |
-| 5 | **Developer server** | Call WeChat JSAPI order API, sign client pay params | `app/wechat_pay.py` → `create_checkout` (L242); `checkout_app_id` (L199), `_payment_parameters` (L208) |
-| 6 | **Mini program** | User confirms / cancels (UI result only) | same as step 3 (`success` / `fail` callbacks) |
-| 7 | **WeChat server** | Async callback to the developer server | `POST /v1/webhooks/wechat/payments` |
-| 8 | **Developer server** | Verify signature, AES-GCM decrypt, idempotency, settle | `app/billing_api.py` → `wechat_pay_notification` (L1408); `app/wechat_pay.py` → `callback` (L356); `app/billing.py` → `complete_payment_order` (L855) |
-| 9 | **Mini program** | Poll until `status: "paid"` | `src/pkg-account/repositories/paymentReconciliation.ts` → poller; applied in `store/index.vue` `applyOrder` (L178) |
-| M1 | **Developer server** | Mock mode: simulate a successful payment | `app/billing_api.py` → `mock_complete_payment` (L764) → reuses `complete_payment_order` |
-| M2 | **Developer server** | Mock mode: simulate a successful refund | `app/billing_api.py` → `mock_complete_refund` (L1011) |
+| 1 | `MP→BE` POST `/v1/token-purchases` or `/v1/subscriptions` | User taps **Buy**; frontend builds the request with `Idempotency-Key` and sends it | Frontend: `src/pkg-account/pages/store/index.vue` → `runCheckout()` (L181); `src/pkg-account/repositories/purchaseRequest.ts` → `buildSubscriptionPurchaseRequest` (L74) / `buildTokenPurchaseRequest` (L83) → `executePurchaseRequest` (L92) |
+| — | (Note over BE) | Backend receives it: JWT auth, server-side pricing, idempotency, insert `PaymentOrder` (PENDING) | `app/billing_api.py` → `create_subscription` (L517) / `create_token_purchase` (L653); helpers: `ensure_payment_mode` (L229), `checkout_openid` (L239), `serialize_billing_order_creation` (L198) |
+| 2 | `BE→WX` JSAPI order API | Backend calls WeChat to create the transaction (merchant private key signing) | `app/wechat_pay.py` → `create_checkout` (L242) → SDK `pay()` → `POST /v3/pay/transactions/jsapi` |
+| 3 | `WX→BE` prepay_id | WeChat returns the prepayment session id | inside `create_checkout` (same as step 2, return value) |
+| 4 | `BE→MP` `payment_parameters` | Backend signs the **client** pay params and returns them | `app/wechat_pay.py` → `checkout_app_id` (L199), `_payment_parameters` (L208) |
+| 5 | `MP→MP` `uni.requestPayment` | Frontend validates params and invokes the paysheet bridge | `src/pkg-account/services/payment.ts` → `requestWechatPayment` (L60) |
+| 6 | `MP→WX` open paysheet | WeChat renders the user-facing paysheet | same as step 5 (internal to `uni.requestPayment`) |
+| 7 | `WX→MP` confirm / cancel | User confirms or cancels — UI result only, not proof of payment | `requestWechatPayment` `success` / `fail` callbacks; `cancelled()` (L54) recognizes cancel |
+| 8 | `WX→BE` webhook | WeChat posts the signed + encrypted result | entry: `app/billing_api.py` → `wechat_pay_notification` (L1408); verify + decrypt: `app/wechat_pay.py` → `callback` (L356) |
+| 9 | `BE→WX` 204 | Backend acknowledges (idempotent) | end of `wechat_pay_notification` (L1408) — persists event, returns 204 |
+| — | (Note over BE) | Backend settles: `complete_payment_order` → PAID + tokens credited | `app/billing.py` → `complete_payment_order` (L855) |
+| 10 | `MP→BE` GET `/v1/payments/{id}` | Frontend polls until the order is `paid` | `src/pkg-account/repositories/paymentReconciliation.ts` → poller; applied in `store/index.vue` `applyOrder` (L178) |
+| 11 | `BE→MP` `status:"paid"` | Poller receives the final state | same as step 10 (poller response) |
+| M1 | — | Mock mode: simulate a successful payment (not in diagram) | `app/billing_api.py` → `mock_complete_payment` (L764) → reuses `complete_payment_order` |
+| M2 | — | Mock mode: simulate a successful refund (not in diagram) | `app/billing_api.py` → `mock_complete_refund` (L1011) |
 
 > Line numbers track the current `main` / `ui-integration` heads. Search for the
 > function name if they drift.
