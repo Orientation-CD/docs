@@ -45,6 +45,29 @@ tokens**. The frontend never "decides" that a payment succeeded — it only
 collects the UI result, while the backend waits for WeChat's signed callback
 (or a server-side query) before granting entitlements.
 
+### Code navigation map
+
+Every numbered step below is the same step in the sequence diagram above.
+"Where in code" uses the convention **`file → function` (line)**, so you can
+jump straight from the diagram to the source.
+
+| Step | Actor | What happens | Where in code |
+|---|---|---|---|
+| 1 | **Mini program** | User taps **Buy** on the store page | `src/pkg-account/pages/store/index.vue` → `runCheckout()` (L181) |
+| 2 | **Mini program** | Build the purchase request with `Idempotency-Key` | `src/pkg-account/repositories/purchaseRequest.ts` → `buildSubscriptionPurchaseRequest` (L74) / `buildTokenPurchaseRequest` (L83) → `executePurchaseRequest` (L92) |
+| 3 | **Mini program** | Validate params, open the WeChat paysheet | `src/pkg-account/services/payment.ts` → `requestWechatPayment` (L60) → `uni.requestPayment({ provider: "wxpay", ... })` |
+| 4 | **Developer server** | Auth (JWT), server-side pricing, idempotency, insert `PaymentOrder` (PENDING) | `app/billing_api.py` → `create_subscription` (L517) / `create_token_purchase` (L653); helpers: `ensure_payment_mode` (L229), `checkout_openid` (L239), `serialize_billing_order_creation` (L198) |
+| 5 | **Developer server** | Call WeChat JSAPI order API, sign client pay params | `app/wechat_pay.py` → `create_checkout` (L242); `checkout_app_id` (L199), `_payment_parameters` (L208) |
+| 6 | **Mini program** | User confirms / cancels (UI result only) | same as step 3 (`success` / `fail` callbacks) |
+| 7 | **WeChat server** | Async callback to the developer server | `POST /v1/webhooks/wechat/payments` |
+| 8 | **Developer server** | Verify signature, AES-GCM decrypt, idempotency, settle | `app/billing_api.py` → `wechat_pay_notification` (L1408); `app/wechat_pay.py` → `callback` (L356); `app/billing.py` → `complete_payment_order` (L855) |
+| 9 | **Mini program** | Poll until `status: "paid"` | `src/pkg-account/repositories/paymentReconciliation.ts` → poller; applied in `store/index.vue` `applyOrder` (L178) |
+| M1 | **Developer server** | Mock mode: simulate a successful payment | `app/billing_api.py` → `mock_complete_payment` (L764) → reuses `complete_payment_order` |
+| M2 | **Developer server** | Mock mode: simulate a successful refund | `app/billing_api.py` → `mock_complete_refund` (L1011) |
+
+> Line numbers track the current `main` / `ui-integration` heads. Search for the
+> function name if they drift.
+
 ---
 
 ## Part 1 — Frontend: preparing a purchase
@@ -107,7 +130,7 @@ becomes `paid` (or fails). It also re-checks that the returned order still has
 ## Part 2 — Backend: creating the order and pay params
 
 Both purchase endpoints live in `app/billing_api.py` and follow the same
-flow (`create_subscription` at line ~512, `create_token_purchase` at ~648):
+flow (`create_subscription` at L517, `create_token_purchase` at L653):
 
 ```
 1. get_current_user()                     → authenticated user (JWT)
@@ -127,13 +150,66 @@ flow (`create_subscription` at line ~512, `create_token_purchase` at ~648):
 
 | `PaymentType` | WeChat surface | Who uses it |
 |---|---|---|
-| `jsapi` | `WeChatPayType.JSAPI` — mini program in-page payment (`wx.requestPayment`) | **Enabled today** — every mini program checkout sends `type: "jsapi"` |
-| `app` | `WeChatPayType.APP` — WeChat **Open Platform App** payment (for standalone native apps, commonly used for virtual goods on iOS) | Implemented in `wechat_pay.py` but **not used by the mini program** — no frontend path sends `type: "app"` |
+| `jsapi` | `WeChatPayType.JSAPI` — **JSAPI order API** | **Enabled today** — every mini program checkout sends `type: "jsapi"` |
+| `app` | `WeChatPayType.APP` — WeChat **Open Platform App** payment (for standalone native apps) | Implemented in `wechat_pay.py` but **not used by the mini program** |
 
-The **official "mini program virtual payment"** (WeChat's `requestVirtualPayment`
-for iOS virtual goods) is a different capability and is **not integrated** in
-this project. If you hear "普通支付 vs 虚拟支付" in the code, it refers to the
-`jsapi` (enabled) vs `app` (backend-ready, frontend-disabled) split above.
+The **official "mini program virtual payment"** (`requestVirtualPayment` for
+iOS virtual goods) is a different capability and is **not integrated**.
+
+### "JSAPI 支付" vs "小程序支付" — what the official product names mean
+
+The WeChat Pay product center lists **JSAPI payment** and **mini program
+payment** as two products, which is the source of the confusion. The official
+docs ([小程序支付 产品介绍, V3](https://pay.weixin.qq.com/doc/v3/partner/4012085810))
+state it precisely:
+
+> JSAPI 支付与小程序支付共享同一权限及下单接口，但调起方式不同：JSAPI 需校验
+> 调起支付的域名/路径与合作伙伴平台配置的「JSAPI支付授权目录」是否一致，
+> 小程序不校验无需配置。
+
+They are **the same API** (`POST /v3/pay/transactions/jsapi`) with **the same
+merchant permission** — only the *invocation channel and configuration*
+differ:
+
+| | JSAPI 支付 | 小程序支付 |
+|---|---|---|
+| Scene | WeChat built-in browser / official-account pages (`wx.chooseWXPay`, `WeixinJSBridge`) | WeChat mini program (`wx.requestPayment`) |
+| Authorized directory (授权目录) | Required — domain/path must match the configured directory | Not checked — nothing to configure |
+| Order API | `POST /v3/pay/transactions/jsapi` | same |
+| In this project | n/a | **what we use** — frontend `uni.requestPayment` (→ `wx.requestPayment`), backend `WeChatPayType.JSAPI` |
+
+So the code sending `type: "jsapi"` is **not** a contradiction: `jsapi` names
+the *interface family*; the *product scene* this mini program belongs to is
+「小程序支付」.
+
+### API V3 vs V2 — which one this project uses
+
+| | API V2 | API V3 |
+|---|---|---|
+| Entry point | `https://api.mch.weixin.qq.com/pay/unifiedorder` (统一下单) | `https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi` |
+| Data format | XML | JSON |
+| Signature | MD5 / HMAC-SHA256 | RSA-SHA256 (merchant private key) |
+| Callback encryption | plaintext (sign only) | AES-256-GCM (API v3 key) + platform-certificate verification |
+| Verification | API key | WeChat Pay platform certificate (serial checked against `Wechatpay-Serial`) |
+| Status | **suspended for new merchants** (V2 SDK stopped maintenance on 2022-09-22; existing merchants keep using it, official deadline TBD) | **current standard** — what new merchants should use |
+
+**This project uses API V3** end to end: the SDK (`wechatpayv3`) only talks to
+V3 endpoints; callbacks are decrypted with the API v3 key and verified with the
+platform public key (`WECHAT_PAY_PUBLIC_KEY` / `_ID`). The
+[Official documentation](#official-documentation) section links both the V3
+*developer guide* (current API names) and the V2 *product guide* (whose 时序图
+is the clearest picture of the three-party interaction) — both describe the same
+flow.
+
+### Where the Python SDK comes from
+
+The dependency is `wechatpayv3[async]==2.0.3` (`pyproject.toml`), imported as
+`from wechatpayv3.async_ import AsyncWeChatPay, WeChatPayType` in
+`app/wechat_pay.py`. It is the **official WeChat Pay Python SDK**, maintained
+by WeChat Pay itself in the `wechatpay-apiv3` GitHub organization
+([wechatpay-python](https://github.com/wechatpay-apiv3/wechatpay-python)) —
+the same org publishes Java, Go, PHP, Node.js, C# and Ruby SDKs. The `async`
+extra provides the `AsyncWeChatPay` client used by FastAPI.
 
 ### Creating the WeChat transaction
 
@@ -166,7 +242,7 @@ API v3 key are secrets — **never** shipped to the mini program.
 After the user pays, WeChat posts to
 `POST /v1/webhooks/wechat/payments` (payments) and
 `POST /v1/webhooks/wechat/refunds` (refunds) — both handled by
-`wechat_pay_notification` in `app/billing_api.py` (line ~1408).
+`wechat_pay_notification` in `app/billing_api.py` (L1408).
 
 ```
 1. wechat_pay_mode == disabled  → 404

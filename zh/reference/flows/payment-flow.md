@@ -40,6 +40,27 @@ sequenceDiagram
 记住一条铁律：**只有后端有权入账**。前端从不"判定"支付成功——它只收集
 UI 结果，后端要等微信带签名的回调（或服务端主动查询）确认后，才发放权益。
 
+### 代码导航表（Code navigation map）
+
+下面每个 Step 编号与上面时序图一一对应。"代码位置"按
+**`文件 → 函数`（行号）** 的格式书写，方便你直接从时序图跳到源码。
+
+| Step | 哪一方 | 做什么 | 代码位置 |
+|---|---|---|---|
+| 1 | **小程序前端** | 用户在商店页点**购买** | `src/pkg-account/pages/store/index.vue` → `runCheckout()`（L181） |
+| 2 | **小程序前端** | 构造带 `Idempotency-Key` 的购买请求 | `src/pkg-account/repositories/purchaseRequest.ts` → `buildSubscriptionPurchaseRequest`（L74）/ `buildTokenPurchaseRequest`（L83）→ `executePurchaseRequest`（L92） |
+| 3 | **小程序前端** | 校验参数、拉起微信收银台 | `src/pkg-account/services/payment.ts` → `requestWechatPayment`（L60）→ `uni.requestPayment({ provider: "wxpay", ... })` |
+| 4 | **开发者服务端** | JWT 鉴权、服务端定价、幂等、插入 `PaymentOrder`(PENDING) | `app/billing_api.py` → `create_subscription`（L517）/ `create_token_purchase`（L653）；辅助：`ensure_payment_mode`（L229）、`checkout_openid`（L239）、`serialize_billing_order_creation`（L198） |
+| 5 | **开发者服务端** | 调微信 JSAPI 下单接口、签客户端支付参数 | `app/wechat_pay.py` → `create_checkout`（L242）；`checkout_app_id`（L199）、`_payment_parameters`（L208） |
+| 6 | **小程序前端** | 用户确认 / 取消（仅 UI 结果） | 同 Step 3（`success` / `fail` 回调） |
+| 7 | **微信服务器** | 异步回调开发者服务端 | `POST /v1/webhooks/wechat/payments` |
+| 8 | **开发者服务端** | 验签、AES-GCM 解密、幂等、结算入账 | `app/billing_api.py` → `wechat_pay_notification`（L1408）；`app/wechat_pay.py` → `callback`（L356）；`app/billing.py` → `complete_payment_order`（L855） |
+| 9 | **小程序前端** | 轮询直到 `status:"paid"` | `src/pkg-account/repositories/paymentReconciliation.ts` → poller；由 `store/index.vue` 的 `applyOrder`（L178）应用结果 |
+| M1 | **开发者服务端** | Mock 模式：模拟支付成功 | `app/billing_api.py` → `mock_complete_payment`（L764）→ 复用 `complete_payment_order` |
+| M2 | **开发者服务端** | Mock 模式：模拟退款成功 | `app/billing_api.py` → `mock_complete_refund`（L1011） |
+
+> 行号对应当前 `main` / `ui-integration` 最新头；若版本漂移，直接搜函数名。
+
 ---
 
 ## 第 1 部分 — 前端：准备一笔购买
@@ -97,7 +118,7 @@ cancel 识别）、`PAYMENT_PROVIDER_FAILED`、`PAYMENT_INVOCATION_FAILED`。
 ## 第 2 部分 — 后端：建订单 + 生成支付参数
 
 两个购买端点都在 `app/billing_api.py`，流程一致
-（`create_subscription` 在 ~512 行，`create_token_purchase` 在 ~648 行）：
+（`create_subscription` 在 L517，`create_token_purchase` 在 L653）：
 
 ```
 1. get_current_user()                     → 已登录用户（JWT）
@@ -117,13 +138,63 @@ cancel 识别）、`PAYMENT_PROVIDER_FAILED`、`PAYMENT_INVOCATION_FAILED`。
 
 | `PaymentType` | 微信面 | 谁在用 |
 |---|---|---|
-| `jsapi` | `WeChatPayType.JSAPI` —— 小程序内支付（`wx.requestPayment`） | **当前启用**——小程序每次购买都发 `type: "jsapi"` |
-| `app` | `WeChatPayType.APP` —— 微信**开放平台 App 支付**（独立原生 App 用，常见于 iOS 虚拟商品） | `wechat_pay.py` 里已实现，但**小程序不调用**——前端没有任何路径发 `type: "app"` |
+| `jsapi` | `WeChatPayType.JSAPI` —— **JSAPI 下单接口** | **当前启用**——小程序每次购买都发 `type: "jsapi"` |
+| `app` | `WeChatPayType.APP` —— 微信**开放平台 App 支付**（独立原生 App 用） | `wechat_pay.py` 里已实现，但**小程序不调用** |
 
 微信官方的"**小程序虚拟支付**"（面向 iOS 虚拟商品的
 `requestVirtualPayment`）是另一套能力，本项目**未接入**。如果你在代码里
 听到"普通支付 vs 虚拟支付"，指的就是上面 `jsapi`（启用）vs `app`
 （后端就绪、前端未启用）的差异。
+
+### "JSAPI 支付" 与 "小程序支付" —— 官方产品名到底指什么
+
+微信支付产品中心把 **JSAPI 支付** 和 **小程序支付** 列为两个产品，这就是
+困惑的来源。官方文档（[小程序支付 产品介绍, V3](https://pay.weixin.qq.com/doc/v3/partner/4012085810)）
+说得非常明确：
+
+> JSAPI 支付与小程序支付共享同一权限及下单接口，但调起方式不同：JSAPI 需校验
+> 调起支付的域名/路径与合作伙伴平台配置的「JSAPI支付授权目录」是否一致，
+> 小程序不校验无需配置。
+
+也就是说，两者**是同一个接口**（`POST /v3/pay/transactions/jsapi`）、**同一
+个商户权限**，区别只在*调起渠道和配置*：
+
+| | JSAPI 支付 | 小程序支付 |
+|---|---|---|
+| 场景 | 微信内置浏览器 / 公众号页面（`wx.chooseWXPay`、`WeixinJSBridge`） | 微信小程序（`wx.requestPayment`） |
+| 授权目录 | 必须校验——域名/路径需与平台配置的「JSAPI 支付授权目录」一致 | 不校验、无需配置 |
+| 下单接口 | `POST /v3/pay/transactions/jsapi` | 同一个 |
+| 本项目 | 未用 | **用的就是它**——前端 `uni.requestPayment`（底层 `wx.requestPayment`），后端 `WeChatPayType.JSAPI` |
+
+所以代码里发 `type: "jsapi"` **并不矛盾**：`jsapi` 是*接口族*的名字；本项目
+所属的*产品场景*是「小程序支付」。
+
+### API V3 与 V2 —— 本项目用的是哪个
+
+| | API V2 | API V3 |
+|---|---|---|
+| 入口 | `https://api.mch.weixin.qq.com/pay/unifiedorder`（统一下单） | `https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi` |
+| 数据格式 | XML | JSON |
+| 签名 | MD5 / HMAC-SHA256 | RSA-SHA256（商户私钥） |
+| 回调加密 | 明文（仅签名） | AES-256-GCM（APIv3 密钥）+ 平台证书验签 |
+| 验签 | API key | 微信支付平台证书（`Wechatpay-Serial` 校验） |
+| 状态 | **新商户已暂停接入**（V2 SDK 2022-09-22 起停止维护；存量商户仍可用，官方下线时间待定） | **现行标准**——新商户应使用 |
+
+**本项目全程用 API V3**：SDK（`wechatpayv3`）只对接 V3 端点；回调用 APIv3
+密钥解密、用平台公钥（`WECHAT_PAY_PUBLIC_KEY` / `_ID`）验签。上文
+[官方文档参考](#官方文档参考) 里同时放了 V3 *开发指引*（现行 API 命名）和
+V2 *产品指引*（其时序图是三方可视化最清晰的一版）——两者描述的是同一个
+流程。
+
+### Python SDK 是哪来的
+
+依赖是 `wechatpayv3[async]==2.0.3`（`pyproject.toml`），在
+`app/wechat_pay.py` 中 `from wechatpayv3.async_ import AsyncWeChatPay, WeChatPayType`
+引入。这是**微信支付官方的 Python SDK**，由微信支付团队在
+`wechatpay-apiv3` GitHub 组织下维护
+（[wechatpay-python](https://github.com/wechatpay-apiv3/wechatpay-python)）——
+同一组织还发布 Java、Go、PHP、Node.js、C#、Ruby 等官方 SDK。`async` extra
+提供 FastAPI 使用的 `AsyncWeChatPay` 客户端。
 
 ### 创建微信交易
 
@@ -153,7 +224,7 @@ cancel 识别）、`PAYMENT_PROVIDER_FAILED`、`PAYMENT_INVOCATION_FAILED`。
 用户付完款，微信 POST 到
 `POST /v1/webhooks/wechat/payments`（支付）和
 `POST /v1/webhooks/wechat/refunds`（退款）——都由 `billing_api.py` 的
-`wechat_pay_notification`（~1408 行）处理：
+`wechat_pay_notification`（L1408）处理：
 
 ```
 1. wechat_pay_mode == disabled  → 404
