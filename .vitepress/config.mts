@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
 // ── Shared sidebar builders ──────────────────────────────────────────────
 // Each function returns the sidebar for one locale. Links are locale-rooted
@@ -261,7 +262,8 @@ function navZh() {
   ];
 }
 
-export default defineConfig({
+export default withMermaid(
+  defineConfig({
   base: "/docs/",
   cleanUrls: true,
   srcExclude: ["README.md"],
@@ -345,4 +347,9 @@ export default defineConfig({
       },
     },
   },
-});
+}),
+{
+  // Mermaid diagrams render client-side; one theme covers both locales.
+  theme: "default",
+},
+);

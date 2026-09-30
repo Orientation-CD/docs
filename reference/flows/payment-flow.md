@@ -13,31 +13,31 @@ how the frontend and backend cooperate at every step.
 
 ## The big picture
 
-```
-Mini program (uni-app)
-  store page → purchaseRequest → payment.ts (paymentBridge)
-        │  POST /v1/token-purchases | /v1/subscriptions
-        │  (type: "jsapi", Idempotency-Key)
-        ▼
-FastAPI (billing_api.py)
-  create_token_purchase / create_subscription
-    → create PaymentOrder (PENDING) in PostgreSQL
-    → wechat_pay.py: create_checkout()
-        │  (wechatpayv3 SDK — signs every request with merchant private key)
-        ▼
-WeChat Pay API  (JSAPI / App transactions)
-   returns prepay_id  ──►  backend signs client params (paySign)
-        │
-        ▼
-Mini program: uni.requestPayment({ provider: "wxpay", ...payParams })
-   user confirms in the WeChat paysheet
-        │
-        ▼
-WeChat Pay server  ──►  POST /v1/webhooks/wechat/payments   (async, after payment)
-FastAPI verifies signature + decrypts, marks order PAID, credits tokens
-        │
-        ▼
-Mini program polls payment_reconciliation until order.status = "paid"
+The interaction below is the **official WeChat JSAPI (mini program) sequence**
+(see the official diagrams in [Official documentation](#official-documentation)).
+The three actors are the mini program frontend, the developer server (your
+FastAPI), and the WeChat Pay server:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MP as Mini program<br/>(uni-app frontend)
+    participant BE as Developer server<br/>(FastAPI)
+    participant WX as WeChat Pay server
+
+    MP->>BE: POST /v1/token-purchases or /v1/subscriptions<br/>{type:"jsapi"} + Idempotency-Key
+    Note over BE: JWT auth · server-side pricing ·<br/>insert PaymentOrder (PENDING)
+    BE->>WX: JSAPI order API<br/>(merchant private key signing)
+    WX-->>BE: prepay_id
+    BE-->>MP: PaymentOrderResponse + payment_parameters<br/>{appId, timeStamp, nonceStr,<br/>package:"prepay_id=...", signType:"RSA", paySign}
+    MP->>MP: uni.requestPayment({provider:"wxpay", ...})
+    MP->>WX: open WeChat paysheet
+    WX-->>MP: user confirms / cancels<br/>(frontend result is informational only)
+    WX->>BE: POST /v1/webhooks/wechat/payments<br/>(signed + encrypted, async)
+    Note over BE: verify signature · AES-GCM decrypt ·<br/>idempotency · complete_payment_order<br/>→ PAID + tokens credited + subscription active
+    BE-->>WX: 204 No Content
+    MP->>BE: GET /v1/payments/{id} (polling)
+    BE-->>MP: status:"paid"
 ```
 
 The rule to remember: **the backend is the only authority that credits
@@ -294,6 +294,28 @@ appid and amount).
 | `purchased_token_batches` | token grant after PAID |
 | `token_ledger_entries` | `TOKEN_PURCHASE` / `SUBSCRIPTION_PURCHASE` credit, refund debit |
 | `user_subscriptions` | activated/renewed period on subscription payment |
+
+## Official documentation
+
+WeChat publishes the authoritative interaction diagrams and API references.
+Bookmark these — the project's implementation mirrors them exactly:
+
+| Topic | Official doc | What it contains |
+|---|---|---|
+| **JSAPI payment dev guide (V3)** | https://pay.weixin.qq.com/doc/v3/merchant/4012791870 | JSAPI/小程序下单 → 调起支付 → 支付结果通知 full sequence; `prepay_id` hand-off |
+| **Mini program payment dev guide (V2)** | https://pay.weixin.qq.com/doc/v2/merchant/4011938514 | **业务流程时序图** for 小程序支付: 统一下单 → `wx.requestPayment` → 支付通知 → 查单 |
+| **API v3 signing / verification / encryption** | https://pay.weixin.qq.com/doc/v3/merchant/4011938658 | How requests are signed with the merchant private key, how callbacks are verified and decrypted (AES-GCM, API v3 key) |
+| **Payment result notification (回调)** | https://pay.weixin.qq.com/doc/v3/merchant/4011935834 | `TRANSACTION.SUCCESS` event payload, verification, retry rules, 204 acknowledgement |
+| **Query order API (查单)** | https://pay.weixin.qq.com/doc/v3/merchant/4011938840 | Server-side order query as the backstop when callbacks are delayed/lost |
+| **小程序登录 (wx.login → code2Session)** | https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html | **官方登录时序图**: wx.login 取 code → 开发者服务端 code2Session → openid/session_key |
+| **code2Session API** | https://developers.weixin.qq.com/miniprogram/dev/server/API/user-login/api_code2session | Server-side only; appid + secret + code → openid + session_key |
+| **手机号快速验证 (getPhoneNumber)** | https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/getPhoneNumber.html | **官方时序图**: 前端按钮授权 → code → 服务端解密 phone number |
+
+> The V2 guide's 时序图 (developers.weixin.qq.com / pay.weixin.qq.com) is the
+> clearest picture of the three-party interaction; the V3 diagram in the JSAPI
+> guide shows the same flow with the current API names. Our
+> [mermaid diagram](#the-big-picture) above is a re-drawing of it with the
+> project's actual endpoints.
 
 ## Related call chains
 

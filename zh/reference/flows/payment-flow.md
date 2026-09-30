@@ -11,31 +11,30 @@
 
 ## 总览
 
-```
-小程序（uni-app）
-  商店页 → purchaseRequest → payment.ts (paymentBridge)
-        │  POST /v1/token-purchases | /v1/subscriptions
-        │  (type: "jsapi", Idempotency-Key)
-        ▼
-FastAPI (billing_api.py)
-  create_token_purchase / create_subscription
-    → 在 PostgreSQL 建 PaymentOrder（PENDING）
-    → wechat_pay.py: create_checkout()
-        │  （wechatpayv3 SDK —— 每个请求都用商户私钥签名）
-        ▼
-微信支付 API（JSAPI / App 交易）
-   返回 prepay_id  ──►  后端签名客户端参数（paySign）
-        │
-        ▼
-小程序：uni.requestPayment({ provider: "wxpay", ...支付参数 })
-   用户在微信收银台确认支付
-        │
-        ▼
-微信服务器  ──►  POST /v1/webhooks/wechat/payments（支付完成后的异步回调）
-FastAPI 验签 + 解密，标记订单 PAID，给用户入账积分
-        │
-        ▼
-小程序轮询 payment_reconciliation，直到 order.status = "paid"
+下图是**微信官方 JSAPI（小程序）支付交互时序**（官方原图见
+[官方文档参考](#官方文档参考)）。三个角色是：小程序前端、开发者服务端
+（你的 FastAPI）、微信支付服务器：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MP as 小程序前端<br/>(uni-app)
+    participant BE as 开发者服务端<br/>(FastAPI)
+    participant WX as 微信支付服务器
+
+    MP->>BE: POST /v1/token-purchases 或 /v1/subscriptions<br/>{type:"jsapi"} + Idempotency-Key
+    Note over BE: JWT 鉴权 · 服务端定价 ·<br/>插入 PaymentOrder(PENDING)
+    BE->>WX: JSAPI 下单 API<br/>(商户私钥签名)
+    WX-->>BE: prepay_id
+    BE-->>MP: PaymentOrderResponse + payment_parameters<br/>{appId, timeStamp, nonceStr,<br/>package:"prepay_id=...", signType:"RSA", paySign}
+    MP->>MP: uni.requestPayment({provider:"wxpay", ...})
+    MP->>WX: 打开微信收银台
+    WX-->>MP: 用户确认 / 取消<br/>(前端结果仅供参考)
+    WX->>BE: POST /v1/webhooks/wechat/payments<br/>(带签名+加密，异步)
+    Note over BE: 验签 · AES-GCM 解密 ·<br/>幂等 · complete_payment_order<br/>→ PAID + 积分入账 + 订阅激活
+    BE-->>WX: 204 No Content
+    MP->>BE: GET /v1/payments/{id}（轮询）
+    BE-->>MP: status:"paid"
 ```
 
 记住一条铁律：**只有后端有权入账**。前端从不"判定"支付成功——它只收集
@@ -276,6 +275,26 @@ PENDING ──(TRANSACTION.SUCCESS 回调 / mock complete)──► PAID
 | `purchased_token_batches` | PAID 后的积分发放批次 |
 | `token_ledger_entries` | `TOKEN_PURCHASE` / `SUBSCRIPTION_PURCHASE` 入账、退款扣回 |
 | `user_subscriptions` | 订阅支付后激活/续期 |
+
+## 官方文档参考
+
+微信官方发布了权威的交互时序图与 API 文档，建议收藏——本项目的实现与它们
+完全一致：
+
+| 主题 | 官方文档 | 内容 |
+|---|---|---|
+| **JSAPI 支付开发指引（V3）** | https://pay.weixin.qq.com/doc/v3/merchant/4012791870 | JSAPI/小程序下单 → 调起支付 → 支付结果通知 完整时序；`prepay_id` 交接 |
+| **小程序支付开发指引（V2）** | https://pay.weixin.qq.com/doc/v2/merchant/4011938514 | **小程序支付业务流程时序图**：统一下单 → `wx.requestPayment` → 支付通知 → 查单 |
+| **API v3 签名/验签/加密** | https://pay.weixin.qq.com/doc/v3/merchant/4011938658 | 请求如何用商户私钥签名、回调如何验签并用 APIv3 密钥 AES-GCM 解密 |
+| **支付结果通知（回调）** | https://pay.weixin.qq.com/doc/v3/merchant/4011935834 | `TRANSACTION.SUCCESS` 事件载荷、验签、重试规则、204 回执 |
+| **查询订单 API（查单）** | https://pay.weixin.qq.com/doc/v3/merchant/4011938840 | 服务端主动查单，作为回调延迟/丢失的兜底 |
+| **小程序登录（wx.login → code2Session）** | https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html | **官方登录时序图**：wx.login 取 code → 开发者服务端 code2Session → openid/session_key |
+| **code2Session API** | https://developers.weixin.qq.com/miniprogram/dev/server/API/user-login/api_code2session | 仅服务端调用；appid + secret + code → openid + session_key |
+| **手机号快速验证（getPhoneNumber）** | https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/getPhoneNumber.html | **官方时序图**：前端按钮授权 → code → 服务端解密手机号 |
+
+> V2 指引里的时序图是三方交互最直观的版本；V3 JSAPI 指引里的图是同一流程
+> 的现行 API 命名版。上面 [mermaid 时序图](#总览) 是按本项目真实端点对它
+> 的重绘。
 
 ## 相关调用链
 

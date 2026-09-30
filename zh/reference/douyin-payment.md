@@ -94,30 +94,28 @@ provider 与抖音订单模型（见 §5）。
 
 ### 4a. 通用交易系统 —— 推荐
 
-```
-小程序                                    抖音                          你的后端
-    │                                        │                              │
-    ├─ tt.requestOrder(orderParams, byteAuth)──►│                            │
-    │    （orderParams 由你的后端签名：          │                            │
-    │      参数 + SALT → MD5）                   │                            │
-    │                                           ├── 预下单扩展点（回调）────►│
-    │                                           │   （服务端预下单钩子）       │
-    │                                           ◄── 预下单响应 ──────────────┤
-    │ ◄── 订单信息（order_id ...）──────────────│                            │
-    ├─ tt.getOrderPayment(order_id) ───────────►│  拉起收银台                 │
-    │ ◄── 用户确认（真钱，经所选渠道）                                        │
-    │                                           │                            │
-    │   （前端 success/fail 仅供参考）           │                            │
-    │                                           ├── 支付结果回调 POST ──────►│
-    │                                           │   （token+timestamp+nonce+msg
-    │                                           │    → SHA1 验签）           │
-    │                                           │   期望 {"err_no":0,        │
-    │                                           │         "err_tips":"success"} 否则重试
-    │                                           ├── 查询订单状态（可选，     │
-    │                                           │   兜底丢消息）─────────────►│
-    │                                           │                            │
-    │   ◄── GET /v1/payments/{id} status=paid ──│                            │
-    └───────────────────────────────────────────┴────────────────────────────┘
+这是**官方通用交易系统的标准时序**（平台自己的图见
+[官方文档参考](#官方文档参考)）：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MP as 小程序前端<br/>(tt.*)
+    participant BE as 开发者服务端<br/>(FastAPI)
+    participant DY as 抖音支付服务器
+
+    MP->>BE: POST /v1/token-purchases 或 /v1/subscriptions<br/>{type:"douyin"} + Idempotency-Key
+    Note over BE: JWT 鉴权 · 构造下单参数 + SALT → MD5<br/>插入 PaymentOrder(PENDING)
+    BE-->>MP: 200 {orderParams, signature}
+    MP->>DY: tt.requestOrder(orderParams, byteAuth)
+    DY-->>MP: order_id
+    MP->>DY: tt.getOrderPayment(order_id)<br/>拉起收银台
+    DY-->>MP: 用户支付（真钱，经所选渠道）<br/>(前端结果仅供参考)
+    DY->>BE: POST 支付结果回调<br/>(token + timestamp + nonce + msg)
+    Note over BE: SHA1 验签 · 幂等 ·<br/>complete_payment_order → PAID + 入账<br/>回执 {"err_no":0,"err_tips":"success"} 否则重试
+    BE-->>DY: {"err_no":0,"err_tips":"success"}
+    MP->>BE: GET /v1/payments/{id}（轮询）
+    BE-->>MP: status:"paid"
 ```
 
 后端要做的事：
@@ -141,6 +139,33 @@ provider 与抖音订单模型（见 §5）。
 服务端调 `POST https://developer.toutiao.com/api/apps/ecpay/v1/create_order`
 （SALT 签名）拿 `order_id`；客户端 `tt.pay(orderId)` 拉起收银台。回调与查询
 同一套信任模型。**二选一**——每笔订单不可混用。
+
+### 4b.2 抖音登录与手机号（已上线，支付的前置）
+
+登录是支付所需的身份前置。下图对照**官方小程序登录时序**（也见
+[官方文档参考](#官方文档参考)）：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MP as 小程序前端<br/>(tt.*)
+    participant BE as 开发者服务端<br/>(FastAPI)
+    participant DY as 抖音服务器
+
+    MP->>DY: tt.login()（或宿主已登录）
+    DY-->>MP: code（3 分钟有效，单次使用）
+    MP->>BE: POST /v1/auth/douyin-login {code}
+    BE->>DY: jscode2session（appid + secret + code）
+    DY-->>BE: openid + session_key
+    Note over BE: 创建/查找用户 · 签发 JWT 对<br/>存 douyin_openid（绝不存 secret）
+    BE-->>MP: {access_token, refresh_token}
+    opt 手机号（可选）
+        MP->>MP: <button open-type="getPhoneNumber">
+        MP->>BE: POST 手机号载荷 {token, iv, encryptedData}
+        Note over BE: client_token + RSA 解密<br/>校验 watermark appid
+        BE-->>MP: 手机号已绑定账号
+    end
+```
 
 ### 4c. iOS 虚拟商品（钻石路径，待开放）
 
@@ -167,6 +192,24 @@ provider 与抖音订单模型（见 §5）。
   `tt.requestOrder + tt.getOrderPayment`），保留严格参数校验与错误归一。
 - **iOS 门禁**：钻石兑换对工具类未开放期间，iOS 端隐藏/阻断购买入口，
   遵守 iOS 虚拟支付规范。
+
+## 官方文档参考
+
+抖音开放平台发布了权威的时序图与 API 文档。上面 [mermaid 时序图](#4a-通用交易系统--推荐)
+都是对这些官方图的重绘：
+
+| 主题 | 官方文档 | 内容 |
+|---|---|---|
+| **担保支付 接入准备 (TE)** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/guaranteed-payment/TE | 前置条件全链：主体认证 → 服务类目 → 交易准入 → 保证金 → 进件 |
+| **通用交易系统接入指引** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/business-monetization/guaranteed-payment/general/basicapi | 进件/下单/回调/退款/结算 API 全集（当前推荐体系） |
+| **整体架构及流程** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/trade-system/old-version/ka-solution/architecture | **预下单 / 支付 / 退款 官方时序图**（实线=同步、虚线=异步） |
+| **沙盒环境** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/business-monetization/guaranteed-payment/sandbox | open-sandbox.douyin.com：免进件审核、无真钱、`Aweme-Negative-Test` 异常注入、14 天数据保留 |
+| **组件与 API 清单** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/business-monetization/guaranteed-payment/trade-system/general/apilist | `tt.requestOrder` / `tt.getOrderPayment` / 进件 / 退款 / 对账 API 名与参数 |
+| **支付方式开通** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/business-monetization/guaranteed-payment/trade-system/general/introduction | 企业版 vs 普通版方案选择（进件后不可改） |
+| **进件（普通版）** | https://developer.open-douyin.com/m/docs/resource/zh-CN/mini-app/open-capacity/guaranteed-payment/guide/merchant | 控制台进件 vs 接口进件（服务商/批量） |
+| **小程序登录（code2Session）** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/develop/server/basic-abilities/log-in/code-2-session | code 3 分钟有效、单次使用、换 openid/session_key |
+| **登录时序图 Codelab** | https://developer.open-douyin.com/docs/resource/zh-CN/codelabs/mini-app/microapp-login/notice | **官方登录 + getPhoneNumber 时序图**与可运行示例 |
+| **获取手机号（新方式）** | https://developer.open-douyin.com/m/docs/resource/zh-CN/mini-app/develop/tutorial/open-capabilities/general-capabilities/new-phone-method | token/iv/encryptedData 服务端解密、watermark 校验 |
 
 ## 相关页面
 

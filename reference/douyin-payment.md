@@ -110,30 +110,28 @@ backstop.
 
 ### 4a. 通用交易系统 (General Trading System) — recommended
 
-```
-Mini program                                    Douyin                        Your backend
-    │                                                │                              │
-    ├─ tt.requestOrder(orderParams, byteAuth) ──────►│                              │
-    │        (orderParams signed by YOUR backend:    │                              │
-    │         params + SALT → MD5)                   │                              │
-    │                                                ├── 预下单扩展点 (callback) ──►│
-    │                                                │   (server pre-order hook)    │
-    │                                                ◄── pre-order response ────────┤
-    │ ◄── order info (order_id ...) ─────────────────│                              │
-    ├─ tt.getOrderPayment(order_id) ────────────────►│  raises the 收银台            │
-    │ ◄── user confirms (real money via chosen channel)                              │
-    │                                                │                              │
-    │   (frontend success/fail is informational)     │                              │
-    │                                                ├── 支付结果回调 POST ────────►│
-    │                                                │   (token+timestamp+nonce+msg │
-    │                                                │    → SHA1 signature verify)  │
-    │                                                │   expect {"err_no":0,        │
-    │                                                │            "err_tips":"success"} else retry
-    │                                                ├── 查询订单状态 (optional,    │
-    │                                                │    backstop for lost msgs) ─►│
-    │                                                │                              │
-    │   ◄── GET /v1/payments/{id} status = paid ─────│                              │
-    └────────────────────────────────────────────────┴──────────────────────────────┘
+This is the **official General Trading System sequence** (see the platform's
+own diagrams in [Official documentation](#official-documentation)):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MP as Mini program<br/>(tt.* frontend)
+    participant BE as Developer server<br/>(FastAPI)
+    participant DY as Douyin Pay server
+
+    MP->>BE: POST /v1/token-purchases or /v1/subscriptions<br/>{type:"douyin"} + Idempotency-Key
+    Note over BE: JWT auth · build order params + SALT → MD5<br/>insert PaymentOrder (PENDING)
+    BE-->>MP: 200 {orderParams, signature}
+    MP->>DY: tt.requestOrder(orderParams, byteAuth)
+    DY-->>MP: order_id
+    MP->>DY: tt.getOrderPayment(order_id)<br/>raise the 收银台
+    DY-->>MP: user pays (real money, chosen channel)<br/>(frontend result is informational only)
+    DY->>BE: POST 支付结果回调<br/>(token + timestamp + nonce + msg)
+    Note over BE: verify SHA1 signature · idempotency ·<br/>complete_payment_order → PAID + credit<br/>reply {"err_no":0,"err_tips":"success"} or retry
+    BE-->>DY: {"err_no":0,"err_tips":"success"}
+    MP->>BE: GET /v1/payments/{id} (polling)
+    BE-->>MP: status:"paid"
 ```
 
 Steps for your backend:
@@ -162,6 +160,33 @@ Server calls `POST https://developer.toutiao.com/api/apps/ecpay/v1/create_order`
 (signed with SALT), gets `order_id`; the client calls `tt.pay(orderId)` to open
 the checkout. Callback and query are the same trust model. Choose **one**
 system — they are not interchangeable per order.
+
+### 4b.2 Douyin login & phone number (already live, payment prerequisite)
+
+Login is the gate that produces the identity used by payment. This mirrors the
+official 小程序登录 sequence (also see [Official documentation](#official-documentation)):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MP as Mini program<br/>(tt.* frontend)
+    participant BE as Developer server<br/>(FastAPI)
+    participant DY as Douyin server
+
+    MP->>DY: tt.login() (or host already logged in)
+    DY-->>MP: code (valid 3 min, single-use)
+    MP->>BE: POST /v1/auth/douyin-login {code}
+    BE->>DY: jscode2session (appid + secret + code)
+    DY-->>BE: openid + session_key
+    Note over BE: create/find user · sign JWT pair<br/>store douyin_openid (never the secret)
+    BE-->>MP: {access_token, refresh_token}
+    opt Phone number (optional)
+        MP->>MP: <button open-type="getPhoneNumber">
+        MP->>BE: POST phone payload {token, iv, encryptedData}
+        Note over BE: client_token + RSA decrypt<br/>verify watermark appid
+        BE-->>MP: phone bound to account
+    end
+```
 
 ### 4c. iOS virtual goods (Diamond path, when open)
 
@@ -192,6 +217,25 @@ To ship Douyin payment, the backend needs (mirroring `app/wechat_pay.py`):
   Douyin), keeping the strict param validation and error mapping.
 - **iOS gating**: while Diamond exchange is unavailable for 工具, hide or block
   purchase entry on iOS to stay compliant with the iOS virtual-payment rule.
+
+## Official documentation
+
+The Douyin Open Platform publishes authoritative diagrams and API references.
+The [mermaid diagrams](#4a-通用交易系统-general-trading-system--recommended)
+above are re-drawings of these:
+
+| Topic | Official doc | What it contains |
+|---|---|---|
+| **担保支付 接入准备 (TE)** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/guaranteed-payment/TE | Full prerequisite chain: 主体认证 → 服务类目 → 交易准入 → 保证金 → 进件 |
+| **通用交易系统接入指引** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/business-monetization/guaranteed-payment/general/basicapi | 进件/下单/回调/退款/结算 API 全集 (current recommended system) |
+| **整体架构及流程** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/trade-system/old-version/ka-solution/architecture | **预下单 / 支付 / 退款 官方时序图**（实线=同步、虚线=异步） |
+| **沙盒环境** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/business-monetization/guaranteed-payment/sandbox | open-sandbox.douyin.com: 免进件审核、无真钱、`Aweme-Negative-Test` 异常注入、14 天数据保留 |
+| **组件与 API 清单** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/business-monetization/guaranteed-payment/trade-system/general/apilist | `tt.requestOrder` / `tt.getOrderPayment` / 进件 / 退款 / 对账 API 名与参数 |
+| **支付方式开通** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/open-capacity/business-monetization/guaranteed-payment/trade-system/general/introduction | 企业版 vs 普通版方案选择（进件后不可改） |
+| **进件（普通版）** | https://developer.open-douyin.com/m/docs/resource/zh-CN/mini-app/open-capacity/guaranteed-payment/guide/merchant | 控制台进件 vs 接口进件（服务商/批量） |
+| **小程序登录（tt.login）** | https://developer.open-douyin.com/docs/resource/zh-CN/mini-app/develop/server/basic-abilities/log-in/code-2-session | code 有效期 3 分钟、单次使用、code2Session 换 openid/session_key |
+| **登录时序图 Codelab** | https://developer.open-douyin.com/docs/resource/zh-CN/codelabs/mini-app/microapp-login/notice | **官方登录 + getPhoneNumber 时序图**与可运行示例 |
+| **获取手机号（新方式）** | https://developer.open-douyin.com/m/docs/resource/zh-CN/mini-app/develop/tutorial/open-capabilities/general-capabilities/new-phone-method | token/iv/encryptedData 服务端解密、watermark 校验 |
 
 ## Related pages
 
