@@ -220,13 +220,42 @@ Use the label value with `--project`. After checking the preview, remove
 port 8080 selects `yuanzhu-8080`. Cleanup requires Docker Compose, Git and
 Python 3 ≥ 3.10, but does not need the original `.env` or secrets. Run it from
 the same repository checkout or a sibling Git worktree. Do not create or
-delete the same project concurrently.
+delete the same project, or retag/rebuild selected images, concurrently.
 
 `--volumes` permanently deletes the selected project's local PostgreSQL,
 Redis and MinIO data, plus `smoke-coverage`, including volumes retained by an
-earlier cleanup. Other projects, images, build caches, source files, keys and
+earlier cleanup. Images are retained by default. Other projects, build caches, source files, keys and
 frontend artifacts are preserved. External OSS objects and tunnel
 registrations are untouched. See [cleanup details](/deploy/local-stack#stop-or-reset-the-local-stack).
+
+### Optional image cleanup
+
+Omitting `--images` retains images. Explicit `--images local` removes only the
+implicit project build references for services without a custom image tag
+(such as API, workers and mock services). `--images all` also selects explicit
+provider references from the current all-profile Compose model, including
+PostgreSQL, Redis, MinIO and Cloudflare. Both modes preserve unrelated tags
+and build caches. `--volumes` remains an independent option.
+
+```bash
+# Preview a complete data reset and project build image cleanup
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images local --dry-run
+
+# Preview a complete data reset and all current model image references
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images all --dry-run
+```
+
+After reviewing the preview, remove `--dry-run` to execute the command.
+Dry-run lists the existing selected image references and IDs. Image-only
+cleanup also works after containers are gone. `all` can remove unused shared
+tags that another environment may need to download or rebuild later.
+
+If any selected image ID is used by a running or stopped container outside
+the verified selected project, even under another tag, the script rejects
+the entire cleanup before **any** deletion. Omit `--images`, or use `local`
+if an explicit shared provider tag caused the conflict. Alternatively,
+deliberately release the identified container in its own environment before
+retrying. Do not force-delete another environment's containers.
 
 ## Troubleshooting
 

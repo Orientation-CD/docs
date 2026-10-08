@@ -211,12 +211,13 @@ companion cleanup workflow for [backend issue #539](https://github.com/Orientati
 your checkout must contain the script before using these commands.
 
 ```text
-./scripts/delete_stack.sh --port PORT [--project NAME] [--volumes] [--dry-run]
+./scripts/delete_stack.sh --port PORT [--project NAME] [--volumes] [--images local|all] [--dry-run]
 
   --port PORT       Required API port, range 1024–22527 (no default)
   --project NAME    Compose project name (default: yuanzhu-PORT)
   --volumes         Irreversibly remove the project's declared local named volumes
-  --dry-run         List exact resources and data policy without changing anything
+  --images local|all  Explicit image cleanup mode (omit to retain images)
+  --dry-run         List exact resources and data/image policy without changing anything
 ```
 
 ```bash
@@ -262,7 +263,8 @@ WeChat/storage mode arguments. The script verifies ownership using the
 containers' checkout labels: the current checkout or another existing Git
 worktree of the same repository is accepted. Foreign or unverifiable
 ownership and conflicting resource labels are rejected before deletion.
-Do not create, replace or delete the same project concurrently.
+Do not create, replace or delete the same project, or retag/rebuild selected
+images, concurrently.
 
 By default, cleanup removes **all** selected project containers (including
 stopped, orphan, mock, migration, initialization and local tunnel containers)
@@ -279,10 +281,40 @@ failure; some resources may already have been removed. Inspect the remaining
 resources, resolve the reported problem and retry the same explicit target.
 Busy/shared volumes are not force-removed by deleting another project's containers.
 
-Other projects, shared images, build caches, source files, `.env`, keys,
+Images are retained by default; explicit `--images` modes follow the policy below.
+Other projects, build caches, source files, `.env`, keys,
 frontend dependencies and artifacts, and external networks/volumes are
 preserved. External OSS objects and cloud/tunnel registrations are untouched;
 removing a local tunnel container does not deregister its tunnel.
+
+### Optional image cleanup
+
+Omitting `--images` retains images. Explicit `--images local` removes only the
+implicit project build references for services without a custom image tag
+(such as API, workers and mock services). `--images all` also selects explicit
+provider references from the current all-profile Compose model, including
+PostgreSQL, Redis, MinIO and Cloudflare. Both modes preserve unrelated tags
+and build caches. `--volumes` remains an independent option.
+
+```bash
+# Preview a complete data reset and project build image cleanup
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images local --dry-run
+
+# Preview a complete data reset and all current model image references
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images all --dry-run
+```
+
+After reviewing the preview, remove `--dry-run` to execute the command.
+Dry-run lists the existing selected image references and IDs. Image-only
+cleanup also works after containers are gone. `all` can remove unused shared
+tags that another environment may need to download or rebuild later.
+
+If any selected image ID is used by a running or stopped container outside
+the verified selected project, even under another tag, the script rejects
+the entire cleanup before **any** deletion. Omit `--images`, or use `local`
+if an explicit shared provider tag caused the conflict. Alternatively,
+deliberately release the identified container in its own environment before
+retrying. Do not force-delete another environment's containers.
 
 ## Smoke and E2E runners
 

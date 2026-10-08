@@ -201,12 +201,13 @@ Compose 文件通过 `x-app-environment` YAML 锚点共享配置。以下是你�
 配套的清理流程；执行下面的命令前，checkout 必须已包含该脚本。
 
 ```text
-./scripts/delete_stack.sh --port PORT [--project NAME] [--volumes] [--dry-run]
+./scripts/delete_stack.sh --port PORT [--project NAME] [--volumes] [--images local|all] [--dry-run]
 
   --port PORT       必须显式指定 API 端口，范围 1024–22527（没有默认值）
   --project NAME    Compose 项目名（默认：yuanzhu-PORT）
   --volumes         不可逆地删除项目声明的本地命名卷
-  --dry-run         列出精确的资源清单和数据策略，不修改任何资源
+  --images local|all  显式选择镜像清理模式（省略时保留镜像）
+  --dry-run         列出精确的资源清单和数据/镜像策略，不修改任何资源
 ```
 
 ```bash
@@ -249,7 +250,7 @@ docker ps --all --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
 与创建不同，清理不需要原来的 `.env`、密钥文件或微信/存储模式参数。
 脚本通过容器的 checkout 标签验证归属：当前 checkout 或同仓库的另一个
 现存 Git worktree 均可使用。归属其他仓库、无法验证归属或资源标签冲突时，
-脚本会在删除前拒绝操作。不要同时创建、替换或删除同一个项目。
+脚本会在删除前拒绝操作。不要同时创建、替换或删除同一个项目，也不要重新标记或构建所选镜像。
 
 默认清理会移除所选项目的**全部**容器（包括已停止、孤立、Mock、迁移、
 初始化和本地隧道容器）及 Compose 网络，同时保留命名卷。`--volumes`
@@ -262,9 +263,34 @@ MinIO 对象和冒烟覆盖率数据，也能删除之前容器清理时保留�
 此时部分资源可能已被移除。检查剩余资源、解决报告的问题，再用同一个显式目标重试。
 脚本不会通过删除其他项目的容器来强制移除正在使用或共享的卷。
 
-其他项目、共享镜像、构建缓存、源文件、`.env`、密钥、前端依赖和产物、
+镜像默认保留；显式指定 `--images` 时遵循下文策略。其他项目、构建缓存、源文件、`.env`、密钥、前端依赖和产物、
 外部网络及外部卷均会保留。外部 OSS 对象和云端/隧道注册信息不受影响；
 移除本地隧道容器不会注销隧道。
+
+### 可选清理镜像
+
+省略 `--images` 会保留镜像。显式指定 `--images local` 只删除未配置自定义
+镜像标签的服务所使用的隐式项目构建引用（例如 API、worker 和 Mock 服务）。
+`--images all` 还会选择当前全部 profile 的 Compose 模型中明确配置的
+PostgreSQL、Redis、MinIO 和 Cloudflare 等镜像引用。两种模式均不清理构建缓存，
+不会删除无关标签；`--volumes` 是独立选项。
+
+```bash
+# 预览完整数据重置及项目构建镜像清理
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images local --dry-run
+
+# 预览完整数据重置及当前模型的全部镜像引用清理
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images all --dry-run
+```
+
+确认预览后，移除命令中的 `--dry-run` 再执行。预览列出现存的所选镜像引用和
+镜像 ID；容器已经删除后仍可单独清理镜像。`all` 可能移除暂时无人使用的共享
+标签，其他环境将来使用时可能需要重新下载或构建。
+
+若任何所选镜像 ID 被已验证的所选项目之外的运行中或已停止容器使用，即使该
+容器使用的是另一个标签，脚本也会在任何删除发生前拒绝整个清理。此时可省略
+`--images`；若冲突来自明确配置的共享标签，可改用 `local`。也可先在另一个
+环境中有意识地释放相关容器，再重试。不要强制删除其他环境的容器。
 
 ## 冒烟与 E2E 运行器
 
