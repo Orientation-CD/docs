@@ -204,6 +204,67 @@ always finish before the API starts.
 - E2E / endurance runs (`profile: e2e`) run with `--volumes --remove-orphans` teardown
   and are self-cleaning.
 
+## Stop or reset the local stack
+
+Use `scripts/delete_stack.sh` from the backend repository root. This is the
+companion cleanup workflow for [backend issue #539](https://github.com/Orientation-CD/YuanZhu-AI/issues/539);
+your checkout must contain the script before using these commands.
+
+```text
+./scripts/delete_stack.sh --port PORT [--project NAME] [--volumes] [--dry-run]
+
+  --port PORT       Required API port, range 1024–22527 (no default)
+  --project NAME    Compose project name (default: yuanzhu-PORT)
+  --volumes         Irreversibly remove the project's declared local named volumes
+  --dry-run         List exact resources and data policy without changing anything
+```
+
+```bash
+# Inspect the default port-8080 project
+./scripts/delete_stack.sh --port 8080 --dry-run
+
+# Stop/remove all project containers and networks, retaining volumes
+./scripts/delete_stack.sh --port 8080
+
+# Preview a complete reset, then delete the local data
+./scripts/delete_stack.sh --port 8080 --volumes --dry-run
+./scripts/delete_stack.sh --port 8080 --volumes
+
+# Match a custom project name used at creation
+./scripts/delete_stack.sh --port 8080 --project my-local-stack --dry-run
+./scripts/delete_stack.sh --port 8080 --project my-local-stack
+# Add --volumes to reset that custom project's local data as well
+./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes
+```
+
+Cleanup requires Docker with the Compose plugin, Git and Python 3 ≥ 3.10.
+Unlike creation, it does not require the original `.env`, secret files or
+WeChat/storage mode arguments. The script verifies ownership using the
+containers' checkout labels: the current checkout or another existing Git
+worktree of the same repository is accepted. Foreign or unverifiable
+ownership and conflicting resource labels are rejected before deletion.
+Do not create, replace or delete the same project concurrently.
+
+By default, cleanup removes **all** selected project containers (including
+stopped, orphan, mock, migration, initialization and local tunnel containers)
+and Compose networks, while retaining named volumes. `--volumes` additionally
+removes the project's declared local named volumes: `postgres-data`,
+`redis-data`, `minio-data` and `smoke-coverage`. This **irreversibly deletes**
+local PostgreSQL records, Redis data, MinIO objects and smoke coverage. It
+also works for volumes retained after an earlier container cleanup.
+
+`--dry-run` lists the exact selected resources and whether volumes will be
+retained or deleted; it performs no mutation. Repeating cleanup for an absent
+project succeeds. If Docker inspection or teardown fails, the script reports
+failure; some resources may already have been removed. Inspect the remaining
+resources, resolve the reported problem and retry the same explicit target.
+Busy/shared volumes are not force-removed by deleting another project's containers.
+
+Other projects, shared images, build caches, source files, `.env`, keys,
+frontend dependencies and artifacts, and external networks/volumes are
+preserved. External OSS objects and cloud/tunnel registrations are untouched;
+removing a local tunnel container does not deregister its tunnel.
+
 ## Smoke and E2E runners
 
 Two launcher scripts exercise a live stack:

@@ -94,7 +94,7 @@ database is migrated.
 ./scripts/create_stack.sh --port 8080 --wechat mock --storage oss --secret .env
 ```
 
-All commands preserve named volumes, so recreating a stack never wipes your
+These creation commands preserve named volumes, so recreating a stack never wipes your
 data. See [Local Development Stack](/deploy/local-stack) for the full details.
 
 ## 4. Run the mini program frontend
@@ -180,6 +180,39 @@ You can watch the backend do the work in real time:
 ```bash
 docker compose logs -f api submit-worker poll-worker
 ```
+
+## 7. Stop or reset the local stack
+
+From the backend repository root, use the cleanup script paired with
+[backend issue #539](https://github.com/Orientation-CD/YuanZhu-AI/issues/539).
+Your backend checkout must contain `scripts/delete_stack.sh`.
+
+```bash
+# Preview the exact resources; no resources are changed
+./scripts/delete_stack.sh --port 8080 --dry-run
+
+# Remove this project's containers and networks; keep local data
+./scripts/delete_stack.sh --port 8080
+
+# Complete reset: irreversibly delete local data and smoke coverage too
+./scripts/delete_stack.sh --port 8080 --volumes
+
+# If you created the stack with --project, use that same name
+./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes --dry-run
+./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes
+```
+
+`--port` is required (1024–22527); the default project is `yuanzhu-PORT`, so
+port 8080 selects `yuanzhu-8080`. Cleanup requires Docker Compose, Git and
+Python 3 ≥ 3.10, but does not need the original `.env` or secrets. Run it from
+the same repository checkout or a sibling Git worktree. Do not create or
+delete the same project concurrently.
+
+`--volumes` permanently deletes the selected project's local PostgreSQL,
+Redis and MinIO data, plus `smoke-coverage`, including volumes retained by an
+earlier cleanup. Other projects, images, build caches, source files, keys and
+frontend artifacts are preserved. External OSS objects and tunnel
+registrations are untouched. See [cleanup details](/deploy/local-stack#stop-or-reset-the-local-stack).
 
 ## Troubleshooting
 
