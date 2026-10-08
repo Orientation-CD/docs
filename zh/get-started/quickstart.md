@@ -89,7 +89,7 @@ curl http://localhost:8080/health/ready
 ./scripts/create_stack.sh --port 8080 --wechat mock --storage oss --secret .env
 ```
 
-所有命令都会保留命名卷，因此重建栈绝不会清空你的数据。完整细节参见
+上述创建命令都会保留命名卷，因此重建栈绝不会清空你的数据。完整细节参见
 [本地开发栈](/deploy/local-stack)。
 
 ## 4. 运行小程序前端
@@ -164,6 +164,75 @@ MP3/M4A），可选填写客户信息（姓氏、称呼、项目名），然后�
 ```bash
 docker compose logs -f api submit-worker poll-worker
 ```
+
+## 7. 停止或重置本地栈
+
+在后端仓库根目录使用与
+[后端 Issue #539](https://github.com/Orientation-CD/YuanZhu-AI/issues/539)
+配套的清理脚本。你的后端 checkout 必须包含 `scripts/delete_stack.sh`。
+
+```bash
+# 预览精确的资源清单；不修改任何资源
+./scripts/delete_stack.sh --port 8080 --dry-run
+
+# 移除该项目的容器和网络；保留本地数据
+./scripts/delete_stack.sh --port 8080
+
+# 完整重置：不可逆地删除本地数据及冒烟覆盖率数据
+./scripts/delete_stack.sh --port 8080 --volumes
+
+# 如果创建栈时指定了 --project，清理时使用同一个名称
+./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes --dry-run
+./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes
+```
+
+清理脚本按 **Compose 项目名**选择环境，不会按 API 端口查找并删除容器。
+如果预览显示 `none`，但 `docker ps` 能看到 8080 的容器，先查看项目标签：
+
+```bash
+docker ps --filter publish=8080 --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
+
+# 示例：实际项目名是 yuanzhu-nine-clean-8080
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --dry-run
+```
+
+将标签值传给 `--project`。确认预览目标后，去掉 `--dry-run` 执行清理；
+只有需要不可逆地重置数据时才保留 `--volumes`。
+
+`--port` 必须显式指定（1024–22527）；默认项目名为 `yuanzhu-PORT`，因此
+8080 端口对应 `yuanzhu-8080`。清理需要 Docker Compose、Git 和
+Python 3 ≥ 3.10，但不需要原来的 `.env` 或密钥。可从同一个仓库 checkout
+或同仓库的另一个 Git worktree 执行。不要同时创建或删除同一个项目，也不要在清理期间重新标记或构建所选镜像。
+
+`--volumes` 会永久删除所选项目的本地 PostgreSQL、Redis、MinIO 数据和
+`smoke-coverage`，包括之前清理时保留下来的卷。默认保留镜像；其他项目、构建缓存、
+源文件、密钥和前端产物会保留；外部 OSS 对象和隧道注册信息不受影响。
+完整说明参见[本地栈清理](/zh/deploy/local-stack#停止或重置本地栈)。
+
+### 可选清理镜像
+
+省略 `--images` 会保留镜像。显式指定 `--images local` 只删除未配置自定义
+镜像标签的服务所使用的隐式项目构建引用（例如 API、worker 和 Mock 服务）。
+`--images all` 还会选择当前全部 profile 的 Compose 模型中明确配置的
+PostgreSQL、Redis、MinIO 和 Cloudflare 等镜像引用。两种模式均不清理构建缓存，
+不会删除无关标签；`--volumes` 是独立选项。
+
+```bash
+# 预览完整数据重置及项目构建镜像清理
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images local --dry-run
+
+# 预览完整数据重置及当前模型的全部镜像引用清理
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images all --dry-run
+```
+
+确认预览后，移除命令中的 `--dry-run` 再执行。预览列出现存的所选镜像引用和
+镜像 ID；容器已经删除后仍可单独清理镜像。`all` 可能移除暂时无人使用的共享
+标签，其他环境将来使用时可能需要重新下载或构建。
+
+若任何所选镜像 ID 被已验证的所选项目之外的运行中或已停止容器使用，即使该
+容器使用的是另一个标签，脚本也会在任何删除发生前拒绝整个清理。此时可省略
+`--images`；若冲突来自明确配置的共享标签，可改用 `local`。也可先在另一个
+环境中有意识地释放相关容器，再重试。不要强制删除其他环境的容器。
 
 ## 故障排查
 

@@ -94,7 +94,7 @@ database is migrated.
 ./scripts/create_stack.sh --port 8080 --wechat mock --storage oss --secret .env
 ```
 
-All commands preserve named volumes, so recreating a stack never wipes your
+These creation commands preserve named volumes, so recreating a stack never wipes your
 data. See [Local Development Stack](/deploy/local-stack) for the full details.
 
 ## 4. Run the mini program frontend
@@ -180,6 +180,82 @@ You can watch the backend do the work in real time:
 ```bash
 docker compose logs -f api submit-worker poll-worker
 ```
+
+## 7. Stop or reset the local stack
+
+From the backend repository root, use the cleanup script paired with
+[backend issue #539](https://github.com/Orientation-CD/YuanZhu-AI/issues/539).
+Your backend checkout must contain `scripts/delete_stack.sh`.
+
+```bash
+# Preview the exact resources; no resources are changed
+./scripts/delete_stack.sh --port 8080 --dry-run
+
+# Remove this project's containers and networks; keep local data
+./scripts/delete_stack.sh --port 8080
+
+# Complete reset: irreversibly delete local data and smoke coverage too
+./scripts/delete_stack.sh --port 8080 --volumes
+
+# If you created the stack with --project, use that same name
+./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes --dry-run
+./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes
+```
+
+Cleanup selects a **Compose project**, rather than searching for containers
+publishing the API port. If the preview says `none` while `docker ps` shows
+containers on 8080, check their project label:
+
+```bash
+docker ps --filter publish=8080 --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
+
+# Example: the actual project is yuanzhu-nine-clean-8080
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --dry-run
+```
+
+Use the label value with `--project`. After checking the preview, remove
+`--dry-run` to perform cleanup; keep `--volumes` only for an irreversible data reset.
+
+`--port` is required (1024–22527); the default project is `yuanzhu-PORT`, so
+port 8080 selects `yuanzhu-8080`. Cleanup requires Docker Compose, Git and
+Python 3 ≥ 3.10, but does not need the original `.env` or secrets. Run it from
+the same repository checkout or a sibling Git worktree. Do not create or
+delete the same project, or retag/rebuild selected images, concurrently.
+
+`--volumes` permanently deletes the selected project's local PostgreSQL,
+Redis and MinIO data, plus `smoke-coverage`, including volumes retained by an
+earlier cleanup. Images are retained by default. Other projects, build caches, source files, keys and
+frontend artifacts are preserved. External OSS objects and tunnel
+registrations are untouched. See [cleanup details](/deploy/local-stack#stop-or-reset-the-local-stack).
+
+### Optional image cleanup
+
+Omitting `--images` retains images. Explicit `--images local` removes only the
+implicit project build references for services without a custom image tag
+(such as API, workers and mock services). `--images all` also selects explicit
+provider references from the current all-profile Compose model, including
+PostgreSQL, Redis, MinIO and Cloudflare. Both modes preserve unrelated tags
+and build caches. `--volumes` remains an independent option.
+
+```bash
+# Preview a complete data reset and project build image cleanup
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images local --dry-run
+
+# Preview a complete data reset and all current model image references
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --images all --dry-run
+```
+
+After reviewing the preview, remove `--dry-run` to execute the command.
+Dry-run lists the existing selected image references and IDs. Image-only
+cleanup also works after containers are gone. `all` can remove unused shared
+tags that another environment may need to download or rebuild later.
+
+If any selected image ID is used by a running or stopped container outside
+the verified selected project, even under another tag, the script rejects
+the entire cleanup before **any** deletion. Omit `--images`, or use `local`
+if an explicit shared provider tag caused the conflict. Alternatively,
+deliberately release the identified container in its own environment before
+retrying. Do not force-delete another environment's containers.
 
 ## Troubleshooting
 
