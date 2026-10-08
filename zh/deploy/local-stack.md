@@ -227,6 +227,24 @@ Compose 文件通过 `x-app-environment` YAML 锚点共享配置。以下是你�
 ./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes
 ```
 
+### 端口选择与自定义项目名
+
+仅传 `--port 8080` 时，脚本选择的是 `yuanzhu-8080`，**不会自动发现**
+当前发布 8080 端口的项目。若创建时使用了 `yuanzhu-nine-clean-8080`
+等自定义名称，清理时必须传同样的 `--project`。否则，即使其他项目正在
+使用该端口，空预览也只表示默认项目没有资源。
+
+通过 Docker 的 Compose 标签确认实际项目名：
+
+```bash
+docker ps --filter publish=8080 --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
+# 对已停止的容器，加 --all 并查看所有 Compose 项目标签：
+docker ps --all --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
+
+# 预览该自定义项目，确认目标后再去掉 --dry-run：
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --dry-run
+```
+
 清理需要 Docker（含 Compose 插件）、Git 和 Python 3 ≥ 3.10。
 与创建不同，清理不需要原来的 `.env`、密钥文件或微信/存储模式参数。
 脚本通过容器的 checkout 标签验证归属：当前 checkout 或同仓库的另一个

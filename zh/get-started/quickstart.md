@@ -186,6 +186,19 @@ docker compose logs -f api submit-worker poll-worker
 ./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes
 ```
 
+清理脚本按 **Compose 项目名**选择环境，不会按 API 端口查找并删除容器。
+如果预览显示 `none`，但 `docker ps` 能看到 8080 的容器，先查看项目标签：
+
+```bash
+docker ps --filter publish=8080 --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
+
+# 示例：实际项目名是 yuanzhu-nine-clean-8080
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --dry-run
+```
+
+将标签值传给 `--project`。确认预览目标后，去掉 `--dry-run` 执行清理；
+只有需要不可逆地重置数据时才保留 `--volumes`。
+
 `--port` 必须显式指定（1024–22527）；默认项目名为 `yuanzhu-PORT`，因此
 8080 端口对应 `yuanzhu-8080`。清理需要 Docker Compose、Git 和
 Python 3 ≥ 3.10，但不需要原来的 `.env` 或密钥。可从同一个仓库 checkout

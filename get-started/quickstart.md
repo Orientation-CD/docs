@@ -202,6 +202,20 @@ Your backend checkout must contain `scripts/delete_stack.sh`.
 ./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes
 ```
 
+Cleanup selects a **Compose project**, rather than searching for containers
+publishing the API port. If the preview says `none` while `docker ps` shows
+containers on 8080, check their project label:
+
+```bash
+docker ps --filter publish=8080 --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
+
+# Example: the actual project is yuanzhu-nine-clean-8080
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --dry-run
+```
+
+Use the label value with `--project`. After checking the preview, remove
+`--dry-run` to perform cleanup; keep `--volumes` only for an irreversible data reset.
+
 `--port` is required (1024–22527); the default project is `yuanzhu-PORT`, so
 port 8080 selects `yuanzhu-8080`. Cleanup requires Docker Compose, Git and
 Python 3 ≥ 3.10, but does not need the original `.env` or secrets. Run it from

@@ -237,6 +237,25 @@ your checkout must contain the script before using these commands.
 ./scripts/delete_stack.sh --port 8080 --project my-local-stack --volumes
 ```
 
+### Port selection and custom project names
+
+`--port 8080` without `--project` selects `yuanzhu-8080`. It does **not**
+discover the project that currently publishes port 8080. A stack created with
+a custom project such as `yuanzhu-nine-clean-8080` requires that same name for
+cleanup. Otherwise, an empty preview means the selected default project has
+no resources, even when another project uses that port.
+
+Find the actual project from Docker's Compose label:
+
+```bash
+docker ps --filter publish=8080 --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
+# For stopped containers, include --all and list all Compose project labels:
+docker ps --all --format '{{.Names}}: {{.Label "com.docker.compose.project"}}'
+
+# Preview this custom project, then remove --dry-run after checking the target:
+./scripts/delete_stack.sh --port 8080 --project yuanzhu-nine-clean-8080 --volumes --dry-run
+```
+
 Cleanup requires Docker with the Compose plugin, Git and Python 3 ≥ 3.10.
 Unlike creation, it does not require the original `.env`, secret files or
 WeChat/storage mode arguments. The script verifies ownership using the
