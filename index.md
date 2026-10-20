@@ -28,9 +28,13 @@ features:
     details: Domain modules, Workflows and Operations, assets, identities, billing, storage and background execution.
     link: /backend/overview
   - icon: 🛠️
-    title: Operations
-    details: Admin configuration, owned local stacks, cloud release procedures, migrations and recovery.
+    title: Administration
+    details: Configure models, Workflow nodes, Features, entitlements, billing, legal documents and operational diagnostics.
     link: /admin/overview
+  - icon: ☁️
+    title: Deploy and test
+    details: Run owned local stacks, verify storage environments, and follow cloud release, migration and recovery procedures.
+    link: /deploy/local-stack
   - icon: 🔗
     title: Reference
     details: Current API contracts, environment settings, data models and traceable end-to-end flows.

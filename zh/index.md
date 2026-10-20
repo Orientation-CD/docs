@@ -28,9 +28,13 @@ features:
     details: 领域模块、Workflow 与 Operation、素材、身份、计费、存储与后台执行。
     link: /zh/backend/overview
   - icon: 🛠️
-    title: 运营与部署
-    details: Admin 配置、独立本地栈、云端发布、数据库迁移与恢复。
+    title: 管理后台
+    details: 配置模型、Workflow 节点、功能与套餐，管理订单、法律文档与运行诊断。
     link: /zh/admin/overview
+  - icon: ☁️
+    title: 部署与测试
+    details: 运行独立本地栈，验证存储环境，按手册完成云端发布、数据库迁移与恢复。
+    link: /zh/deploy/local-stack
   - icon: 🔗
     title: 参考
     details: 当前 API 契约、环境设置、数据模型与可追溯端到端调用链。
