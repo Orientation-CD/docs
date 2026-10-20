@@ -1,0 +1,100 @@
+import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+import { settingsWithExamples } from './source-utils.mjs'
+
+const root = fileURLToPath(new URL('../', import.meta.url))
+const args = process.argv.slice(2)
+const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name) + 1] : fallback
+const checking = args.includes('--check')
+const knownOptions = new Set(['--frontend', '--backend', '--frontend-ref', '--backend-ref', '--check'])
+for (let i = 0; i < args.length; i++) {
+  if (!knownOptions.has(args[i])) throw new Error(`Unknown option ${args[i]}`)
+  if (args[i] !== '--check' && (!args[++i] || args[i].startsWith('--'))) throw new Error('Option requires a value')
+}
+const previous = JSON.parse(await readFile(path.join(root, 'sources/revisions.json'), 'utf8'))
+const git = (dir, ...argv) => execFileSync('git', ['-C', path.resolve(dir), ...argv], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
+const repos = {}
+for (const [key, repo] of Object.entries(previous.repositories)) {
+  const dir = option(`--${key}`, path.join(root, '..', repo.repository.split('/')[1]))
+  const ref = option(`--${key}-ref`, repo.commit)
+  const commit = git(dir, 'rev-parse', '--verify', `${ref}^{commit}`).trim()
+  const names = git(dir, 'ls-tree', '-r', '--name-only', commit).trim().split('\n')
+  const selected = names.filter((name) => key === 'backend'
+    ? name === '.env.example' || name === 'pyproject.toml' || name.startsWith('app/') && name.endsWith('.py') && !name.startsWith('app/vendor/') || name.startsWith('documents/') && name.endsWith('.md') || name.startsWith('scripts/') && /\.(sh|py|md)$/.test(name) || name.startsWith('deploy/sae/') && /\.(sh|md)$/.test(name)
+    : name === 'package.json' || name === '.env.example' || name === 'src/env.d.ts' || name === 'config/build-targets.mjs' || name.startsWith('scripts/') && /\.(mjs|sh)$/.test(name))
+  const files = Object.fromEntries(selected.map((name) => [name, git(dir, 'show', `${commit}:${name}`)]))
+  repos[key] = { ...repo, commit, files, allPaths: names }
+}
+const python = process.env.DOCS_PYTHON || 'python3'
+const version = execFileSync(python, ['-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'], { encoding: 'utf8' }).trim().split('.').map(Number)
+if (version[0] < 3 || version[0] === 3 && version[1] < 12) throw new Error('Source extraction requires Python 3.12+. Set DOCS_PYTHON=python3.12 if needed.')
+const facts = JSON.parse(execFileSync(python, [path.join(root, 'scripts/extract-source-facts.py')], {
+  input: JSON.stringify({ files: repos.backend.files }), encoding: 'utf8', maxBuffer: 32 * 1024 * 1024,
+}))
+const parseEnv = (source) => Object.fromEntries(source.split('\n').flatMap((line) => {
+  const m = line.match(/^([A-Z][A-Z0-9_]*)=(.*)$/)
+  if (!m) return []
+  return [[m[1], /SECRET|PASSWORD|PRIVATE_KEY|API_KEY|ACCESS_KEY/.test(m[1]) ? '<secret example redacted>' : m[2]]]
+}))
+const backendExamples = parseEnv(repos.backend.files['.env.example'])
+const settings = settingsWithExamples(facts.settings, backendExamples)
+const frontendScripts = JSON.parse(repos.frontend.files['package.json']).scripts
+const frontendEnv = [...new Set(['src/env.d.ts', '.env.example', 'config/build-targets.mjs'].map(name => repos.frontend.files[name]).flatMap((text) => text.match(/\bVITE_[A-Z0-9_]+\b/g) || []))].sort()
+const snapshot = {
+  schemaVersion: 1,
+  commits: Object.fromEntries(Object.entries(repos).map(([key, value]) => [key, value.commit])),
+  api: facts.api,
+  settings,
+  frontend: { packageManager: JSON.parse(repos.frontend.files['package.json']).packageManager, scripts: frontendScripts, envNames: frontendEnv, examples: parseEnv(repos.frontend.files['.env.example']) },
+  sourcePaths: Object.fromEntries(Object.entries(repos).map(([key, value]) => [key, value.allPaths])),
+}
+const authorityPaths = {
+  frontend: ['package.json', '.env.example', 'src/env.d.ts', 'config/build-targets.mjs'],
+  backend: ['app/api/__init__.py', 'app/core/models.py', 'app/core/config.py', 'app/persistence/db_models.py', 'documents/REST_API_INTERFACE.md', 'scripts/runbook.md', 'deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md', 'documents/DOUYIN_PAYMENT.md', 'documents/ai_copywriting_setup.md'],
+}
+const revisions = { schemaVersion: 1, verifiedAt: previous.verifiedAt, docsBaseCommit: previous.docsBaseCommit, repositories: Object.fromEntries(Object.entries(repos).map(([key, value]) => [key, {
+  repository: value.repository, branch: value.branch, commit: value.commit,
+  authorities: authorityPaths[key].map((file) => {
+    if (!(file in value.files)) throw new Error(`Missing authority ${file}`)
+    return { path: file, sha256: createHash('sha256').update(value.files[file]).digest('hex') }
+  }),
+}])) }
+const json = (value) => JSON.stringify(value, null, 2) + '\n'
+const outputs = { 'sources/revisions.json': json(revisions), 'sources/contracts.json': json(snapshot) }
+const cell = (value) => '`' + String(typeof value === 'object' ? JSON.stringify(value) : value).replaceAll('|', '&#124;').replaceAll('`', '&#96;').replaceAll('\n', ' ') + '`'
+for (const locale of ['en', 'zh']) {
+  const zh = locale === 'zh'
+  const sourceRows = Object.entries(revisions.repositories).map(([key, repo]) => `| ${key} | [${repo.repository}](https://github.com/${repo.repository}/tree/${repo.commit}) | ${cell(repo.branch)} | ${cell(repo.commit)} |`)
+  outputs[`.vitepress/generated/revisions.${locale}.md`] = [zh ? '| 组件 | 仓库与已核验版本 | 分支 | 提交 SHA |' : '| Component | Repository at verified revision | Branch | Commit SHA |', '| --- | --- | --- | --- |', ...sourceRows, '', zh ? `核验日期：${revisions.verifiedAt}。` : `Verified on ${revisions.verifiedAt}.`, ''].join('\n')
+  outputs[`.vitepress/generated/api.${locale}.md`] = [
+    zh ? '以下为固定源码版本中的公开路由声明。状态码来自路由声明；通常为默认成功状态，退休接口也可声明 409。运行时可能返回其他状态。权限、错误和业务语义以相应指南与 REST 契约为准。' : 'Public route declarations at the pinned revision. Status comes from the route declaration, usually a success status; retired endpoints may declare 409. Runtime responses can differ. Consult the domain guides and REST contract for authorization, errors and business semantics.', '',
+    zh ? '| 方法 | 路由 | 默认状态 | 兼容状态 | 来源 |' : '| Method | Route | Default status | Compatibility | Source |', '| --- | --- | --- | --- | --- |',
+    ...facts.api.map(row => `| ${row.method} | ${cell(row.path)} | ${row.status} | ${row.deprecated ? (zh ? '已弃用的兼容接口' : 'Deprecated alias') : '—'} | [${row.source.split('/').at(-1)}](https://github.com/${revisions.repositories.backend.repository}/blob/${revisions.repositories.backend.commit}/${row.source}#L${row.line}) |`), '',
+  ].join('\n')
+  const lines = [
+    `<!-- Generated by pnpm docs:sources. Do not edit manually. -->`, '',
+    `## ${zh ? '已核验的后端设置' : 'Verified backend settings'}`, '',
+    zh ? '下表来自已固定版本的 Settings 与 `.env.example`。代码默认值与示例环境值分列；示例不代表生产配置。敏感字段已隐藏。' : 'Extracted from pinned Settings and `.env.example`. Code defaults and example environment values are separate; examples are not production configuration. Secret fields are redacted.', '',
+    zh ? '| 环境变量 | 类型 | 代码默认值 | 示例环境值 |' : '| Environment variable | Type | Code default | Example environment |',
+    '| --- | --- | --- | --- |',
+    ...settings.map((row) => `| ${cell(row.env)} | ${cell(row.type)} | ${cell(row.default)} | ${row.example === null ? '—' : cell(row.example)} |`), '',
+    `## ${zh ? '前端构建环境变量' : 'Frontend build variables'}`, '',
+    zh ? '以下变量名从前端环境声明、构建配置与脚本提取。未出现示例值不表示变量有隐式默认值；构建档可能覆盖外部设置。' : 'Names are extracted from frontend declarations, build configuration and scripts. An absent example does not imply a default; build profiles can override supplied values.', '',
+    zh ? '| 变量 | .env.example 示例 |' : '| Variable | .env.example example |', '| --- | --- |',
+    ...frontendEnv.map((name) => `| ${cell(name)} | ${snapshot.frontend.examples[name] === undefined ? '—' : cell(snapshot.frontend.examples[name])} |`), '',
+  ]
+  outputs[`.vitepress/generated/configuration.${locale}.md`] = lines.join('\n')
+}
+for (const [file, content] of Object.entries(outputs)) {
+  const target = path.join(root, file)
+  if (checking) {
+    if (await readFile(target, 'utf8') !== content) throw new Error(`Source snapshot drift: ${file}. Review source changes, then run without --check.`)
+  } else {
+    await mkdir(path.dirname(target), { recursive: true })
+    await writeFile(target, content)
+  }
+}
+console.log(`${checking ? 'Verified' : 'Updated'} source snapshots: ${facts.api.length} public route declarations, ${settings.length} settings, ${Object.keys(frontendScripts).length} frontend scripts. No application code executed.`)

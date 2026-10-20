@@ -1,144 +1,49 @@
-# FAQ
+# FAQ and First Troubleshooting Steps
 
-Common questions from people starting with the project. If your question is not
-here, try the [Glossary](/get-started/glossary) or search the docs.
+## Which folder or branch should I use?
 
-## Product & project
+Application commands run inside `wechat_mini_program` (`ui-integration`) or `YuanZhu-AI` (`main`). Documentation commands run inside `docs`. Run `pwd` and `git branch --show-current` before copying a repository-specific command. The frontend pins pnpm **9.15.9**, while this docs repository pins **10.28.2**. [macOS setup](/get-started/macos-setup) shows both.
 
-**Q: What exactly does the product do?**
-A: It is a WeChat mini program that turns photos (or voice recordings) of rooms
-into AI-generated interior-design proposals and professional deliverables. Users
-upload a photo or recording, the backend schedules an AI "design job", a model
-renders the result (or summarizes the recording as markdown), and the user views
-and replays it. See [Introduction](/get-started/introduction).
+## Do I need a backend for the first preview?
 
-**Q: Why are there three repositories?**
-A: Frontend (`wechat_mini_program`), backend (`YuanZhu-AI`) and documentation
-(`docs`). They are developed and released on independent cadences, so keeping
-them in separate repos lets each team work and deploy independently.
+No. A frontend Mock build simulates the interface without starting the server. For an integration check, an API build talks to a real local backend with its own database and object storage. Mock identity/payment/model providers in that backend do not make it the same as frontend Mock mode.
 
-**Q: Which branches are canonical?**
-A: Frontend → `ui-integration`; Backend and Docs → `main`. Always sync to the
-latest before working (see [Quick Start](/get-started/quickstart)).
+## Why does Docker build ask for SSH access when I only want a mock image?
 
-**Q: What is the WeChat AppID? Can I commit the AppSecret?**
-A: The AppID is `wxec0d577de41255aa` (public). The **AppSecret must never be
-committed** to the frontend repo — it lives only on the backend, where WeChat
-exchanges the login `code` for an `openid`.
+The application image builds the private `Orientation-CD/jinqiuai` dependency through BuildKit SSH, including for local builds. Access to the frontend/backend repositories alone is insufficient. Confirm the private repository permission and a loaded SSH key with the maintainer. See [Local stack](/deploy/local-stack).
 
-## Running the project
+## Why is the server healthy but login or feature discovery fails?
 
-**Q: Do I need real WeChat credentials to develop locally?**
-A: No. The local stack ships with mock WeChat identity, mock payment and mock
-AI providers. You only need real credentials to test production behaviors
-(real WeChat login/pay, real model calls). See [Quick Start](/get-started/quickstart).
+Readiness checks service health; it does not prove that current legal documents, Features, templates, prices or subscription plans are configured. A fresh local stack can import authorized cloud-test configuration. Existing configured volumes are deliberately protected from replacement. Follow [Quick Start](/get-started/quickstart), including the configuration prerequisites.
 
-**Q: Can I develop the UI without running the backend at all?**
-A: Yes — run `pnpm dev:mp-weixin:mock`. The frontend has a complete in-memory
-mock of every repository and uses a seeded personal + organization workspace.
+## Why does an API URL override have no effect?
 
-**Q: Why does the mini program show "无法连接后端服务"?**
-A: Usually `VITE_API_BASE_URL` is wrong, or the mini program is reaching a
-non-HTTPS, non-loopback address. Use the `api-local` dev mode which targets
-`http://127.0.0.1:8080`, make sure your backend stack is running, and enable
-"不校验合法域名" in WeChat DevTools.
+`dev:mp-weixin:api-local` and `build:mp-weixin:api-local` assign port **8080 inside the script**. Prefixing them with another `VITE_API_BASE_URL` cannot change that assignment. Use the explicit `pnpm exec uni` command in [Quick Start](/get-started/quickstart) for a custom port, and rebuild afterward.
 
-**Q: How do I point the frontend at a backend on a different port?**
-A: Override the env var on the command line:
-`VITE_API_BASE_URL=http://127.0.0.1:9090 pnpm dev:mp-weixin:api-local`.
+## Why does an extra API prefix cause a 404?
 
-**Q: How do I test on a real phone?**
-A: Put the phone and Mac on the same LAN and run
-`pnpm build:mp-weixin:api-device-wechat`, then import
-`dist/build/mp-weixin` into DevTools.
+The current public API uses `/v1`. Configure the origin as the base, for example `http://127.0.0.1:8080`; the frontend appends `/v1/...`. Do not insert `/api` unless an independently configured proxy actually requires that prefix.
 
-## Architecture
+## Why can I select options but not submit?
 
-**Q: Why is design processing asynchronous (workers + polling)?**
-A: AI image generation and speech summarization take tens of seconds to minutes.
-Blocking a single HTTP request for that long would be unusable and fragile.
-Instead the backend enqueues a job, workers process it against the provider,
-and the frontend polls for durable status with backoff. See
-[Design Jobs](/backend/design-jobs).
+Check login, current workspace/project, server feature availability, active personal subscription permissions and Token balance. Frontend scenario overrides are demonstrations and do not change server entitlements. The account-wide pending/running limit is five. A server rejection should preserve the draft; retry only after resolving its reason.
 
-**Q: Where are the images and audio stored?**
-A: In S3-compatible object storage — MinIO locally, Aliyun OSS in production.
-The frontend uploads **directly to storage** via presigned POST forms; it
-never proxies bytes through the backend. The backend only signs intents and
-verifies completions. See [Assets & Object Storage](/backend/assets-storage).
+## Why does WeChat native payment fail against the local mock backend?
 
-**Q: What is the role of each worker?**
-A: The **submit worker** calls the AI/speech provider to create a provider
-job; the **poll worker** repeatedly checks that job and persists the result.
-See [Architecture](/get-started/architecture).
+An API build still calls the native WeChat payment bridge. `VITE_PAYMENT_MODE=mock` does not replace it with a fake cashier. The local backend provides an authenticated `/mock/payments/{id}/complete` endpoint for owned mock WeChat orders. The [Quick Start](/get-started/quickstart) demonstrates server settlement without exposing tokens in logs. This is a local test, not proof of real payment integration.
 
-**Q: Why does the home screen check tokens before opening a feature?**
-A: It is a friendly UX guard (#224, #226): `inspectHomeEntry(tokenCost)` counts
-inflight jobs (`ACTIVE_JOB_LIMIT = 5`) and compares the personal token balance
-against the job's catalog cost. If either fails, the user is sent to the store
-or "我的方案". The backend still enforces the same limits atomically at submit
-time.
+## Why do images or audio fail while the API works?
 
-**Q: How does voice playback resume where I left off?**
-A: The markdown summary page keeps a per-asset `playbackByAsset` map
-(`status`, `currentTime`, `duration`). Pausing or switching recordings writes
-the current position back, and a new `InnerAudioContext` is started with
-`context.startTime = resumeAt`. A finished recording restarts from 0.
+The file origin may be different from the API. Check `VITE_RESULT_STORAGE_ORIGINS`, MinIO's derived port, URL expiry and platform domain lists. CDN JSON and Douyin network-audio playback need **request** domains; upload/download registration alone is insufficient. See [Platforms](/frontend/platforms).
 
-## Billing & accounts
+## Why is the Project tab missing?
 
-**Q: How does the token economy work?**
-A: New users may receive a starter token grant. Each design job reserves tokens
-on submission and settles the exact cost on completion. Users top up by buying
-token packages or a subscription via WeChat Pay. See
-[Billing & Tokens](/backend/billing-tokens).
+Projects are compiled in only when `VITE_ENABLE_PRIVATE_PROJECTS=true`. The explicit production builds enable them; a generic Mock script does not necessarily do so. Change the build settings and rebuild. Server permissions are still enforced after the tab appears.
 
-**Q: Do users have to log in before using features?**
-A: No. All image features can be explored as a **guest**; the WeChat
-registration/login gate triggers at the final submission step.
+## What should I include in a bug report?
 
-**Q: Why can't I renew an active subscription?**
-A: This version deliberately does not support early renewal. The "权益管理" page
-shows a notice ("暂不支持提前续订") with the plan's end date; the user buys
-again after expiry. There is no auto-charge.
+Record the source revision, build command/mode, platform, owned local port/project, reproducible steps, expected/actual result and safe error/request ID. Do not paste access tokens, signed file URLs, phone codes, `.env` contents or payment signatures. Use the app's diagnostics export when applicable.
 
-**Q: What is the difference between personal and enterprise workspaces?**
-A: A personal workspace is private. An enterprise workspace is shared: the
-owner manages seats, invitations and members; members see shared plans. Roles
-are only owner and member — there is no member-role adjustment. See
-[Workspaces & Organizations](/backend/workspaces-orgs).
+## Source evidence
 
-## Debugging & contribution
-
-**Q: How do I run the tests?**
-A: `pnpm test:domain` (pure logic, milliseconds), `pnpm test:unit` (Vitest),
-and `pnpm quality:mp-weixin:mock` for the full local gate. See
-[Testing & Quality Gates](/frontend/testing).
-
-**Q: Why did the build fail on "package too large"?**
-A: The quality gate enforces ≤ 1.5 MiB per chunk and ≤ 200 KiB per bundled
-media. Heavy code must live in a subpackage; large images belong on the CDN
-behind `VITE_ASSET_BASE_URL`.
-
-**Q: Why is my new response field ignored / rejected?**
-A: Every backend response is validated by a normalizer that throws
-`*RESPONSE_INVALID` on unexpected shapes. Add the field to the matching
-`map*` function and its unit test, and run `pnpm check:api-contract`.
-
-**Q: How do I edit these docs?**
-A: All content is Markdown under `docs/`. Edit a file, push, and the VitePress
-site rebuilds automatically. To preview locally:
-
-```bash
-cd docs
-pnpm install
-pnpm docs:dev
-```
-
-Then open the printed local URL.
-
-**Q: Is there a style guide for docs?**
-A: Keep it **beginner-friendly** (the docs assume zero background), use real
-file/endpoint/env-var names, and whenever you describe an API include the full
-call chain (see [Reference](/reference/rest-api)). Internal links use paths
-like `/frontend/architecture` (no `.md`, no locale prefix).
+Documented against frontend `eca0a5f` and backend `b13cc56` (2026-10-20). [Build scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Runtime and feature gates](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/runtime.ts) · [Local mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing_api.py).

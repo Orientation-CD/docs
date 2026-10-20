@@ -1,166 +1,63 @@
 # 测试与质量门禁
 
-前端把测试与构建质量当作**一等发布门禁**。在下列检查全部通过之前，一次改动不算"完成"。共有四层：**领域测试**、**Vitest 单元测试**、**API 契约检查**，以及检查真正编译产物的**构建期质量门禁**。
+源码测试验证业务，契约检查验证后端兼容，产物检查验证真正的平台包。在前端仓库使用 Node22、pnpm9.15.9 运行。这些是仓库提供的门禁，不代表所有命令都已接入某条 CI。
 
-## 测试命令
+## 本地检查
 
 ```bash
-# 纯领域逻辑（Node 内置运行器，无需打包器）
-pnpm test:domain
-
-# 用 Vitest 跑单元测试
-pnpm test:unit
-
-# 全部（领域 + 单元）
-pnpm test
-
-# 覆盖率
-pnpm test:coverage
-pnpm test:unit:watch
-
-# 类型检查
 pnpm type-check
 pnpm type-check:test
+pnpm test:domain
+pnpm test:unit
+pnpm check:api-contract
+pnpm check:design-system
+```
 
-# 完整质量门禁（CI 使用）
+`pnpm test` 依次执行领域、单元测试。领域测试使用 Node `--experimental-strip-types`。Vitest 采用 happy-dom、Vue Test Utils、`uni` harness，别名明确选择测试实现。`pnpm test:coverage` 使用 `vitest.config.ts` 中阈值，包括更严格的逐文件要求；直接读取该配置，不维护第二份固定测试数量/阈值表。
+
+## 契约检查
+
+门禁检查 OpenAPI/fixture 证据、DTO、候选兼容、项目状态/动态契约及路由/产物约束。最新命令在旧兼容 fixture 之外，包含 issue611、619 项目契约。
+
+```bash
+pnpm check:openapi
+pnpm check:openapi:live
+```
+
+live 检查需要目标后端。`pnpm openapi:update` 会有意修改快照，仅在经评审的接口更新时使用并检查差异。部分项目证据从固定后端 AST/schema 提取，不取代总快照，不能随意对某个运行实例重生成全部 fixture。
+
+## 平台产物
+
+```bash
 pnpm quality:mp-weixin:mock
 pnpm quality:mp-weixin:api
+pnpm quality:mp-toutiao:mock
 ```
 
-`quality:mp-weixin:api` 由以下步骤组装：
+微信门禁先跑 `test:weixin-babel`，再执行契约/设计检查、构建、产物扫描；正式 API 同时检查项目启用包。Babel 检查针对微信二次转换后才出现的模块绑定错误。
 
-```
-check:api-contract && check:design-system && build:mp-weixin:api
-  && check-code-quality.mjs --api-production
-```
+微信产物检查覆盖组件懒加载、压缩与域名设置、主包/各分包不超过1.5MiB、单个随包媒体不超过200KiB（180KiB预警）、多余文件、项目隔离/导航、模块导入/供应商启动，以及发布剔除开发代码。不要将历史测量包体积复制为当前验证结果。
 
-还有一些需要真实后端的集成/冒烟运行器：
+抖音门禁检查 AppID、行业 SDK、隐私设置、项目导航/隔离、模块导入、构建档运行配置。环境门禁有 `quality:mp-toutiao:local-test`、`:cloud-test`、`:cloud-production`，会调用检查真实健康状态的脚本，需要相应环境可用。
 
-```bash
-pnpm test:integration:auth          # node --test tests/authApi.integration.test.mjs
-pnpm test:integration:design-config # tests/importDesignConfig.test.mjs
-pnpm test:smoke:server               # tests/serverBacked.smoke.test.mjs
-pnpm test:smoke:coverage             # 真实 API 脚手架覆盖率
-pnpm test:smoke:design-ui            # 设计垂直切片运行器
-```
+## 集成与真实 UI
 
-## 1. 领域测试（`pnpm test:domain`）
-
-**不做任何 I/O** 的纯业务逻辑位于 `src/domain/`
-（`report.ts`、`tasks.ts`、`wallet.ts`），用 Node 内置测试运行器执行：
-
-```bash
-node --experimental-strip-types --test tests/domain.test.mjs
-```
-
-它们在毫秒级跑完，无需打包器。
-
-## 2. 单元测试（`pnpm test:unit`）
-
-Vitest 1.6.1 运行 `tests/` 下约 115 个 `tests/*.test.ts` 文件。配置在
-`vitest.config.ts`：
-
-- **环境**：`happy-dom`。
-- **Setup**：`tests/setup.ts` 从
-  `tests/harness/` 安装 `uni` mock，在每个测试间重置 mock，并清空 DOM。
-- **别名**：镜像生产别名，但固定指向 mock 实现（因此单元测试始终跑在确定性数据上）。
-- **包含**：`tests/**/*.test.ts`。
-
-覆盖率通过 `@vitest/coverage-v8` 收集：
-
-| 门槛 | 值 |
+| 命令 | 用途 |
 | --- | --- |
-| 语句 | 全局 30% |
-| 分支 | 全局 67% |
-| 函数 | 全局 44% |
-| 行 | 全局 30% |
+| `test:integration:auth` | 后端认证集成 |
+| `test:integration:design-config` | 设计配置导入集成 |
+| `test:smoke:server` | 真实服务冒烟流程 |
+| `test:smoke:coverage` | live API harness 覆盖 |
+| `test:smoke:design-ui` | 真实开发者工具设计纵切 |
 
-在全局底线之上，还有一长串**关键文件被钉死在 100%**（V8 对生成的 Vue 包装器映射不到的地方接近 100%）：
+运行前读取各 runner 环境要求。真实工具会话需要项目授权和首次设置，不能占用其它会话的服务栈。自动化配置与选择器见下方固定提交的真实 UI 手册。
 
-- 领域：`src/domain/report.ts`、`src/domain/tasks.ts`、`src/domain/wallet.ts`。
-- 请求/可观测：`src/services/request.ts`、
-  `src/services/apiObservability.ts`、`src/services/pollScheduler.ts`、
-  `src/services/idempotency.ts`。
-- 首页门槛：`src/services/homeEntryGuard.ts`、
-  `src/services/personalTokenPreflight.ts`、`src/pages/home/index.vue`。
-- 设计提交：`pkg-features/repositories/designAssets.ts`、
-  `standardDesignJob.ts`、`furnitureDesignJob.ts`、`designJobSubmit.ts`、
-  `pkg-features/services/standardDesignSubmit.ts`、`furnitureDesignSubmit.ts`、
-  `designTokenPreflight.ts`、`imageFileMetadata.ts`、`designSubmitError.ts`。
-- 语音：`pkg-features/repositories/voiceAudioAssets.ts`（由
-  `voiceAudioAssets.test.ts`、`voiceAudioFiles.test.ts`、
-  `voiceSummarySubmit.test.ts`、`voiceSummaryPage.test.ts` 覆盖）。
-- 方案/markdown：`pkg-plans/services/reportViewer.ts`、
-  `pkg-plans/pages/markdown/index.vue`（由 `markdownSummary.test.ts`、
-  `markdownSummaryPage.test.ts` 覆盖）、`pkg-plans/repositories/resultFile.ts`。
-- 计费/支付：`pkg-account/repositories/paymentOrder.ts`、
-  `paymentHistory.ts`、`paymentResume.ts`、`paymentReconciliation.ts`、
-  `paymentClose.ts`、`purchaseRequest.ts`、`pkg-account/services/payment.ts`、
-  `pricePresentation.ts`、`entitlementPresentation.ts`。
-- 账户/会话：`src/repositories/session.ts`、`account.ts`、`profile.ts`、
-  `designJobs.ts`、`designJobDetail.ts`、`workspaceDesignJobs.ts`、`content.ts`。
+本仓库验收应涵盖读取中切账号/空间、提交不确定恢复、订阅/余额拒绝、项目阶段/结果、成员只读、媒体过期、安全 Markdown、脚本导入，以及各平台支付恢复。先跑受影响的聚焦测试，再做昂贵环境验证。
 
-排除在覆盖率之外：`*.d.ts`、`src/api/dto/**`、`src/types/**`、
-`src/main.ts`、`src/App.vue`。
+## 记录有效证据
 
-### 单元测试覆盖了什么
+报告提交 SHA、命令、平台/构建档、API Origin、自己拥有的本地项目/端口及结果。区分编译产物通过、模拟 UI 通过、真实本地 API 通过、真机/正式供应商验收。凭据、私钥、签名 URL、邀请凭据不能进入证据。
 
-- 仓库的**响应校验**（mock 与 API 契约一致性）——每个规整化函数都有测试，喂入畸形 JSON 并期望抛出
-  `*RESPONSE_INVALID`。
-- 服务：轮询调度器、请求/令牌刷新、报告查看器校验、支付桥、幂等、retry-after、设计失败呈现。
-- 用 `@vue/test-utils` 覆盖组件与页面逻辑——首页、功能外壳、选项宫格、语音总结页、markdown 页、支付页。
+## 源码依据
 
-## 3. 契约检查（`check:api-contract`）
-
-前端把自己钉死在后端的 **OpenAPI 契约**上，从而把漂移拦在 CI 里，而不是生产里：
-
-| 脚本 | 作用 |
-| --- | --- |
-| `check-openapi-snapshot.mjs` | 校验已提交的 OpenAPI 快照与预期契约一致；`--update` 刷新；`--live` 从运行中的后端拉取 |
-| `check-contract-fixtures.mjs` | 校验测试使用的契约夹具 |
-| `check-api-dtos.mjs` | 对照契约校验 `src/api/dto/*` |
-| `check-api-contract.mjs` | 运行以上三个 |
-
-保持快照同步是正常后端契约变更的一部分：
-
-```bash
-pnpm openapi:update    # 后端变更后重新生成快照
-```
-
-## 4. 构建期质量门禁
-
-`scripts/check-code-quality.mjs` 检查**编译后的小程序**，任何违规都会让构建失败：
-
-| 门禁 | 校验内容 |
-| --- | --- |
-| `lazyCodeLoading: requiredComponents` | 主包不预加载未使用组件 |
-| 压缩 | JS / WXML / WXSS 已压缩；不夹带依赖文件 |
-| 合法域名校验 | 发布配置开启了合法域名校验（域名白名单） |
-| 包体积 | 主包与每个分包 ≤ 1.5 MiB |
-| 内置媒体 | 媒体 ≤ 200 KiB（超过 180 KiB 告警） |
-| 禁用文件 | 不含 CDN 照片、`.DS_Store`，或仅被分包使用的主包 JS |
-| 无已删除包 | 构建产物不含已移除的"成本方案"包 |
-| 生产卫生 | API 生产包排除开发健康检查与连接状态组件 |
-
-供参考的最近 mock 模式体积：主包约 395 KiB，
-`pkg-features` 约 57 KiB，`pkg-plans` 约 9 KiB，`pkg-account` 约 26 KiB。
-
-## 真实微信开发者工具 UI 测试（可选）
-
-关于在**真实微信开发者工具**内做 UI 自动化（首次运行配置、不抢焦点、选择器、同步、确定性状态覆盖），见
-`documents/MINIPROGRAM_REAL_UI_TESTING.md`。
-`pnpm test:smoke:design-ui` 运行器会端到端地执行一个设计垂直切片。
-
-## 提交前建议流程
-
-```bash
-pnpm test:domain
-pnpm type-check
-pnpm quality:mp-weixin:mock    # 快速本地反馈
-pnpm quality:mp-weixin:api     # 生产包门禁（CI）
-```
-
-## 下一步
-
-- [数据源模式](/frontend/data-source-modes)——为什么 mock 与 API 构建都要过门禁。
-- [设计系统](/frontend/design-system)——`check:design-system` 强制了什么。
+前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）：[命令](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Vitest配置](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/vitest.config.ts) · [微信产物检查](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/scripts/check-code-quality.mjs) · [抖音检查](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/scripts/check-douyin-quality.mjs) · [真实UI手册](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/documents/MINIPROGRAM_REAL_UI_TESTING.md)。

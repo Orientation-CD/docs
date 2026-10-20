@@ -1,55 +1,43 @@
-# YuanZhu AI Docs
+# YuanZhu AI documentation
 
-The official documentation for the **YuanZhu AI** project — the WeChat mini
-program for AI interior design, its backend and its deployment.
+Bilingual technical and operations documentation for the YuanZhu AI WeChat/Douyin mini programs, FastAPI backend and administration console. Includes a macOS onboarding path for first-time contributors.
 
-Built with [VitePress](https://vitepress.dev), auto-deployed to **GitHub Pages**
-on every push to `main`.
+- [Live English site](https://orientation-cd.github.io/docs/)
+- [中文文档](https://orientation-cd.github.io/docs/zh/)
+- Frontend: `Orientation-CD/wechat_mini_program`, `ui-integration`
+- Backend: `Orientation-CD/YuanZhu-AI`, `main`
+- Audited full commits and source hashes: [sources/revisions.json](sources/revisions.json)
 
-## Live site
+## Develop and validate
 
-`https://orientation-cd.github.io/docs/`
-
-## Project overview
-
-| Component | Repository | Branch |
-| --- | --- | --- |
-| Frontend (mini program) | [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` |
-| Backend (FastAPI) | [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` |
-| Docs (this repo) | `docs` | `main` |
-
-## Local development
+Use Node.js 22.6+ and pnpm 10.28.2, from this repository:
 
 ```bash
-pnpm install
-pnpm docs:dev        # dev server with HMR
-pnpm docs:build      # production build into docs/.vitepress/dist
-pnpm docs:preview    # preview the built site
+corepack enable
+pnpm install --frozen-lockfile
+pnpm docs:dev
 ```
 
-## Editing content
+```bash
+pnpm docs:check
+pnpm exec playwright install chromium
+pnpm docs:test:browser
+```
 
-All documentation is Markdown at the repo root, organized by section:
+`docs:check` runs Node tests, content/source-reference checks, the production build and rendered-site/search validation. Browser tests start a preview on `127.0.0.1:4173`; do not run another preview on that port concurrently. Failed screenshots and traces are ignored locally and retained by CI.
 
-- `get-started/` — introduction, architecture, quick start, glossary, FAQ
-- `frontend/` — the mini program deep dive
-- `backend/` — the FastAPI backend deep dive
-- `deploy/` — local + Alibaba Cloud SAE deployment
-- `reference/` — REST API, data model, configuration, and end-to-end call chains
+Build only with `pnpm docs:build`; output is `.vitepress/dist`. Use `pnpm docs:preview` for manual inspection.
 
-### Structure conventions
+## Content and maintenance
 
-- Every section has an `overview` page that introduces the topic and links to
-  sub-pages.
-- Reference flow pages trace the **full call chain** from the mini program
-  through the backend (Redis, workers, providers, DB, storage) to the response.
-- When you add a page, register it in `.vitepress/config.mts` (nav + sidebar).
+English content lives in `get-started/`, `frontend/`, `backend/`, `admin/`, `deploy/`, `testing/` and `reference/`; `zh/` mirrors those routes. Shared bilingual navigation is in `.vitepress/navigation.mjs`. Local full-text search indexes each language, including Chinese and technical identifiers.
 
-### Publishing
+See [Maintenance](reference/maintenance.md) / [维护本文档](zh/reference/maintenance.md) for the contribution workflow, snapshot synchronization and publishing. The source updater requires Git, Python 3 and access to local application clones:
 
-Push to `main` — GitHub Actions builds and deploys automatically. No manual
-deploy step.
+```bash
+pnpm docs:sources --frontend ../wechat_mini_program --backend ../YuanZhu-AI --check
+```
 
-## License
+Normal CI compares against committed audited facts and does not need private application access. It cannot prove upstream has not changed; a maintainer must review and synchronize new source commits. [Page migration inventory](sources/page-migration.json) records rewritten, added and retired pages. Retired routes remain as migration pages excluded from search.
 
-Internal team documentation.
+PRs run content/build/browser checks. Publishing remains GitHub Pages from `main`, with full Git history for page timestamps. No application deployment is performed by this repository's validation.

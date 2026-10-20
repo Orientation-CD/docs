@@ -1,92 +1,60 @@
 ---
 layout: home
-
 hero:
-  name: "YuanZhu AI Docs"
-  text: "From zero to hero"
-  tagline: "The complete developer documentation for the YuanZhu AI interior-design WeChat mini program — frontend, backend, Admin console, deployment and end-to-end reference."
+  name: YuanZhu AI Docs
+  text: Understand, build and operate
+  tagline: Code-backed guides for the WeChat and Douyin mini programs, Workflow backend and operations console.
   actions:
     - theme: brand
-      text: Get Started
-      link: /get-started/introduction
+      text: Start on macOS
+      link: /get-started/macos-setup
     - theme: alt
-      text: Quick Start
+      text: Run the first local task
       link: /get-started/quickstart
     - theme: alt
-      text: REST API Overview
+      text: API reference
       link: /reference/rest-api
-
 features:
-  - icon: 🚀
-    title: Get Started
-    details: Understand what the product is, how the system is architected, and run the whole stack on your own machine in minutes.
+  - icon: 🧭
+    title: Get started
+    details: Learn the product and terminal basics, preview Mock UI, then verify a persistent local API task.
     link: /get-started/introduction
   - icon: 📱
     title: Frontend
-    details: Deep dive into the uni-app / Vue 3 mini program — pages, subpackages, repositories, data-source modes, and every key user flow.
+    details: Platform builds, feature groups, copywriting, video, reports, projects and read-only collaboration.
     link: /frontend/overview
   - icon: 🧩
     title: Backend
-    details: Deep dive into the FastAPI backend — API, ARQ workers, PostgreSQL, Redis, object storage, billing, reports and the multi-provider AI layer.
+    details: Domain modules, Workflows and Operations, assets, identities, billing, storage and background execution.
     link: /backend/overview
   - icon: 🛠️
-    title: Admin Console (Studio Control)
-    details: The operations console for product and ops — dashboard, users, workspaces, billing, campaigns, prompts, report templates, and the model-provider catalog.
+    title: Operations
+    details: Admin configuration, owned local stacks, cloud release procedures, migrations and recovery.
     link: /admin/overview
-  - icon: ☁️
-    title: Deploy
-    details: Run the local Docker Compose stack and deploy to Alibaba Cloud SAE — from first smoke test to production promotion and rollback.
-    link: /deploy/local-stack
   - icon: 🔗
     title: Reference
-    details: REST API overview, data model, configuration, and the OpenAPI surface for the backend service.
+    details: Current API contracts, environment settings, data models and traceable end-to-end flows.
     link: /reference/rest-api
-  - icon: 🧭
-    title: End-to-End Call Chains
-    details: Full traceable data flows — login, design-job lifecycle, asset upload, payments, reports and workspaces — from button tap to database and provider.
-    link: /reference/flows/wechat-login-flow
 ---
 
-## What is YuanZhu AI?
+## Choose a route
 
-YuanZhu AI is a **WeChat mini program** that uses generative AI to help home owners,
-designers and renovation teams turn photos of rooms into professional interior-design
-proposals and HTML reports.
+New to development? Start with [macOS setup](/get-started/macos-setup). [Quick Start](/get-started/quickstart) moves through six checkpoints, from a frontend-only Mock preview to registration, local mock settlement and a completed task persisted by the real local server. It identifies required private dependency/configuration access before Docker builds.
 
-The project is composed of three repositories under the `Orientation-CD` GitHub
-organization:
+For implementation work, read [System architecture](/get-started/architecture), [Frontend](/frontend/overview) or [Backend](/backend/overview). Operators can enter [Admin](/admin/overview) or [Deployment](/deploy/local-stack). Use search for a feature key, route, environment variable or error, and follow each page's pinned source evidence when checking behavior.
 
-| Component | Repository | Default branch | What it does |
-| --- | --- | --- | --- |
-| Frontend | [`wechat_mini_program`](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | uni-app + Vue 3 + TypeScript mini program |
-| Backend | [`YuanZhu-AI`](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | FastAPI + ARQ + PostgreSQL + Redis backend |
-| Docs | this repository (`docs`) | `main` | The documentation you are reading now |
+## Product and documented baseline
 
-## How the docs are organized
+YuanZhu AI (装易装AI) supports design/renovation images, recording summaries, customized design, video, eight copywriting/Q&A forms and Workflow-based design reports. Projects and enterprise views organize plans and member activity. Availability, prices, entitlements and rollout switches are deployment-specific server configuration.
 
-- **Get Started** — no background assumed. Learn the product, the high-level
-  architecture, and run the full stack locally.
-- **Frontend** — everything about the mini program: tech stack, pages and
-  subpackages, the repository layer, build modes, and key user flows.
-- **Backend** — everything about the API service: modules, workers, the
-  database, object storage, Redis, billing, reports, workspaces and the AI provider layer.
-- **Admin Console (Studio Control)** — the operations web app: dashboard and alerts,
-  users and accounts, workspaces, billing and tokens, campaigns, marketing, finance,
-  performance, design jobs, assets, legal documents, prompt and report templates, and
-  the model-provider catalog.
-- **Deploy** — how to run locally with Docker Compose (per-developer parallel stacks)
-  and how to deploy to Alibaba Cloud SAE, including CI/CD, namespace-safe tooling,
-  migration credential separation and production safeguards.
-- **Reference** — the API surface: REST overview, data model, configuration reference,
-  and OpenAPI.
-- **End-to-End Call Chains** — for every open API you can trace exactly what happens
-  from the user tapping a button in the mini program to the final response, including
-  every intermediate hop (Redis, ARQ workers, providers, database, WeChat).
+| Repository | Working branch | Documented source |
+| --- | --- | --- |
+| [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | `eca0a5f` |
+| [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | `b13cc56` |
+| [docs](https://github.com/Orientation-CD/docs) | `main` | This bilingual documentation site |
 
-> **Reading order.** If you are new to the project, start at
-> [Introduction](/get-started/introduction), then follow
-> [Architecture Overview](/get-started/architecture), then the **Quick Start**.
-> After you have the stack running, explore Frontend and Backend. Use the
-> **Admin Console** section when operating the product, **Deploy** when shipping to the
-> cloud, and **Reference / End-to-End Call Chains** whenever you want to understand a
-> specific API or data flow in depth.
+The content was checked on **2026-10-20**. Implementation in a branch does not prove a feature is enabled or has passed device/production acceptance. Current public product API paths begin with `/v1`; source evidence distinguishes client UI limits from wider backend contracts.
+
+## Source evidence
+
+[Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [Frontend commands](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Backend contracts](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py) · [Local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md).

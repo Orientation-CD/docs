@@ -1,188 +1,47 @@
 # Frontend Overview
 
-The frontend repository (`wechat_mini_program`, package name
-`yuanzhu-ai-mini-program`) contains the **WeChat mini program** — the product's
-user-facing application. This section is a deep dive into the tech stack, code
-layout, architecture, build modes, key user flows, the design system and
-testing. It assumes you have **no prior background** in uni-app or WeChat mini
-programs; each concept is introduced in context.
+`wechat_mini_program`, branch **`ui-integration`**, builds the WeChat and Douyin mini programs from uni-app, Vue 3, TypeScript and uview-plus. The pinned package manager is **pnpm 9.15.9**. There is no Pinia dependency: credentials use a module-level session store, while pages and repositories manage scoped state and caches.
 
-> Repository branch: `ui-integration`. The internal WeChat AppID is
-> `wxec0d577de41255aa` (public). The AppSecret, OpenID and session keys are
-> **server-side only** and must never appear in this repo.
+## Product navigation
 
-## What it is
+The main home entries are **AI设计** and **AI创作**. AI design contains interior, furniture try-on, colored floor plans, recording summary, customized design, design reports and an old-house-renovation folder; that folder contains local, kitchen and bathroom renovation. AI creation contains video and copywriting. AI Q&A is entered from the profile page. Group pages include a breadcrumb and shared back/home navigation.
 
-- A **uni-app** project — a Vue-based meta-framework that compiles the same
-  source to **WeChat Mini Program** (the primary and only shipped target),
-  other mini-program platforms (Alipay, Baidu, Douyin, QQ, …) and H5.
-- Written in **Vue 3 (Composition API, `<script setup>`) + TypeScript**, using
-  **uview-plus** (`uview-plus` 3.8.55) for off-the-shelf components.
-- Runtime state is intentionally minimal: the only persistent store is a
-  lightweight **module-level session token store** (`src/stores/session.ts`)
-  backed by `uni.setStorageSync`. There is no global state-management library
-  in `package.json`; pages use local `ref`/`computed` plus repository calls.
-- The single source of truth for product/interaction is `documents/UI.md`; the
-  API contract is `documents/REST_API_INTERFACE.md`.
+With `VITE_ENABLE_PRIVATE_PROJECTS=true`, the main tabs are Home, Contact, Projects, Plans and Profile. Otherwise the Project tab and project subpackage are compiled out. A generic Mock build does not automatically enable projects.
 
-## The product features
+| Capability | Main implementation | Output |
+| --- | --- | --- |
+| Standard design and renovation | `pkg-features/components/StandardFeaturePage.vue` | Image |
+| Furniture try-on | `pkg-features/pages/furniture` | Mask/reference-based image |
+| Customized design | `pkg-features/pages/customized_design` | Image using editable template fields |
+| Recording summary | `pkg-features/pages/voice_summary` | Markdown and original-audio playback |
+| Video creation | `pkg-features/pages/video_generation` | Video |
+| Copywriting / AI Q&A | `pkg-features/pages/copywriting` | Eight text-only Markdown Workflows |
+| Design report | `pkg-features/pages/design_report` | Blueprint-based HTML report, with export behavior determined by supported products |
+| Historical report | `pkg-plans/pages/report` | Earlier `html_report` compatibility |
 
-The home screen exposes a rotating hero carousel plus a 3×N feature grid.
-Features are **published** (shipped to users) or **development** (shown but
-marked "coming soon"):
+The table describes implemented UI. Anonymous `/v1/billing/features` discovery, release visibility and account entitlements determine what is available in a given deployment. Prices are server values. A discovery failure must not be presented as a successful empty catalog.
 
-| Feature key (`FeatureKey`) | Page | Result kind | Status |
-| --- | --- | --- | --- |
-| `interior` | `pkg-features/pages/interior/index` | `IMAGE` | Published |
-| `local` | `pkg-features/pages/local/index` | `IMAGE` | Published |
-| `furniture` | `pkg-features/pages/furniture/index` | `IMAGE` | Published |
-| `kitchen` | `pkg-features/pages/kitchen/index` | `IMAGE` | Published |
-| `bathroom` | `pkg-features/pages/bathroom/index` | `IMAGE` | Published |
-| `colored_floor_plan` | `pkg-features/pages/colored_floor_plan/index` | `IMAGE` | Published |
-| `voice_summary` | `pkg-features/pages/voice_summary/index` | `MARKDOWN` | Published |
-| `report` (`html_report`) | `pkg-features/pages/report/index` | `HTML_REPORT` | Server-disabled from home |
-| `ai_tour_video`, `space_renewal_animation` | — | — | Development placeholders |
+## Code layout
 
-Availability is **not** hard-coded. The home page fetches
-`GET /v1/billing/catalog` and lets the backend decide which job types are
-active; unknown/inactive types render as "in development" cards. See
-`src/repositories/designCatalog.ts`.
-
-On top of the design features sits an account/billing layer: WeChat
-registration/login, personal & enterprise workspaces, a store (token packages /
-subscriptions), payment orders, a token ledger, enterprise seats, share
-invitations and referral rewards.
-
-## Repository layout
-
-```
-wechat_mini_program/
-├── src/
-│   ├── pages/                  # Main package (tab bar + splash)
-│   │   ├── ad-splash/index.vue # 5s skippable ad splash
-│   │   ├── splash/index.vue    # 3s brand splash
-│   │   ├── home/index.vue      # Home: ad banner, hero carousel, feature grid
-│   │   ├── contact/index.vue   # 联系我们 (contact)
-│   │   ├── plans/index.vue     # 我的方案 (my plans list)
-│   │   └── profile/index.vue   # 我的 (profile tab)
-│   ├── pkg-features/           # Subpackage: design + voice flows
-│   │   ├── pages/{interior,local,kitchen,bathroom,colored_floor_plan,
-│   │   │            furniture,report,voice_summary}/index.vue
-│   │   ├── components/         # FeatureShell, StandardFeaturePage, OptionGrid,
-│   │   │                       # UploadStep, ImageConfirmStep, ClientInfoForm,
-│   │   │                       # SubmittedStep, TokenShortageDialog ...
-│   │   ├── composables/        # useDesignTokenCost, useSubmissionEligibility
-│   │   ├── repositories/      # designAssets, designJobSubmit, standardDesignJob,
-│   │   │                       # furnitureDesignJob, promptCatalog, voiceAudioAssets ...
-│   │   └── services/           # *DesignSubmit, voiceSummarySubmit, voiceAudioFiles, ...
-│   ├── pkg-plans/              # Subpackage: plan detail, report, markdown summary
-│   │   ├── pages/detail/index.vue
-│   │   ├── pages/report/index.vue
-│   │   ├── pages/markdown/index.vue   # voice summary view + resumable playback
-│   │   ├── repositories/       # designJob, resultFile, httpUrl
-│   │   └── services/           # markdownSummary, reportViewer, designComparison, resultDownload
-│   ├── pkg-account/            # Subpackage: login, store, billing, org, tokens
-│   │   ├── pages/{login,profile,legal,store,orders,subscription,organization,
-│   │   │            invitation,rewards,tokens}/index.vue
-│   │   ├── components/         # AccountPage, dev SubscriptionScenarioPanel
-│   │   ├── repositories/       # paymentOrder, paymentHistory, paymentResume,
-│   │   │                       # paymentReconciliation, paymentClose, purchaseRequest,
-│   │   │                       # billingCatalog, workspaces, memberSelfLeave, rewards ...
-│   │   └── services/           # payment, pricePresentation, entitlementPresentation,
-│   │                           # subscriptionRenewal, storeDemo*, submissionCatalogPresentation
-│   ├── repositories/           # Shared async repositories (session, profile,
-│   │                           # designJobs, designCatalog, content, workspaces, ...)
-│   ├── services/               # Shared services (request, wechatAuth, accountGate,
-│   │                           # pollScheduler, homeEntryGuard, clientInfo, assets, ...)
-│   ├── stores/session.ts       # Token-pair persistence (the only store)
-│   ├── api/dto/                # Typed API contracts (design, session, billing, workspace)
-│   ├── domain/                 # Pure domain logic (report, tasks, wallet)
-│   ├── types/                  # Shared TS types (design, home, account, auth)
-│   ├── components/             # Shared components (home/FeatureGrid, home/HeroCarousel,
-│   │                           # common/RemoteImage, common/DesignIcon, account/..., dev/...)
-│   ├── static/                # Icons, tabbar images, brand assets, placeholders
-│   ├── styles/                # design-tokens.json + generated SCSS/TS, placeholder.scss
-│   ├── App.vue                 # App entry (hydrate session on launch)
-│   ├── main.ts                 # createSSRApp + uview-plus
-│   ├── manifest.json           # uni-app / WeChat build manifest (AppID, permissions)
-│   └── pages.json              # Pages, subpackages, tabBar, globalStyle
-├── scripts/                    # Build helpers, quality gates, design-system gen
-├── tests/                      # Vitest unit tests + node:test domain tests + harness
-├── documents/                  # UI spec, REST API interface, runbooks
-├── vite.config.ts              # Build + compile-time alias wiring
-├── vitest.config.ts            # Test runner + coverage thresholds
-└── package.json               # Scripts (dev/build/test per platform)
-```
-
-## Key design decisions
-
-### 1. Pages never call HTTP directly
-
-Every screen depends only on **asynchronous repositories**. There is no fetch
-in a page `.vue` file. The repository layer is what makes Mock mode and API
-mode interchangeable — see [Data Source Modes](/frontend/data-source-modes).
-
-### 2. Mock vs API is decided at compile time
-
-`vite.config.ts` uses Vite **resolve aliases** that point abstract module names
-(e.g. `AccountRepositoryRuntime`, `TaskRepositoryRuntime`, `WechatCodeRuntime`)
-at either the mock or the API implementation based on `VITE_DATA_SOURCE`,
-`VITE_WECHAT_AUTH_MODE` and friends. There is **no runtime switch**; each build
-is a fixed configuration.
-
-### 3. Every backend response is validated
-
-Repository functions treat raw JSON as `unknown` and re-shape it into typed
-domain objects, throwing `ApiRequestError` (`code: *RESPONSE_INVALID`) on any
-contract violation. This is what keeps mock/API parity honest — see
-`mapDesignJobResponseMedia` in `src/repositories/designJobs.ts` and
-`mapDesignJobDetail` in `src/repositories/designJobDetail.ts`.
-
-### 4. Compile-time strictness
-
-The build runs type checks (`vue-tsc`), domain tests, unit tests and a battery
-of **quality gates** that inspect the compiled mini program (package sizes,
-domain validation, forbidden files). See [Testing & Quality Gates](/frontend/testing).
-
-## Main package vs subpackages
-
-WeChat limits the main package size. Heavy feature code is split into
-**subpackages** loaded on demand (declared in `src/pages.json`, with
-`mp-weixin.optimization.subPackages: true` and
-`lazyCodeLoading: "requiredComponents"`):
-
-| Chunk | Contents |
+| Directory | Responsibility |
 | --- | --- |
-| Main package | Splash screens, home, plans, profile, contact, tab bar |
-| `pkg-features` | Design + voice feature flow pages and their logic |
-| `pkg-plans` | Plan detail, HTML report viewer, markdown voice-summary viewer |
-| `pkg-account` | Login, store, orders, subscription, organization, invitation, rewards, tokens |
+| `src/pages` | Startup screens, home, contact, projects/plans/profile tabs, diagnostics and payment-order entry |
+| `src/pkg-features` | Feature forms, upload/submit orchestration, local draft handling |
+| `src/pkg-plans` | Image comparison, Markdown/audio, video and report result viewers |
+| `src/pkg-projects` | Project editor/detail, member project view and activity; conditional subpackage |
+| `src/pkg-account` | Login, legal documents, account profile, store, subscription, orders, tokens, organization and drafts |
+| `src/repositories`, `src/api/dto` | Validated data access and API contracts |
+| `src/services`, `src/stores`, `src/domain` | Shared behavior, session credentials and pure domain logic |
+| `config`, `scripts`, `tests` | Build profiles, artifact/contract gates and test harnesses |
 
-Recent mock-mode sizes (from the project README): main ≈ 395 KiB,
-`pkg-features` ≈ 57 KiB, `pkg-plans` ≈ 9 KiB, `pkg-account` ≈ 26 KiB. The WeChat
-limit is 1.5 MiB per chunk.
+## Build and ownership boundaries
 
-## The tab bar
+Frontend Mock provides deterministic image/UI demonstrations; it does not expose every API-only capability. API mode uses the real backend and can independently select platform authentication/payment. Server secrets never belong in `VITE_*` settings, because these values enter the client bundle.
 
-Four tabs are declared in `pages.json` → `tabBar`:
+The frontend documents distinguish current UI constraints from the wider public contract. For example, video UI requires exactly one scene reference, while the backend accepts zero to twelve; the UI's script limit is also narrower. See [Workflows](/frontend/workflows).
 
-| Tab | Page |
-| --- | --- |
-| 首页 | `pages/home/index` |
-| 联系我们 | `pages/contact/index` |
-| 我的方案 | `pages/plans/index` |
-| 我的 | `pages/profile/index` |
+Start with [Getting started](/frontend/getting-started), then [Architecture](/frontend/architecture). Detailed behavior is split into [Key flows](/frontend/key-flows), [Workflows](/frontend/workflows), [Projects](/frontend/projects) and [Platforms](/frontend/platforms).
 
-The active color is the brand sage `#526F5A`; the idle color is `#858A85`.
+## Source evidence
 
-## Next steps
-
-- [Frontend Getting Started](/frontend/getting-started) — install, run, build.
-- [Architecture](/frontend/architecture) — layers, subpackages, stores and how
-  they interact.
-- [Data Source Modes](/frontend/data-source-modes) — mock vs API and every
-  environment variable.
-- [Key User Flows](/frontend/key-flows) — what happens in the UI for each major
-  interaction.
-- [Design System](/frontend/design-system) — tokens and UI conventions.
-- [Testing & Quality Gates](/frontend/testing).
+Frontend `eca0a5f` (2026-10-20): [Feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [Page registration](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pages.json) · [Package](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json).

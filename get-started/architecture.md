@@ -1,177 +1,51 @@
-# Architecture Overview
+# System Architecture
 
-This page gives you the **big picture** of how the whole system is wired
-together. It is intentionally high-level; every component is covered in depth
-in the Frontend, Backend, Deploy and Reference sections.
+The mini programs provide the user interface. The backend owns accounts, prices, permissions, persistent jobs and settlement. PostgreSQL records durable business state; Redis coordinates background work; object storage holds uploaded and generated files.
 
-## The system at a glance
-
-```
-        ┌─────────────────────────────────────────────────────────────────┐
-        │                          WeChat (Tencent)                       │
-        │   identity (code2session / phone)          WeChat Pay (JSAPI)   │
-        └───────▲───────────────────────────────────────▲─────────────────┘
-                │                                       │
-                │ wx.login / phone auth / pay            │ payment notify
-                │                                       │
-        ┌───────┴──────────────────────┐      ┌─────────┴──────────────┐
-        │   Mini Program               │      │   Backend (SAE)        │
-        │  (uni-app + Vue 3 + TS)      │ HTTPS│   FastAPI (API)        │
-        │  WeChat DevTools / phone     │─────►│   /api/v1/*            │
-        └───────▲──────────────────────┘      │                        │
-                │ direct upload (presigned)   │  ┌───────────────────┐  │
-        ┌───────┴──────────────────────┐      │  │ ARQ Submit Worker  │  │
-        │   Object Storage             │◄─────│  └───────┬───────────┘  │
-        │ (MinIO / Aliyun OSS)         │      │  ┌───────▼───────────┐  │
-        └───────▲──────────────────────┘      │  │ ARQ Poll Worker   │  │
-                │ result images / audio       │  └───────┬───────────┘  │
-        ┌───────┴──────────────────────┐      │  ┌───────▼───────────┐  │
-        │   AI Image / Speech Provider │◄─────│  │  AI Provider      │  │
-        │  (Seedream etc., HTTP)       │      │  └───────────────────┘  │
-        └──────────────────────────────┘      │  PostgreSQL │ Redis    │
-                                              └──────────────────────────┘
+```mermaid
+flowchart LR
+  MP[WeChat / Douyin mini program] -->|REST and access token| API[FastAPI API]
+  ADM[Admin browser] -->|Session and CSRF| API
+  API --> DB[(PostgreSQL)]
+  API --> Q[(Redis / ARQ)]
+  Q --> W[Background workers]
+  W --> P[Model and media providers]
+  W --> DB
+  MP -->|Authorized upload / signed download| S[(MinIO / OSS)]
+  W --> S
+  PAY[WeChat / Douyin payment] -->|Verified notifications| API
 ```
 
-## Components and their roles
+## Request addresses
 
-### 1. WeChat Mini Program (Frontend)
+Public product routes use **`/v1`**, for example `/v1/me`, `/v1/billing/features` and `/v1/workflows`. Health routes such as `/health/ready`, Admin under `/admin`, and development-only `/mock` routes have separate prefixes. Do not add an `/api` prefix merely because the server is an API.
 
-- Runs inside WeChat on the user's phone.
-- Built with **uni-app (Vue 3 + TypeScript + uview-plus)**.
-- Talks to the backend over **HTTPS** using a REST client
-  (`src/services/request.ts`) that automatically handles token refresh.
-- Uploads photos **and audio** **directly to object storage** using presigned
-  POST forms issued by the backend (never through the backend proxy).
-- Polls the backend for design-job status while the user waits.
-- Two compile-time modes: **Mock** (self-contained, for UI development) and
-  **API** (production behavior). See
-  [Data Source Modes](/frontend/data-source-modes).
+The frontend appends each route to `VITE_API_BASE_URL`. For a local stack on port 8080, the base is `http://127.0.0.1:8080`, and the complete profile URL is `http://127.0.0.1:8080/v1/me`.
 
-### 2. Backend (FastAPI)
+## A generation request
 
-A Python 3.12 FastAPI application that owns all business logic:
+1. The app discovers available Features, prices and applicable permissions. Authenticated template discovery supplies editable fields.
+2. Files use role-bound upload intents, direct object-storage upload and server completion verification. Text-only copywriting needs no file upload. Some recording-entry flows also use dedicated upload-session APIs.
+3. The app submits an idempotent request to `/v1/workflows` or a supported legacy `/v1/design-jobs` route. A `202` means accepted, not finished.
+4. The server checks the account, workspace/project, entitlement, concurrent-job limit and balances. Workers execute the configured Workflow operations and persist their results.
+5. The app reads status with server-provided poll timing. It displays an image, Markdown, video or report when the server reports completion.
 
-- **REST API** — authentication, design jobs, assets, billing, workspaces,
-  reports, admin. Every route lives under `/api/v1`.
-- **ARQ workers** — background job processors (see below).
-- **Database access** — SQLAlchemy 2.0 async ORM over PostgreSQL.
-- **Object storage** — S3-compatible storage for photos, audio, renderings and
-  report assets.
-- **WeChat integration** — login + payment.
+Canonical Workflows and legacy design-job compatibility are explained in [Frontend workflows](/frontend/workflows) and [API reference](/reference/rest-api). Operation execution can involve image generation, speech/text processing, report assembly, local media work or export; it is not always a single external image-model request.
 
-The backend is deployed to **Alibaba Cloud SAE** as several applications that
-share one immutable Docker image (see [Deploy](/deploy/cloud-architecture)).
+## Identity, money and collaboration
 
-### 3. ARQ workers
+WeChat and Douyin exchange platform login/phone credentials through the backend. The app receives an access/refresh token pair; the request client shares refresh work across concurrent requests. AppSecrets and provider credentials belong on the server.
 
-ARQ is a Redis-backed Python job queue. The backend runs two worker types:
+Subscriptions grant permissions and allowances. Token balances fund generation. The server selects prices and performs reservations, settlement or release; a client precheck is only an early explanation. A native payment success callback alone does not establish paid status: the app confirms the server order.
 
-| Worker | Job | What it does |
-| --- | --- | --- |
-| **Submit worker** | `submit_provider_job` | Takes a reserved design job, composes the provider request (prompt + images/audio), calls the AI provider, and stores the provider's job id. |
-| **Poll worker** | `poll_provider_job` | Repeatedly asks the AI provider whether the job finished; when it has, downloads and persists the result (image or markdown text) and marks the job complete. |
+Each account has a personal workspace and may own or join enterprises. A submission names its workspace explicitly. Projects organize a user's work within that workspace; the current/default project and enterprise read-only member views have different purposes. See [Projects and collaboration](/frontend/projects).
 
-Workers are **stateless** and consume jobs from Redis, so they can be scaled
-independently.
+## Local and cloud environments
 
-### 4. AI Provider
+A local Docker stack contains the API, workers, PostgreSQL, Redis, MinIO and selected provider mocks. It still needs valid legal/product configuration. Cloud deployment uses separately configured services and persistent storage. Private video dependencies are built into the server image, so even a local image build requires authorized source access.
 
-An external large model — the primary image provider is **Seedream** (wrapped
-in `app/providers/`); the voice-summary flow adds a speech-to-text /
-summarization provider. The backend treats providers as **asynchronous HTTP
-services**: submit → get a `provider_job_id` → poll → fetch the result. A
-**mock provider** ships with the local stack so the whole pipeline can be
-exercised without real credentials.
+Follow [Quick Start](/get-started/quickstart) for a local acceptance loop and [Cloud architecture](/deploy/cloud-architecture) for deployment details.
 
-### 5. PostgreSQL
+## Source evidence
 
-The durable system of record. It stores users, sessions, workspaces, design
-jobs, token ledgers, billing orders/subscriptions, report configurations,
-asset metadata, share/referral invitations and legal-document acceptances.
-Schema changes are managed with **Alembic** migrations.
-
-### 6. Redis
-
-Used for:
-
-- The **ARQ job queue** (submission and polling tasks).
-- **Rate limiting** (auth attempts, design-job submission).
-- **Progress metrics** (moving-average durations shown to users).
-- Short-lived coordination/cache state.
-
-### 7. Object storage
-
-S3-compatible object storage for all binary content:
-
-- **Input images and audio** uploaded by users (with a temporary retention
-  window before the job is submitted).
-- **Result renderings** and **markdown summary text** (stored as a job output).
-- **Report assets** and the global **legal documents** (privacy, terms).
-
-Local development uses **MinIO**; production uses **Aliyun OSS**. The frontend
-only trusts result-media origins listed in `VITE_RESULT_STORAGE_ORIGINS`.
-
-## The core flow: a design job
-
-The heart of the system is the **asynchronous design job**. The same pattern
-backs image features and the voice-summary feature:
-
-```
-user uploads photo / records audio
-        │
-        ▼
-POST /api/v1/assets/upload-intents  (per asset, idempotent)
-        │
-        ▼
-direct upload to presigned URL  ──►  POST /api/v1/assets/{id}/complete
-        │
-        ▼
-POST /api/v1/design-jobs  (reserve tokens, create job, enqueue)
-        │
-        ▼
-Redis queue ─► Submit worker ─► AI provider (job created)
-        │
-        ▼
-Poll worker ◄──► AI provider (job done?)
-        │
-        ▼
-result image / markdown persisted ─► job status = completed
-        │
-        ▼
-Mini program polls GET /api/v1/design-jobs/{id} ─► shows result
-```
-
-For the complete, step-by-step trace (which tables are written and which HTTP
-hops happen), see
-[Design Job Lifecycle](/reference/flows/design-job-lifecycle).
-
-## Money flow: tokens and subscriptions
-
-- Each design job **reserves** a number of tokens when submitted and
-  **settles** the exact cost when the job finishes.
-- Users buy **token packages** or a **subscription** through WeChat Pay.
-- The backend receives the WeChat Pay **payment notification webhook**, marks
-  the order paid and credits tokens / activates the subscription.
-- In the current version, subscriptions are **manually renewed**; renewing an
-  already-active subscription is explicitly disclaimed in the UI
-  ("暂不支持提前续订").
-
-## Authentication model
-
-- Users authenticate with **WeChat login** (`wx.login` code → backend exchanges
-  it for an `openid`, and on first registration the phone number too).
-- The backend issues an **access token** (short-lived) and a **refresh token**
-  (long-lived).
-- The mini program stores the token pair in local storage under
-  `yuanzhu.session.tokens.v1` and automatically refreshes it when a request
-  returns `401 AUTH_TOKEN_EXPIRED_OR_INVALID` (a single shared refresh promise
-  collapses concurrent 401s).
-
-See [Authentication](/backend/authentication) and the
-[WeChat Login Flow](/reference/flows/wechat-login-flow).
-
-## Next steps
-
-- Follow the [Quick Start](/get-started/quickstart) to run everything locally.
-- Dive into the [Frontend](/frontend/overview) or [Backend](/backend/overview).
-- Explore the [Deploy](/deploy/local-stack) options.
+Documented against frontend `eca0a5f` and backend `b13cc56` (2026-10-20). [Frontend request client](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts) · [Backend application assembly](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py) · [Backend local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md).

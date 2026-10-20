@@ -1,133 +1,51 @@
-# GitHub Actions CI/CD
+# CI/CD 与文档验证
 
-有两个仓库使用 GitHub Actions：**后端**（YuanZhu-AI）运行定时耐久压测和 PR 文档门禁；
-本**文档仓库**（`docs`）自动把站点发布到 GitHub Pages。SAE 云测与生产部署本身
-**不是** GitHub Actions 工作流——它由 `deploy/sae/` 下的脚本手动驱动
-（见 [SAE 部署操作手册](/deploy/sae-deployment)）。本页覆盖*所有*已自动化的部分。
+后端、小程序和文档有不同的检查及发布边界。docs 构建成功只证明此站点的对应检查通过，不代表已部署后端或完成支付/供应商验收。
+
+## 文档检查
+
+在文档仓库中运行：
+
+```bash
+pnpm install --frozen-lockfile
+pnpm docs:check
+pnpm docs:test:browser
+pnpm docs:sources --frontend /path/to/wechat_mini_program --backend /path/to/YuanZhu-AI --check
+```
+
+`docs:check` 构建生产站点并检查适用静态契约，包括链接、锚点、本地资源和语言结构。浏览器检查在构建产物上验证搜索、语言导航、深链接与运行渲染。源码检查读取固定 Git 提交，对比由源码提取的清单，不启动服务、连接数据库或调用模型。
+
+更新文档基线时，显式更新源码元数据与生成清单；不同 HEAD 或未提交代码不能悄悄冒充记录版本。见[维护指南](/zh/reference/maintenance)与[源码版本](/zh/reference/source-revisions)。
+
+## Pages 发布
+
+VitePress 输出 `.vitepress/dist`，GitHub Pages 在 `/docs/` 提供服务。PR 检查先验证修改，授权合入 `main` 后通过 Pages 发布构建产物。部署需要 Pages/token 权限；验证任务保持只读，不把 PR 内容直接部署生产站点。
+
+文档根相对链接明确语言：英文 `/frontend/overview`，中文 `/zh/frontend/overview`；VitePress 渲染时添加 `/docs/`。主题资源路径不带 base，例如 `/favicon.svg`。当前 Pages 支持 clean URL 的直接深链接，既要检查站内跳转，也要检查刷新直达。
 
 ## 后端工作流
 
-后端仓库（`.github/workflows/`）附带两个工作流。
+当前快照有 `daily-endurance.yml` 与 `sdd-docs.yml`。daily endurance 是带版本筛选的定时/repository-dispatch 运行门禁，不是每个文档 PR 都执行的测试。SDD 工作流验证过程文档/工具并保存证据。SAE 镜像发布和受保护晋级在 `deploy/sae/`，不能从合入后端推断已自动上线。
 
-### `daily-endurance.yml`——定时负载耐久压测
+后端规范明确：仅文档修改不触发单测、全量回归、smoke/E2E，只验证渲染、命令、链接、图表和引用。生产代码修改执行 focused coverage/风险审阅、保留审阅者、全量回归及部署基线升级流程；混合修改按生产代码要求执行。
 
-| 方面 | 值 |
-| --- | --- |
-| **文件** | `.github/workflows/daily-endurance.yml` |
-| **触发** | `schedule`（cron `17 3 * * *`）和类型为 `daily-endurance` 的 `repository_dispatch` |
-| **权限** | `actions: read`、`contents: read` |
-| **并发** | 分组 `daily-endurance`，`cancel-in-progress: false` |
+## 前端检查与发布
 
-它做的事：
+使用选定 `ui-integration` 快照的 package scripts 做类型、设计系统和平台构建检查。模式脚本会选择 API/mock 与目标平台。微信构建成功不证明抖音真实支付、真机网络或视频供应商兼容；客户端 API 环境与公开域名配置必须对齐目标发布边界。
 
-1. **`decide` job**（ubuntu-latest，5 分钟超时）：当由 schedule 触发时，它向 GitHub API
-   查询上一次定时运行的 `head_sha`。若与当前 SHA 相同则跳过（发布已覆盖）；
-   否则继续运行。手动 `repository_dispatch` 总是运行。
-2. **`endurance` job**（needs `decide`，75 分钟超时）：
-   - 检出代码，安装 Python 3.12 和 `.[dev]` 测试依赖。
-   - 校验有界 profile：精确为 `E2E_USER_RUNNERS=2`、
-     `E2E_USERS_PER_CONTAINER=4`、`E2E_DURATION_SECONDS=1800`、
-     `E2E_AUTH_THREADS_PER_CONTAINER=2`、`E2E_API_WORKERS=2`。
-   - 把 `.env.example` 安装到受保护的临时文件，并针对云端 admin 运行
-     `python -m app.config_sync query` 以捕获校验过的配置快照。
-   - 通过 `scripts/run_e2e_tests.sh --local localhost --mode endurance --config-snapshot ...`
-     拉起一个一次性 Compose 栈（`CI_COMPOSE_PROJECT=yuanzhu-daily-<run-id>`、
-     `CI_API_PORT=6060`）。
-   - 把 `free -m`、`df -h`、`docker stats` 采样到 `resources.log`。
-   - 结束时（无论成败）抓取 `docker compose ps`/日志，把证据目录作为
-     保留 7 天的 artifact 上传，并以 `--volumes` 拆除自己的栈。
+## 贡献约定
 
-**所需 Secrets：**
+- 重组时保留已公开路由，或提供明确重定向。
+- 同时更新双语内容与导航；标识符和 API 路径保持精确。
+- 行为引用固定代码/契约，区分代码默认、示例与实际云端状态。
+- 不提交秘密材料、私有测试证据、依赖目录或分发产物。
+- 文档修正运行最小相关检查，不为检查文字启动产品栈。
 
-| 类型 | 名称 | 用途 |
-| --- | --- | --- |
-| secrets | `CLOUD_API_URL` | 耐久 E2E 目标 / 配置同步来源 |
-| secrets | `CLOUD_ADMIN_USERNAME` | 配置同步 admin 登录 |
-| secrets | `CLOUD_ADMIN_PASSWORD` | 配置同步 admin 密码 |
-| vars | `DAILY_E2E_USER_ACTION_DELAY_SECONDS`、`DAILY_E2E_ADMIN_ACTION_DELAY_SECONDS` | 可选节奏覆盖（有界 1–10 s / 0.5–5 s） |
+## 源码依据
 
-### `sdd-docs.yml`——PR 文档门禁
+已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-| 方面 | 值 |
-| --- | --- |
-| **文件** | `.github/workflows/sdd-docs.yml` |
-| **触发** | 路径 `**/*.md`、`.github/spec-driven-delivery/**`、`scripts/check_sdd.py`、`tests/tooling/**`、`pyproject.toml`、本工作流文件上的 `pull_request` |
-| **权限** | `contents: read` |
-| **并发** | 按 PR 编号分组，`cancel-in-progress: true` |
-
-单个 job（`sdd`，ubuntu-latest，10 分钟）安装固定版本的文档工具
-（`markdown-it-py==4.2.0`、`PyYAML==6.0.3`、`ruff==0.16.0`）并运行：
-
-```bash
-python scripts/check_sdd.py
-python -m unittest discover -s tests/tooling -p 'test_*.py'
-python -m ruff check scripts/check_sdd.py tests/tooling
-python -m ruff format --check scripts/check_sdd.py tests/tooling
-git diff --check "$BASE_SHA...$HEAD_SHA"
-```
-
-证据作为保留 30 天的 artifact 上传。无需 secrets。
-
-### SAE 部署自动化在哪里
-
-云测与生产 SAE 发布由 `deploy/sae/deploy.sh` 及其辅助脚本
-（`build-image.sh`、`run-deploy-container.sh`、`deploy-image.sh`）执行，
-而非 GitHub Actions 工作流。预期的运维流程是：
-
-1. 推送到 `main`（或运行 `daily-endurance`）。
-2. 本地运行两阶段部署（构建镜像 → 按摘要部署）——见
-   [SAE 部署操作手册](/deploy/sae-deployment)。
-3. 生产提升使用受保护的 `--promote` / `--rollback` 参数。
-
-这样把发布控制权留在一个能读懂迁移备份证据、并批准数据库关卡的运维人员手中，
-而不是交给一次定时运行。
-
-## 文档工作流：自动发布到 GitHub Pages
-
-文档仓库（`.github/workflows/deploy.yml`）使用标准的 VitePress + GitHub Pages 设置。
-
-| 方面 | 值 |
-| --- | --- |
-| **文件** | `.github/workflows/deploy.yml` |
-| **触发** | 推送到 `main`，以及手动 `workflow_dispatch` |
-| **权限** | `contents: read`、`pages: write`、`id-token: write` |
-| **并发** | 分组 `pages`，`cancel-in-progress: false` |
-| **环境** | `github-pages` |
-
-两个 job：
-
-1. **`build`**（ubuntu-latest）：checkout → 安装 `pnpm/action-setup` +
-   `actions/setup-node@v4`（Node 22，pnpm 缓存）→ `pnpm install --frozen-lockfile` →
-   `pnpm docs:build` → 通过 `actions/upload-pages-artifact@v3` 上传 `.vitepress/dist`。
-2. **`deploy`**（needs `build`）：用 `actions/deploy-pages@v4` 部署到
-   `github-pages` 环境。
-
-无需任何仓库 secret——GitHub Pages 身份由 `GITHUB_TOKEN` 提供。
-
-### 本地文档命令
-
-由于 GitHub Pages 在项目路径下服务本仓库，`.vitepress/config.mts` 设置了
-`base: '/docs/'`（与仓库名匹配）。如果你重命名了仓库，请更新 `base`。
-
-```bash
-pnpm install
-pnpm docs:dev        # 带 HMR 的开发服务器
-pnpm docs:build      # 生产构建，输出到 .vitepress/dist
-pnpm docs:preview    # 预览构建产物
-```
-
-`package.json` 固定了 `packageManager: pnpm@10.28.2` 和 `vitepress: ^1.6.3`。
-
-## 本文档的贡献规则
-
-- 所有内容都是 section 目录下的 Markdown（`deploy/`、`reference/flows/` 等）。
-- 内部链接是根相对路径，不带 `.md` 或语言前缀（例如
-  `/deploy/sae-deployment`、`/reference/flows/design-job-lifecycle`）。
-- 真实服务名、端口、环境变量和脚本路径要与后端保持同步。
-- 绝不提交 `node_modules/`、`.env` 或 `.vitepress/dist/`。
-- 推送到 `main` 即发布；站点自动更新。
-
-## 下一步
-
-- [SAE 部署操作手册](/deploy/sae-deployment)——手动两阶段流程。
-- [生产提升与回滚](/deploy/production)——已验证的镜像如何上生产。
+- [后端文档工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.github/workflows/sdd-docs.yml)
+- [定时运行工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.github/workflows/daily-endurance.yml)
+- [规范测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/tests/documents/TEST_STRATEGY.md)
+- [前端脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json)

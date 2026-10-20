@@ -1,177 +1,138 @@
-# REST API Reference
+# REST API Index
 
-This page is the **complete route table** for the YuanZhu AI mobile API,
-derived directly from `app/api.py`, `app/asset_api.py`, `app/billing_api.py`,
-`app/workspace_api.py`, `app/referral_api.py`, and
-`app/account_lifecycle_api.py`. Paths below are the **exact** paths the
-FastAPI app serves (routers are mounted at the app root; the version prefix is
-`/v1`).
-
-For live request/response schemas, use the generated
-[OpenAPI document](/reference/openapi). For the data behind these routes, see
-[Data Model](/reference/data-model).
+This page is a domain-oriented integration map. The [complete pinned REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md) is normative for exact fields, successful/replay statuses and every reachable domain error. Internal Admin and conditional mocks have different boundaries.
 
 ## Conventions
 
-- **Internal mount:** the FastAPI app mounts every mobile router at the root,
-  so the paths below are the **exact** paths uvicorn serves — e.g. `/v1/me`,
-  `/v1/design-jobs`. Locally (docker-compose) you reach them directly at
-  `http://localhost:8000/v1/...`.
-- **Public/edge prefix:** in production the API sits behind a gateway that
-  exposes the same routes under an `/api` prefix, so the Mini Program calls
-  `/api/v1/me` and the edge maps it to `/v1/me`. The route table below lists
-  the internal `/v1` paths; prepend `/api` for production URLs.
-- **Auth:** most routes require `Authorization: Bearer <access_token>` (see
-  [Authentication](/backend/authentication)). Public routes are marked.
-- **Idempotency:** mutating upload / referral / payment routes accept an
-  `Idempotency-Key` header (8–128 chars). Replaying the key returns the
-  original result instead of double-executing.
-- **Errors:** all errors share the envelope
-  `{"detail": {"code": "MACHINE_READABLE_CODE"}}`.
-- **Content type:** request/response bodies are `application/json`, except the
-  report HTML route and admin forms.
+Set `API_BASE_URL` to the selected environment, for example `http://localhost:<owner-selected-port>`. All paths below are relative to it. Use HTTPS for real clients. Most `/v1` calls require `Authorization: Bearer <access_token>`; exceptions are listed explicitly. Idempotency keys are durable per action (upload-intent keys are 8–128 characters), and must survive a timeout/restart when replaying the same action.
 
-## Health & meta
+Domain errors have `{"detail":{"code":"STABLE_CODE","message":"..."}}`; branch on `code`, not message text. Request-shape `422` uses a validation array instead. `409 TRANSIENT_CONFLICT` carries `Retry-After: 1`; honor it and reuse the key for an idempotent action. Never retry a non-idempotent/paid operation merely because an SDK labels an error transient.
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| GET | `/health/live` | public | process is up |
-| GET | `/health/ready` | public | Postgres + Redis reachable |
-| GET | `/openapi.json` | public | generated OpenAPI schema |
-| GET | `/metrics` | internal | compact performance snapshot |
-| GET | `/configuration/export` | admin | export deployment config (`config_export.py`) |
+## Identity and discovery
 
-## Authentication (`app/api.py` `auth_router`)
+| Methods / paths | Authentication and purpose |
+| --- | --- |
+| `GET /health/live`, `GET /health/ready` | Public; `200`, readiness can return `503 DEPENDENCY_UNAVAILABLE` |
+| `GET /v1/legal-documents/current`, `GET /v1/legal-documents/{document_id}/content` | Public current immutable documents and their content |
+| `POST /v1/auth/register`, `/login`, `/wechat-login`, `/douyin-login` | Public rate-limited authentication; registration/platform login includes current legal acceptance |
+| `POST /v1/auth/refresh`, `/logout` | Refresh token in request body; rotate or revoke the session |
+| `GET/PATCH /v1/me`, `POST /v1/me/deactivate` | Bearer profile and account lifecycle |
+| `POST /v1/auth/reactivate`, `/wechat-reactivate`, `/douyin-reactivate` | Credential-specific reactivation flow |
+| `GET /v1/billing/features`, `/v1/billing/catalog` | Public Feature/catalog; catalog is compatibility and supports `200`/`304` |
+| `GET /v1/design-workflows` | Public deprecated alias of `/v1/billing/features`, with identical catalog/ETag behavior |
+| `GET /v1/prompt-templates`, `/v1/prompt-templates/{prompt_template_name}` | Bearer; current template contract, exact names/fields are required at submission |
+| `GET/POST /v1/prompt-presets`, `PATCH/DELETE /v1/prompt-presets/{preset_id}` | Bearer-owned prompt selections |
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| POST | `/v1/auth/register` | public, rate-limited | register a phone+password account, return tokens (201) |
-| POST | `/v1/auth/login` | public, rate-limited | phone + password login, return tokens |
-| POST | `/v1/auth/wechat-login` | public, rate-limited | exchange a `wx.login` code for an OpenID, return tokens |
-| POST | `/v1/auth/refresh` | refresh token | rotate the access token |
-| POST | `/v1/auth/logout` | bearer | revoke the current session (204) |
-| POST | `/v1/auth/reactivate` | public, rate-limited | restore a deactivated account via phone+password |
-| POST | `/v1/auth/wechat-reactivate` | public, rate-limited | restore a deactivated account via WeChat code |
-| POST | `/v1/me/deactivate` | bearer | start the deactivation grace period (204) |
+Example read:
 
-## Me, workspaces, prompts, report discovery (`app/api.py` `design_router`)
+```bash
+curl --fail "$API_BASE_URL/v1/legal-documents/current?locale=zh-CN"
+curl --fail "$API_BASE_URL/v1/billing/features"
+```
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| GET | `/v1/me` | bearer | current user profile + balance |
-| PATCH | `/v1/me` | bearer | update profile (display name etc.) |
-| GET | `/v1/me/workspaces` | bearer | list accessible workspaces + current selection |
-| GET | `/v1/report-items?workspace_id=` | bearer | discover available report sections |
-| GET | `/v1/prompt-templates` | bearer | list active prompt templates |
-| GET | `/v1/prompt-templates/{prompt_template_name}` | bearer | one prompt template's variables/options |
+A `503 LEGAL_DOCUMENTS_UNAVAILABLE` blocks admissible registration; `409 LEGAL_ACCEPTANCE_REQUIRED` requires fetching/displaying current documents and renewed consent. Do not insert invented document IDs into login examples.
 
-## Design jobs (`app/api.py` `design_router`)
+## Workspaces and private Projects
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| POST | `/v1/design-jobs` | bearer | create + reserve a job; returns `202 Accepted` |
-| GET | `/v1/design-jobs` | bearer | list the caller's jobs (paginated) |
-| GET | `/v1/workspace/design-jobs` | bearer | list jobs in the current workspace |
-| GET | `/v1/design-jobs/{design_job_id}` | bearer | one job's status + progress |
-| GET | `/v1/design-jobs/{design_job_id}/report` | bearer | rendered HTML report (`HTMLResponse`) |
-| GET | `/v1/design-jobs/{design_job_id}/result-file` | bearer | download the result file |
-| DELETE | `/v1/design-jobs/{design_job_id}` | bearer | delete a terminal job (204) |
+| Methods / paths | Purpose |
+| --- | --- |
+| `GET /v1/me/workspaces`, `/v1/me/history-workspaces`, `/v1/me/workspace-removal-notices` | Bearer current access, departed history and removal notices |
+| `GET/PATCH /v1/workspaces/{workspace_id}`, `POST /v1/workspaces` | Workspace detail, owner updates/creation according to the contract |
+| `GET /v1/workspaces/{workspace_id}/overview`, `/token-detail` | Authorized workspace overview and financial detail |
+| `GET /v1/project-statuses` | Bearer code-owned status catalog; outcomes depend on activation |
+| `GET/POST /v1/workspaces/{workspace_id}/projects` | Creator-private project collection in the selected workspace |
+| `PUT /v1/workspaces/{workspace_id}/projects/default` | Persist caller's default Project |
+| `GET/PATCH /v1/workspaces/{workspace_id}/projects/{project_id}` | Authorized detail/creator mutation |
+| `POST /v1/workspaces/{workspace_id}/projects/{project_id}/delete` | Guarded project deletion; not an unqualified hard delete |
+| `POST/GET /v1/workspaces/{workspace_id}/share-invitations` | Enterprise-owner creation/list; list `200`, token absent from owner list |
+| `POST /v1/share-invitations/preview`, `/accept` | Public preview; authenticated atomic accept |
+| `DELETE /v1/workspaces/{workspace_id}/share-invitations/{invitation_id}` | Owner revocation, `204` |
+| `POST /v1/workspaces/{workspace_id}/invitations`, `DELETE /.../members/{member_user_id}` | Owner phone invitation/member removal |
+| `DELETE /v1/workspaces/{workspace_id}/membership` | Authenticated member leaves |
 
-## Assets (`app/asset_api.py`, prefix `/v1/assets`)
+Singular `/v1/workspace*` routes remain compatibility interfaces for invitation inbox/accept/decline and owner access. They are not a substitute for explicit selected-workspace authorization. Referral `/v1/referral-invitations*` and reward `/v1/rewards*` are a separate attribution/claim system; they do not join an enterprise.
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| POST | `/v1/assets/upload-intents` | bearer + `Idempotency-Key` | mint a presigned direct-upload form (201, or 200 on replay) |
-| POST | `/v1/assets/{asset_id}/complete` | bearer | verify the upload and finalize the asset |
-| GET | `/v1/assets` | bearer | list the caller's assets (paginated) |
-| GET | `/v1/assets/{asset_id}` | bearer | asset metadata + preview |
-| DELETE | `/v1/assets/{asset_id}` | bearer | delete an asset (204) |
+## Asset admission
 
-## Billing & payments (`app/billing_api.py`, prefix `/v1`)
+| Method / path | Credential and successful result |
+| --- | --- |
+| `POST /v1/assets/upload-intents` | Bearer + key; `201` new / `200` exact replay; returns Asset identity and optional signed POST form |
+| `POST /v1/assets/{asset_id}/complete` | Owner/Admin Bearer; `200` verified completion |
+| `POST /v1/assets/{source_asset_id}/design-input-copies` | Authorized Bearer + key; `201` new / `200` replay; independent reusable result copy |
+| `GET /v1/assets/{asset_id}` | Authorized safe metadata; signed preview can expire |
+| `GET /v1/assets` | Administrator-only collection |
+| `DELETE /v1/assets/{asset_id}` | Administrator-only guarded deletion, `204` |
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| GET | `/v1/billing/catalog` | bearer | plans + token packages |
-| POST | `/v1/subscriptions` | bearer | create a subscription payment order |
-| POST | `/v1/token-purchases` | bearer | create a token-package payment order |
-| GET | `/v1/payments?type=` | bearer | payment history |
-| GET | `/v1/payments/{payment_order_id}` | bearer | one order status |
-| POST | `/v1/payments/{payment_order_id}/pay` | bearer | (re)trigger JSAPI payment params |
-| POST | `/v1/payments/{payment_order_id}/close` | bearer | close an unpaid order |
-| POST | `/v1/payments/{payment_order_id}/refunds` | bearer | request a refund |
-| GET | `/v1/refunds` | bearer | refund history |
-| GET | `/v1/workspace` | bearer | current enterprise workspace management |
-| POST | `/v1/workspace/invitations` | bearer (owner) | create an enterprise invitation |
-| GET | `/v1/workspace/invitations` | bearer | list invitations |
-| POST | `/v1/workspace/invitations/{invitation_id}/accept` | bearer | accept an invitation |
-| POST | `/v1/workspace/invitations/{invitation_id}/decline` | bearer | decline an invitation (204) |
-| DELETE | `/v1/workspace/invitations/{invitation_id}` | bearer (owner) | revoke an invitation (204) |
-| DELETE | `/v1/workspace/members/{member_user_id}` | bearer (owner) | remove a member (204) |
+```bash
+curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
+  --header "Authorization: Bearer $ACCESS_TOKEN" \
+  --header "Idempotency-Key: $UPLOAD_KEY" --header 'Content-Type: application/json' \
+  --data '{"type":"IMAGE","purpose":"DESIGN_JOB_INPUT","role":"image","original_filename":"room.jpg","content_type":"image/jpeg","size_bytes":12345}'
+```
 
-### Payment webhooks (public, server-to-server)
+`12345` is illustrative; supply the actual byte count. POST the binary file and every returned `upload.fields` value to `upload.url` without the API Bearer header. Then complete and require `READY`. See the [upload chain](/reference/flows/asset-upload-flow).
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/v1/webhooks/wechat/payments` | WeChat Pay payment notify (signature-verified) |
-| POST | `/v1/webhooks/wechat/refunds` | WeChat Pay refund notify |
+## Workflows and compatibility jobs
 
-### Mock payment helpers (local only)
+| Method / path | Meaning |
+| --- | --- |
+| `POST /v1/design-job-quotes` | Retired; authenticated call returns `409 WORKFLOW_UPDATED`; new flows skip the quote round trip |
+| `POST /v1/workflows` | Bearer + durable key; canonical typed submission; `202` for both acceptance and exact replay |
+| `GET /v1/workflows`, `/v1/workflows/{workflow_id}` | Bearer history/status; `200`; public Workflow ID is the Job ID |
+| `POST /v1/workflows/{design_job_id}/retry` | Original creator + retry key; `202`; same Job with durable retry receipt |
+| `POST /v1/workflows/{design_job_id}/move` | Creator/current access; expected-source plus target project |
+| `DELETE /v1/workflows/{design_job_id}` | Creator; guarded deletion |
+| `GET /v1/workflows/{design_job_id}/result-file` | Authorized Bearer; image streaming or fresh signed-artifact redirect |
+| `GET /v1/workflows/{design_job_id}/report`, `/presentation` | Signed query-token browser capabilities, not a generic Bearer API call |
+| `GET /v1/workspace/workflows?workspace_id=<UUID>` | Explicit selected-workspace owner collection; required workspace query |
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/mock/payments/{payment_order_id}/complete` | simulate payment success |
-| POST | `/mock/refunds/{refund_order_id}/complete` | simulate refund success |
+Example canonical image request (replace all UUIDs with accessible returned identities):
 
-## Workspaces & share invitations (`app/workspace_api.py`, prefix `/v1`)
+```json
+{
+  "workspace_id": "22222222-2222-2222-2222-222222222222",
+  "type": "colored_floor_plan",
+  "name": "Living-room proposal",
+  "inputs": [{"kind":"asset","port":"images","role":"primary","asset_id":"00000000-0000-0000-0000-000000000001"}],
+  "prompts": {"prompts":[{"name":"feature_colored_floor_plan","fields":[]}]}
+}
+```
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| GET | `/v1/workspaces/{workspace_id}` | bearer | workspace detail + members |
-| GET | `/v1/workspaces/{workspace_id}/token-detail` | bearer | token ledger detail for the workspace |
-| POST | `/v1/workspaces` | bearer | create an enterprise workspace |
-| PATCH | `/v1/workspaces/{workspace_id}` | bearer (owner) | rename / update workspace |
-| POST | `/v1/workspaces/{workspace_id}/invitations` | bearer (owner) | invite a member |
-| POST | `/v1/workspaces/{workspace_id}/share-invitations` | bearer (owner) | create a share link |
-| GET | `/v1/workspaces/{workspace_id}/share-invitations` | bearer | list share links |
-| DELETE | `/v1/workspaces/{workspace_id}/share-invitations/{invitation_id}` | bearer (owner) | revoke a share link (204) |
-| POST | `/v1/share-invitations/preview` | public, IP-limited | preview a share link |
-| POST | `/v1/share-invitations/accept` | bearer + `Idempotency-Key` | accept a share link |
-| DELETE | `/v1/workspaces/{workspace_id}/membership` | bearer | leave a workspace |
-| DELETE | `/v1/workspaces/{workspace_id}/members/{member_user_id}` | bearer (owner) | remove a member (204) |
+Choose the actual active Feature/template and required role set from discovery; the example does not promise the Feature is configured in every environment. Canonical roles are `primary`, `mask`, `reference`, validated against immutable upload roles. `/v1/design-jobs` remains an in-process compatibility adapter, including supported history/status/retry/result operations; new clients use Workflows. Retired request fields may explicitly require resubmission.
 
-## Referrals & rewards (`app/referral_api.py`, prefix `/v1`)
+Text summary/copywriting, ordered voice input, Design Report/PPTX and video use their own discriminated bodies. Current video API accepts one character image, 0–12 scene images, optional recording and a nonblank script up to 20,000 characters. The mini-program UI deliberately allows one scene and 1,000 script characters; the supplier package may enforce narrower limits. API schema acceptance is not supplier acceptance.
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| POST | `/v1/referral-invitations` | bearer + `Idempotency-Key` | create a referral bearer (201) |
-| POST | `/v1/referral-invitations/preview` | public, IP-limited | preview a bearer |
-| POST | `/v1/referral-invitations/accept` | bearer + `Idempotency-Key` | accept (first-wins attribution) |
-| GET | `/v1/rewards` | bearer | list the caller's rewards |
-| POST | `/v1/rewards/claim` | bearer + `Idempotency-Key` | claim reward tokens |
+## Billing and platform events
 
-## Legal documents (`app/api.py` `legal_router`, prefix `/v1/legal-documents`)
+| Methods / paths | Credential and behavior |
+| --- | --- |
+| `POST /v1/subscriptions`, `/v1/token-purchases` | Bearer + key; server selects price and entitlement snapshot |
+| `GET /v1/payments`, `/v1/payments/{payment_order_id}` | Purchaser Bearer; `200`, authoritative local state |
+| `POST /v1/payments/{payment_order_id}/pay`, `/close`, `/reconcile` | Purchaser Bearer; resume, close/reconcile under server rules |
+| `POST /v1/payments/{payment_order_id}/refunds` | Purchaser Bearer + key; guarded full refund |
+| `GET /v1/refunds`, `POST /v1/refunds/{refund_order_id}/reconcile` | Purchaser state; explicit reconcile endpoint is Douyin-only |
+| `POST /v1/webhooks/wechat/payments`, `/refunds` | Verified WeChat APIv3 signature; no mobile Bearer |
+| `POST /v1/webhooks/douyin/payment`, `/refund`, `/refund-application` | Verified Douyin RSA/raw-body signature |
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| GET | `/v1/legal-documents/current` | bearer | list the current required legal docs |
-| GET | `/v1/legal-documents/{slug}` | bearer | fetch one legal document + acceptance state |
+The explicit payment/refund `/reconcile` endpoints use the Douyin gateway; they are not a generic manual WeChat reconciliation API. Client payment success does not grant tokens. Expired pending orders remain “confirming” until server evidence closes/settles them. Refund APIs exist; the mini program currently has no user-facing refund application entry.
 
-## Admin routes
+## Voice browser handoff and internal interfaces
 
-Admin routes are server-rendered HTML under `/admin` (login, users, model
-providers, prompt templates, billing catalog, performance). They use a signed
-browser session + CSRF token, not bearer JWTs, and are mostly excluded from the
-OpenAPI schema (`include_in_schema=False`). See
-[Authentication](/backend/authentication#admin-sessions-and-csrf).
+`POST /v1/voice-upload-sessions` requires owner Bearer + key (`201`/`200` replay); owner status is `GET /v1/voice-upload-sessions/{session_id}`. Browser `/voice-upload/exchange` consumes a one-time code and issues a restricted cookie. `/voice-upload/session` and `/voice-upload/files/{slot}/upload-intent`/`complete` require that cookie; writes additionally require exact Origin and CSRF. They do not expose a general API session.
 
-## Versioning
+`/admin/*` uses browser sessions/CSRF and is excluded from public OpenAPI. Conditional `/mock/*` payment helpers and standalone mock provider servers are test interfaces. Read [OpenAPI boundaries](/reference/openapi), the [full REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md), and its per-endpoint error tables before implementing a new action.
 
-There is no URL version negotiation beyond the fixed `/v1` prefix. Breaking
-changes are delivered by adding new fields (additive Pydantic models) and, when
-necessary, a new prefix; clients should ignore unknown fields.
+## Generated route index
 
-## Read next
+This inventory records declared default success statuses and deprecation metadata, not endpoint authorization or every runtime/replay response. Use the manual guidance above and the pinned REST contract for those semantics.
 
-- [OpenAPI](/reference/openapi) — accessing `/openapi.json` and key schemas.
-- [Data Model](/reference/data-model) — the tables behind these routes.
-- [Configuration](/reference/configuration) — env vars that gate behavior.
+<!--@include: ../.vitepress/generated/api.en.md-->
+
+## Source evidence
+
+Verified against the [documented source revisions](/reference/source-revisions).
+
+- [Normative method/path/auth/status and error contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md)
+- [Public request/response schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)
+- [Asset signing/admission routes](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/asset_api.py)
+- [Workflow routes and compatibility](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py)

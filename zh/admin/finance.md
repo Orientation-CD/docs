@@ -1,61 +1,27 @@
-# 财务
+# 财务与月度成本
 
-财务页面位于 `GET /admin/finance`（模板 `app/templates/admin/finance.html`），逐月报告应用收入、已追踪运营成本和由此产生的利润。它由 `app/finance.py` 中的 `build_finance_report(db, month_count=...)` 构建，并通过进程内管理报表缓存提供服务。
+`/admin/finance` 将已记录客户收入/退款与人工云服务、模型成本结合。所有金额输入为整数**分**，10,000 分等于 100 元。
 
-## 控件
+## 录入成本
 
-| 控件 | 值 | 效果 |
-| --- | --- | --- |
-| Months back | 1 … 36 | 包含多少个日历月。 |
-| Trend view | `overview` / `unit_economics` / `profit` | 强调哪个数据切片（参见 `FinanceTrend`）。 |
+选择月份、`cloud` 或 `model_provider`、非负金额与可选备注。提交**相同月份及类别会替换该月总额**，不会新增一张发票。应先汇总目标发票再提交月总额，并通过备注/证据保留依据。
 
-更改任一控件会自动提交表单（下拉框携带 `data-auto-submit`）。
+页面支持 1–36 个月范围（默认 12），以及经营概览、单位经济性、利润趋势；财务按 UTC 月边界聚合。营销中的月财务投影使用相同财务基础，而日级客户窗口使用北京时间。
 
-## 报表内容
+## 解读结果
 
-每个月，报表将两个收入流与两个刻意简化的成本类别对账：
+| 数值 | 含义 |
+| --- | --- |
+| 总收入 | 对应期间已确认客户收款 |
+| 退款 | 已记录成功退款金额 |
+| 净收入 | 总收入减退款 |
+| 云/模型成本 | 显式录入的月成本 |
+| 经营差额 | 净收入减完整记录成本 |
 
-**收入**（成功支付，单位为分）：
-- 订阅收入 + 支付笔数。
-- 积分套餐收入 + 支付笔数。
-- 当月完成的退款。
-- 售出积分（订阅 + 套餐）。
+成本缺失是证据缺失，不等于零支出。必要类别不可用时不能宣称利润完整或比较利润率。内部 Token 消耗是另一运营单位，不是以分计的支付金额。
 
-**成本**（手动录入——见下文）：
-- `cloud` —— 云基础设施成本。
-- `model_provider` —— 模型/提供商使用成本。
+此页不审批退款，也不向服务商支付发票。支付补偿与异常展示在[计费](/zh/admin/billing)，客户转化/留存见[营销](/zh/admin/marketing)。
 
-**推导数字**：
-- **总收入** = 订阅 + 套餐收入。
-- **净收入** = 总收入 − 退款。
-- **总成本** = 云服务 + 模型提供商。
-- **利润** = 净收入 − 总成本。
-- **利润率 %** = 利润 ÷ 净收入（净收入 ≤ 0 时为 null）。
-- 单用户经济视图下的每积分收入和每积分云成本。
+---
 
-总览仪表盘复用此报表（month_count=1）作为其月初至今的收入/利润/利润率 KPI。
-
-## 录入月度成本
-
-由于提供商/云支出不会自动出现在支付表中，你需要手动记录。使用 **Record a cost** 表单，通过 `POST /admin/finance/costs` 提交。
-
-| 字段 | 类型 | 必填 | 说明 | 默认值 |
-| --- | --- | --- | --- | --- |
-| Period | month picker | 是 | 账期月份，`YYYY-MM`。 | 当前月 |
-| Category | select | 是 | `cloud` 或 `model_provider`（`FinanceCostCategory`）。 | — |
-| Amount (fen) | number | 是 | 该月/类别的成本，单位为分。 | — |
-| Note | text | 否 | 自由文本备注。 | — |
-
-这调用 `upsert_monthly_cost(...)`：再次录入相同的期间+类别会**覆盖**该月的数字（upsert）。保存后，管理报表缓存被清除，使仪表盘和财务页面立即反映新成本。
-
-## 如何阅读
-
-- 使用 **overview** 看头条：每月的总收入 → 净收入 → 成本 → 利润。
-- 使用 **unit_economics** 查看每积分收入和每积分成本，在价格或提供商费率变化时发现利润率侵蚀。
-- 使用 **profit** 在选定窗口内追踪利润和利润率趋势。
-
-## 注意
-
-- 所有货币单位为分；除以 100 得到元。
-- 退款在其完成的月份计入净额，而非原始销售发生的月份。
-- 这是**仅应用**财务；外部工资/办公成本未建模——只追踪 `cloud` 和 `model_provider`。
+代码依据 · backend `b13cc566`: [app/admin/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/billing.py) · [app/billing/finance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/finance.py) · [app/templates/admin/finance.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/finance.html).

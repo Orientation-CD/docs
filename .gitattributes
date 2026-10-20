@@ -1,0 +1,2 @@
+# Dependency patches must preserve upstream CRLF and unified-diff context.
+patches/*.patch -whitespace

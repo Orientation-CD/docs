@@ -1,126 +1,57 @@
-# 资源上传流程（端到端）
+# Asset 上传调用链
 
-这是**上传图片**的完整调用链——从用户选好照片，到资源在对象存储中变为
-`READY`。其决定性特征是：**后端从不代理图片字节**。小程序使用预签名表单
-直接上传到对象存储。
+客户端通过受约束的签名 **multipart POST** 直接上传对象存储；API 准入并验证对象。Workflow 输入不是 base64 图片，也不是调用者指定的对象 URL。
 
-## 第 0 部分——用户选照片（前端）
-
-```
-User picks an image (or draws a mask)
-        │
-        ▼
-Frontend src/pkg-features/repositories/designAssets.ts
-  stageDesignImages(...)
-  for each required role (image / masked_image / reference_image):
-    1. read local metadata (getFileInfo): size, type
-    2. build a logical file id + idempotency key (services/idempotency.ts)
-    3. POST /v1/assets/upload-intents
-```
-
-## 第 1 部分——上传意图（后端签发表单）
-
-```
-POST /v1/assets/upload-intents
-  Authorization: Bearer <access_token>
-  Idempotency-Key: <8..128 chars>
-  body: { type: "IMAGE", purpose: "DESIGN_JOB_INPUT",
-          role: "image", original_filename, content_type, size_bytes }
-        │
-        ▼
-FastAPI → app/asset_api.py: create_asset_upload_intent  (router prefix /v1/assets)
-  1. get_current_user
-  2. rate limit (asset-upload-intent-user,
-       ASSET_UPLOAD_INTENT_RATE_LIMIT_ATTEMPTS / WINDOW_SECONDS)
-  3. create_upload_intent(...)
-       • validate type/purpose/role/size (MAX_UPLOAD_BYTES, MAX_IMAGE_PIXELS)
-       • idempotency: replay an existing matching intent (200, not 201)
-       • create asset_upload_intents + assets row:
-           status = PENDING_UPLOAD, object_key = server-generated
-       • build an S3 POST policy (presigned form):
-           url = S3_PRESIGN_ENDPOINT + "/" + bucket
-           fields = { key, policy, x-amz-signature, ... }
-           expires in S3_UPLOAD_FORM_SECONDS
-  4. return AssetUploadIntentResponse
-     { asset_id, type, purpose, role, status: "PENDING_UPLOAD",
-       upload: { method: "POST", url, fields, expires_at } }
+```mermaid
+sequenceDiagram
+  participant MP as 小程序
+  participant API as Asset API
+  participant DB as PostgreSQL
+  participant S3 as MinIO 或 OSS
+  MP->>API: POST upload-intents + Bearer + 幂等 key
+  API->>DB: 保存 owner、角色、约束与 intent
+  API-->>MP: asset_id 与签名 POST form
+  MP->>S3: multipart POST、全部字段、二进制 file
+  S3-->>MP: 存储响应
+  MP->>API: POST assets/asset_id/complete
+  API->>S3: 验证准确版本及真实内容
+  API->>DB: 保存元数据和 READY
+  API-->>MP: 安全的已验证 Asset 元数据
 ```
 
-## 第 2 部分——直传（前端 → 对象存储）
+## 1. 声明不可变 intent
 
-```
-Frontend services/assets.ts → directUpload(file, form)
-  uni.uploadFile({
-    url: form.url,          // object storage, NOT the backend
-    name: "file",
-    formData: form.fields,  // signed fields
-    onProgressUpdate → progress bar
-  })
-        │
-        ▼
-Object storage verifies the signed policy, stores the object,
-returns 2xx on success.
-```
+向 `POST /v1/assets/upload-intents` 提交 `type`、`purpose`、`role`、文件名、真实 `content_type`/`size_bytes`。每个二进制/角色独立持久 key；首次 `201`，相同重放 `200`。无需继续上传时 `upload` 可为空，以响应状态为准。
 
-后端**不在数据路径上**——这让大图不进入 API 请求内存，也不经过 API 网络路径。
-`httpUrl.ts` / `validateUploadUrl` 把上传 URL 限制为 HTTPS（或开发用回环/局域网）。
+普通图片为 `IMAGE`、`DESIGN_JOB_INPUT`，上传 role 为 `image`、`masked_image`、`reference_image`。音频使用允许的 recording；PPTX 按授权流程使用 document/attachment。Admin 图片、法律文档另有权限/类型规则。提交 Workflow 改 JSON 不能重新分类上传。
 
-## 第 3 部分——完成（后端收尾）
+form 返回 `method: "POST"`、`url`、`fields`、`expires_at`。全部字段是不透明签名材料，不能自行派生 endpoint/key、改成 PUT 或省略 policy/signature。
 
-```
-POST /v1/assets/{asset_id}/complete
-        │
-        ▼
-FastAPI → app/asset_api.py → app/asset_completion.py
-  1. get_current_user
-  2. rate limit (asset-upload-completion-user,
-       ASSET_UPLOAD_COMPLETION_RATE_LIMIT_ATTEMPTS / WINDOW_SECONDS)
-  3. load the pending intent (must be PENDING_UPLOAD)
-  4. verify the object exists in storage with the expected size/version
-  5. capture content_sha256, object_etag, width, height (image_validation)
-  6. mark assets.status = READY
-  7. return AssetCompletionResponse
-     { asset_id, type, purpose, role, status: "READY",
-       content_type, size_bytes, content_sha256, object_etag,
-       width, height, expires_at }
-```
+## 2. 传输字节
 
-如果资源已经是 `READY`（幂等重试），意图端点会直接返回 `READY` 而不签发新表单，
-complete 调用再次成功。
+平台 multipart 工具携带所有字段及二进制 `file`，不向 OSS/MinIO 传 API Bearer。遵守过期、长度/类型和公网 endpoint 约束。真机必须可达该 host，Compose/VPC 内网地址不能作为手机公网目标。
 
-## 第 4 部分——资源供给设计作业
+多个必需角色可独立并行上传，分别保存 Asset ID/原 key。某条失败不废弃其他成功链，只重试失败链，不自动重传全部或新建 Job。
 
-暂存好的 `asset_id` 随后在设计作业提交中传入（`assets: [{ role, asset_id }]`）。
-作业创建时：
+## 3. complete 与验证
 
-- 资源通过 `design_job_assets` **绑定**，并在作业生命周期内**受保护**，
-  不被临时资源清理回收。
-- submit worker 在组装规范化 `ProviderRequest` 输入时，从存储解析出已校验、
-  版本绑定的对象 URL。
+存储成功后，以 API 身份调用 `POST /v1/assets/{asset_id}/complete`。完成流程核对对象版本/内容/长度，保存 hash、ETag、子类型元数据并发布 `READY`。存储 HTTP 成功不代表 Asset 已获准提交。
 
-## 清理与保留
+`ASSET_UPLOAD_INCOMPLETE`、`ASSET_STATE_CONFLICT` 或暂时保护按 `Retry-After` 做有界稍后重试。对象改变/过期、不支持内容、owner 错误按对应契约修正，不在准入后覆盖同一对象。
 
-- 上传的输入是**临时的**：带有 `asset_expires_at`（`ASSET_TEMPORARY_RETENTION_SECONDS`）。
-- poll worker 的 cron `cleanup_expired_temp_assets` 批量删除过期的
-  `PENDING_UPLOAD` / 未被消费的 `READY` 资源
-  （由 `ASSET_CLEANUP_BATCH_SIZE` / `ASSET_CLEANUP_MAX_BATCHES` 限制）。
-- 提供商暂存的制品有自己的命名空间：`cleanup_provider_staging` 只回收
-  `PROVIDER_STAGING_RETENTION_SECONDS` 下过期的确切版本，并用持久化 Redis 游标，
-  使保留下来的首页对象不会饿死清理任务。
-- 设计作业会**预留**其输入，使其存活到作业完成。
+## 4. 绑定 Workflow
 
-## 本流程的安全属性
+图片 Workflow 使用 Asset ID 和 canonical role `primary`、`mask`、`reference`；后端验证原 intent role、owner、ready 和角色集合。结果转输入的 copy 端点生成独立已验证 Asset，不能直接复用结果 URL。
 
-| 属性 | 在哪里强制 |
-| --- | --- |
-| 服务端生成对象 key | 后端（客户端文件名被清洗） |
-| 限时签名上传 | 预签名 POST policy（`S3_UPLOAD_FORM_SECONDS`） |
-| 后端不在数据路径上 | 直传到存储 |
-| 客户端上传 URL 校验 | 前端 `validateUploadUrl`（HTTPS/回环） |
-| 尺寸/像素限制 | 后端意图校验 + `image_validation` |
-| 开启版本管理的 bucket | MinIO `mc version enable` / OSS 版本管理 |
+持久保存 Asset 身份/不可变元数据，预览/下载 URL 过期后重新从授权 API 获取。删除/保留受 pin 与引用约束，删除 Job 或离开空间不授权任意删对象；Asset 删除接口本身仅限管理员。
 
-## 相关调用链
+语音浏览器交接通过受限 cookie/Origin/CSRF 路由复用 intent/complete 校验，不暴露通用应用 token，也不改变底层直传协议。
 
-- [设计作业生命周期](/reference/flows/design-job-lifecycle)——第 0 部分调用本流程。
-- [支付流程](/reference/flows/payment-flow)——同一套 JWT/保护模型。
+## 源码依据
+
+已按[记录的源码版本](/zh/reference/source-revisions)核对。
+
+- [Asset API 和状态](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/asset_api.py)
+- [intent 策略与签名](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/assets.py)
+- [准确对象验证](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/asset_completion.py)
+- [存储实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/storage.py)

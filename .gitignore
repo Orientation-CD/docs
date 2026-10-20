@@ -14,3 +14,10 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# Browser validation artifacts
+playwright-report/
+test-results/
+
+# Python source-extractor test cache
+__pycache__/

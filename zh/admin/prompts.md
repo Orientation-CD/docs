@@ -1,61 +1,21 @@
-# 提示词模板
+# 提示词模板与整库导入
 
-提示词页面位于 `GET /admin/prompts`（模板 `app/templates/admin/prompts.html`），管理发送给模型提供商的提示词模板。一个模板打包了一个系统提示词、一个带 `{{variables}}` 的正文模板、一个可选的负面提示词，以及一组在移动端应用中作为选项出现的可配置变量。
+`/admin/prompts` 搜索模板名称、描述及提示词正文，支持创建/编辑、激活、移除及 JSON 导入导出。模板用于图片、总结、报告和文案，并非旧报告布局编辑器。
 
-## 列表
+## 模板合同
 
-对名称/描述进行实时搜索，每页 50 条分页。
+唯一名称标识模板。system、configurable、negative 各段可选，但至少存在一段。可配置占位符使用精确的 `key | example value` 字段行。服务端校验占位符与字段一致、长度边界，以及请求组合中最多一个 system prompt。
 
-| 列 | 显示内容 |
-| --- | --- |
-| Template | 名称 + 描述。 |
-| Prompt types | 徽章：System / Configurable / Negative（哪些部分存在）。 |
-| Configurable fields | 此模板暴露的变量键。 |
-| Status | 活跃 / 不活跃。 |
-| Updated | 最后修改时间。 |
+客户发现活动模板后提交精确 name/value，后端保存接收时的组合文本。之后的编辑、停用或导入不改变已接受任务及重试冻结的提示词。
 
-## 创建 / 编辑
+## 替换前先导出
 
-- 新建：`GET /admin/prompts/new`，然后提交 `POST /admin/prompts`。
-- 编辑：`GET /admin/prompts/{id}/edit`，然后提交 `POST /admin/prompts/{id}`。
+**完整 JSON 校验通过后，导入会替换整个提示词库**，不是增量合并，后台也没有撤销按钮。先导出备份，保留所有既有条目与编辑，在完整归档中增改目标模板，再导入该归档。文件限制为 1,000,000 字节。
 
-表单（`app/templates/admin/prompt_form.html`）：
+文案启动逻辑已会补充缺失 seed 模板，不覆盖现有模板。不能把八个文案模板样例单独导入已有部署，修改仓库初始 JSON 也不会替换数据库权威模板。见[文案配置](/zh/backend/copywriting)。
 
-| 字段 | 类型 | 必填 | 说明 | 默认值 |
-| --- | --- | --- | --- | --- |
-| Name | text | 是 | 唯一的、不可变的公开 ID，提供商用它来选择模板。一次性设置。 | — |
-| Description | text | 否 | 内部备注。 | — |
-| System prompt | textarea | 否 | 作为系统消息发送的 `system_prompt`。 | 空 |
-| Template text | textarea | 是 | `template_text` 正文；使用 `{{variable_key}}` 占位符。 | — |
-| Negative prompt | textarea | 否 | 支持它的图片模型的 `negative_prompt`。 | 空 |
-| Variable specification | textarea | 是 | 描述变量及其选项的 JSON（见下文）。 | — |
-| Is active | checkbox | 否 | 关闭 = 模板不提供给提供商。 | on |
+个人 prompt preset 是客户 `/v1/prompt-presets` 的独立功能，不是管理员模板定义。报告生成提示词也不同于已删除的原始 HTML/Jinja 报告编辑器，报告执行在 [Workflows](/zh/admin/workflows)配置。
 
-### 变量与选项（`PromptVariable`、`PromptOption`）
+---
 
-变量规范 JSON 按变量声明：
-
-| 属性 | 含义 |
-| --- | --- |
-| `key` | `template_text` 中使用的占位符名称（每个模板内唯一）。 |
-| `label` | 应用中显示的人类可读标签。 |
-| `required` | 是否必须提供该变量。 |
-| `default_value` | 可选的回退值。 |
-| `sort_order` | 显示顺序。 |
-| `options` | 可选的允许选项列表，每项含 `value`、`label`、`sort_order`（`PromptOption`）。存在时，应用显示受限选择器而非自由文本。 |
-
-变量按 `sort_order` 排序；选项按各自的 `sort_order` 排序。
-
-## 操作
-
-- **切换活跃**（`POST /admin/prompts/{id}/toggle`）—— 启用/禁用而不编辑。
-- **移除**（`POST /admin/prompts/{id}/remove`）—— 删除模板及其变量/选项（级联）。
-
-## 导入 / 导出归档
-
-- **导出**（`GET /admin/prompts/export`）—— 将所有活跃模板及其变量/选项下载为 JSON 归档。
-- **导入**（`POST /admin/prompts/import`）—— 上传之前导出的归档。这是一个**破坏性的、替换式**操作，由 `parse_prompt_archive` 验证；用于在环境间迁移模板。导入对话框从"Import"按钮打开。
-
-## 提供商如何使用提示词
-
-设计任务运行时，提供商层按名称选择活跃模板，替换客户选择的变量值（和默认值），并将组装好的系统 + 正文 + 负面提示词发送到配置的模型。保持模板名称跨环境稳定，因为它们是任务类型和提示词之间的耦合键。
+代码依据 · backend `b13cc566`: [app/admin/prompts.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/prompts.py) · [app/prompts/prompt_templates.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/prompts/prompt_templates.py) · [documents/ai_copywriting_setup.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/ai_copywriting_setup.md).

@@ -1,60 +1,21 @@
-# 设计任务运营
+# 任务家族与诊断
 
-任务分区位于 `GET /admin/design-jobs`（模板 `app/templates/admin/design_jobs.html`），是你分诊客户提交的异步设计任务的地方。当仪表盘弹出"任务需要关注"告警时，这就是运营的前门。
+`/admin/design-jobs` 保留后台 URL，客户 API 使用 [Workflows](/zh/backend/workflows)。页面搜索父/独立任务卡，并在父任务下展示包含的子任务。
 
-## 任务状态
+## 找到对应执行
 
-设计任务在 `DesignJobStatus`（`app/db_models.py`）中流转：
+可按任务、用户、手机号、服务商身份或错误搜索，并按状态过滤。分页总数是父/独立卡片数，不是全部子记录数。卡片展示类型、Token 成本/状态、时间、状态、详情与诊断入口。展开子任务可定位失败依赖；子任务完成不代表报告父任务完成。
 
-| 状态 | 含义 |
-| --- | --- |
-| `pending` | 已接受，等待分派。 |
-| `running` | 已分派到提供商，等待结果。 |
-| `completed` | 成功完成（终态）。 |
-| `failed` | 永久失败（终态）。 |
+详情/诊断提供持久 Workflow/Operation/Submission 身份及尝试证据。下载要求管理员授权和存储片段可用。诊断存储故障不能证明服务商未收到请求。
 
-只有 `completed` 和 `failed` 是终态。超过配置的慢任务阈值仍处于 `pending`/`running` 的任务被视为"卡住"并在告警中显示。
+## 受限干预
 
-## 列表与筛选
+保留引用及生命周期允许时可移除终态任务。移除使用共享持久清理路径，存储不可用可能需要重试。不能通过手工删对象或数据库记录绕过引用检查。
 
-列表支持实时搜索和状态筛选，每页 50 条分页。
+详情可能提供受执行代际约束的**标记失败**操作。这是本地执行覆盖，不是取消服务商任务，也不证明外部付费调用失败。处理器重新核查当前代际、状态与服务商证据，通过正常补偿/收尾维护父任务账务。接收情况未知时仍不能任意重发。
 
-**搜索匹配：** 用户名、任务类型、提供商任务 ID、错误消息和任务 ID。
-**状态筛选：** 全部 / pending / running / completed / failed。
+干预前保留错误、代际、诊断及受影响 ID。使用[性能](/zh/admin/performance)区分正常积压与卡住的尝试。配置修复在 [Workflows](/zh/admin/workflows)或[模型](/zh/admin/providers)中完成，不改写已接受任务的冻结输入。
 
-| 列 | 显示内容 |
-| --- | --- |
-| Job | 任务 ID + 创建时间。 |
-| User | 所有者显示名称。 |
-| Type / Tokens | 任务类型和预留/消耗的积分。 |
-| Status | 状态标签。 |
-| Provider ID | 提供商自己的任务 ID（如果已分派）。 |
-| Created | 提交时间。 |
+---
 
-## 任务详情（`GET /admin/design-jobs/{id}`）
-
-点击行打开 `app/templates/admin/design_job_detail.html`。显示：
-- 任务的输入、提示词和参数。
-- 所有子**提交记录**（`DesignJobSubmission`）及其提供商生命周期。
-- 输出和相关**资产**（输入图片、结果图片、蒙版、录屏）。
-- 当前状态、提供商 ID 和任何安全（脱敏）的错误消息。
-
-## 对任务的操作
-
-### 移除终态任务（`POST /admin/design-jobs/{id}/remove`）
-
-**仅当任务为终态**（`completed` 或 `failed`）时才能移除，通过 `delete_terminal_design_job`。这是清理旧/噪声任务的操作。对仍在运行的任务拒绝执行，以确保你永远不会删除在途工作。
-
-### 标记为失败（`POST /admin/design-jobs/{id}/mark-failed`）
-
-调用 `admin_mark_design_job_failed(...)`。当任务卡住 `pending`/`running` 超过慢任务阈值且提供商不可恢复时使用。它将任务转为 `failed`，结算/释放预留积分，并记录安全的失败原因，使客户余额得到纠正。
-
-> 优先使用"标记失败"而非让任务无限期挂起：它释放预留积分并清除卡住任务告警。
-
-## 典型分诊流程
-
-1. 打开仪表盘告警 → 链接到 `/admin/design-jobs`（或 `?status=failed`）。
-2. 筛选 `running`/`pending`，按时间排序。
-3. 打开详情，检查提供商 ID 和错误。
-4. 如果不可恢复 → **标记为失败**。如果是旧/终态垃圾 → **移除**。
-5. 如果失败集中出现，检查 [providers](/admin/providers) 和 [performance](/admin/performance)。
+代码依据 · backend `b13cc566`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/workflows.py) · [app/admin/workflow_diagnostics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/workflow_diagnostics.py) · [app/templates/admin/design_jobs.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/design_jobs.html).

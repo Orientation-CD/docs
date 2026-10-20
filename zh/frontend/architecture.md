@@ -1,209 +1,51 @@
 # 前端架构
 
-本页讲解小程序内部是如何组织的、各部分如何协作。如果还没读过，建议先看[概览](/frontend/overview)。本文假设你熟悉 Vue 3，但不假设你熟悉 uni-app。
+页面管理呈现和生命周期，Service 编排用户动作，Repository 校验响应并管理作用域缓存，请求层负责传输和刷新会话。生产与测试使用别名选择部分实现，因此 Mock 测试通过不能单独证明 API 产物正确。
 
-## 分层
-
-前端被拆成若干层。数据单向流动——页面依赖服务/仓库，服务/仓库再依赖 DTO 与请求客户端：
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 页面（Vue SFC）                                              │
-│   pages/*, pkg-features/pages/*, pkg-plans/pages/*,         │
-│   pkg-account/pages/*                                       │
-├─────────────────────────────────────────────────────────────┤
-│ Composables + 服务（业务逻辑、编排）                          │
-│   src/services/*, src/pkg-features/services/*,              │
-│   src/pkg-account/services/*, */composables/*               │
-├─────────────────────────────────────────────────────────────┤
-│ 仓库（异步数据访问；mock 或 API 实现）                        │
-│   src/repositories/*, pkg-features/repositories/*, ...     │
-├─────────────────────────────────────────────────────────────┤
-│ DTO + 请求客户端                                              │
-│   src/api/dto/*  ← 带类型的 API 契约                        │
-│   src/services/request.ts ← HTTP + 令牌刷新 + 上传          │
-├─────────────────────────────────────────────────────────────┤
-│ Store + 领域                                                  │
-│   src/stores/session.ts（令牌持久化）                        │
-│   src/domain/*（纯领域逻辑，无 I/O）                          │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+  P[页面与组件] --> S[Service 与组合函数]
+  S --> R[Repository 与校验器]
+  R --> H[请求层]
+  H --> API[后端 /v1 接口]
+  H --> T[会话 Token Store]
+  R --> C[账号与空间作用域缓存]
 ```
 
-### 页面
+## 编译期边界
 
-路由与分包边界在 `src/pages.json` 中声明。tabBar 有四个 tab：首页、联系我们、我的方案、我的。
+`vite.config.ts` 选择 `AccountRepositoryRuntime`、`TaskRepositoryRuntime`、平台登录辅助、开发连接提示和订阅场景。`VITE_ENABLE_PRIVATE_PROJECTS` 同时设置 `pages.json` 的 `PRIVATE_PROJECTS` 预处理条件，并选择启用/禁用项目实现。要求发布包剔除能力时，不能仅隐藏按钮。
 
-**主包**（`src/pages/`）：
+旧的宽泛账号仓储在 API 模式明确不可用。正式功能使用会话、资料、空间、项目、任务、Workflow、计费和组织等较小仓储。部分仓储在内部判断模式，不能假定每个仓储都有一对独立 Mock/API 文件。
 
-| 路径 | 导航样式 | 用途 |
-| --- | --- | --- |
-| `pages/ad-splash/index` | custom | 5 秒可跳过的广告启动页 |
-| `pages/splash/index` | custom | 3 秒品牌启动页 |
-| `pages/home/index` | custom | 首页（广告 banner、首屏轮播、功能宫格、积分预检） |
-| `pages/contact/index` | default | 联系我们 |
-| `pages/plans/index` | default | 我的方案列表 |
-| `pages/profile/index` | default | 我的 |
+`src/pages.json` 定义页面与分包。主包代码须尊重分包边界；模块放置、启动绑定等问题通过编译产物检查补足源码测试。
 
-**`pkg-features`**（设计 + 语音流程）：`interior`、`local`、`kitchen`、
-`bathroom`、`colored_floor_plan`、`furniture`、`report`、`voice_summary`。
+## 会话与请求
 
-**`pkg-plans`**：`detail`（单个设计任务）、`report`（HTML 报告 web-view）、
-`markdown`（语音总结查看，支持可续播）。
+`src/stores/session.ts` 以 `yuanzhu.session.tokens.v1` 保存凭据。会话 generation 在账号切换时使旧读取与作用域界面失效，不依赖 Pinia。
 
-**`pkg-account`**：`login`、`profile`、`legal`、`store`、`orders`、
-`subscription`、`organization`、`invitation`、`rewards`、`tokens`。
+`src/services/request.ts` 将路径拼接到 `VITE_API_BASE_URL`，添加 `X-Request-ID`，按需附加 Bearer，并将错误统一为 `ApiRequestError`。并发过期请求共享一次刷新，使用轮换凭据重放；其它认证失败按约定清理会话。
 
-### Store：`src/stores/session.ts`
+基础地址须用 HTTPS，开发时允许回环 HTTP 或明确启用的私有局域网 HTTP。这与平台合法域名校验是不同规则。结果文件和报告还有精确 Origin/有效期检查；API 地址合法不等于任意媒体 URL 都可信。
 
-整个应用只有一个 store，而且刻意做得极小。它是一个**模块级单例**（不是 Pinia），把 access/refresh 令牌对保存在内存中，并镜像写入
-`uni.setStorageSync`：
+## 发现与响应校验
 
-- 存储键：`yuanzhu.session.tokens.v1`。
-- 应用启动时（`App.vue` → `onLaunch` → `sessionTokenStore.hydrate()`）会校验已存储的令牌对，并清理历史遗留键
-  （`yz_access_token`、`yz_refresh_token`、`yz_user_profile`）。
-- 暴露 `getAccessToken()`、`getRefreshToken()`、`applyTokenPair(pair)`、
-  `clear()`。
+`designCatalog.ts` 请求公共 `/v1/billing/features`，发送 `If-None-Match`，缓存 ETag 支持的 `200/304` 响应，并区分标准任务、报告 Workflow 和文案产品。模板元数据需要认证，前端表单控件仍须匹配声明字段。
 
-页面把其他所有状态都放在本地 `ref`/`computed` 中。这样既避免了引入全局状态库，又保证了凭据只有一个事实来源。
+DTO 描述期望 JSON，仓储 normalizer 在运行时执行验证。列表/详情统一校验输入输出类别、ID、媒体元信息。`*_RESPONSE_INVALID` 等错误阻止畸形响应变成看似有效的 UI 状态。
 
-### 请求客户端：`src/services/request.ts`
+会话读取缓存合并请求并过期清理。项目选择、方案计数、筛选和成员读取还跟踪账号、空间、项目、会话；切换或失权后，迟到响应不得写入新上下文。
 
-所有 API 仓库共用的唯一 HTTP 网关。关键行为：
+## 提交、恢复与结果
 
-- 为每个请求构造 `X-Request-ID`（`mp-<ts>-<seq>-<rand>`），并设置
-  `Accept: application/json`。
-- 对 `auth: true` 的调用附加 `Authorization: Bearer <access>`。
-- **自动令牌轮换**：收到 `401 AUTH_TOKEN_EXPIRED_OR_INVALID` 时，会**只调用一次** `POST /v1/auth/refresh`（用共享的 `refreshPromise` 把并发的 401 合并成一次刷新），然后用新令牌重放原始请求。其他 401 错误码则清空会话。
-- 把后端错误归一化为带类型的 `ApiRequestError`，携带
-  `statusCode`、`code`、`details`、`requestId`、`retryAfterSeconds`。FastAPI 的校验错误数组会被拍平成可读的消息。
-- 校验 API 基地址：始终要求 HTTPS；HTTP 只允许回环地址，或在
-  `VITE_ALLOW_INSECURE_LAN_HTTP=true` 时允许私有局域网地址
-  （`10/8`、`172.16/12`、`192.168/16`）。
-- 提供 `uploadFile(path, filePath, formData)`，对 multipart 上传施加相同的令牌轮换行为。
+准备阶段校验本地字段、服务端目录、套餐、余额、项目绑定和已上传 Asset。受理结果不确定时，同一逻辑动作保留原 body/key；修改内容则形成新动作。`202` 后任务仍待处理或运行中，本地超时不能证明后端失败。
 
-### DTO：`src/api/dto/`
+轮询尊重 `poll_after_seconds`、`Retry-After`，页面隐藏时暂停、退出时释放。结果页再次校验访问权，报告/文件地址过期后重新取得能力。重试使用服务端授权的现有任务；删除、移动、企业只读读取各有写权限门禁。
 
-与后端 OpenAPI 对应的带类型契约：
+启动时恢复凭据并安装应用更新提示。新版本准备好后在前台提示，只有明确确认才重启；取消可继续当前版本。
 
-| 文件 | 定义的类型 |
-| --- | --- |
-| `session.ts` | `WechatLoginRequest`、`TokenPair`、`WechatSession`、`CurrentUser`、`Subscription`、`Enterprise`、`LegalDocument`、`UpdateCurrentUserRequest` |
-| `billing.ts` | `BillingCatalog`、`SubscriptionPlan`、`TokenPackage`、`PaymentOrder`、`PaymentPage`、`CreateSubscriptionRequest`、`CreateTokenPurchaseRequest` |
-| `design.ts` | `DesignJob`、`DesignJobType`、`AssetUploadIntent`、`AssetCompletion`、`DesignJobCreateRequest`、`DesignJobClientInfo`、`DesignJobOutput`、`PromptTemplate` |
-| `workspace.ts` | `WorkspaceSummary`、`WorkspaceDetail`、`TokenDetailItem`、分享/推荐邀请、奖励 |
+请求族见[工作流](/zh/frontend/workflows)，作用域行为见[项目](/zh/frontend/projects)，契约/产物验证见[测试](/zh/frontend/testing)。
 
-仓库实现会校验每一个响应；一旦违反服务端契约就抛出
-`ApiRequestError`（`code: *RESPONSE_INVALID`）——这正是 mock/API 一致性的强制手段。
+## 源码依据
 
-## 仓库模式
-
-页面只依赖仓库。每个仓库都有两种形态，在构建期通过
-`vite.config.ts` 中的 **Vite 别名**选择：
-
-| 别名 | API 构建 | Mock 构建 |
-| --- | --- | --- |
-| `AccountRepositoryRuntime` | `repositories/accountApi.ts`（拒绝——离线数据源） | `repositories/account.ts` |
-| `TaskRepositoryRuntime` | `repositories/tasksApi.ts` | `repositories/tasks.ts` |
-| `WechatCodeRuntime` | `services/wechatCodeLive.ts` | `services/dev/wechatCodeMock.ts` |
-| `BackendStatusRuntime` | `components/dev/BackendStatusHidden.vue` | `components/dev/BackendStatus.vue` |
-| `StoreDemoRuntime` | `pkg-account/services/storeDemoDisabled.ts` | `pkg-account/services/storeDemoMock.ts` |
-| `SubscriptionScenarioRuntime` | `services/subscriptionScenarioDisabled.ts` | `services/dev/subscriptionScenarioMock.ts` |
-| `SubscriptionScenarioPanelRuntime` | 隐藏面板 | `pkg-account/components/dev/SubscriptionScenarioPanel.vue` |
-
-注意一个有趣的不对称：在 **API 模式**下，旧的大而全的
-`Session/Workspace/Billing/Organization` 仓库被
-`accountApi.ts` 桩掉了（它们会抛出 `"该离线数据源在生产 API 模式不可用"`）。真正的 API 模式使用更新、更窄的仓库：`wechatSessionRepository`（`repositories/session.ts`）、`currentProfileRepository`
-（`repositories/profile.ts`）、`personalDesignJobRepository`
-（`repositories/designJobs.ts`），以及 `pkg-features/repositories/` 与
-`pkg-account/repositories/` 下的按功能划分的仓库。
-
-### 共享仓库（`src/repositories/`）
-
-| 仓库 | 端点 | 职责 |
-| --- | --- | --- |
-| `wechatSessionRepository`（`session.ts`） | `POST /v1/auth/wechat-login`、`POST /v1/auth/refresh`、`POST /v1/auth/logout`、`GET /v1/legal-documents/current` | 静默登录、注册、法务同意、登出 |
-| `currentProfileRepository`（`profile.ts`） | `GET /v1/me`、`PATCH /v1/me` | 当前用户、订阅、积分、企业、邀请 |
-| `personalDesignJobRepository`（`designJobs.ts`） | `GET/DELETE /v1/design-jobs` | 列出/删除个人设计任务 |
-| `designJobRepository`（`designJobDetail.ts`） | `GET /v1/design-jobs/{id}` | 单个任务详情，媒体已规整化 |
-| `workspaceDesignJobRepository`（`workspaceDesignJobs.ts`） | 工作空间维度的任务列表 | 企业"全部方案"视图 |
-| `designJobTypeCatalogRepository`（`designCatalog.ts`） | `GET /v1/billing/catalog`（公开，ETag 缓存） | 功能可用性 + 积分成本 |
-| `contentRepository`（`content.ts`） | 静态 | 首屏轮播、功能宫格、空间/风格选项目录 |
-| `workspacesRepository`（`workspaces.ts`） | 工作空间相关端点 | 工作空间列表/切换 |
-
-### 设计任务响应契约的规整化
-
-`src/repositories/designJobs.ts` 中的 `mapDesignJobResponseMedia(job, reject)` 是列表与详情共用的标准规整化函数。它会：
-
-- 遍历 `job.inputs`，只接受带类型的 `image` / `audio` / `text` 条目，收集第一张图片 `input`、`recording` 音频输入（并对照上传时使用的同一套限制校验 sha256/etag/时长/大小），拒绝未知形态。
-- 遍历 `job.outputs`，把 `artifact`（图片/音频/文件）、`report`
-  （HTML）或 `text` 总结（markdown）分别路由到带类型的槽位。
-- 对 `voice_summary` 任务强制要求 1–3 个音频输入，并在
-  `status === completed` 时必须提供 markdown 文本。
-
-`mapDesignJobDetail`（`designJobDetail.ts`）把它与
-`mapDesignJobStatus`、`mapClientInfo` 组合，产出完全带类型的
-`DesignJobDetail`。后端 provider 的输入输出变化都经由这几个唯一入口。
-
-## 关键服务
-
-| 服务 | 作用 |
-| --- | --- |
-| `services/wechatAuth.ts` | 构造微信登录请求（code + 手机号 code + 已同意的法务文档） |
-| `services/accountGate.ts` | 共享的注册门槛；静默登录、手机号授权、法务同意、`ensureRegisteredForAction()` |
-| `services/homeEntryGuard.ts` | `inspectHomeEntry(tokenCost)`——在功能打开前统计在途任务数（`ACTIVE_JOB_LIMIT = 5`）并执行个人积分预检 |
-| `services/personalTokenPreflight.ts` | `personalCatalogTokenShortage(profile, cost)` / `assertPersonalTokenBalance(profile, jobType)` |
-| `services/pollScheduler.ts` | 通用轮询循环；遵守 `poll_after_seconds`/`Retry-After`，页面隐藏时暂停，卸载时销毁 |
-| `services/clientInfo.ts` | 校验/规整化 `ClientInfoDraft` → `DesignJobClientInfo`（`last_name`、`salutation`、`project_name`） |
-| `services/idempotency.ts` | 从一个逻辑动作（`scope`、`ownerId`、`actionId`）推导出稳定的 `Idempotency-Key` |
-| `services/assets.ts` | 基于 `VITE_ASSET_BASE_URL` 解析 CDN 图片 URL，并内置兜底 |
-| `services/advertising.ts` | 广告启动页 + 首页 banner（CDN 对象 + 本地占位图） |
-| `pkg-features/services/*DesignSubmit.ts` | 提交流程：`standardDesignSubmit`、`furnitureDesignSubmit`、`reportDesignSubmit`、`voiceSummarySubmit` |
-| `pkg-features/repositories/designAssets.ts` | 图片上传 intent → 直传 → complete，带进度 |
-| `pkg-features/repositories/voiceAudioAssets.ts` | 音频上传 intent → 直传 → complete，带重试与重复 sha256 拒绝 |
-| `pkg-account/services/payment.ts` | 微信 JSAPI 桥（`uni.requestPayment`），带类型的 `PaymentBridgeError` |
-| `pkg-account/services/subscriptionRenewal.ts` | 对生效中订阅给出"暂不支持提前续订"引导 |
-
-## 一个功能流程是如何接线的（以语音总结为例）
-
-1. 用户在首页点 **录音需求总结** → `home/index.vue` 调用
-   `inspectHomeEntry(catalog.features.voice_summary.jobType.token_cost)`。如果个人积分余额不足，弹窗引导去商店；如果已经有 5 个任务在途，则跳转"我的方案"。
-2. 页面导航到 `pkg-features/pages/voice_summary/index.vue`。
-3. 页面加载目录（积分成本、展示名），检查提交资格
-   （`useSubmissionEligibility`），并从
-   `yuanzhu.voice-summary-draft.v1` 恢复草稿。
-4. 用户录制（通过 `uni.getRecorderManager`，MP3/16 kHz/单声道/48 kbps，单次最长 10 分钟）或最多选择 3 个文件（MP3/WAV/AAC/M4A，≤ 25 MB，≤ 120 分钟）。每个文件都会按扩展名校验文件签名。
-5. 提交时，`submitVoiceSummary` 校验输入 + 客户信息，并行拉取个人资料 + 目录，断言资格与积分余额，随后
-   `stageVoiceAudioFiles` 携带幂等键执行 intent→上传→complete 的流程。
-6. `submitDesignJob` 以 `POST /v1/design-jobs` 提交
-   （`type: "voice_summary"`、assets、可选 `client_info`），并导航到
-   `/pkg-plans/pages/markdown/index?id=<jobId>`。
-7. markdown 页面通过 `createPollScheduler` 轮询
-   `loadMarkdownSummary(id)` 直到终态，随后渲染经过清洗的 markdown 块，并以**可续播**的方式回放原始录音（参见
-   [关键用户流程](/frontend/key-flows)）。
-
-## 值得知道的 uni-app 细节
-
-- **页面生命周期**：使用 `@dcloudio/uni-app` 的
-  `onLoad`、`onShow`、`onHide`、`onUnmounted`、
-  `onPullDownRefresh`、`onShareAppMessage`、`onShareTimeline`（而不是普通 Vue 的 `onMounted`）。
-- **`easycom`**：`pages.json` 通过
-  `^u-(.*)` → `uview-plus/components/u-$1/u-$1.vue` 自动注册 uview-plus 组件，因此 `<u-button>` 无需 import 即可使用。
-- **存储**：始终使用 `uni.getStorageSync` / `uni.setStorageSync`（封装在
-  `runtime.ts` 中）。绝不要碰 `localStorage`。
-- **录音**：`uni.getRecorderManager()`；语音页面用
-  `WeakMap`/`WeakSet` 仔细追踪录音器的归属，以便在导航后丢弃过期的终态事件。
-- **隐私**：录音与选文件按钮受
-  `uni.getPrivacySetting().needAuthorization` 门控；按钮设置
-  `open-type="agreePrivacyAuthorization"`，这样可以在系统权限弹窗前先同意微信的隐私弹窗。
-- **分包**在 `pages.json` 的 `subPackages` 下声明；主包永远不会静态引用分包代码。
-
-## 启动顺序
-
-`main.ts` 导出 `createSSRApp(App)` 并注册 `uviewPlus`。`App.vue`
-实现 `onLaunch` → `sessionTokenStore.hydrate()`，并全局引入生成的设计令牌与 uview-plus 样式。令牌水合是同步且非阻塞的；第一次带认证的 API 调用会在需要时刷新令牌。
-
-## 下一步
-
-- [数据源模式](/frontend/data-source-modes)——mock/API 是如何选择的。
-- [关键用户流程](/frontend/key-flows)——交互细节。
-- [设计系统](/frontend/design-system)——设计令牌与 UI 约定。
+前端 `eca0a5f`（2026-10-20）：[构建别名](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/vite.config.ts) · [请求层](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts) · [会话 Store](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/stores/session.ts) · [应用更新](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/appUpdate.ts)。

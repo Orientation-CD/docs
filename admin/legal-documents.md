@@ -1,65 +1,21 @@
-# Legal Documents
+# Legal documents and acceptance evidence
 
-The Legal Documents page at `GET /admin/legal-documents` (template `app/templates/admin/legal_documents.html`) publishes the Terms of Service and Privacy Policy versions that customers must accept, and tracks how many users have accepted each version.
+`/admin/legal-documents` publishes immutable Terms and Privacy text. Current documents are a prerequisite for customer registration/login consent; an empty library is not a valid way to bypass consent.
 
-## Document types
+## Publish a version
 
-There are exactly two legal document types (`LegalDocumentType`):
+Choose document type (`terms` or `privacy`), unique version metadata, locale, title, effective time **in UTC**, and reviewed UTF-8 plain-text file up to **1 MiB**. The browser creates an upload intent, posts the file directly and completes it. The optional checkbox makes the new version current immediately.
 
-| Type | Code | Purpose |
-| --- | --- | --- |
-| Terms of Service | `terms` | The product terms. |
-| Privacy Policy | `privacy` | The privacy policy. |
+Content and metadata cannot be edited after publication. Correct a document by publishing a new version. Preview the stored text and verify both current documents for the locale used by customers.
 
-Each type can have **one current version** active at a time; older versions are retained for acceptance history.
+## Select and retain
 
-## Upload a new version
+Stored rows show version/effective/published times, Asset identity and acceptance count. A noncurrent version can be selected as current through the corresponding form. Current versions cannot be removed; versions already accepted by users remain evidence and are also protected from deletion.
 
-Uploads use the same two-step direct-to-storage flow (upload intent → PUT → complete). Submit the metadata via `POST /admin/legal-documents/upload-intents` and finalize with `POST /admin/legal-documents/{id}/complete`.
+The customer endpoint `/v1/legal-documents/current` provides current immutable IDs and URLs with cache validators. Content is anonymously readable through the public HTTPS content route when the Asset bucket remains private; a separately configured public legal origin needs verified anonymous delivery. Do not substitute an expiring private presigned URL for the legal contract's stable content URL.
 
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| Document type | select | Yes | `terms` or `privacy`. |
-| Version | text | Yes | Version label; must be unique per document type. Duplicate version returns `LEGAL_DOCUMENT_VERSION_EXISTS`. |
-| Locale | text | Yes | BCP-47 locale, e.g. `zh-CN`, `en`. |
-| Title | text | Yes | Display title. |
-| Effective at | datetime | Yes | When the version becomes effective. |
-| File | file | Yes | UTF-8 plain-text content, max **1 MiB** (`LEGAL_DOCUMENT_MAX_BYTES = 1024*1024`, content type `text/plain; charset=utf-8`). |
-| Set as current on upload | checkbox | No | If checked, this version immediately becomes the active one. |
+Changing the current selection updates what subsequent consent flows must accept; it does not rewrite historical acceptances. Storage publication and metadata selection are distinct states, so a file upload alone does not guarantee both Terms and Privacy are ready. See [authentication](/backend/authentication) and [storage](/backend/assets-storage).
 
-## The documents table
+---
 
-| Column | What it shows |
-| --- | --- |
-| Type | terms / privacy. |
-| Version | Version label. |
-| Locale | Locale. |
-| Title | Document title. |
-| Effective at | Effective datetime. |
-| Accepted | How many users accepted this version. |
-| Current | Badge marking the active version. |
-
-## Per-row actions
-
-### Set current (`POST /admin/legal-documents/{id}/current`)
-
-Promotes this historical version to the current one. Customers then must accept the newly active version. Only one current per document type at a time.
-
-### View file (`GET /admin/legal-documents/{id}/file`)
-
-Streams the stored document text so you can review exact wording before promoting.
-
-### Remove (`POST /admin/legal-documents/{id}/remove`)
-
-Removes a version. You can only remove a version that is **not current** and that **no user has accepted** — accepted and current documents are protected so the legal acceptance trail stays intact.
-
-## Acceptance tracking
-
-Every acceptance is recorded (`LegalDocumentAcceptance`). The "Accepted" count per version answers "how many users are on this version?" and surfaces when you publish a new version (so you can see how long enforcement takes).
-
-## Publishing workflow
-
-1. Upload the new version (optionally "set current" immediately).
-2. Review it via **view file**.
-3. If not set on upload, **set current** when ready.
-4. Monitor the Accepted count as users re-accept on next sign-in.
+Source evidence · backend `b13cc566`: [app/admin/assets.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/assets.py) · [app/identity/legal_documents.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/identity/legal_documents.py) · [app/templates/admin/legal_documents.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/legal_documents.html).

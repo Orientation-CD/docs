@@ -1,61 +1,27 @@
-# Finance
+# Finance and monthly costs
 
-The Finance page at `GET /admin/finance` (template `app/templates/admin/finance.html`) reports app revenue, tracked operating costs, and resulting profit, month by month. It is built by `build_finance_report(db, month_count=...)` in `app/finance.py` and served through the process-local admin report cache.
+`/admin/finance` combines recorded customer receipts/refunds with manually recorded cloud/model costs. All monetary inputs use integer **fen**; 10,000 fen is CNY 100.
 
-## Controls
+## Record costs
 
-| Control | Values | Effect |
-| --- | --- | --- |
-| Months back | 1 … 36 | How many calendar months to include. |
-| Trend view | `overview` / `unit_economics` / `profit` | Which cut of the data to emphasize (see `FinanceTrend`). |
+Choose a month, `cloud` or `model_provider`, nonnegative amount and optional note. Saving the **same month and category replaces its total**; it does not append another invoice. Aggregate all intended invoices before submitting that monthly total and keep invoice context in the note/evidence.
 
-Changing either control auto-submits the form (the selects carry `data-auto-submit`).
+The page accepts a 1–36-month range (default 12) and overview, unit-economics or profit trends. Finance aggregates use UTC month boundaries. Marketing's monthly finance projection shares the finance basis, while its daily customer window uses Shanghai dates.
 
-## What the report contains
+## Interpret the result
 
-For each month the report reconciles two revenue streams against two deliberately simple cost categories:
+| Value | Interpretation |
+| --- | --- |
+| Gross receipts | Confirmed customer receipts in the defined period |
+| Refunds | Recorded successful refunded amounts |
+| Net receipts | Gross less refunds |
+| Cloud/model costs | Explicit monthly cost entries |
+| Operating difference | Net receipts less complete recorded costs |
 
-**Revenue** (successful payments, fen):
-- Subscription revenue + payment count.
-- Token-package revenue + payment count.
-- Refunds completed in the month.
-- Tokens sold (subscription + package).
+Missing costs are missing evidence, not zero expense. Do not claim complete profit or compare margins when required categories are unavailable. Internal Token consumption is a separate operational unit, not the payment amount in fen.
 
-**Costs** (manually entered — see below):
-- `cloud` — cloud infrastructure cost.
-- `model_provider` — model/provider usage cost.
+This page is not a refund approval or provider invoice payment screen. Payment reconciliation and anomaly display are in [Billing](/admin/billing). For customer funnel/retention use [Marketing](/admin/marketing).
 
-**Derived figures**:
-- **Gross revenue** = subscription + package revenue.
-- **Net revenue** = gross revenue − refunds.
-- **Total cost** = cloud + model provider.
-- **Profit** = net revenue − total cost.
-- **Margin %** = profit ÷ net revenue (null when net revenue ≤ 0).
-- Revenue per token and cloud cost per token for unit-economics view.
+---
 
-The Overview dashboard reuses this report (month_count=1) for its MTD revenue/profit/margin KPIs.
-
-## Recording monthly costs
-
-Because provider/cloud spend does not appear automatically in the payment tables, you record it manually. Use the **Record a cost** form, submitted via `POST /admin/finance/costs`.
-
-| Field | Type | Required | Description | Default |
-| --- | --- | --- | --- | --- |
-| Period | month picker | Yes | The billing month, `YYYY-MM`. | current month |
-| Category | select | Yes | `cloud` or `model_provider` (`FinanceCostCategory`). | — |
-| Amount (fen) | number | Yes | Cost in fen for that month/category. | — |
-| Note | text | No | Free-text memo. | — |
-
-This calls `upsert_monthly_cost(...)`: entering the same period+category again **overwrites** that month's figure (upsert). After saving, the admin report cache is cleared so the dashboard and finance page reflect the new cost immediately.
-
-## How to read it
-
-- Use **overview** for the headline: gross → net → costs → profit per month.
-- Use **unit_economics** to see revenue-per-token and cost-per-token and spot margin erosion as prices or provider rates shift.
-- Use **profit** to track profit and margin trend over the selected window.
-
-## Notes
-
-- All currency is fen; divide by 100 for yuan.
-- Refunds are netted in the month they complete, not the month the original sale occurred.
-- This is **app-only** finance; external payroll/office costs are not modeled — only `cloud` and `model_provider` are tracked.
+Source evidence · backend `b13cc566`: [app/admin/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/billing.py) · [app/billing/finance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/finance.py) · [app/templates/admin/finance.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/finance.html).

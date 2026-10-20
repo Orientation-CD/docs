@@ -1,129 +1,57 @@
-# Asset Upload Flow (End-to-End)
+# Asset Upload Flow
 
-This is the full call chain for **uploading an image** — from the user picking a photo
-to the asset being `READY` in object storage. The defining property: **the backend
-never proxies image bytes**. The mini program uploads directly to object storage using a
-presigned form.
+The client uploads bytes directly to object storage through a constrained signed **multipart POST**. The API admits and later verifies the object; it does not accept a base64 image or a caller-selected object URL as a Workflow input.
 
-## Part 0 — User picks a photo (frontend)
-
-```
-User picks an image (or draws a mask)
-        │
-        ▼
-Frontend src/pkg-features/repositories/designAssets.ts
-  stageDesignImages(...)
-  for each required role (image / masked_image / reference_image):
-    1. read local metadata (getFileInfo): size, type
-    2. build a logical file id + idempotency key (services/idempotency.ts)
-    3. POST /v1/assets/upload-intents
-```
-
-## Part 1 — Upload intent (backend signs a form)
-
-```
-POST /v1/assets/upload-intents
-  Authorization: Bearer <access_token>
-  Idempotency-Key: <8..128 chars>
-  body: { type: "IMAGE", purpose: "DESIGN_JOB_INPUT",
-          role: "image", original_filename, content_type, size_bytes }
-        │
-        ▼
-FastAPI → app/asset_api.py: create_asset_upload_intent  (router prefix /v1/assets)
-  1. get_current_user
-  2. rate limit (asset-upload-intent-user,
-       ASSET_UPLOAD_INTENT_RATE_LIMIT_ATTEMPTS / WINDOW_SECONDS)
-  3. create_upload_intent(...)
-       • validate type/purpose/role/size (MAX_UPLOAD_BYTES, MAX_IMAGE_PIXELS)
-       • idempotency: replay an existing matching intent (200, not 201)
-       • create asset_upload_intents + assets row:
-           status = PENDING_UPLOAD, object_key = server-generated
-       • build an S3 POST policy (presigned form):
-           url = S3_PRESIGN_ENDPOINT + "/" + bucket
-           fields = { key, policy, x-amz-signature, ... }
-           expires in S3_UPLOAD_FORM_SECONDS
-  4. return AssetUploadIntentResponse
-     { asset_id, type, purpose, role, status: "PENDING_UPLOAD",
-       upload: { method: "POST", url, fields, expires_at } }
+```mermaid
+sequenceDiagram
+  participant MP as Mini program
+  participant API as Asset API
+  participant DB as PostgreSQL
+  participant S3 as MinIO or OSS
+  MP->>API: POST upload-intents + Bearer + Idempotency-Key
+  API->>DB: Persist owner, role, constraints and intent
+  API-->>MP: asset_id and upload POST form
+  MP->>S3: Multipart POST, all returned fields, binary file
+  S3-->>MP: Storage response
+  MP->>API: POST assets/asset_id/complete
+  API->>S3: Verify exact object version and bytes
+  API->>DB: Store verified metadata and READY state
+  API-->>MP: Safe verified Asset metadata
 ```
 
-## Part 2 — Direct upload (frontend → object storage)
+## 1. Declare one immutable upload intent
 
-```
-Frontend services/assets.ts → directUpload(file, form)
-  uni.uploadFile({
-    url: form.url,          // object storage, NOT the backend
-    name: "file",
-    formData: form.fields,  // signed fields
-    onProgressUpdate → progress bar
-  })
-        │
-        ▼
-Object storage verifies the signed policy, stores the object,
-returns 2xx on success.
-```
+Send `type`, `purpose`, `role`, `original_filename`, actual `content_type` and `size_bytes` to `POST /v1/assets/upload-intents`. Use one durable key per binary/role. The first successful intent returns `201`; an identical replay returns `200`. Its `upload` may be absent when no new storage transfer is needed; honor the returned Asset state.
 
-The backend is **not in the data path** — this keeps large images out of API request
-memory and off the API network path. `httpUrl.ts` / `validateUploadUrl` constrains the
-upload URL to HTTPS (or dev loopback/LAN).
+For ordinary image input use `type: "IMAGE"`, `purpose: "DESIGN_JOB_INPUT"` and upload role `image`, `masked_image` or `reference_image`. Audio uses the allowed recording role; PPTX uses document/attachment under its authorized flow. Admin image and legal-document purposes have separate privilege/type rules. Changing JSON at Workflow submission cannot reclassify an upload.
 
-## Part 3 — Complete (backend finalizes)
+The form has `method: "POST"`, `url`, `fields` and `expires_at`. Treat every returned field as opaque signing material. Never derive a new endpoint/key, convert it to PUT, or omit policy/signature fields.
 
-```
-POST /v1/assets/{asset_id}/complete
-        │
-        ▼
-FastAPI → app/asset_api.py → app/asset_completion.py
-  1. get_current_user
-  2. rate limit (asset-upload-completion-user,
-       ASSET_UPLOAD_COMPLETION_RATE_LIMIT_ATTEMPTS / WINDOW_SECONDS)
-  3. load the pending intent (must be PENDING_UPLOAD)
-  4. verify the object exists in storage with the expected size/version
-  5. capture content_sha256, object_etag, width, height (image_validation)
-  6. mark assets.status = READY
-  7. return AssetCompletionResponse
-     { asset_id, type, purpose, role, status: "READY",
-       content_type, size_bytes, content_sha256, object_etag,
-       width, height, expires_at }
-```
+## 2. Transfer the file
 
-If the asset was already `READY` (idempotent retry), the intent endpoint returns
-`READY` without a new form and the complete call succeeds again.
+Use the platform's multipart upload facility with all form fields and the binary `file` part. Do not send the API Bearer credential to OSS/MinIO. Respect form expiry, storage size/type constraints and the required public endpoint. A real phone must reach that host; an internal Compose/VPC address is not a public upload target.
 
-## Part 4 — The asset feeds a design job
+Several required image roles can upload independently in parallel. Persist each role's Asset ID and original intent key. If one fails, retain successful roles and retry only the failed chain; do not create a second job or reupload everything automatically.
 
-The staged `asset_id`s are then passed in the design-job submission
-(`assets: [{ role, asset_id }]`). When the job is created:
+## 3. Complete and verify
 
-- The assets are **bound** via `design_job_assets` and **protected** from temp-asset
-  cleanup for the job's lifetime.
-- The submit worker resolves verified, version-bound object URLs from storage when
-  composing the normalized `ProviderRequest` inputs.
+After storage success call `POST /v1/assets/{asset_id}/complete` with API authentication. Completion verifies object identity/version, length and actual content, records content hash/ETag and subtype metadata, and publishes `READY`. A successful storage HTTP status alone does not make an Asset valid for submission.
 
-## Cleanup & retention
+`ASSET_UPLOAD_INCOMPLETE`, `ASSET_STATE_CONFLICT` and temporary protections can require a bounded later retry with `Retry-After`. Changed/expired objects, unsupported content and ownership failures require their documented corrective action. Do not mutate the same object after it is admitted.
 
-- Uploaded inputs are **temporary**: they carry `asset_expires_at`
-  (`ASSET_TEMPORARY_RETENTION_SECONDS`).
-- The poll worker cron `cleanup_expired_temp_assets` deletes expired
-  `PENDING_UPLOAD` / unconsumed `READY` assets in batches (bounded by
-  `ASSET_CLEANUP_BATCH_SIZE` / `ASSET_CLEANUP_MAX_BATCHES`).
-- Provider-staged artifacts have their own namespace: `cleanup_provider_staging` reaps
-  only expired exact versions under `PROVIDER_STAGING_RETENTION_SECONDS`, with a
-  durable Redis cursor so retained first-page objects cannot starve cleanup.
-- A design job **reserves** its inputs so they survive until job completion.
+## 4. Bind Assets to a Workflow
 
-## Security properties in this flow
+`POST /v1/workflows` receives typed Asset IDs with canonical roles `primary`, `mask`, `reference` for image inputs; the API verifies their upload-intent roles, ownership, readiness and role inventory. A result-to-input copy endpoint creates an independent verified input instead of reusing a result URL.
 
-| Property | Where enforced |
-| --- | --- |
-| Server-generated object keys | backend (client filenames sanitized) |
-| Time-limited signed upload | presigned POST policy (`S3_UPLOAD_FORM_SECONDS`) |
-| No backend in the data path | direct upload to storage |
-| Client upload URL validation | frontend `validateUploadUrl` (HTTPS/loopback) |
-| Size/pixel limits | backend intent validation + `image_validation` |
-| Versioned bucket | MinIO `mc version enable` / OSS versioning |
+Store Asset identity and immutable metadata. Refresh expiring preview/download URLs from authorized API responses. Deletion and retention are guarded by active pins/references; deleting a Job or leaving a workspace does not authorize arbitrary object deletion.
 
-## Related call chains
+The voice browser handoff reuses intent/completion verification through restricted cookie/Origin/CSRF routes. It does not put a general application token in the browser or replace the underlying direct-upload protocol.
 
-- [Design Job Lifecycle](/reference/flows/design-job-lifecycle) — Part 0 calls this flow.
-- [Payment Flow](/reference/flows/payment-flow) — the same JWT/protection model.
+## Source evidence
+
+Verified against the [documented source revisions](/reference/source-revisions).
+
+- [Asset API and successful/replay statuses](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/asset_api.py)
+- [Intent policy and signing](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/assets.py)
+- [Exact-object completion verification](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/asset_completion.py)
+- [Storage implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/storage.py)

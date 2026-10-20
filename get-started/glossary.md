@@ -1,85 +1,66 @@
 # Glossary
 
-A quick reference for the terms used throughout this documentation and the
-codebase. If a term is unfamiliar, look it up here first.
+## Start here
 
-## Product & domain terms
+| Term | Meaning in this project |
+| --- | --- |
+| Repository / branch | A versioned source folder / a named line of work. Frontend uses `ui-integration`; backend uses `main`. |
+| Terminal / command | The macOS text application / an instruction entered into it and run with Return. |
+| Current directory | The folder a terminal command runs in. `pwd` shows it; `cd` changes it. |
+| Dependency | A library or tool installed for a project. `pnpm install` downloads frontend dependencies. |
+| Build / output | Compilation of source into a mini program; generated files under `dist/` are imported into platform DevTools. |
+| Environment variable | A named setting. Frontend `VITE_*` settings are fixed when compiling; rebuilding is needed to change them. |
+| Port / origin | A service's numbered local endpoint / scheme, hostname and port together, such as `http://127.0.0.1:8080`. |
+| Mock / API mode | A simulated frontend data source / frontend requests to a real backend. API mode can still use backend provider mocks. |
+
+## Product and permissions
 
 | Term | Meaning |
 | --- | --- |
-| **Design job** (设计任务) | A single asynchronous unit of work that turns input images/audio + prompts into one or more AI-generated outputs (rendering, HTML report or markdown summary). Every feature is implemented as a design job. |
-| **Design job type / Catalog** | The backend-catalogued list of job types (`GET /v1/billing/catalog`): key, display name, token cost, required images, result kind. The frontend decides what to show on home from this catalog. |
-| **Result kind** | What a design job produces: `IMAGE`, `HTML_REPORT` or `MARKDOWN`. |
-| **Feature** | One of the product flows: interior, local, furniture, kitchen, bathroom, colored floor plan, voice summary, report. |
-| **Voice summary** (录音需求总结) | A `voice_summary` design job that takes 1–3 audio recordings and returns a markdown requirement summary. |
-| **Design report** (方案汇报) | A professional HTML document assembled from a design job plus report assets (cover, mood board, renderings, etc.). Rendered server-side; viewed in a `web-view`. |
-| **Token** | The internal currency used to pay for design jobs. Each job type has a token cost. Users buy token packages or subscriptions. |
-| **Token ledger** | The append-only record of every token credit/debit (initial grant, job reserve, consume, release, purchase, subscription purchase/expiration, referral reward, adjustment). |
-| **Token precheck / preflight** | A client-side balance check before a feature opens or a job submits (`personalCatalogTokenShortage`, `assertPersonalTokenBalance`). Admission is still atomic server-side. |
-| **Workspace** | A container for design jobs and members. Every user has a **personal workspace**; they may also belong to **enterprise workspaces**. |
-| **Personal workspace** | The private workspace auto-created for every account. |
-| **Enterprise** (企业空间) | A shared workspace with an owner and members. The owner manages seats, invitations, members and all plans. |
-| **Seat** (席位) | A membership slot in an enterprise workspace. |
-| **Subscription** | An entitlement granting token allowances and/or feature access; in this version it is a single purchase with **manual renewal** (no auto-charge). |
-| **Client info** | Optional natural-wood branding fields attached to a job: `last_name`, `salutation` (先生/女士), `project_name`. |
-| **Share invitation** | An owner-issued token that lets another user join the enterprise workspace. |
-| **Referral invitation / Reward** | A referrer-attribution token; rewards (e.g. first-purchase token bonuses) are claimed from the Rewards page. |
+| Feature | An executable product capability discovered through `/v1/billing/features`; the server controls availability and Token price. |
+| Workflow | A canonical generation request and configured execution graph. A request can run multiple Operations. |
+| Operation / Provider | An execution step / the configured implementation or supplier used by that step. |
+| Design job | The asynchronous task visible to users; older design-job routes coexist with canonical Workflow routes. |
+| Result kind | The declared output category, including image, Markdown, video, HTML report and presentation output. |
+| Workspace | Personal or enterprise context that determines membership and the balance/permissions used for work. |
+| Owner / member | The two enterprise roles. Owners manage enterprise settings, invitations and membership. |
+| Project | A workspace-scoped container for a user's plans and customer details. A temporary project is the fallback entry. |
+| Current / default project | The currently selected project / the persisted preferred project. Neither is a project lifecycle status. |
+| Stage / outcome | Progress such as collected requirements / a separate result such as won or lost, when the server enables it. |
+| Subscription | Purchased access and allowances. Renewal is manual; the current UI does not offer early renewal of an active subscription. |
+| Token / ledger | Generation balance / its durable history of grants, purchase, reservation, consumption, release and adjustments. |
+| Seat | Enterprise membership capacity, including the owner. Invitations do not reserve a seat. |
 
-## Frontend terms
+## Requests and files
 
 | Term | Meaning |
 | --- | --- |
-| **uni-app** | The cross-platform framework (Vue-based) used to build the mini program; compiles to WeChat / other mini-program platforms and H5. |
-| **Subpackage** | A WeChat mini-program chunk loaded on demand. This project has `pkg-features`, `pkg-plans`, `pkg-account`. |
-| **Main package** | The always-loaded chunk: splash, home, contact, plans, profile and the tab bar. |
-| **Repository layer** | The frontend's data-access abstraction. Pages only depend on async repositories; they never call HTTP directly. |
-| **DTO** | Data-transfer object — the typed contract between the frontend and the REST API (`src/api/dto/*`). |
-| **Normalizer** | A function that validates raw JSON (`unknown`) into a typed domain object, throwing `*RESPONSE_INVALID` on drift (e.g. `mapDesignJobResponseMedia`). |
-| **Mock mode** | A compile-time frontend mode (`VITE_DATA_SOURCE=mock`) with no backend dependency; everything is simulated in memory. |
-| **API mode** | A compile-time frontend mode (`VITE_DATA_SOURCE=api`) that calls the real backend at `/api/v1`. |
-| **Runtime alias** | A Vite `resolve.alias` that swaps an abstract module name (e.g. `WechatCodeRuntime`) for a mock or live implementation at build time. |
-| **Logical job id / idempotency key** | A client-generated key derived from `{ scope, ownerId, actionId }` that makes retries safe: submitting the same logical action twice produces one job. Sent as the `Idempotency-Key` header. |
-| **Poll scheduler** | The frontend helper that polls the backend for design-job status, honouring `poll_after_seconds` / `Retry-After` and pausing when the page is hidden. |
-| **Recorder manager** | `uni.getRecorderManager()`; the voice page records MP3/16 kHz/mono/48 kbps up to 10 minutes per take. |
-| **Resumable playback** | The markdown summary page remembers each recording's play position per asset and resumes via `InnerAudioContext.startTime`. |
-| **Token pair** | Access + refresh token pair persisted under `yuanzhu.session.tokens.v1`. |
+| REST API / DTO | HTTP interface / TypeScript representation of a request or response. Repositories also validate actual JSON. |
+| Access / refresh token | Short-lived request credential / credential used to rotate the session. Treat both as secrets. |
+| Idempotency key | Identifies one logical submission or purchase so an uncertain retry can reuse the same action. |
+| Polling | Reading status repeatedly using server timing; leaving a page pauses its poller. |
+| Asset | Server-managed metadata and identity for a stored file. An arbitrary file URL is not an Asset ID. |
+| Upload intent / completion | Temporary permission to upload one file / server verification that its bytes and metadata are ready. |
+| Signed URL | Temporary file access; refresh through the authorized API when it expires. |
+| Blueprint | Structured project, pages and source Assets used by the new design-report Workflow. |
+| Historical HTML report | The earlier `html_report` product; distinct from current `design_report_9/13/17` Workflows. |
+| JSAPI / Douyin payment bridge | Platform-specific native payment invocation. Server settlement confirms the order independently. |
 
-## Backend terms
+## Backend and deployment
 
 | Term | Meaning |
 | --- | --- |
-| **FastAPI** | The Python web framework used for the REST API. |
-| **ARQ** | A Redis-backed asynchronous job queue used for background work. |
-| **Submit worker** | ARQ worker that submits jobs to the AI/speech provider. |
-| **Poll worker** | ARQ worker that polls the provider until a job completes. |
-| **Provider** | An AI/speech backend (`app/providers/`). The primary image provider is Seedream; a mock provider is used locally. |
-| **Provider job** | The provider-side job identified by `provider_job_id`. |
-| **SQLAlchemy / Alembic** | The Python ORM and its migration tool for PostgreSQL. |
-| **Object storage / S3** | S3-compatible storage for images, audio and report assets. Local: MinIO. Production: Aliyun OSS. |
-| **Upload intent** | A short-lived backend-issued permission to upload one asset directly to object storage (`POST /v1/assets/upload-intents`). |
-| **Asset completion** | The backend confirmation that an upload finished (`POST /v1/assets/{id}/complete`), returning sha256, etag and dimensions. |
-| **Presigned URL** | A time-limited URL that lets the client upload/download an object directly. |
-| **OpenID / phone code** | WeChat identity primitives: `openid` identifies the user; a `phone_code` proves the phone number. |
-| **JWT** | JSON Web Token — the format of access/refresh tokens. |
-| **JSAPI Pay** | The WeChat Pay method used by mini programs to initiate a payment (`uni.requestPayment`). |
-| **Payment notify** | The WeChat Pay server-to-server webhook that confirms a payment. |
+| FastAPI | Python HTTP application serving product APIs and Admin. |
+| PostgreSQL / Alembic | Durable relational database / reviewed schema migrations. |
+| Redis / ARQ | Coordination and queue storage / background-worker framework. |
+| MinIO / OSS | Local S3-compatible object storage / Alibaba Cloud object storage. |
+| Docker image / container / volume | Built application package / a running instance / retained data storage. Rebuilding an image does not migrate or erase data by itself. |
+| Compose project | Named local stack and its associated resources. Separate developers use separate owned ports/projects. |
+| SAE | Alibaba Cloud application runtime used by the backend deployment. |
+| Configuration snapshot | Validated legal/product/template configuration imported into a fresh local environment; it excludes supplier credentials. |
 
-## Deployment terms
+Use [FAQ](/get-started/faq) for symptoms, [macOS setup](/get-started/macos-setup) for basic commands, and [API reference](/reference/rest-api) for contracts.
 
-| Term | Meaning |
-| --- | --- |
-| **Local stack** | The Docker Compose topology (`create_stack.sh`) for local development. |
-| **SAE** | Alibaba Cloud **Serverless App Engine** where the backend runs in production. |
-| **ACR** | Alibaba Container Registry where backend images are published. |
-| **Immutable image** | One image per Git commit, tagged by the full SHA, resolved to a registry digest before deployment. |
-| **Migration Job** | A SAE Job that runs `alembic upgrade head` before apps roll out. |
-| **GitHub Pages** | Where this documentation site is published automatically. |
+## Source evidence
 
-## Domain (feature) terms
-
-| Term | Meaning |
-| --- | --- |
-| **Masked image** | A user-drawn mask over the input photo used by furniture try-on. |
-| **Reference image** | An optional second image (e.g. a furniture or style reference) used by some job types. |
-| **Prompt template / Prompt selection** | A server-side template that turns the user's selections into the final prompt sent to the provider. |
-| **Report item** | One section of a design report (project cover, renderings, mood board, etc.), configured on the server. |
+Documented against frontend `eca0a5f` and backend `b13cc56` (2026-10-20). [Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [Workflow request types](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py).
