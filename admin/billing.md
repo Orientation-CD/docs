@@ -1,90 +1,25 @@
-# Billing & Tokens
+# Billing, Feature access and orders
 
-The Billing section at `GET /admin/billing` (template `app/templates/admin/billing.html`) controls commercial pricing: what each job type costs, what subscription plans entitle, what token packages sell for, and the order history plus reconciliation. All amounts are stored in **fen** (1 fen = 0.01 CNY).
+`/admin/billing` owns the commercial configuration and payment history. Prices are integer fen; internal work is priced in Tokens. Configuration changes are server-authoritative and do not rewrite accepted jobs or purchased entitlement snapshots.
 
-## Global tokens KPI
+## Features and plans
 
-The header shows `global_tokens_consumed` — the provider-side token consumption billed globally — as a quick supply/demand sanity check.
+Features have a stable key, display name, Token price, Workflow mapping, image-role flags where applicable and active state. Create/configure a Feature before activating it; activation requires an executable Workflow. The node model is selected in [Workflows](/admin/workflows), not in a Catalog permission table.
 
-## 1. Job types
+Subscription plans distinguish standard/premium tiers and fixed intervals, reference/sale price, grant and personal-job discount. Feature permissions are edited separately for the saved plan. The UI preserves unavailable/unknown grants explicitly rather than silently treating them as known active products. Existing purchased snapshots keep their original numeric benefits.
 
-Each design-job type maps to a price (in tokens) and an approved model catalog. Edit via `POST /admin/billing/job-types`; remove via `POST /admin/billing/job-types/{key}/remove` (soft archive).
+Token packages distinguish purchased amount and bonus, with the total grant derived server-side. Deactivate/remove products for future checkout while retaining historical orders. Personal purchases do not fund enterprise pools; use [Workspaces](/admin/workspaces) for that ledger.
 
-| Field | Type | Required | Description | Default |
-| --- | --- | --- | --- | --- |
-| Key | text (read-only) | Yes | Stable slug, e.g. `interior_redesign`. | — |
-| Display name | text | Yes | Customer-facing name. | — |
-| Token cost | number | Yes | Tokens charged per job. Range 10 … 1,000,000. | — |
-| Masked image required | checkbox | No | Whether the job needs a masked/brush input. | off |
-| Reference image required | checkbox | No | Whether a reference image is required. | off |
-| Is active | checkbox | No | When off, the job type is hidden from customers. | on |
-| Approved models | select | No | Which model configs serve this catalog key (multiple). | — |
-| Expected version | number | Yes | Optimistic-lock version; a stale edit returns `409`. | current |
+## Payment evidence
 
-"Approved models" is the `ProviderModelCatalog` assignment — see [providers](/admin/providers) for how models are attached to catalogs.
+History offers query, channel (`app`, `jsapi`, `douyin`), mock/live, status and purchase-kind filters. The old-pending-payment reconciliation control queues applicable provider checks and shows asynchronous progress; it is not a button that simply marks orders paid. A successful client SDK callback is not settlement evidence.
 
-## 2. Subscription plans
+## Douyin trade settings and refunds
 
-Plans are grouped by **interval** (`monthly`, `quarterly`, `yearly`). Switch interval with the auto-submit selector.
+The trade form stores a shared HTTPS image and subscription/Token mappings with service type **702** and platform tag groups. It uses a configuration version; choose real official tags for live mode instead of reusing mock labels. Credentials and callback origins are deployment settings, not public form values. See [Douyin payments](/reference/douyin-payment).
 
-Create/edit via `POST /admin/billing/plans`; remove via `POST /admin/billing/plans/{id}/remove` (soft archive).
+The backend retains full-refund APIs, callbacks and compensation, while Mini Program refund-application entry points remain closed at this baseline. The admin shows Douyin refund anomalies but has **no ordinary approval queue or exception-resolution button**. WeChat refund query recovery and associated subscription reclamation have documented gaps. Do not describe anomaly display or mock success as a completed refund operating process; use the pinned refund contract and [REST API](/reference/rest-api).
 
-| Field | Type | Required | Description | Default |
-| --- | --- | --- | --- | --- |
-| Code | text | Yes | Unique plan code. | — |
-| Name | text | Yes | Display name. | — |
-| Interval | select | Yes | monthly / quarterly / yearly. | — |
-| List price (fen) | number | Yes | Original/strikethrough price. | — |
-| Price (fen) | number | Yes | Actual charged price. | — |
-| Token grant | number | Yes | Tokens granted per interval. | — |
-| Job discount % | number | Yes | Discount applied to job costs for subscribers. | 0 |
-| Is active | checkbox | No | When off, the plan is not purchasable. | on |
+---
 
-### Plan permissions (allowed catalogs)
-
-`POST /admin/billing/plan-permissions/{interval}` sets which job-type catalogs a plan in that interval may use. It is a multi-select of job-type keys — customers on a plan can only run jobs in the allowed catalogs.
-
-## 3. Token packages
-
-One-time top-up bundles. Create via `POST /admin/billing/token-packages`; remove via `POST /admin/billing/token-packages/{id}/remove` (soft archive).
-
-| Field | Type | Required | Description | Default |
-| --- | --- | --- | --- | --- |
-| Code | text | Yes | Unique package code. | — |
-| Name | text | Yes | Display name. | — |
-| List price (fen) | number | Yes | Strikethrough price. | — |
-| Price (fen) | number | Yes | Actual charged price. | — |
-| Token amount | number | Yes | Tokens delivered. | — |
-| Bonus token amount | number | No | Bonus tokens included. | 0 |
-| Is active | checkbox | No | Off = not purchasable. | on |
-
-## 4. Payment history
-
-The table lists `PaymentOrder` rows with live search and status/type filters.
-
-| Column | What it shows |
-| --- | --- |
-| Order | Merchant order no (`out_trade_no`) + WeChat transaction id. |
-| User | Purchaser display name. |
-| Type | `subscription` or `token_purchase`. |
-| Amount | Amount in fen (paid/refunded). |
-| Tokens | Tokens granted. |
-| Status | pending / paid / closed / refunded. |
-| Created / Paid | Timestamps. |
-
-### Payment reconciliation (async)
-
-`POST /admin/billing/payments/reconcile` kicks off an asynchronous sweep of expired/pending orders against WeChat to confirm their true state. Because this can be long-running, it returns a `progress_id` and the page polls `GET /admin/billing/payments/reconcile/{progress_id}` (with `no-store`) until it reports completion. The UI shows a step list (start → query → finish) and the final processed/updated counts. The "Reconcile expired payments" button is disabled while a run is in flight.
-
-> Never manually flip a stale pending order to paid/closed — reconciliation uses WeChat-confirmed evidence only.
-
-## Enterprise token adjustment
-
-Workspace token pools are managed on the [Workspaces](/admin/workspaces) page; individual user personal balances are on [Users](/admin/users). Every adjustment writes an auditable `TokenLedgerEntry` (`TOKEN_ADJUSTMENT_CREDIT` / `..._DEDUCTION`).
-
-## Order of operations checklist
-
-1. Set job-type token costs and approved models.
-2. Create subscription plans and token packages.
-3. Restrict plan permissions per interval.
-4. Watch payments here and run reconciliation when pending orders age out.
+Source evidence · backend `b13cc566`: [app/admin/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/billing.py) · [app/templates/admin/billing.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/billing.html) · [documents/PAYMENT_REFUNDS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/PAYMENT_REFUNDS.md).

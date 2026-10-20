@@ -1,96 +1,31 @@
-# 可观测性
+# 可观测性与恢复
 
-后端在生产环境中设计为可观测，且不泄露密钥或无界指标基数。本页覆盖结构化日志、进程内指标管道、性能报告、管理后台性能看板，以及记录什么（和不记录什么）的安全保证。代码位于
-`app/performance.py`、`app/http_safety.py`、`app/overview.py` 和
-`app/maintenance_jobs.py`。
+健康检查判断是否适合接流量，Studio Control 展示总体压力，Workflow diagnostics 解释一次具体执行；三者回答的问题不同。
 
-## 请求 ID 与结构化日志
+## 健康与 HTTP 证据
 
-每个请求获得一个 32 位十六进制字符的**请求 ID**（`http_safety.py`）：如果客户端未发送则生成，附加到响应，并在处理该请求时发出的每条日志行中用作关联 ID。日志路径经过净化：原始 UUID 路径段被归一化为 `/{id}`，任何非安全字符被替换，因此用户提供的路径文本永远不能注入日志输出。
+`/health/live` 仅证明 HTTP 进程存活。`/health/ready` 检查 Redis 与 PostgreSQL，失败返回 `503 DEPENDENCY_UNAVAILABLE`，不校验模型凭据、对象存储验收或支付结算。
 
-## 什么绝不记录
+HTTP 保护层传递 request ID、限制并发/请求体、采样 trace，并按已注册路由模板聚合指标。应用错误使用 `detail.code`、`message` 与可选元数据；请求结构 422 使用验证数组。敏感请求体和凭据不应粘贴到诊断报告。
 
-环境变量注释中记录的硬性安全规则：**指标中不存储 payload、凭证、手机号或原始未注册 URL 路径。**指标管道只记录已注册路由模板、状态码、持续时间和错误代码——绝不记录查询字符串或 body 内容。
+## 性能
 
-## HTTP 性能指标
+[/admin/performance](/zh/admin/performance)区分进入/处理流量、准入等待、handler 耗时、有界延迟估计、失败、队列深度/年龄与任务阶段。提供认证的 HTML 刷新和实时 JSON 接口；应用没有公开 Prometheus `/metrics` 合同。
 
-`app/performance.py` 在**内存中**聚合每个请求，然后每
-`PERFORMANCE_METRICS_FLUSH_SECONDS`（默认 10s）向 Redis 刷新一个紧凑快照。
+历史报告可能短暂缓存，实时压力独立采集。要区分数据缺失/不可用和零负载。慢响应可能来自准入竞争、数据库压力、服务商或收尾，应先定位阶段，不能一律加大超时。
 
-| 设置 | 默认值 | 含义 |
-| --- | --- | --- |
-| `REQUEST_SLOW_LOG_SECONDS` | 2 | 比这更慢的请求被追踪 |
-| `REQUEST_TRACE_SAMPLE_RATE` | 0.001 | 采样 0.1% 的健康请求 |
-| `REQUEST_TRACE_LOG_BUDGET_PER_MINUTE` | 30 | 每分钟追踪行上限 |
-| `PERFORMANCE_METRICS_FLUSH_SECONDS` | 10 | 向 Redis 刷新频率 |
-| `PERFORMANCE_METRICS_STREAM_MAX_ENTRIES` | 5000 | 原始持续时间样本上限 |
+## 单任务诊断
 
-只有**慢/失败**请求被完整追踪；健康请求按 0.1% 采样。重复的相同错误由每分钟预算（`_UNHANDLED_ERROR_LOG_BUDGET`）抑制，因此失控失败模式不会淹没日志。
+后台任务详情链接到 diagnostics、持久化片段及授权下载。排查重试时对应 Workflow/Operation/Submission 身份及尝试代际。服务商错误区分确定未发送、明确拒绝及接收情况未知，并关联不同重放策略。付费结果未知不代表可以自动重发。
 
-排除在指标之外：`/health/live`、`/health/ready`、
-`/admin/performance/live`、`/admin/performance/refresh`。
+worker 补偿持久化 Operation/Submission、支付证据、删除声明及临时存储。补偿机制不授予手工改库或删除保留对象版本的权限。
 
-## 设计作业性能
+## 活跃度可信状态与部署恢复
 
-作业级追踪由单独阈值控制：
+`PROJECT_ACTIVITY_STATE_UNAVAILABLE` 表示权威活跃度状态需要运维核对，不表示无人操作。项目活跃度迁移与 trust epoch 恢复需按当前部署 runbook 的保护式全角色停机流程执行，不能清空/初始化可信状态或降级持久数据库来压制错误。
 
-| 设置 | 默认值 | 含义 |
-| --- | --- | --- |
-| `DESIGN_JOB_QUEUE_SLOW_LOG_SECONDS` | 30 | 标记慢的提供商队列等待 |
-| `DESIGN_JOB_SLOW_LOG_SECONDS` | 120 | 标记慢的端到端作业 |
-| `DESIGN_JOB_TRACE_LOG_BUDGET_PER_MINUTE` | 20 | 每分钟作业追踪行上限 |
+参见[后台性能](/zh/admin/performance)、[任务](/zh/admin/design-jobs)、[部署](/zh/deploy/sae-deployment)与[配置](/zh/reference/configuration)。报告事件时保留首个失败证据、实际版本及具体受影响任务 ID。
 
-成功的作业仅在其队列或端到端时间异常时记录；**失败始终符合条件**（受预算约束）。
-`record_job_performance_event` 喂给作业性能报告使用的有界事件流。
+---
 
-## 暴露的指标与报告
-
-| 端点 | 认证 | 用途 |
-| --- | --- | --- |
-| `/metrics` | 内部 | 紧凑性能快照 |
-| `/health/live` | 公开 | 存活 |
-| `/health/ready` | 公开 | 就绪（Postgres + Redis 可达） |
-| `/admin/performance/live` | 管理员 | 实时 HTTP + 作业性能报告 |
-| `/admin/performance/refresh` | 管理员 | 强制刷新指标 |
-
-`build_http_performance_report` 在滚动窗口上聚合按路由的请求率、错误率和延迟百分位。`build_job_performance_report` 结合
-`DurationMetric`、`JobMinuteMetric`、`ActiveJobSnapshot` 和
-`TerminalOutcomeSummary`。`build_runtime_bottleneck_report` 突出 worker 卡在哪里（队列深度、活跃作业快照、终态结果分布）。
-
-管理后台概览页（`app/overview.py`）将这些聚合呈现给运营人员。
-`ADMIN_REPORT_CACHE_SECONDS`（默认 10）短暂缓存渲染的管理报告。
-
-## 周期性维护作业
-
-`app/maintenance_jobs.py` 注册同时兼作可观测性触点的 ARQ 任务：
-
-| 作业 | 池 | 用途 |
-| --- | --- | --- |
-| `process_expire_user_subscriptions` | 两者 | 翻转过期个人订阅 |
-| `process_expire_locked_user_subscriptions` | 两者 | 持锁过期 |
-| `process_anonymize_due_user_accounts` | 两者 | 不可逆地匿名化过宽限期账号 |
-| `process_reconcile_stale_design_jobs` | 两者 | 重新驱动中途丢失的作业 |
-| `process_cleanup_temporary_assets` | 两者 | 删除过期未完成上传 |
-| `process_cleanup_provider_staging_artifacts` | 两者 | 移除提供商暂存对象 |
-| `process_cleanup_report_result_artifacts` | poll | 垃圾回收旧报告结果 |
-| `process_reconcile_report_templates` | poll | 对齐存储报告与当前模板 |
-| `process_record_provider_job_performance_events` | 两者 | 刷新作业性能事件 |
-| `process_record_runtime_bottleneck_metrics` | 两者 | 刷新瓶颈报告 |
-
-Worker 详细日志默认关闭（`WORKER_VERBOSE_LOGS=false`）；仅在调试特定流水线问题时开启。
-
-## 典型日志行
-
-请求携带请求 ID 作为结构化字段，因此单个用户操作可从 API 穿过两个 worker 追踪。错误行包含稳定的
-`error_code`（从 PostgreSQL `sqlstate` 和领域异常归一化而来），但绝不包含问题 SQL、payload、手机号或原始 URL 路径。慢请求额外携带有界路由模板、状态、持续时间以及哪个依赖慢。这保持日志对分类有用，而不成为数据泄露向量。
-
-## 安全与恢复姿态
-
-- **PostgreSQL 快照恢复**（#238）：系统记录源是 PostgreSQL；恢复程序依赖拍摄和恢复数据库快照，而非从日志重建，因此持久状态始终在数据库中，绝不只在 Redis 或日志中。
-- **幂等 worker** 使维护任务可安全重试；清理和对齐任务刻意幂等且受批次大小限制。
-- **处处有界预算**（每分钟日志预算、流条目上限、批次大小）意味着故障风暴优雅降级日志记录，而非压垮存储。
-
-## 延伸阅读
-
-- [架构](/backend/architecture) —— 中间件和 worker 拓扑。
-- [快速开始](/backend/getting-started) —— 健康检查。
+代码依据 · backend `b13cc566`: [app/core/http_safety.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/http_safety.py) · [app/core/performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/performance.py) · [app/admin/workflow_diagnostics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/workflow_diagnostics.py) · [deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md).

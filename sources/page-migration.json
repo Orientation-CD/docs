@@ -1,0 +1,560 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "172cee9be81849af2662de62a573bfebb8a78485",
+  "pages": [
+    {
+      "path": "admin/assets.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/billing.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/campaigns.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/dashboard.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/design-jobs.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/finance.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/getting-started.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/legal-documents.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/marketing.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/performance.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/prompts.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/providers.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/report-templates.md",
+      "action": "migration",
+      "replacement": "/backend/reports"
+    },
+    {
+      "path": "admin/tech-stack.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/users.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "admin/workflows.md",
+      "action": "add"
+    },
+    {
+      "path": "admin/workspaces.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/architecture.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/assets-storage.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/authentication.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/billing-tokens.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/copywriting.md",
+      "action": "add"
+    },
+    {
+      "path": "backend/design-jobs.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/getting-started.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/observability.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/projects.md",
+      "action": "add"
+    },
+    {
+      "path": "backend/reports.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/video.md",
+      "action": "add"
+    },
+    {
+      "path": "backend/voice.md",
+      "action": "add"
+    },
+    {
+      "path": "backend/workflows.md",
+      "action": "add"
+    },
+    {
+      "path": "backend/workspaces-orgs.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "deploy/ci-cd.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "deploy/cloud-architecture.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "deploy/local-stack.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "deploy/production.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "deploy/sae-deployment.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/architecture.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/data-source-modes.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/design-system.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/getting-started.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/key-flows.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/platforms.md",
+      "action": "add"
+    },
+    {
+      "path": "frontend/projects.md",
+      "action": "add"
+    },
+    {
+      "path": "frontend/testing.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/workflows.md",
+      "action": "add"
+    },
+    {
+      "path": "get-started/architecture.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "get-started/faq.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "get-started/glossary.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "get-started/introduction.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "get-started/macos-setup.md",
+      "action": "add"
+    },
+    {
+      "path": "get-started/quickstart.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "index.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/configuration.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/data-model.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/douyin-payment.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/asset-upload-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/design-job-lifecycle.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/payment-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/report-view-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/wechat-login-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/workspace-membership-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/maintenance.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/openapi.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/rest-api.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/source-revisions.md",
+      "action": "add"
+    },
+    {
+      "path": "testing/storage-environments.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/assets.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/billing.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/campaigns.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/dashboard.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/design-jobs.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/finance.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/getting-started.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/legal-documents.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/marketing.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/performance.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/prompts.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/providers.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/report-templates.md",
+      "action": "migration",
+      "replacement": "/zh/backend/reports"
+    },
+    {
+      "path": "zh/admin/tech-stack.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/users.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/admin/workflows.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/admin/workspaces.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/architecture.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/assets-storage.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/authentication.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/billing-tokens.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/copywriting.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/backend/design-jobs.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/getting-started.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/observability.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/projects.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/backend/reports.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/video.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/backend/voice.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/backend/workflows.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/backend/workspaces-orgs.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/deploy/ci-cd.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/deploy/cloud-architecture.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/deploy/local-stack.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/deploy/production.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/deploy/sae-deployment.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/architecture.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/data-source-modes.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/design-system.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/getting-started.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/key-flows.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/platforms.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/frontend/projects.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/frontend/testing.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/workflows.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/get-started/architecture.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/get-started/faq.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/get-started/glossary.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/get-started/introduction.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/get-started/macos-setup.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/get-started/quickstart.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/index.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/configuration.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/data-model.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/douyin-payment.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/asset-upload-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/design-job-lifecycle.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/payment-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/report-view-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/wechat-login-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/workspace-membership-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/maintenance.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/openapi.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/rest-api.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/source-revisions.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/testing/storage-environments.md",
+      "action": "rewrite"
+    }
+  ]
+}

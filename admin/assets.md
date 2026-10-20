@@ -1,70 +1,21 @@
-# Asset Management
+# Asset administration
 
-The Assets section at `GET /admin/assets` (template `app/templates/admin/assets.html`) lists files stored in object storage — images, documents, audio — and lets you upload admin images, generate access URLs, and remove objects.
+`/admin/assets` searches authorized Asset metadata and generates access URLs. It is the administrator file-discovery surface; customer `/v1/assets` list/delete operations likewise require administrator authorization.
 
-## Search-first
+## Find and inspect
 
-This page is **search-first**: no results are shown until you type a query. Use the search box to filter by title, file name, or asset id. Results paginate at 50 per page.
+Use the keyword search and available filters, then inspect Asset ID, type, purpose, status, visibility, filename, size and timestamps. Image results have authenticated thumbnail/enlarge controls; other objects can be opened through the supported object-view flow.
 
-## Asset types & statuses
+The URL form offers a presigned URL or a public URL. **Public URL is available only for an already-public Asset**; selecting it does not change visibility. Signed URLs expire and should be regenerated when needed. Never paste upload fields or signed private URLs into durable public documentation.
 
-| Type (`AssetType`) | Meaning |
-| --- | --- |
-| `IMAGE` | An image (input, reference, mask, or result). |
-| `DOCUMENT` | A document file. |
-| `AUDIO` | An audio recording. |
+Admin image upload handlers use the same intent → direct multipart POST → completion verification as customer inputs, with the administrator purpose. Legal publication has its own [Legal Documents](/admin/legal-documents) workflow and immutable metadata.
 
-| Status (`AssetStatus`) | Meaning |
-| --- | --- |
-| `PENDING_UPLOAD` | An upload intent created but not yet completed. |
-| `READY` | File uploaded, not yet bound to a job. |
-| `RESERVED` | Reserved by a pending/in-flight job. |
-| `ACTIVE` | In active use by a completed job. |
+## Removal
 
-Visibility is `PRIVATE` (default) or `PUBLIC`.
+The Remove Asset confirmation covers the Asset and its stored object versions. The server rejects active retained references, incorrect state and unavailable storage. Do not manually delete an object retained by a Workflow, report, logo/gallery reference or legal acceptance.
 
-## The assets table
+A result reused as a design input is an independently copied Asset with its own lifecycle; deleting one identity is not permission to remove every related version. Use task cleanup for task-owned results. See [Assets and storage](/backend/assets-storage) for exact-version integrity and retention.
 
-| Column | What it shows |
-| --- | --- |
-| Type | IMAGE / DOCUMENT / AUDIO badge. |
-| Title | Admin-assigned or descriptive title. |
-| Visibility | Private / public. |
-| Dimensions / duration | Image width×height, or audio length. |
-| Size | File size. |
-| Created | Upload time. |
-| Asset ID | Internal UUID. |
+---
 
-Each row offers thumbnail, URL, and remove actions.
-
-## Uploading an admin image
-
-Uploads are a **two-step direct-to-storage** flow driven by `admin.js`:
-
-1. **Create an upload intent** — `POST /admin/assets/upload-intents` with the desired title. The server returns an object key and a signed upload target.
-2. **PUT the file directly to object storage** from the browser.
-3. **Complete the upload** — `POST /admin/assets/{id}/complete` so the server records the object as ready and extracts metadata (dimensions, size, content type).
-
-| Form field | Type | Required | Description |
-| --- | --- | --- | --- |
-| Title | text | Yes | Label for the asset. |
-| Image | file | Yes | The image file to upload. |
-
-## Per-row actions
-
-### Get access URL (`POST /admin/assets/{id}/url`)
-
-Generates a usable URL for the object. Depending on storage configuration this is either a presigned `GET` URL or a public URL; the row shows the result you can open or copy.
-
-### Thumbnail (`GET /admin/assets/{id}/thumbnail`)
-
-Redirects to (or streams) a thumbnail rendition of the image for quick preview without opening the full object.
-
-### Remove (`POST /admin/assets/{id}/remove`)
-
-Removes the asset. Objects still reserved/active on a job are protected; you can only clean up assets no longer in use.
-
-## Notes
-
-- Admin uploads are tagged as `ADMIN_IMAGE` purpose; customer job inputs use other purposes (`DESIGN_JOB_INPUT`, `LEGAL_DOCUMENT`).
-- Never expose private asset URLs publicly; use presigned URLs and respect their expiry.
+Source evidence · backend `b13cc566`: [app/admin/assets.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/assets.py) · [app/templates/admin/assets.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/assets.html) · [app/assets/asset_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/asset_api.py).

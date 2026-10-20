@@ -1,74 +1,28 @@
-# User Management
+# User operations
 
-The Users section at `GET /admin/users` (template `app/templates/admin/users.html`) lets you search registered customer accounts and adjust their entitlements. You cannot create customer accounts here — they self-register through the mobile app.
+`/admin/users` searches and paginates accounts, shows identity/status, personal balances and the owned-workspace allowance. User operations require the active admin session and CSRF token.
 
-## Searching
+## Balances and allowance
 
-Use the search bar (`_search.html`, `data-live-search`). It matches, live as you type:
-- Display name
-- Phone number (E.164)
-- User ID
-- Enterprise / workspace name
+A signed integer Token adjustment writes an auditable ledger entry. Negative adjustments cannot reduce the balance below active reservations. Check the resulting ledger before retrying an uncertain form response.
 
-Results paginate at 50 per page (`_pagination.html`). There is no status filter on this page; suspended/deactivated accounts are flagged in the table.
+The allowance is between 1 and 100 and counts the permanent personal workspace plus active owned enterprises. Joined memberships do not consume it. Reducing an allowance must satisfy current ownership constraints; it is not a way to remove an enterprise. See [Workspaces](/admin/workspaces).
 
-## The users table
+## Distinct account actions
 
-| Column | What it shows |
+| Action | Meaning |
 | --- | --- |
-| User | Display name + user type badge (personal / enterprise / admin). |
-| Phone | The account's E.164 phone. |
-| Jobs | Number of design jobs belonging to this user. |
-| Personal tokens | Current remaining balance, plus a "reserved" amount held by in-flight jobs. |
-| Type | Account type badge. |
-| Workspaces | Enterprise memberships this user holds (owner/member), plus the personal "allowed workspaces" allowance. |
-| Status | Active / suspended / deactivated badge. |
+| Suspend | Administrative access restriction, with owned-enterprise/member effects |
+| Reactivate | Restore an eligible suspended/deactivated account; retired memberships do not reappear |
+| Assist voluntary deactivation | Requires the user's request and removal of active owned enterprises; applies normal grace/recovery rules |
+| Archive | Irreversible identity anonymization for an eligible deactivated account |
 
-Each row expands to expose the account actions described below.
+The UI exposes only applicable lifecycle actions; the server rechecks account state, owned enterprises, active Jobs and self-action restrictions. Archiving removes identity/recovery data while retaining required financial/audit records; it is not ordinary reversible suspension.
 
-## Actions
+Planned suspension/removal can cut off member access to owned enterprises. Coordinate the download period and affected members before the authorized action. Active work may continue or settle; account state changes are not provider cancellation.
 
-### Adjust tokens (`POST /admin/users/{id}/tokens`)
+Customer credential-verified lifecycle APIs are described in [authentication](/backend/authentication). Enterprise-wide balances are adjusted on the workspace page, not by adding personal Tokens to its owner.
 
-Top up or deduct a user's **personal** token balance.
+---
 
-| Field | Type | Required | Description | Default |
-| --- | --- | --- | --- | --- |
-| Adjustment | number | Yes | Signed delta in tokens. Range −1,000,000,000 … +1,000,000,000. Must not be `0`. | — |
-| Reason | text | No | Free-text note recorded on the ledger entry. | — |
-
-- Positive values credit the account (`TOKEN_ADJUSTMENT_CREDIT`); negative values debit it (`TOKEN_ADJUSTMENT_DEDUCTION`). A zero adjustment is rejected.
-- The change writes a durable `TokenLedgerEntry` so finance and token-detail screens stay consistent.
-
-### Allowed workspaces (`POST /admin/users/{id}/allowed-workspaces`)
-
-How many enterprise workspaces a user may belong to.
-
-| Field | Type | Required | Description | Default |
-| --- | --- | --- | --- | --- |
-| Allowed workspaces | number | Yes | Integer between **1 and 100**. | current value |
-
-- You cannot lower this below the number of workspaces the user already owns — the server rejects it so owners are not stranded.
-
-### Suspend / reactivate
-
-Toggles the account between active and suspended (`account_status` / `is_active`). A suspended user cannot sign in or run jobs but their data is retained. Use the row's suspend/reactivate control.
-
-### Archive deactivated users (soft remove)
-
-Per the archive policy, deactivated users are archived immediately. The remove action (`POST /admin/users/{id}/remove`) performs a **soft archive** via `remove_user_account`: it marks the user removed/anonymized rather than deleting rows, preserving billing and job history.
-
-> Removing/archiving a user is irreversible from the UI and keeps ledger records for finance. Prefer suspend when you may restore access later.
-
-## Account lifecycle summary
-
-| State | Meaning |
-| --- | --- |
-| Active | Can sign in and run jobs. |
-| Suspended | Sign-in blocked; data retained. |
-| Deactivated / anonymized | Soft-archived; appears removed from customer-facing surfaces, history preserved. |
-
-## Tips
-
-- Adjust tokens sparingly and always record a reason; every adjustment is auditable in the token ledger.
-- Use [Workspaces](/admin/workspaces) to manage enterprise token pools and membership; this page only touches the user's *personal* balance.
+Source evidence · backend `b13cc566`: [app/admin/users.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/users.py) · [app/identity/account_lifecycle_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/identity/account_lifecycle_api.py) · [app/templates/admin/users.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/users.html).

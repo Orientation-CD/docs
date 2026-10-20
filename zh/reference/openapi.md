@@ -1,113 +1,57 @@
-# OpenAPI
+# OpenAPI 与契约边界
 
-FastAPI 从装饰路由自动生成 OpenAPI（Swagger）文档。本页解释如何访问它、包含什么和不包含什么，以及你会遇到的关键请求/响应 schema。
+运行后端的 `/openapi.json` 提供机器可读传输 schema，`/docs` 提供 Swagger UI。[固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md) 决定业务错误和重试语义，两者用途不同。
 
-## 访问文档
-
-API 运行时：
-
-```
-http://localhost:8000/openapi.json     # 原始 JSON schema
-http://localhost:8000/docs            # Swagger UI 交互式 playground
-```
-
-文档标题和版本在 `app/main.py` 中设置（`FastAPI(title=...,
-version="0.3.0")`）。生产环境中同一文档在边缘前缀下服务，例如
-`https://api.example.com/api/openapi.json`。
-
-## 包含什么
-
-生成的 schema 覆盖每个带 `response_model` 和开放声明的路由：
-
-| 标签 | 路由 | 说明 |
-| --- | --- | --- |
-| `authentication` | `auth_router` | 注册、登录、wechat-login、刷新、登出 |
-| `design` | `design_router` | 个人信息、工作区、提示词模板、设计作业、报告发现 |
-| `assets` | `asset_api.router` | 上传意向、完成、列表/读取/删除 |
-| `billing` | `billing_api.router` | 目录、订阅、积分购买、支付、退款、工作区 |
-| `wechat-webhooks` | `webhook_router` | 支付/退款通知（服务器到服务器） |
-| `workspaces` | `workspace_api.router` | 工作区 CRUD、分享邀请 |
-| `rewards` | `referral_api.router` | 推荐邀请、奖励 |
-| `legal` | `legal_router` | 当前法律文档 |
-| `health` | 根 `router` | `/health/live`、`/health/ready` |
-
-## 排除什么
-
-以 `include_in_schema=False` 声明的路由**不**发布。这些是管理服务端渲染表单操作（登录、登出、用户暂停/恢复/归档、提供商和提示词管理表单），因为它们是带 CSRF 令牌的 HTML 表单 POST，而非 JSON API。它们仍然工作，但记录在
-[认证](/backend/authentication)而非此处。
-
-`/mock/*` 支付助手仅在 `MOCK_PAYMENT_ENDPOINTS_ENABLED=true` 时挂载；它们只在那时出现在 schema 中。
-
-## playground 中的认证
-
-受保护路由声明了一个 `BearerAuth` 安全方案（通过
-`HTTPBearer`）。在 Swagger UI 中你可以粘贴一个真实访问令牌到
-**Authorize** 对话框：
-
-```
-Authorization: Bearer <access_token>
-```
-
-管理 Web 路由**不**使用此方案——它们依赖
-`/admin/login` 设置的签名浏览器 Cookie。
-
-## 关键 schema
-
-`app/models.py` 中的这些 Pydantic 模型塑造最重要的请求和响应。
-
-### 认证
-
-- `RegisterRequest` / `TokenResponse` —— 注册（手机号 + 密码）并接收
-  `{ access_token, refresh_token, ... }`。
-- `WeChatLoginResponse` —— 微信登录结果。
-- `UserResponse` —— 当前用户资料 + 积分余额。
-
-### 设计作业
-
-- `DesignJobCreate` —— 创建请求（作业类型、资产 ID、提示词选择）。
-- `DesignJobResponse` —— 一个作业：状态、进度、结果、错误代码。
-- `DesignJobListResponse` —— 分页列表。
-- `PromptTemplateListResponse` / `PromptTemplateResponse` —— 带变量和选项的可选提示词。
-- `ReportItemDiscoveryResponse` —— 可用报告章节。
-
-### 资产
-
-- `AssetUploadIntentCreateRequest` / `AssetUploadIntentResponse` —— 请求和
-  预签名上传表单。
-- `AssetCompletionResponse` —— 最终资产元数据。
-- `AssetListResponse` / `AssetResponse` —— 列表和读取。
-
-### 计费
-
-- `BillingCatalogResponse` —— 套餐 + 积分包。
-- `PaymentOrderResponse` / `PaymentHistoryResponse` —— 订单生命周期。
-- `RefundOrderResponse` —— 退款状态。
-
-### 工作区与推荐
-
-- `WorkspaceListResponse` / `WorkspaceDetailResponse` —— 工作区摘要。
-- `ReferralInvitationCreateResponse` / `RewardListResponse` /
-  `RewardClaimResponse` —— 推荐流程。
-
-## 幂等
-
-几个 POST 路由要求 `Idempotency-Key` 头（8–128 字符）。这在操作上声明，因此 playground 将其显示为上传意向、推荐创建/接受、奖励认领和支付操作的必需头参数。
-
-## 生成客户端 SDK
-
-因为文档是标准 OpenAPI，你可以从 `/openapi.json` 生成类型化客户端，例如：
+## 从选定环境读取
 
 ```bash
-# 下载 schema
-curl http://localhost:8000/openapi.json -o openapi.json
-
-# （示例）生成 TypeScript 客户端
-npx openapi-typescript openapi.json -o api.d.ts
+export API_BASE_URL='http://localhost:<本会话选定端口>'
+curl --fail "$API_BASE_URL/openapi.json" -o openapi.json
 ```
 
-仅增量 API 演进意味着生成的客户端应忽略未知字段。
+先替换占位符。下载得到的是该环境实际部署/配置的 schema，不一定等于本文档版本；生成客户端时一并记录 `APP_VERSION`/源码版本。下载只读，但 Swagger **Try it out** 可能修改真实数据或触发付费任务。
 
-## 延伸阅读
+## 包含的接口
 
-- [REST API](/reference/rest-api) —— 完整路由表。
-- [数据模型](/reference/data-model) —— 背后的表。
+生产契约涵盖健康、身份/同意、Workflow、兼容 Job、Asset、工作区/Project、提示词、支付/退款回调和语音交接。schema 有某操作，不代表某 Feature 已激活。
+
+保留精确路径参数名、body discriminator、类型化输入输出、参数和成功状态。新集成使用 `POST /v1/workflows`，仍支持的 `/v1/design-jobs` 兼容操作另有标识。可运行能力由发现接口与实时权益判定。
+
+## 不同认证边界
+
+| 接口面 | 凭据 |
+| --- | --- |
+| 多数手机 `/v1` | access token Bearer header |
+| refresh/logout | body 中 refresh token |
+| 法律、发现、邀请公开预览 | 逐端点声明的公开访问 |
+| 报告/演示浏览器查看 | 短时签名 `token` query capability |
+| 支付/退款 webhook | 对原始请求字节的平台签名 |
+| exchange 后 `/voice-upload/*` | 受限 HttpOnly cookie，写请求还需准确 Origin/CSRF |
+| `/admin/*` | Admin 浏览器会话与 CSRF，不在公开 OpenAPI 内 |
+
+不要把通用 Bearer 放进对象存储 form、capability URL 或 webhook。Admin JSON/局部页面端点不会因为返回 JSON 就变成公开客户端 API。
+
+## 错误和幂等
+
+请求形状错误为 `422` 校验数组；稳定业务错误为 `detail.code`、展示/诊断消息和可选元数据。逐端点 REST 错误表决定处理/重试：OpenAPI 可能自动列出框架 `422`，却没有穷举所有业务状态。
+
+要求 `Idempotency-Key` 的动作在网络不确定时，使用原 key 和相同归一化 body 重放。新 key 是新动作，可能新增预留、支付或模型调用；同 key 改内容是冲突。生成客户端的通用 HTTP 异常类型不能替你决定付费重试。
+
+## 条件 mock 与历史兼容
+
+`MOCK_PAYMENT_ENDPOINTS_ENABLED` 控制本地完成辅助端点；抖音还有依模式注册的 mock。独立 mock provider 不运行在主 API 内。这些是测试契约，不是生产客户端能力，精确行为看固定 mock 文档/测试。
+
+兼容路径不代表退休字段仍可执行：部分历史 Workflow 字段明确要求重新提交。以当前 discriminator/schema 为准，见[API 索引](/zh/reference/rest-api)和[Workflow 生命周期](/zh/reference/flows/design-job-lifecycle)。
+
+## 生成客户端
+
+用团队固定版本 generator 读取已保存并标注版本的 schema；生成代码与手写业务/仓储逻辑分离。人工检查 discriminated union、nullable、逐端点状态（Asset/语音 session 新建 `201`、重放 `200`；Workflow 两者都是 `202`）、capability URL 和存储 multipart **POST**。生成器不会替你实现同意 UX、权益检查、安全付费重试和平台支付桥。
+
+## 源码依据
+
+已按[记录的源码版本](/zh/reference/source-revisions)核对。
+
+- [规范 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md)
+- [应用路由注册](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py)
+- [公开 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)
+- [条件 mock 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/MOCK_API_INTERFACE.md)

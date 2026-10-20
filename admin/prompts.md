@@ -1,61 +1,21 @@
-# Prompt Templates
+# Prompt templates and complete-library import
 
-The Prompts page at `GET /admin/prompts` (template `app/templates/admin/prompts.html`) manages the prompt templates sent to model providers. A template bundles a system prompt, a body template with `{{variables}}`, an optional negative prompt, and a set of configurable variables that surface as choices in the mobile app.
+`/admin/prompts` searches template names, descriptions and prompt text, and supports create/edit, activation, removal and JSON export/import. Templates are used by image, summary, report and copywriting flows; they are not an obsolete report-layout editor.
 
-## Listing
+## Template contract
 
-Live search over name/description, paginated at 50.
+A unique template name identifies optional system, configurable and negative sections; at least one section must be present. Configurable placeholders have exact field definitions using `key | example value` rows. The server validates placeholder/field agreement, bounds lengths and rejects more than one selected system prompt in a composed request.
 
-| Column | What it shows |
-| --- | --- |
-| Template | Name + description. |
-| Prompt types | Badges: System / Configurable / Negative (which parts are present). |
-| Configurable fields | The variable keys this template exposes. |
-| Status | Active / inactive. |
-| Updated | Last modified time. |
+Customers discover active templates, then send exact field name/value selections. The backend stores the accepted composed text. Subsequent admin edits, deactivation or import do not alter prompts already frozen on accepted tasks or their retries.
 
-## Create / edit
+## Export before replacement
 
-- New: `GET /admin/prompts/new`, then submit `POST /admin/prompts`.
-- Edit: `GET /admin/prompts/{id}/edit`, then submit `POST /admin/prompts/{id}`.
+**Import replaces the entire prompt library after the complete JSON archive passes validation.** It is not an incremental merge and there is no UI undo. Export a backup, preserve all existing entries/edits, add or change the intended templates in the complete archive, then import that archive. The input limit is 1,000,000 bytes.
 
-Form (`app/templates/admin/prompt_form.html`):
+Copywriting startup already creates missing seed templates without overwriting existing ones. Do not import its eight-template sample alone into a populated deployment. Editing the checked-in initial JSON also does not overwrite database-authoritative deployed templates. See [copywriting setup](/backend/copywriting).
 
-| Field | Type | Required | Description | Default |
-| --- | --- | --- | --- | --- |
-| Name | text | Yes | Unique, immutable public id used by providers to select the template. Set once. | — |
-| Description | text | No | Internal note. | — |
-| System prompt | textarea | No | `system_prompt` sent as the system message. | empty |
-| Template text | textarea | Yes | `template_text` body; use `{{variable_key}}` placeholders. | — |
-| Negative prompt | textarea | No | `negative_prompt` for image models that support it. | empty |
-| Variable specification | textarea | Yes | JSON describing variables and their options (see below). | — |
-| Is active | checkbox | No | Off = template not offered to providers. | on |
+Personal prompt presets are a separate customer feature managed through `/v1/prompt-presets`; they are not admin template definitions. Report generation prompts also differ from the removed raw HTML/Jinja report-template editor. Configure report execution in [Workflows](/admin/workflows).
 
-### Variables & options (`PromptVariable`, `PromptOption`)
+---
 
-The variable-spec JSON declares, per variable:
-
-| Property | Meaning |
-| --- | --- |
-| `key` | Placeholder name used in `template_text` (unique per template). |
-| `label` | Human label shown in the app. |
-| `required` | Whether the variable must be supplied. |
-| `default_value` | Optional fallback. |
-| `sort_order` | Display order. |
-| `options` | Optional list of allowed choices, each with `value`, `label`, `sort_order` (`PromptOption`). When present, the app shows a constrained picker instead of free text. |
-
-Variables are ordered by `sort_order`; options by their own `sort_order`.
-
-## Actions
-
-- **Toggle active** (`POST /admin/prompts/{id}/toggle`) — enable/disable without editing.
-- **Remove** (`POST /admin/prompts/{id}/remove`) — deletes the template and its variables/options (cascade).
-
-## Import / export archive
-
-- **Export** (`GET /admin/prompts/export`) — downloads all active templates and their variables/options as a JSON archive.
-- **Import** (`POST /admin/prompts/import`) — uploads a previously exported archive. This is a **destructive, replace-style** operation validated by `parse_prompt_archive`; use it to move templates between environments. The import dialog is opened from the "Import" button.
-
-## How providers use prompts
-
-When a design job runs, the provider layer selects the active template by name, substitutes the customer's chosen variable values (and defaults), and sends the assembled system + body + negative prompt to the configured model. Keep template names stable across environments because they are the coupling key between job types and prompts.
+Source evidence · backend `b13cc566`: [app/admin/prompts.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/prompts.py) · [app/prompts/prompt_templates.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/prompts/prompt_templates.py) · [documents/ai_copywriting_setup.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/ai_copywriting_setup.md).

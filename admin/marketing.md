@@ -1,58 +1,23 @@
-# Marketing Data (read-only)
+# Marketing data
 
-The Marketing dashboard at `GET /admin/marketing` is a **read-only** operational evidence surface (per the read-only policy). It exists so pricing and growth decisions are based on real retained records rather than estimates. It does not attribute results to any campaign and it never changes business state.
+`/admin/marketing` is a read-only evidence dashboard loaded from authenticated `/admin/marketing/data`. It summarizes registration, generation, payments, conversion, repeat purchase and retention. It does not alter campaigns, orders or user status.
 
-## Two-part page
+## Windows and definitions
 
-The HTML shell (`app/templates/admin/marketing.html`) only renders the date-range picker and panels. The numbers come from `GET /admin/marketing/data` — a JSON endpoint built by `build_marketing_report(...)` in `app/marketing.py`. The page fetches that JSON (client-side) and draws the charts; this keeps heavy queries off first paint.
+Omitting both dates defaults to the latest 30 days including today. Explicit dates must be paired `YYYY-MM-DD`, ordered, no later than today, and span at most 366 inclusive days; today is partial. Use the response's timezone/coverage metadata. Daily marketing windows use **Asia/Shanghai**; the monthly finance section uses independent complete **UTC months**, not the daily date filter.
 
-## Choosing a date range
+Generation-active users are customers with successful parent/root work in the defined window. The 1/7/30-day activity windows are generation activity, not login DAU/WAU/MAU. Included child tasks and output images do not become additional customer completions. Historical first-success and cohort retention have their own denominators and observation windows.
 
-Range parsing is done server-side by `parse_marketing_range(start_value, end_value, *, as_of)`, which validates paired ISO dates and derives Shanghai-timezone UTC boundaries.
+Money is reported in fen; Tokens, people and task counts are separate units. Read gross receipts, refunds and net receipts together. Conversion and repeat purchase must use the corresponding eligible cohort, not a ratio of unrelated totals from different time windows.
 
-**Quick ranges** (one click):
+## Availability and safe refresh
 
-| Button | Window |
-| --- | --- |
-| Today | Current Shanghai day (partial). |
-| Yesterday | Previous full Shanghai day. |
-| Last 7 days | Rolling 7-day window. |
-| Last 30 days | Rolling 30-day window. |
+A missing source window or financial cost is shown as unavailable/null with explanatory coverage, not fabricated zero. Immature retention cells remain unobserved. Keep gaps in charts; do not coerce them to zero when exporting or comparing.
 
-**Custom range**: pick a start and end date and click **Apply custom range**. The displayed range and "last refreshed" timestamp appear at the top.
+The page has independent loading/error states and safe read refresh. On a transport/service error, preserve the last known result and show unavailability rather than an empty successful dashboard. Session expiry requires reauthentication; changing a Campaign amount is a separate [Campaigns](/admin/campaigns) mutation.
 
-> "Today is still in progress" — today's figures are partial. Missing history is shown as a gap, never as a fake zero.
+For metric field definitions and exact request/error behavior, use the backend's pinned **Internal administrator marketing contract**. [Finance](/admin/finance) owns monthly cost entry, while [Overview](/admin/dashboard) is a shorter operational summary.
 
-## What the report shows
+---
 
-The report is organized into separated panels so people, jobs, money, and tokens are never mixed on one scale:
-
-### Business snapshot
-- **New users** — sign-ups in range.
-- **Generation-active users** — users who ran a successful job in range.
-- **Paying users** — users with a successful payment in range.
-- **Net receipts** — actual paid minus refunded amounts (real ledger amounts, not current catalog prices).
-
-### Audience (registration & activation)
-- Cumulative retained users and first-successful users over time.
-- Completed image jobs and completed report jobs.
-
-### Revenue (payments & usage)
-- First paying users, gross receipts, refunds, net receipts.
-- Customer tokens vs. provider tokens (what customers paid in vs. what providers consumed).
-
-### Daily evidence / Trends
-- Daily charts kept on separate honest scales: people, completed jobs, net receipts in yuan, and token settlement records per UTC day. Gaps remain gaps.
-
-### Conversion, repurchase & retention
-- Cohort and conversion readouts derived from the retained records.
-
-## Performance & failure behavior
-
-- The query runs under a **2-second budget** (the data call uses a ~1.8s `anyio` deadline).
-- If the query times out or conflicts, the page shows the previous successful result with a "Marketing data is unavailable / Showing the previous successful result" notice and a **Retry** button.
-- `Cache-Control: private, no-store` is set on the data endpoint; clicking **Refresh data** re-fetches.
-
-## Data sources
-
-All metrics come from durable operational tables: `User` (registrations, last login), `DesignJob` / token ledger (active users and completed jobs), `PaymentOrder` / `RefundOrder` (receipts, refunds, paying users), and token ledger scopes (customer vs. provider tokens). It is historical truth, not a real-time live feed.
+Source evidence · backend `b13cc566`: [app/admin/marketing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/marketing.py) · [app/templates/admin/marketing.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/marketing.html) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md).

@@ -1,132 +1,46 @@
-# Report Viewing Flow (End-to-End)
+# Design Report and Presentation Flow
 
-This is the full chain for viewing an HTML design report in the mini program — from a
-completed design job to a rendered, CSP-hardened HTML page. Reports are Jinja2 templates
-served by the backend; the mini program never renders them itself.
+Current Design Reports run as versioned Blueprint Workflows. They publish verified HTML and, for the configured pipeline, a presentation output. Historical HTML-only reports remain readable; a deprecated template field or old report body is not the new creation contract.
 
-## The report template system (read this first)
+## 1. Build the source Blueprint
 
-Templates are managed in Studio Control (Admin) and stored with a **scope**
-(`ReportTemplateScope`):
+The frontend assembles a structured Design Report Blueprint from selected sources and the configured product. Source identities are verified completed Jobs/Assets, not arbitrary remote URLs. The backend composes named report documents and request-local image aliases after exact-version verification, preserving the required floor-plan and room semantics.
 
-```text
-ReportTemplateScope = global | workspace:<enterprise-id> | user:<user-id>
-```
+Submit an exact current `type` (`design_report_9`, `design_report_13` or `design_report_17`, producing 9/13/17 total pages) to `/v1/workflows` with exactly one Blueprint input and at most one authorized append-PPTX attachment. Bare `design_report` identifies historical Jobs, not a new request type. The presence of retired `quote_id`, including `null`, requires resubmission; omit the field entirely. Older protocol-zero `options`/`project`/completed-job inventories must not be copied into a current request. The Blueprint schema is the complete specification; do not infer it from a rendered report.
 
-- Candidates are saved through `save_report_template_candidate(...)`:
-  - content is validated by `validate_report_template` inside a sandboxed Jinja2
-    environment (`_ReportTemplateEnvironment` extends `SandboxedEnvironment`) — syntax
-    and the report-data contract are checked before save;
-  - a save lock per scope prevents concurrent candidates; an idempotency cache key stops
-    duplicate submissions;
-  - a candidate is enqueued for promotion; `resolve_active_report_template` returns the
-    active template for the scope (cached in Redis, invalidated on promotion).
-- Rendering uses `render_report_template(content_utf8, report, csp_nonce)` with an
-  explicit, minimal context — no arbitrary Python reachable in the sandbox.
+## 2. Execute and publish
 
-## Part 0 — The design job finishes (html_report)
+The frozen Workflow graph runs its dependent report Operations. The model receives only the validated request shape. The generalized Ark Responses adapter accepts the report JSON/Markdown documents and ordered verified images for staged HTML output. PPTX conversion/local assembly has separate bounded subprocess/resource controls. An appended customer PPTX is private final-assembly input, not model prompt content.
 
-```
-Design job lifecycle completes
-  (result_kind = html_report, e.g. "生成汇报")
-        │
-        ▼
-_design_report.py: create_report_for_design_job(...)
-  1. one design_reports row per completed design job
-  2. design_report_items rows (images, headings, layout)
-  3. design_report_item_assets → result asset_ids
-  4. mark design_reports.status = ready_for_view
-```
+The workers validate/stage outputs, publish typed Assets and settle the aggregate through durable execution. Partial failure, explicit retry and presentation generation follow server eligibility rather than restarting every completed provider node.
 
-## Part 1 — Frontend requests a report view token
+## 3. Open a capability URL
 
-```
-User taps "查看汇报"
-        │
-        ▼
-Frontend services/reportCapability.ts
-  getFreshReportCapability(designJobId)
-  → returns whether a report exists and how to view it
-        │
-        ▼
-GET /v1/design-jobs/{id}/report-view-token
-  Authorization: Bearer <access_token>
-        │
-        ▼
-app/api.py → report_view.create_report_view_token(...)
-  1. get_current_user; load the design job + report (ownership check)
-  2. build_report_context(...)  (report_view.py)
-       • assemble report_data: headings, report items,
-         image contexts (public/presigned URLs, alt, caption)
-  3. resolve_active_report_template(scope)  (report_templates.py)
-       workspace/user scope first, fall back to global
-  4. create_report_csp_nonce() → one fresh nonce
-  5. sign a SHORT-LIVED report view JWT:
-       claims = { sub, report_id, design_job_id, nonce,
-                   exp = now + REPORT_VIEW_TOKEN_SECONDS }
-       (HMAC-signed with REPORT_VIEW_SECRET_KEY; NOT a user access token)
-  6. return ReportViewTokenResponse { report_view_token, report_view_url,
-                                      expires_at }
-```
+Fetch the completed Workflow using authenticated API access. Select its typed report/presentation output and fresh expiry metadata. The server issues a short-lived URL such as `/v1/workflows/{design_job_id}/report?token=...`; the browser/web-view uses that capability without a general API Bearer header. Presentation download has its own capability route and attachment behavior.
 
-## Part 2 — Backend renders HTML on demand
+The token binds the intended Job/purpose and expiry. Treat it as a secret bearer capability: do not log/share it as permanent identity. After expiry, refetch the authenticated Workflow to obtain current output URLs. A cached URL is not a reason to weaken validation or place a long-lived JWT in a browser query.
 
-```
-GET /v1/reports/{report_id}?token=<report_view_token>
-        │
-        ▼
-app/api.py → report_view:
-  1. decode_report_view_token(token, settings)  → ReportViewClaims
-       • check signature, expiry (REPORT_VIEW_TOKEN_SECONDS, e.g. 30 s local)
-       • bind to the report_id in the path
-  2. build_report_context(...) again (fresh presigned image URLs)
-  3. render_report_html(...)
-       render_report_template(active_template.content, report_data, nonce)
-  4. report_content_security_policy(nonce)
-       • CSP header: default-src 'self';
-         img-src  <cdn host> <storage hosts> https: data:;
-         script-src 'nonce-<nonce>' 'strict-dynamic';
-         object-src 'none'; base-uri 'none'
-       • anti-clickjacking frame-ancestors 'none'
-  5. return text/html; charset=utf-8
-```
+## 4. Mini-program rendering
 
-## Part 3 — Mini program shows the report
+The report viewer checks capability identity/expiry before navigation and handles unavailable/expired results. WeChat/Douyin web-view domain requirements and HTTPS configuration must be satisfied separately. A working desktop URL alone does not prove the mini-program domain is approved.
 
-```
-Frontend services/reportViewer.ts
-  validateReportViewer({ url })   (basic shape/allowlist checks)
-  → web-view src = report_view_url
-        │
-        ▼
-WeChat web-view component loads the backend HTML
-  • short TTL means the link cannot be shared / replayed later
-  • CSP nonce pins inline scripts; no remote script origins
-  • images load from the CDN / presigned object URLs
-```
+HTML publication and conversion retain their content/network isolation controls; generated content is untrusted model output. Do not inject it into Admin or a generic unrestricted page. Use the existing report route rather than opening an object-store raw HTML URL directly.
 
-## Why a separate short-lived token
+## Compatibility and troubleshooting
 
-| Property | Report view token | User access token |
-| --- | --- | --- |
-| Lifetime | seconds (`REPORT_VIEW_TOKEN_SECONDS`) | minutes |
-| Audience | one report, one render | API user session |
-| Purpose | open the web-view once | call protected APIs |
-| Storage | not persisted; used inline | `yuanzhu.session.tokens.v1` |
-| Replay | expired before a share can happen | rotated on 401 |
+- Missing presentation on a historical HTML-only report can be valid; inspect typed outputs and pipeline version.
+- A retired Blueprint/quote body requires rebuilding from current discovery/schema, not changing one old template name.
+- An expired view token requires an authenticated fresh Job read; a failed Job requires its explicit retry flow.
+- Output/Asset verification failures are backend integrity failures; replacing the URL in the client is not a repair.
 
-## Security properties
+See [Workflow lifecycle](/reference/flows/design-job-lifecycle) and [reports](/backend/reports) for execution and result selection.
 
-- **Sandboxed Jinja2** — `SandboxedEnvironment`; templates cannot reach arbitrary Python.
-- **CSP nonce** — inline scripts must carry the per-render nonce.
-- **Signed, short-TTL, single-report** token — no session credential in the web-view URL.
-- **Presigned image URLs** are regenerated per render, scoped to the report's assets.
-- **Access log filter** — `_ReportViewAccessLogFilter` /
-  `configure_report_view_access_log_filter()` keep report-view logging scoped.
+## Source evidence
 
-## Related call chains
+Verified against the [documented source revisions](/reference/source-revisions).
 
-- [Design Job Lifecycle](/reference/flows/design-job-lifecycle) — the job that produces
-  the report.
-- [WeChat Login Flow](/reference/flows/wechat-login-flow) — issues the user JWT used to
-  mint the report-view token.
+- [Blueprint composition](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/services/reportBlueprint.ts)
+- [Report submission](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/services/reportDesignSubmit.ts)
+- [Report source Blueprint contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/design_report_sources.py)
+- [Report publication/capabilities](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py)
+- [Workflow output projection](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py)

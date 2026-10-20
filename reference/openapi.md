@@ -1,127 +1,57 @@
-# OpenAPI
+# OpenAPI and Contract Boundaries
 
-FastAPI auto-generates an OpenAPI (Swagger) document from the decorated routes.
-This page explains how to reach it, what is and is not included, and the key
-request/response schemas you will encounter.
+Use the running backend's `/openapi.json` for machine-readable transport schemas and `/docs` for Swagger UI. The pinned [REST client contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md) defines domain errors and retry semantics. These sources serve different purposes.
 
-## Accessing the document
-
-While the API is running:
-
-```
-http://localhost:8000/openapi.json     # raw JSON schema
-http://localhost:8000/docs            # Swagger UI interactive playground
-```
-
-The document title and version are set in `app/main.py` (`FastAPI(title=...,
-version="0.3.0")`). In production the same document is served under the edge
-prefix, e.g. `https://api.example.com/api/openapi.json`.
-
-## What is included
-
-The generated schema covers every route with a `response_model` and an open
-declaration:
-
-| Tag | Router | Notes |
-| --- | --- | --- |
-| `authentication` | `auth_router` | register, login, wechat-login, refresh, logout |
-| `design` | `design_router` | me, workspaces, prompt templates, design jobs, report discovery |
-| `assets` | `asset_api.router` | upload intents, completion, list/read/delete |
-| `billing` | `billing_api.router` | catalog, subscriptions, token purchases, payments, refunds, workspace |
-| `wechat-webhooks` | `webhook_router` | payment/refund notify (server-to-server) |
-| `workspaces` | `workspace_api.router` | workspace CRUD, share invitations |
-| `rewards` | `referral_api.router` | referral invitations, rewards |
-| `legal` | `legal_router` | current legal documents |
-| `health` | root `router` | `/health/live`, `/health/ready` |
-
-## What is excluded
-
-Routes declared with `include_in_schema=False` are **not** published. These are
-the admin server-rendered form actions (login, logout, user suspend /
-reactivate / archive, provider and prompt admin forms), because they are HTML
-form posts with CSRF tokens rather than JSON APIs. They still function but are
-documented under [Authentication](/backend/authentication) instead of here.
-
-The `/mock/*` payment helpers are only mounted when
-`MOCK_PAYMENT_ENDPOINTS_ENABLED=true`; they appear in the schema only then.
-
-## Authentication in the playground
-
-Protected routes declare a `BearerAuth` security scheme (via
-`HTTPBearer`). In Swagger UI you can paste a real access token into the
-**Authorize** dialog:
-
-```
-Authorization: Bearer <access_token>
-```
-
-The admin web routes do **not** use this scheme — they rely on the signed
-browser cookie set by `/admin/login`.
-
-## Key schemas
-
-These Pydantic models in `app/models.py` shape the most important requests and
-responses.
-
-### Auth
-
-- `RegisterRequest` / `TokenResponse` — register (phone + password) and receive
-  `{ access_token, refresh_token, ... }`.
-- `WeChatLoginResponse` — WeChat login result.
-- `UserResponse` — current user profile + token balance.
-
-### Design jobs
-
-- `DesignJobCreate` — create request (job type, asset ids, prompt selection).
-- `DesignJobResponse` — one job: status, progress, result, error code.
-- `DesignJobListResponse` — paginated list.
-- `PromptTemplateListResponse` / `PromptTemplateResponse` — selectable prompts
-  with variables and options.
-- `ReportItemDiscoveryResponse` — available report sections.
-
-### Assets
-
-- `AssetUploadIntentCreateRequest` / `AssetUploadIntentResponse` — request and
-  the presigned upload form.
-- `AssetCompletionResponse` — final asset metadata.
-- `AssetListResponse` / `AssetResponse` — listing and read.
-
-### Billing
-
-- `BillingCatalogResponse` — plans + packages.
-- `PaymentOrderResponse` / `PaymentHistoryResponse` — order lifecycle.
-- `RefundOrderResponse` — refund state.
-
-### Workspaces & referrals
-
-- `WorkspaceListResponse` / `WorkspaceDetailResponse` — workspace summaries.
-- `ReferralInvitationCreateResponse` / `RewardListResponse` /
-  `RewardClaimResponse` — referral flows.
-
-## Idempotency
-
-Several POST routes require an `Idempotency-Key` header (8–128 chars). This is
-declared on the operation, so the playground shows it as a required header
-parameter for upload intents, referral creation/accept, reward claim, and
-payment actions.
-
-## Generating a client SDK
-
-Because the document is standard OpenAPI, you can generate a typed client from
-`/openapi.json`, for example:
+## Read a schema from the selected environment
 
 ```bash
-# Download the schema
-curl http://localhost:8000/openapi.json -o openapi.json
-
-# (example) generate a TypeScript client
-npx openapi-typescript openapi.json -o api.d.ts
+export API_BASE_URL='http://localhost:<selected-session-port>'
+curl --fail "$API_BASE_URL/openapi.json" -o openapi.json
 ```
 
-Additive-only API evolution means generated clients should ignore unknown
-fields.
+Replace the placeholder before running. A downloaded schema describes the deployed application/configuration at that URL, not necessarily this documentation snapshot. Record the server `APP_VERSION`/source revision alongside generated clients. Downloading a schema is read-only; Swagger's **Try it out** can mutate real data and trigger paid work.
 
-## Read next
+## Included interfaces
 
-- [REST API](/reference/rest-api) — the full route table.
-- [Data Model](/reference/data-model) — the backing tables.
+The production contract covers the recorded method/path operations, including health, authentication/consent, Workflows, compatibility jobs, Assets, workspaces/Projects, prompts, billing, payment/refund callbacks and voice handoff. Schema coverage is not a promise of feature activation.
+
+The schemas preserve literal path parameter names, body discriminators, typed input/output shapes, declared parameters and success statuses. Use `POST /v1/workflows` for new integrations; `/v1/design-jobs` compatibility operations remain documented where still supported. Discovery and live entitlement checks decide which capabilities a user may run.
+
+## Different authentication boundaries
+
+| Surface | Credential |
+| --- | --- |
+| Most mobile `/v1` operations | Access-token Bearer header |
+| Refresh/logout | Refresh token in the body |
+| Legal/discovery and public invitation preview | Public as specified per endpoint |
+| Report/presentation browser view | Short-lived signed `token` query capability |
+| Payment/refund webhooks | Platform signatures over the exact raw request bytes |
+| `/voice-upload/*` after exchange | Restricted HttpOnly cookie, exact Origin and CSRF token for writes |
+| `/admin/*` | Browser Admin session and CSRF; excluded from public OpenAPI |
+
+Do not paste a general bearer token into a signed storage form, browser capability URL or webhook request. Admin JSON/partial endpoints are internal operational interfaces, not public client APIs merely because they return JSON.
+
+## Validation, errors and idempotency
+
+Request-shape errors use `422` with a validation array. Stable domain errors use `detail.code` plus display/diagnostic message and optional metadata. The REST contract's per-endpoint errors/retry rules are authoritative: generated OpenAPI can include framework `422` without enumerating every domain status.
+
+Creation endpoints that require `Idempotency-Key` must replay the original key with the same normalized request after transport uncertainty. A new key is a new action and can incur a new reservation/payment/provider call. Reusing a key with changed content is a conflict. Do not derive retry policy from a generated client's generic HTTP exception class.
+
+## Conditional mocks and legacy behavior
+
+`MOCK_PAYMENT_ENDPOINTS_ENABLED` controls local completion helpers; Douyin also has mode-dependent mock routes. Separate mock image/provider servers run outside the main API. These are conditional test interfaces, not production client operations. Their exact contract is the pinned mock document/tests.
+
+Compatibility paths are not proof that retired request fields remain accepted. Some historical Workflow fields are explicitly rejected for resubmission; follow the current discriminator/schema. The [API index](/reference/rest-api) and [Workflow lifecycle](/reference/flows/design-job-lifecycle) explain the supported client path.
+
+## Client generation
+
+Generate a client from a saved, revision-identified schema with your team's pinned generator. Keep its output separate from handwritten domain/repository logic. Check discriminated unions, nullable values, endpoint-specific statuses (Asset/voice-session creation `201` new versus `200` replay; Workflow submission `202` for both), capability URLs and multipart **POST** storage forms manually. Schema generation cannot implement consent UX, entitlement handling, safe paid retries or platform payment bridges for you.
+
+## Source evidence
+
+Verified against the [documented source revisions](/reference/source-revisions).
+
+- [Normative REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md)
+- [Application router registration](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py)
+- [Public schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)
+- [Conditional mock interfaces](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/MOCK_API_INTERFACE.md)

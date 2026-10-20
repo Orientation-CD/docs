@@ -1,142 +1,51 @@
-# CI/CD with GitHub Actions
+# CI/CD and Documentation Validation
 
-Two repositories use GitHub Actions: the **backend** (YuanZhu-AI) runs scheduled
-endurance tests and a pull-request documentation gate, and this **docs repository**
-(`docs`) auto-publishes the site to GitHub Pages. SAE cloud-test and production
-deployment itself is **not** a GitHub Actions workflow — it is driven manually by the
-scripts under `deploy/sae/` (see [SAE Deployment Runbook](/deploy/sae-deployment)).
-This page covers everything that *is* automated.
+The backend, mini program and documentation have different checks and publishing boundaries. A passing docs build is evidence about this site; it is not a backend deployment or a payment/provider acceptance test.
+
+## Documentation checks
+
+Run from this documentation repository:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm docs:check
+pnpm docs:test:browser
+pnpm docs:sources --frontend /path/to/wechat_mini_program --backend /path/to/YuanZhu-AI --check
+```
+
+`docs:check` builds the production site and validates the applicable static documentation contracts, including links, fragments, local assets and locale structure. Browser checks use the built site to exercise search, locale navigation, deep links and runtime rendering. The source check reads the pinned Git revisions and compares source-derived inventories; it does not launch a server, access a database or run provider calls.
+
+Update source metadata and generated inventories deliberately when changing the documented baseline; a different HEAD or uncommitted code is not silently accepted as the recorded revision. See [maintenance](/reference/maintenance) and [source revisions](/reference/source-revisions).
+
+## Pages publication
+
+VitePress builds `.vitepress/dist`; GitHub Pages serves it under `/docs/`. PR checks validate changes before merge, while authorized pushes to `main` publish the built artifact through GitHub Pages. Deployment needs Pages/token permissions; validation jobs should remain read-only. Keep deployment restricted to the publishing branch rather than deploying PR content.
+
+Root-relative documentation links include their locale: English `/frontend/overview`, Chinese `/zh/frontend/overview`. VitePress adds `/docs/` at render time. Theme asset paths omit that base (`/favicon.svg`). Clean deep links are supported by the current GitHub Pages host; validate a direct reload as well as client navigation.
 
 ## Backend workflows
 
-The backend repository (`.github/workflows/`) ships two workflows.
+The snapshot has `daily-endurance.yml` and `sdd-docs.yml`. Daily endurance is a scheduled/repository-dispatch runtime gate with revision selection, not a blanket test of every docs PR. SDD documentation validation checks the installed process documents/tooling and retains evidence. SAE artifact publication and protected promotion live in `deploy/sae/`; do not infer automatic production delivery from a backend merge.
 
-### `daily-endurance.yml` — scheduled load endurance
+The backend's normative test policy explicitly exempts documentation-only changes from unit/full-regression/smoke/E2E gates. Validate rendered text, commands, links, diagrams and references instead. Production-code changes follow that repository's focused coverage, retained review, full regression and deployed-baseline upgrade procedure. Mixed changes follow the production-change requirements.
 
-| Aspect | Value |
-| --- | --- |
-| **File** | `.github/workflows/daily-endurance.yml` |
-| **Triggers** | `schedule` (cron `17 3 * * *`) and `repository_dispatch` type `daily-endurance` |
-| **Permissions** | `actions: read`, `contents: read` |
-| **Concurrency** | group `daily-endurance`, `cancel-in-progress: false` |
+## Frontend checks and release
 
-What it does:
+Use the selected `ui-integration` snapshot's package scripts for type, design-system and build checks; mode-specific builds can select API/mock services and platform targets. A successful WeChat build does not prove Douyin payment acceptance, physical-device networking or supplier video compatibility. Keep the client artifact's API environment and public-domain configuration aligned with the release boundary.
 
-1. **`decide` job** (ubuntu-latest, 5 min timeout): when triggered by schedule, it asks
-   the GitHub API for the previous scheduled run's `head_sha`. If it equals the current
-   SHA, it skips (a release already covered); otherwise it runs. A manual
-   `repository_dispatch` always runs.
-2. **`endurance` job** (needs `decide`, 75 min timeout):
-   - Checks out, installs Python 3.12 and `.[dev]` test dependencies.
-   - Validates the bounded profile: exactly `E2E_USER_RUNNERS=2`,
-     `E2E_USERS_PER_CONTAINER=4`, `E2E_DURATION_SECONDS=1800`,
-     `E2E_AUTH_THREADS_PER_CONTAINER=2`, `E2E_API_WORKERS=2`.
-   - Installs `.env.example` to a protected temp file and runs
-     `python -m app.config_sync query` against the cloud admin to capture a validated
-     config snapshot.
-   - Launches a throwaway Compose stack (`CI_COMPOSE_PROJECT=yuanzhu-daily-<run-id>`,
-     `CI_API_PORT=6060`) via `scripts/run_e2e_tests.sh --local localhost --mode
-     endurance --config-snapshot ...`.
-   - Samples `free -m`, `df -h`, and `docker stats` into `resources.log`.
-   - On completion (always) captures `docker compose ps`/logs, uploads the evidence
-     directory as a 7-day artifact, and tears down its own stack with `--volumes`.
+## Contributor rules
 
-**Secrets required:**
+- Preserve existing public routes or supply explicit redirects when reorganizing pages.
+- Update both languages and their navigation together; identifiers and API paths stay exact.
+- Link factual behavior to pinned code/contract evidence; separate defaults, example values and actual cloud state.
+- Keep secrets, private test evidence, local dependencies and generated distribution output out of Git.
+- Run the smallest appropriate docs checks after a documentation correction; do not start product stacks merely to check prose.
 
-| Kind | Name | Purpose |
-| --- | --- | --- |
-| secrets | `CLOUD_API_URL` | Endurance E2E target / config-sync source |
-| secrets | `CLOUD_ADMIN_USERNAME` | Config-sync admin login |
-| secrets | `CLOUD_ADMIN_PASSWORD` | Config-sync admin password |
-| vars | `DAILY_E2E_USER_ACTION_DELAY_SECONDS`, `DAILY_E2E_ADMIN_ACTION_DELAY_SECONDS` | Optional pacing overrides (bounded 1–10 s / 0.5–5 s) |
+## Source evidence
 
-### `sdd-docs.yml` — pull-request documentation gate
+Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-| Aspect | Value |
-| --- | --- |
-| **File** | `.github/workflows/sdd-docs.yml` |
-| **Triggers** | `pull_request` on paths `**/*.md`, `.github/spec-driven-delivery/**`, `scripts/check_sdd.py`, `tests/tooling/**`, `pyproject.toml`, this workflow file |
-| **Permissions** | `contents: read` |
-| **Concurrency** | group per PR number, `cancel-in-progress: true` |
-
-Single job (`sdd`, ubuntu-latest, 10 min) that installs pinned documentation tooling
-(`markdown-it-py==4.2.0`, `PyYAML==6.0.3`, `ruff==0.16.0`) and runs:
-
-```bash
-python scripts/check_sdd.py
-python -m unittest discover -s tests/tooling -p 'test_*.py'
-python -m ruff check scripts/check_sdd.py tests/tooling
-python -m ruff format --check scripts/check_sdd.py tests/tooling
-git diff --check "$BASE_SHA...$HEAD_SHA"
-```
-
-Evidence is uploaded as a 30-day artifact. No secrets required.
-
-### Where SAE deployment automation lives
-
-Cloud-test and production SAE rollouts are executed by `deploy/sae/deploy.sh` and its
-helpers (`build-image.sh`, `run-deploy-container.sh`, `deploy-image.sh`), not by a
-GitHub Actions workflow. The intended operator flow is:
-
-1. Push to `main` (or run `daily-endurance`).
-2. Locally run the two-phase deploy (build image → deploy from digest) — see
-   [SAE Deployment Runbook](/deploy/sae-deployment).
-3. Production promotion uses the protected `--promote` / `--rollback` flags.
-
-This keeps release control with an operator who can read the migration backup evidence
-and approve the database gate, rather than delegating it to a scheduled run.
-
-## Docs workflow: automatic GitHub Pages publishing
-
-The docs repository (`.github/workflows/deploy.yml`) uses the standard VitePress +
-GitHub Pages setup.
-
-| Aspect | Value |
-| --- | --- |
-| **File** | `.github/workflows/deploy.yml` |
-| **Triggers** | `push` to `main`, plus manual `workflow_dispatch` |
-| **Permissions** | `contents: read`, `pages: write`, `id-token: write` |
-| **Concurrency** | group `pages`, `cancel-in-progress: false` |
-| **Environment** | `github-pages` |
-
-Two jobs:
-
-1. **`build`** (ubuntu-latest): checkout → setup `pnpm/action-setup` +
-   `actions/setup-node@v4` (Node 22, pnpm cache) → `pnpm install --frozen-lockfile` →
-   `pnpm docs:build` → upload `.vitepress/dist` via
-   `actions/upload-pages-artifact@v3`.
-2. **`deploy`** (needs `build`): `actions/deploy-pages@v4` to the `github-pages`
-   environment.
-
-No repository secrets are required — GitHub Pages identity is provided by the
-`GITHUB_TOKEN`.
-
-### Local docs commands
-
-Because GitHub Pages serves the repo at a project path, `.vitepress/config.mts` sets
-`base: '/docs/'` (matching the repo name). If you rename the repo, update `base`.
-
-```bash
-pnpm install
-pnpm docs:dev        # dev server with HMR
-pnpm docs:build      # production build into .vitepress/dist
-pnpm docs:preview    # preview the built site
-```
-
-`package.json` pins `packageManager: pnpm@10.28.2` and `vitepress: ^1.6.3`.
-
-## Contributing rules for these docs
-
-- All content is Markdown under the section directories (`deploy/`, `reference/flows/`,
-  etc.).
-- Internal links are root-relative without `.md` or a locale prefix (e.g.
-  `/deploy/sae-deployment`, `/reference/flows/design-job-lifecycle`).
-- Keep real service names, ports, env vars, and script paths in sync with the backend.
-- Never commit `node_modules/`, `.env`, or `.vitepress/dist/`.
-- Push to `main` to publish; the site updates automatically.
-
-## Next steps
-
-- [SAE Deployment Runbook](/deploy/sae-deployment) — the manual two-phase flow.
-- [Production Promotion & Rollback](/deploy/production) — how a proven image goes to
-  production.
+- [Backend documentation workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.github/workflows/sdd-docs.yml)
+- [Daily runtime workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.github/workflows/daily-endurance.yml)
+- [Normative test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/tests/documents/TEST_STRATEGY.md)
+- [Frontend scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json)

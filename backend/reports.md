@@ -1,162 +1,31 @@
-# Reports
+# Design reports and editable PowerPoint
 
-A **report** (the `方案汇报` / `html_report` job family) assembles a shareable
-HTML design report for a workspace: colored floor plans, circulation diagrams,
-mood imagery, and other sections pulled either from a rendered provider or
-from a curated object-storage library. This page covers report **configuration**,
-**discovery**, **rendering**, and the signed **view** URLs. The data tables are
-on the [Data Model](/reference/data-model) page.
+Current report products are `design_report_9`, `design_report_13` and `design_report_17`. Each uses the shared `design_report` Workflow: generate a report, then convert it to an editable presentation. Discover live prices and availability through `/v1/billing/features`; initial seed prices are not a client price table.
 
-## What a report is
+## Blueprint input
 
-A finished report is a row in `design_reports`, decomposed into sections in
-`design_report_items`. Each item links to the assets that belong to it
-(`design_report_item_assets`) and, for library-backed sections, the specific
-objects chosen from storage (`design_report_item_objects`). A report is produced
-by an `html_report` design job (see [Design Jobs](/backend/design-jobs)) and
-rendered to HTML that the client then displays or exports.
+The client submits `/v1/workflows` with the chosen Feature and a strict Blueprint. The Feature fixes the exact total page count and allowed template multiset. `cover` stays first and `closing` last; middle pages can be reordered within that product's contract.
 
-## Report configuration: three levels
+Inputs bind verified Assets to semantic aliases: the customer-summary Document (`customer_insight.md`), original/colored floor plans and interior images. The cover repeats one complete interior binding. Each page binds at most three Assets; there is no separate report-wide image-count ceiling. MIME, byte/pixel budgets and the closed alias/template matrix still apply. Follow the full Blueprint example in [REST API](/reference/rest-api), rather than constructing it from old report-item settings.
 
-Report sections are configured by `ReportItemSetting` objects. The effective
-configuration for a workspace is resolved by
-`app/report_config.py:resolve_effective_report_config` with a clear precedence:
+An ordinary [Project](/backend/projects) can prefill editable customer/project/area values. This is a report input snapshot; editing it does not edit the Project. Omitted `project_id` places the task in scratch.
 
-1. **Enterprise config** — if the workspace is an enterprise, use its own
-   `report_config` JSON column.
-2. **Default enterprise** — if the workspace is personal, look up the single
-   enterprise flagged `is_default_report_config = true` and use its config.
-3. **Global settings fallback** — otherwise use the `REPORT_ITEMS` env var /
-   `settings.report_items`.
+## Outputs and publication
 
-The returned `EffectiveReportConfig` records which `source` produced it
-(`enterprise`, `default_enterprise`, or `global`) and which enterprise owns the
-OSS namespace for library objects.
+The Workflow produces an HTML preview and editable PPTX. HTML and image references are verified and published with retained exact-version inputs. The report is complete after its required export succeeds; intermediate child success is not a separate complete customer deliverable or additional purchase.
 
-### One `ReportItemSetting`
+Returned preview/download URLs carry short-lived signed capabilities. The report and presentation routes validate the token and pinned publication identity; refresh the owned task to obtain a new URL after expiry. Do not log or persist capability URLs as permanent public share links. HTML has a restrictive rendering/security policy, and presentation download returns an attachment.
 
-Each section definition has:
+## Optional customer PowerPoint
 
-| Field | Meaning |
-| --- | --- |
-| `key` | stable section identifier (must be unique) |
-| `display_name` | label shown to the user |
-| `source` | `provider` (rendered by a model) or `oss` (library object) |
-| `base_path` | OSS base path for `oss` sections |
-| `image_count` | how many images the section expects |
-| `prompt_template_name` | for `provider` sections, which `PromptTemplate` to use |
-| `include_request_prompts` | whether to echo the request prompts into the report |
-| `is_enabled` | whether the section is offered |
+A customer PPTX can be uploaded as private `DOCUMENT`, `DESIGN_JOB_INPUT`, role `attachment`, up to 100 MiB. The report accepts it through its defined append input and preserves the source version through conversion. Export uses bounded local conversion resources; retained input/output cleanup follows Workflow lifecycle.
 
-`validated_report_config` strict-validates stored/admin JSON and rejects
-duplicate keys. `save_enterprise_report_config` stages an enterprise's config
-under a row lock; `set_default_report_config` atomically flips the optional
-default enterprise.
+## Configuration and migration
 
-## Discovery (what is selectable right now)
+Configure report node models in [Workflows](/admin/workflows), editable generation templates in [Prompts](/admin/prompts), and Feature prices/access in [Billing](/admin/billing). Workspace/default Logos and private gallery objects have separate storage rules described in the deployment runbook.
 
-`app/report_discovery.py:discover_report_items` checks availability **without
-changing the API shape**:
+The old `html_report`, `/v1/report-items`, quote-based assembly, report-section configuration and `/admin/report-templates` editor are retired. Historical compatible outputs remain readable, but new admissions use the Blueprint products. See [compatibility](/backend/design-jobs) and [deployment](/deploy/sae-deployment).
 
-- for a `provider` section, availability means its configured
-  `prompt_template_name` exists among active provider prompts;
-- for an `oss` section, it lists objects under the resolved `base_path` in the
-  workspace's OSS namespace via
-  `report_library.list_valid_report_library_objects` (bounded by
-  `REPORT_LIBRARY_MAX_OBJECTS_PER_ITEM`, default 1000).
+---
 
-The client calls this to render the report-builder UI, marking each section
-available or unavailable.
-
-## Built-in report prompt templates
-
-`ensure_report_configuration_defaults` seeds two server-owned prompts once at
-startup (without overwriting later admin edits):
-
-- `colored_floor_plan` — "Generate a colored floor plan from the submitted floor plan."
-- `circulation_plan` — "Generate a circulation plan from the submitted floor plan."
-
-These are `PromptTemplate` rows that provider sections reference by
-`prompt_template_name`.
-
-## HTML report rendering
-
-The `html_report` job type (`result_kind = HTML_REPORT`) drives assembly. The
-renderer combines:
-
-- the configured report items,
-- the selected provider prompts (rendered through the prompt-template engine in
-  `app/prompt_templates.py`),
-- provider-rendered images for `provider` sections,
-- chosen library objects for `oss` sections.
-
-Output HTML is stored in object storage under the workspace's report prefix
-(`REPORT_WORKSPACE_ASSET_PREFIX`, default `workspaces`); shared assets use
-`REPORT_GLOBAL_ASSET_PREFIX` (default `global`). The rendered HTML must not
-execute user/agent-injected scripts; it is treated as untrusted markup.
-
-## Report view tokens
-
-A finished report is shared through a short-lived, signed **view token** rather
-than a permanent public URL. `REPORT_VIEW_TOKEN_SECONDS` (default **300**)
-bounds token lifetime. The client exchanges a report id for a view token and
-fetches the report HTML through a signed, expiring route. This keeps reports
-private while still letting a recipient open one link for a few minutes.
-
-## Template reconciliation & caching
-
-Periodic worker jobs keep report storage consistent:
-
-| Job / setting | Default | Purpose |
-| --- | --- | --- |
-| `REPORT_TEMPLATE_CACHE_TTL_SECONDS` | 300 | in-process render cache |
-| `REPORT_TEMPLATE_RECONCILE_SCHEDULE_MINUTE` | 5 | how often to reconcile report templates |
-| `REPORT_TEMPLATE_RECONCILE_BATCH_SIZE` / `_MAX_BATCHES` | 100 / 10 | batch bounds |
-| `REPORT_RESULT_CLEANUP_MINIMUM_AGE_SECONDS` | 3600 | minimum age before cleanup |
-
-`process_reconcile_report_templates` (poll worker) and
-`process_cleanup_report_result_artifacts` keep rendered report artifacts aligned
-with current config and garbage-collect old ones.
-
-## Resolution precedence by example
-
-For a personal workspace with no dedicated enterprise, the lookup chain is:
-
-```text
-personal workspace
-  └─ is there an Enterprise flagged is_default_report_config = true and active?
-       ├─ yes → use that enterprise.report_config   (source = "default_enterprise")
-       └─ no  → use settings.report_items from REPORT_ITEMS / env (source = "global")
-```
-
-For an enterprise workspace, the answer is simply that enterprise's own
-`report_config` JSON (`source = "enterprise"`). The `EffectiveReportConfig`
-returned to callers records which source won, so the UI can show "this report
-uses the default config" without guessing.
-
-## Report view walk-through
-
-1. An `html_report` job finishes and stores its rendered HTML under the
-   workspace prefix.
-2. The client requests a signed view token for the report (bounded by
-   `REPORT_VIEW_TOKEN_SECONDS`).
-3. The recipient opens the short-lived URL; the server validates the token,
-   renders the stored HTML with raw HTML/scripts disabled, and returns it.
-
-This keeps finished reports private while still allowing a recipient to open one
-link for a few minutes, and it means the rendered HTML never needs to be made
-public in the bucket.
-
-## Per-workspace configuration in the admin UI
-
-Admins edit an enterprise's report config from `/admin`, choose which
-enterprise is the personal-workspace default, and preview the resolved
-configuration. Because personal workspaces fall back to the default enterprise,
-a single well-configured enterprise can drive reports for all free users until
-they are moved to a dedicated enterprise.
-
-## Read next
-
-- [Design Jobs](/backend/design-jobs) — the `html_report` / `方案汇报` pipeline.
-- [Assets & Storage](/backend/assets-storage) — OSS library objects and presigned reads.
-- [Data Model](/reference/data-model) — `design_reports*` tables.
+Source evidence · backend `b13cc566`: [app/workflows/operations/design_report/design_report_products.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/design_report_products.py) · [app/workflows/operations/design_report/workflow_report_publication.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md).

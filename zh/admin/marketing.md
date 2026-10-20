@@ -1,58 +1,23 @@
-# 营销数据（只读）
+# 营销数据
 
-营销数据仪表盘位于 `GET /admin/marketing`，是一个**只读**的运营证据面板（遵循只读策略）。它的存在是为了让定价和增长决策基于真实的留存记录而非估算。它不将结果归因于任何营销活动，也从不改变业务状态。
+`/admin/marketing` 通过认证的 `/admin/marketing/data` 加载只读证据面板，汇总注册、生成、支付、转化、复购与留存，不修改活动、订单或用户状态。
 
-## 两部分页面
+## 窗口与口径
 
-HTML 外壳（`app/templates/admin/marketing.html`）只渲染日期范围选择器和面板。数字来自 `GET /admin/marketing/data`——一个由 `app/marketing.py` 中 `build_marketing_report(...)` 构建的 JSON 端点。页面（在客户端）获取该 JSON 并绘制图表；这将重量级查询移出首次渲染。
+省略两个日期时默认最近 30 天（含今日）；显式日期必须成对使用 `YYYY-MM-DD`、顺序有效、不晚于今日，含首尾最多 366 天。今日数据尚未完整。读取响应的时区/覆盖元数据。日级营销窗口使用 **Asia/Shanghai**；月度财务区域使用独立完整 **UTC 月份**，不受日级日期筛选控制。
 
-## 选择日期范围
+生成活跃用户指在规定窗口成功完成父/根任务的客户。1/7/30 日活跃窗口统计生成行为，不是登录 DAU/WAU/MAU。包含的子任务和输出图片不额外计为客户完成。历史首次成功和 cohort 留存各有自己的分母与观察窗口。
 
-范围解析由服务端的 `parse_marketing_range(start_value, end_value, *, as_of)` 完成，它验证成对的 ISO 日期并推导上海时区的 UTC 边界。
+金额单位是分，Tokens、人数、任务数使用独立单位。总收入、退款和净收入应一起解读。转化/复购应使用相应合资格 cohort，不能随意相除不同时间窗口的总数。
 
-**快捷范围**（一键）：
+## 可用性与刷新
 
-| 按钮 | 窗口 |
-| --- | --- |
-| Today | 当前上海自然日（不完整）。 |
-| Yesterday | 上一个完整的上海自然日。 |
-| Last 7 days | 滚动 7 天窗口。 |
-| Last 30 days | 滚动 30 天窗口。 |
+来源窗口或财务成本缺失时以 unavailable/null 和覆盖说明展示，不能伪造为零。尚未成熟的留存单元保持未观测。图表保留空缺，导出/比较时也不能强制转成零。
 
-**自定义范围**：选择开始和结束日期，点击 **Apply custom range**。显示的范围和"上次刷新"时间戳出现在顶部。
+页面分别处理加载、失败及只读安全刷新。传输/服务失败时应保留最后已知结果并显示不可用，不能展示为空的成功面板。会话过期需重新认证；修改奖励金额是独立[活动](/zh/admin/campaigns)操作。
 
-> "今天仍在进行中"——今天的数字是不完整的。缺失的历史显示为间隙，绝不会伪装成假零。
+详细指标定义、请求及错误以页末后端 **Internal administrator marketing contract** 为准。[财务](/zh/admin/finance)负责月成本录入，[概览](/zh/admin/dashboard)提供简短运营摘要。
 
-## 报表内容
+---
 
-报表按分离面板组织，确保人、任务、钱和积分不会混在同一刻度上：
-
-### 业务快照
-- **新用户** —— 范围内注册数。
-- **生成活跃用户** —— 在范围内运行过成功任务的用户。
-- **付费用户** —— 在范围内有成功支付的用户。
-- **净收入** —— 实际支付减去退款金额（真实台账金额，非当前目录价格）。
-
-### 用户群（注册与激活）
-- 随时间变化的累计留存用户和首次成功用户。
-- 已完成图片任务和已完成报告任务。
-
-### 收入（支付与使用）
-- 首次付费用户、总收入、退款、净收入。
-- 客户积分 vs. 提供商积分（客户充值量 vs. 提供商消耗量）。
-
-### 每日证据 / 趋势
-- 每日图表保持在各自诚实的刻度上：按 UTC 日展示的人数、已完成任务数、净收入（元）和积分结算记录。间隙保持为间隙。
-
-### 转化、复购与留存
-- 从留存记录推导的同期群和转化读数。
-
-## 性能与失败行为
-
-- 查询在 **2 秒预算**内运行（数据调用使用约 1.8 秒的 `anyio` 截止时间）。
-- 如果查询超时或冲突，页面显示上一次成功结果，并附带"营销数据不可用 / 显示上一次成功结果"提示和 **Retry** 按钮。
-- 数据端点设置 `Cache-Control: private, no-store`；点击 **Refresh data** 重新获取。
-
-## 数据来源
-
-所有指标来自持久运营表：`User`（注册、最后登录）、`DesignJob` / 积分台账（活跃用户和已完成任务）、`PaymentOrder` / `RefundOrder`（收入、退款、付费用户），以及积分台账范围（客户 vs. 提供商积分）。这是历史事实，不是实时直播流。
+代码依据 · backend `b13cc566`: [app/admin/marketing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/marketing.py) · [app/templates/admin/marketing.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/marketing.html) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md).

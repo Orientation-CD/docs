@@ -1,172 +1,44 @@
-# 工作区与成员关系流程（端到端）
+# 工作区成员与项目访问
 
-这是**工作区**的完整链路——用户首次登录时个人工作区如何创建、
-如何通过邀请链接加入企业工作区，以及每次设计作业上如何强制访问/角色。
+工作区划分访问和计费，内部 Project 仍属创建者私有。邀请接受、owner 视图、移除历史和资金来源在切换页面/迟到响应时必须保持一致。
 
-## 工作区模型
+## 手机邀请与分享邀请
 
-每个用户恰好有一个**个人工作区**，在首次登录时自动创建：
+owner 可定向邀请手机号，也可创建可转发分享卡片。两者有不同记录/协议；referral 是营销归因，不授企业访问。
 
-```
-User (users) ───1:1──► Workspace (workspaces) ───1:1──► PersonalWorkspace (personal_workspaces)
-                          │
-                          ├──1:N──► WorkspaceMembership (workspace_memberships)
-                          │
-                          └──► Enterprise (enterprises)  (workspace_kind = enterprise)
-                                  ├──1:N──► EnterpriseMembership (enterprise_memberships)
-                                  └──1:N──► EnterpriseInvitation (enterprise_invitations)
-```
+分享链路：
 
-- `workspaces` 是多态根（kind：`personal` | `enterprise`）。
-- 个人工作区积分持存在 `users` 行上（`remaining_tokens`）。
-- 企业积分持存在 `enterprises` 行上；成员关系携带角色（`owner` / `member`）
-  和权益。
+1. owner 向 `POST /v1/workspaces/{workspace_id}/share-invitations` 传动作 key 和 JSON 请求体 `{}`（`Content-Type: application/json`），得到一次性 bearer、身份与过期。不能完全省略请求体。
+2. 接收者把 bearer 放 body 调公开 `POST /v1/share-invitations/preview`，仅展示安全的空间/邀请者/可用性信息，预览不授访问。
+3. 登录/同意后，以接收账号向 `POST /v1/share-invitations/accept` 提交要求的幂等 key。事务重新检查 token/过期、企业活跃、座位与成员规则。
+4. 刷新资料/空间，选择可访问目标。重放不能重复添加成员/占座。
 
-## 第 0 部分——首次登录时的个人工作区
+owner 列表不重新返回 bearer 明文，可 DELETE 撤销 pending。已用、过期、撤销、满员、空间关闭有不同稳定状态，不对失效 bearer 无限重试。
 
-```
-WeChat login (new user)
-  → create_personal_workspace(db, user)
-      • INSERT workspaces (kind=personal, owner_id=user.id)
-      • INSERT personal_workspaces (workspace_id)
-      • INSERT workspace_membership (user_id, role=owner, is_primary=true)
-```
+## 角色与选定空间
 
-这与用户创建在同一个事务中运行，因此新用户在令牌对返回前就一定已有一个可用的
-工作区。
+每次请求检查当前成员和所需 owner 身份，缓存名称和之前预览成功不是权限。owner 全局 Job/概览访问是显式例外，不允许修改别人私有 Project；创建/default/detail/move 还检查创建者/原空间身份。
 
-## 第 1 部分——列出 / 切换工作区
+前端待执行动作与缓存绑定 user/workspace/session generation。提交中切账号/空间时保留原动作身份并核对结果，不能静默把旧数据提交到新空间。
 
-```
-GET  /v1/workspaces
-  workspace_api.py → list_workspace_summaries(...)
-    personal_workspace_summary(user) + enterprise_workspace_summary(ent)
-    → [WorkspaceSummary]  (id, name, kind, role, token balance, active)
+## 离开与移除历史
 
-GET  /v1/workspaces/{workspace_id}
-  workspace_api.py → workspace_detail(...)
-    • accessible_workspace(db, user, id) enforces membership
-    • roles, member count, entitlements, plan
+成员调用 `DELETE /v1/workspaces/{workspace_id}/membership` 离开；owner 移除指定成员。立即刷新活跃访问，再使用契约允许的移除通知/离开历史。历史 Job 保留原空间/项目和资金来源；离开不把企业付费历史转进个人钱包。
 
-PATCH /v1/workspaces/{workspace_id}
-  workspace_api.py → update
-    • require_workspace_owner(user, workspace)  (app/workspaces.py)
-    • update name / settings
-```
+单数 `/v1/workspace*` 保留收件箱/接受/拒绝/owner 兼容接口，新集成优先显式选定空间的复数接口。账号注销、企业解散有独立守卫，不能手删 membership 行代替。
 
-每个设计作业 / 计费 / 资源请求都通过 `accessible_workspace(db, user, workspace_id)`
-（写操作用 `lock_accessible_workspace`）解析其工作区：先查成员关系、
-工作区是否活跃，再走业务规则。
+## 加入后的 Project 生命周期
 
-## 第 2 部分——创建企业工作区
+读取 `/v1/project-statuses` 和当前空间本人的 Project/default。scratch 是系统项目，普通项目有字段、数量和额度规则。Job move 传 expected source/target 防竞争。WON/LOST 和流失信息是版本化后端能力，不能由客户端自行扩展 enum。
 
-```
-POST /v1/workspaces
-  body: { name }
-        │
-        ▼
-workspace_api.py → create_workspace
-  1. get_current_user; owned_workspace_count(user)
-  2. INITIAL_USER_ALLOWED_WORKSPACES limits how many enterprises a user can own
-  3. INSERT workspaces (kind=enterprise)
-       + enterprises row (name, token pool, capacity)
-       + enterprise_memberships (user_id, role=owner)
-  4. return WorkspaceDetailResponse
-```
+覆盖登录前预览、最后座位竞争、重复接受、撤销/过期、角色变化、页面打开时被移除、账号/空间切换、离开历史和私有 Project 边界。见[工作区后端](/zh/backend/workspaces-orgs)与[数据模型](/zh/reference/data-model)。
 
-## 第 3 部分——所有者邀请成员
+## 源码依据
 
-```
-POST /v1/workspaces/{workspace_id}/invitations
-  body: { phone_e164?, role? }          (direct invitation)
-        │
-        ▼
-billing_api.py / workspace_api.py
-  create_enterprise_invitation(...)
-    • require_workspace_owner
-    • ensure_enterprise_member_capacity(...)
-    • INSERT enterprise_invitations
-        (workspace_id, phone_e164?, role, status=PENDING, token)
-```
+已按[记录的源码版本](/zh/reference/source-revisions)核对。
 
-或通过可分享链接：
-
-```
-POST /v1/workspaces/{workspace_id}/share-invitations
-  → workspace_share_invitations row (token, expires_at, role)
-  → returns a link the owner copies into WeChat
-```
-
-## 第 4 部分——被邀请人预览并接受
-
-```
-Invitee opens the link in the mini program (must already be logged in)
-        │
-        ▼
-POST /v1/share-invitations/preview
-  body: { token }
-  → { workspace_name, inviter_name, role, expires_at }
-    (does NOT consume the invitation)
-        │
-        ▼
-User taps "加入"
-        ▼
-POST /v1/share-invitations/accept
-  body: { token }
-        │
-        ▼
-app/billing.py: accept_enterprise_invitation_by_id(...)
-  1. load invitation (row lock, enterprise lock)
-  2. validate status=PENDING, not expired, not already a member
-  3. _validate_pending_invitation(user, invitation)
-  4. INSERT enterprise_memberships (user_id, enterprise_id, role)
-  5. mark invitation ACCEPTED
-  6. return membership summary
-```
-
-直接（非链接）邀请通过 `POST /v1/workspace/invitations/{invitation_id}/accept`
-接受；通过 `POST /v1/workspace/invitations/{invitation_id}/decline` 拒绝；
-通过 `DELETE /v1/workspace/invitations/{invitation_id}` 撤销。
-
-## 第 5 部分——角色与权限
-
-| 操作 | 所需角色 |
-| --- | --- |
-| 提交设计作业、花积分 | 成员或所有者（该工作区） |
-| 查看工作区详情、列出成员 | 任意成员 |
-| 重命名工作区、编辑设置 | 所有者 |
-| 邀请 / 撤销邀请 | 所有者 |
-| 移除其他成员 | 所有者 |
-| 退出工作区（自己） | 成员（`DELETE /v1/workspaces/{id}/membership`） |
-| 解散企业 | 所有者 |
-
-强制点：
-
-- `accessible_workspace(...)`——读路径：成员关系存在、工作区活跃。
-- `lock_accessible_workspace(...)`——写路径：相同，在锁下。
-- `require_workspace_owner(...)`——仅所有者的变更。
-- 在企业上花积分从**企业**池扣（而非个人余额）；`_locked_token_account(db, design_job)`
-  在 `User` 或 `Enterprise` 之间选择。
-
-## 第 6 部分——清理
-
-- `remove_enterprise_member(...)`——所有者驱逐某成员；其成员关系行被归档。
-- `DELETE /v1/workspaces/{id}/members/{member_user_id}`——同上。
-- `dissolve_enterprise(...)`——所有者解散；`_retire_user_relationships` 归档
-  成员关系，让工作区进入安全状态。
-
-## 写入的数据
-
-| 表 | 内容 |
-| --- | --- |
-| `workspaces` + `personal_workspaces` | 首次登录每用户一个 |
-| `workspace_memberships` | 个人工作区成员关系 |
-| `enterprises` + `enterprise_memberships` | 企业 + 所有者/成员行 |
-| `enterprise_invitations` / `workspace_share_invitations` | 待处理/已接受邀请 |
-
-## 相关调用链
-
-- [微信登录流程](/reference/flows/wechat-login-flow)——创建个人工作区。
-- [设计作业生命周期](/reference/flows/design-job-lifecycle)——每个作业携带通过
-  `accessible_workspace` 解析的 `workspace_id`。
-- [支付流程](/reference/flows/payment-flow)——企业 vs 个人积分池。
+- [分享邀请状态与锁](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/share_invitations.py)
+- [选定空间路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/workspace_api.py)
+- [私有 Project API](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_api.py)
+- [空间仓储](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/workspaces.ts)
+- [邀请与历史规范](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md)

@@ -1,84 +1,66 @@
 # 术语表
 
-贯穿本文档与代码库的术语速查。遇到陌生术语时，先在这里查。
+## 入门操作
 
-## 产品与领域术语
+| 术语 | 本项目中的含义 |
+| --- | --- |
+| 仓库 / 分支 | 保存历史版本的源码目录 / 一条工作线。前端用 `ui-integration`，后端用 `main`。 |
+| 终端 / 命令 | macOS 的文字操作应用 / 输入后按回车执行的指令。 |
+| 当前目录 | 命令运行所在的文件夹；`pwd` 查看，`cd` 切换。 |
+| 依赖 | 项目需要的库和工具，前端由 `pnpm install` 下载。 |
+| 构建 / 产物 | 将源码编译成小程序 / `dist/` 中供平台开发工具导入的文件。 |
+| 环境变量 | 有名称的设置。前端 `VITE_*` 在编译时确定，修改后须重新构建。 |
+| 端口 / Origin | 本机服务的数字入口 / 协议、主机和端口的组合，例如 `http://127.0.0.1:8080`。 |
+| Mock / API 模式 | 前端模拟数据 / 前端请求真实后端。API 模式里的后端仍可使用模拟提供商。 |
 
-| 术语（英文原文） | 中文译名 | 解释 |
-| --- | --- | --- |
-| **Design job** | 设计任务 | 一个独立的异步工作单元，把输入图片/音频 + prompt 变成一个或多个 AI 生成的输出（效果图、HTML 报告或 markdown 总结）。每个功能都实现为一个设计任务。 |
-| **Design job type / Catalog** | 设计任务类型 / 计费目录 | 后端编目好的任务类型清单（`GET /v1/billing/catalog`）：键、展示名、积分成本、所需图片、结果类型。前端据此决定首页展示什么。 |
-| **Result kind** | 结果类型 | 设计任务产出什么：`IMAGE`、`HTML_REPORT` 或 `MARKDOWN`。 |
-| **Feature** | 功能 | 产品的功能流程之一：室内、局部、家具、厨房、卫生间、彩平图、语音总结、报告。 |
-| **Voice summary** | 录音需求总结 | 一个 `voice_summary` 设计任务，接收 1–3 段录音，返回 markdown 需求总结。 |
-| **Design report** | 方案汇报 | 由一个设计任务加报告素材（封面、情绪板、效果图等）组装成的专业 HTML 文档。服务端渲染；在 `web-view` 中查看。 |
-| **Token** | 积分 | 用于支付设计任务的内部货币。每种任务类型都有积分成本。用户购买积分包或订阅。 |
-| **Token ledger** | 积分台账 | 每一笔积分增减的只追加记录（初始赠送、任务预留、消耗、释放、购买、订阅购买/到期、推荐奖励、人工调整）。 |
-| **Token precheck / preflight** | 积分预检 | 功能打开或任务提交前的客户端余额检查（`personalCatalogTokenShortage`、`assertPersonalTokenBalance`）。准入仍由服务端原子执行。 |
-| **Workspace** | 工作空间 | 设计任务与成员的容器。每个用户都有一个**个人工作空间**；也可能属于**企业工作空间**。 |
-| **Personal workspace** | 个人工作空间 | 为每个账号自动创建的私有工作空间。 |
-| **Enterprise** | 企业空间 | 带所有者与成员的共享工作空间。所有者管理席位、邀请、成员与所有方案。 |
-| **Seat** | 席位 | 企业工作空间中的一个成员名额。 |
-| **Subscription** | 订阅 | 一种权益，授予积分额度和/或功能访问权；本版本中它是一次性购买、**手动续订**（无自动扣费）。 |
-| **Client info** | 客户信息 | 附加到任务上的可选原木风品牌字段：`last_name`、`salutation`（先生/女士）、`project_name`。 |
-| **Share invitation** | 分享邀请 | 所有者签发的令牌，让另一个用户加入企业工作空间。 |
-| **Referral invitation / Reward** | 推荐邀请 / 奖励 | 一种推荐归因令牌；奖励（例如首购积分赠送）在"奖励"页领取。 |
+## 产品与权限
 
-## 前端术语
+| 术语 | 含义 |
+| --- | --- |
+| Feature | `/v1/billing/features` 发现的可执行产品能力；服务端控制开放状态和 Token价格。 |
+| Workflow | 规范生成请求及其配置的执行图，一次请求可能运行多个 Operation。 |
+| Operation / Provider | 执行步骤 / 该步骤使用的实现或供应商。 |
+| 设计任务 | 用户看到的异步任务；旧设计任务接口与规范 Workflow 接口共存。 |
+| 结果类型 | 输出类别，包括图片、Markdown、视频、HTML 报告和演示文稿。 |
+| 工作空间 | 个人或企业上下文，决定成员权限、使用的权益和余额。 |
+| 所有者 / 成员 | 企业仅有的两种角色；所有者管理企业设置、席位、邀请和成员。 |
+| 项目 | 空间内组织某用户方案与客户资料的容器；临时项目是兜底入口。 |
+| 当前 / 默认项目 | 本次选中的项目 / 持久保存的优先项目，都不是生命周期状态。 |
+| 阶段 / 结果 | 如已采集需求的跟进进度 / 服务端启用后可用的成交、流失等独立结果。 |
+| 会员订阅 | 购买得到的权限与额度；目前手动续费，界面不支持生效期内提前续订。 |
+| Token / 流水 | 生成余额 / 授予、购买、预留、消耗、释放和调整的持久记录。 |
+| 席位 | 包含所有者在内的企业成员容量；待接受邀请不预占席位。 |
 
-| 术语（英文原文） | 中文译名 | 解释 |
-| --- | --- | --- |
-| **uni-app** | uni-app | 用于构建小程序的跨平台框架（基于 Vue）；可编译到微信/其他小程序平台与 H5。 |
-| **Subpackage** | 分包 | 微信小程序按需加载的分块。本项目有 `pkg-features`、`pkg-plans`、`pkg-account`。 |
-| **Main package** | 主包 | 始终加载的分块：启动页、首页、联系我们、方案、个人中心与 tabBar。 |
-| **Repository layer** | 仓库层 | 前端的数据访问抽象。页面只依赖异步仓库，绝不直接发 HTTP。 |
-| **DTO** | DTO（数据传输对象） | 数据传输对象——前端与 REST API 之间的带类型契约（`src/api/dto/*`）。 |
-| **Normalizer** | 规整化函数 | 把原始 JSON（`unknown`）校验成带类型领域对象的函数，遇到漂移即抛 `*RESPONSE_INVALID`（例如 `mapDesignJobResponseMedia`）。 |
-| **Mock mode** | Mock 模式 | 前端的编译期模式（`VITE_DATA_SOURCE=mock`），无后端依赖，一切在内存中模拟。 |
-| **API mode** | API 模式 | 前端的编译期模式（`VITE_DATA_SOURCE=api`），调用位于 `/api/v1` 的真实后端。 |
-| **Runtime alias** | 运行时别名 | Vite 的 `resolve.alias`，在构建期把抽象模块名（例如 `WechatCodeRuntime`）换成 mock 或真实实现。 |
-| **Logical job id / idempotency key** | 逻辑任务 id / 幂等键 | 由 `{ scope, ownerId, actionId }` 推导的客户端密钥，让重试安全：同一逻辑动作提交两次只产生一个任务。作为 `Idempotency-Key` 请求头发送。 |
-| **Poll scheduler** | 轮询调度器 | 前端辅助函数，轮询后端查询设计任务状态，遵守 `poll_after_seconds` / `Retry-After`，页面隐藏时暂停。 |
-| **Recorder manager** | 录音管理器 | `uni.getRecorderManager()`；语音页面录制 MP3/16 kHz/单声道/48 kbps，单次最长 10 分钟。 |
-| **Resumable playback** | 可续播 | markdown 总结页按素材记住每段录音的播放位置，通过 `InnerAudioContext.startTime` 续播。 |
-| **Token pair** | 令牌对 | access + refresh 令牌对，持久化在 `yuanzhu.session.tokens.v1` 下。 |
+## 请求与文件
 
-## 后端术语
+| 术语 | 含义 |
+| --- | --- |
+| REST API / DTO | HTTP 接口 / 请求响应的 TypeScript 类型，仓储层还会校验真实 JSON。 |
+| 访问 / 刷新 Token | 短期请求凭据 / 用于轮换会话的凭据，两者都需保密。 |
+| 幂等键 | 标记一次逻辑提交或购买；响应不确定时复用原动作，避免重复创建。 |
+| 轮询 | 按服务端时机反复读取状态；页面隐藏时暂停。 |
+| Asset | 服务端管理的文件身份和元信息；任意文件 URL 不是 Asset ID。 |
+| 上传凭证 / 完成校验 | 一个文件的临时上传许可 / 验证已上传字节与元信息可供使用。 |
+| 签名 URL | 临时文件访问地址；过期后通过有权限的 API 刷新。 |
+| Blueprint | 新设计报告使用的项目、页面及来源 Asset 结构。 |
+| 历史 HTML 汇报 | 旧 `html_report` 产品，与新 `design_report_9/13/17` Workflow 区分。 |
+| JSAPI / 抖音支付桥 | 平台原生支付调用；订单最终状态独立由服务端结算确认。 |
 
-| 术语（英文原文） | 中文译名 | 解释 |
-| --- | --- | --- |
-| **FastAPI** | FastAPI | 用于 REST API 的 Python Web 框架。 |
-| **ARQ** | ARQ | 基于 Redis 的异步任务队列，用于后台工作。 |
-| **Submit worker** | 提交 worker | 把任务提交给 AI/语音提供方的 ARQ worker。 |
-| **Poll worker** | 轮询 worker | 轮询提供方直到任务完成的 ARQ worker。 |
-| **Provider** | 提供方 | AI/语音后端（`app/providers/`）。主图像提供方是 Seedream；本地用 mock 提供方。 |
-| **Provider job** | 提供方任务 | 由 `provider_job_id` 标识的提供方侧任务。 |
-| **SQLAlchemy / Alembic** | SQLAlchemy / Alembic | 用于 PostgreSQL 的 Python ORM 及其迁移工具。 |
-| **Object storage / S3** | 对象存储 / S3 | S3 兼容存储，用于图片、音频与报告素材。本地：MinIO。生产：阿里云 OSS。 |
-| **Upload intent** | 上传意图 | 后端签发的短时效许可，允许把一个素材直接上传到对象存储（`POST /v1/assets/upload-intents`）。 |
-| **Asset completion** | 素材完成确认 | 后端确认一次上传已完成（`POST /v1/assets/{id}/complete`），返回 sha256、etag 与尺寸。 |
-| **Presigned URL** | 预签名 URL | 有时效限制的 URL，让客户端直接上传/下载对象。 |
-| **OpenID / phone code** | OpenID / 手机号 code | 微信身份原语：`openid` 标识用户；`phone_code` 证明手机号。 |
-| **JWT** | JWT | JSON Web Token——access/refresh 令牌的格式。 |
-| **JSAPI Pay** | JSAPI 支付 | 小程序发起支付所用的微信支付方式（`uni.requestPayment`）。 |
-| **Payment notify** | 支付回调 | 微信支付的服务端到服务端 webhook，用于确认一笔支付。 |
+## 后端与部署
 
-## 部署术语
+| 术语 | 含义 |
+| --- | --- |
+| FastAPI | 提供产品接口和 Admin 的 Python 应用。 |
+| PostgreSQL / Alembic | 持久关系数据库 / 经评审的结构迁移。 |
+| Redis / ARQ | 协调与队列存储 / 后台任务框架。 |
+| MinIO / OSS | 本地 S3 兼容对象存储 / 阿里云对象存储。 |
+| Docker 镜像 / 容器 / 卷 | 构建的应用包 / 运行实例 / 保留的数据存储。重建镜像本身不等于迁移或清空数据库。 |
+| Compose 项目 | 有名称的本地服务栈及资源；不同开发者使用各自拥有的端口/项目。 |
+| SAE | 后端使用的阿里云应用运行平台。 |
+| 配置快照 | 导入新本地环境的经校验法律、产品与模板配置，不含供应商密钥。 |
 
-| 术语（英文原文） | 中文译名 | 解释 |
-| --- | --- | --- |
-| **Local stack** | 本地栈 | 用于本地开发的 Docker Compose 拓扑（`create_stack.sh`）。 |
-| **SAE** | SAE | 阿里云**Serverless App Engine**，后端生产运行于此。 |
-| **ACR** | ACR | 阿里云容器镜像服务，后端镜像发布于此。 |
-| **Immutable image** | 不可变镜像 | 每个 Git 提交一个镜像，以完整 SHA 打标签，部署前解析为仓库摘要。 |
-| **Migration Job** | 迁移任务 | 一个 SAE Job，在应用滚动发布前运行 `alembic upgrade head`。 |
-| **GitHub Pages** | GitHub Pages | 本文档站自动发布到的地方。 |
+症状排查见 [FAQ](/zh/get-started/faq)，基础命令见 [macOS 准备](/zh/get-started/macos-setup)，接口契约见 [API 参考](/zh/reference/rest-api)。
 
-## 领域（功能）术语
+## 源码依据
 
-| 术语（英文原文） | 中文译名 | 解释 |
-| --- | --- | --- |
-| **Masked image** | 蒙版图 | 用户在输入照片上手绘的蒙版，家居试搭使用。 |
-| **Reference image** | 参考图 | 某些任务类型使用的可选第二张图（例如家具或风格参考）。 |
-| **Prompt template / Prompt selection** | Prompt 模板 / Prompt 选择 | 服务端模板，把用户的选择转成最终发给提供方的 prompt。 |
-| **Report item** | 报告条目 | 设计报告中的一个章节（项目封面、效果图、情绪板等），在服务端配置。 |
+核对版本：前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）。[前端功能分组](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [Workflow请求类型](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)。

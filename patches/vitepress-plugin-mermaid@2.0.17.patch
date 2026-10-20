@@ -1,0 +1,54 @@
+diff --git a/dist/Mermaid.vue b/dist/Mermaid.vue
+index 1632d9856878c0abf12a4a9ec6936f6e643cd9b3..29bf6169fc6150708ef722a8e7fcea97b16525f9 100644
+--- a/dist/Mermaid.vue
++++ b/dist/Mermaid.vue
+@@ -36,21 +36,26 @@ const props = defineProps({
+ 
+ const svg = ref(null);
+ let mut = null;
++let disposed = false;
+ 
+ onMounted(async () => {
+   await init(pluginSettings.value.externalDiagrams);
++  if (disposed) return;
+   let settings = await import("virtual:mermaid-config");
++  if (disposed) return;
+   if (settings?.default) pluginSettings.value = settings.default;
+ 
+   mut = new MutationObserver(async () => await renderChart());
+   mut.observe(document.documentElement, { attributes: true });
+   await renderChart();
++  if (disposed) return;
+ 
+   //refresh images on first render
+   const hasImages =
+     /<img([\w\W]+?)>/.exec(decodeURIComponent(props.graph))?.length > 0;
+   if (hasImages)
+     setTimeout(() => {
++      if (disposed) return;
+       let imgElements = document.getElementsByTagName("img");
+       let imgs = Array.from(imgElements);
+       if (imgs.length) {
+@@ -70,9 +75,13 @@ onMounted(async () => {
+     }, 100);
+ });
+ 
+-onUnmounted(() => mut.disconnect());
++onUnmounted(() => {
++  disposed = true;
++  mut?.disconnect();
++});
+ 
+ const renderChart = async () => {
++  if (disposed) return;
+   const hasDarkClass = document.documentElement.classList.contains("dark");
+   let mermaidConfig = {
+     ...pluginSettings.value,
+@@ -86,6 +95,7 @@ const renderChart = async () => {
+     decodeURIComponent(props.graph),
+     mermaidConfig
+   );
++  if (disposed) return;
+   // This is a hack to force v-html to re-render, otherwise the diagram disappears
+   // when **switching themes** or **reloading the page**.
+   // The cause is that the diagram is deleted during rendering (out of Vue's knowledge).

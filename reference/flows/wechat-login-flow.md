@@ -1,151 +1,52 @@
-# WeChat Login Flow (End-to-End)
+# Platform Login and Consent Flow
 
-This is the full call chain for **WeChat login / registration** — what happens from the
-user tapping "登录/提交" in the mini program to receiving a token pair, including the
-backend's exchanges with WeChat (or its local mock).
+WeChat and Douyin exchange platform credentials for the same application account/session model. This route keeps its historical name; both current platform paths belong here.
 
-## Part 0 — Frontend prepares (accountGate)
-
-```
-User reaches a submission/login gate
-        │
-        ▼
-Frontend src/services/accountGate.ts
-  ensureRegisteredForAction()
-    └─ registrationFlow (reactive) drives the login UI
-```
-
-For a **returning user**, the request body is just `{ code }`. For a **new user** it is
-`{ code, phone_code, accepted_document_ids }`.
-
-```
-Frontend src/services/wechatAuth.ts
-  requestFreshWechatLoginCode()          → wx.login()          (login code)
-  buildReturningWechatLoginRequest()      → { code }
-  buildRegistrationWechatLoginRequest(phoneCode, documents)
-       • getPhoneNumber()                  (phone code)
-       • fetch current required legal docs (accepted_document_ids)
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant MP as Mini program
+  participant API as Identity API
+  participant WX as Platform
+  participant DB as PostgreSQL
+  MP->>API: GET current legal documents
+  U->>MP: Read and accept current IDs
+  MP->>WX: wx.login or tt.login
+  WX-->>MP: Short-lived code
+  MP->>API: Platform login with code and consent IDs
+  API->>WX: Exchange/verify platform credential
+  API->>DB: Resolve user, consent and durable auth session
+  API-->>MP: User plus access/refresh pair
 ```
 
-If a stored token pair already exists, the request layer
-(`src/services/request.ts`) first tries it silently; no WeChat round trip happens
-unless the access token is rejected.
+## Client preparation
 
-## Part 1 — Backend receives the login
+`accountGate` coordinates required authentication and continuation. Fetch current legal documents for the display locale, open their returned content and retain immutable IDs the person actually accepted. Mock mode can simulate platform calls, but API mode still needs a correctly configured backend and published legal documents.
 
-```
-POST /v1/auth/wechat-login
-  body: { code, phone_code?, accepted_document_ids? }
-        │
-        ▼
-FastAPI → app/api.py: wechat_login  (auth_router, prefix /v1/auth)
-  1. enforce_rate_limit(namespace="wechat-login-ip", subject=client host,
-       limit=AUTH_RATE_LIMIT_ATTEMPTS, window=AUTH_RATE_LIMIT_WINDOW_SECONDS)
-  2. exchange_login_code(settings, code)
-       POST WECHAT_CODE_TO_SESSION_URL  (https://api.weixin.qq.com/sns/jscode2session
-                                          or the mock identity server locally)
-       ──► { openid, session_key }
-       • code rejected    → 401 WECHAT_LOGIN_CODE_INVALID
-       • WeChat down      → 503 WECHAT_AUTH_UNAVAILABLE
-  3. SELECT user WHERE wechat_openid = openid  (row lock, key_share)
-```
+Call `/v1/auth/wechat-login` or `/v1/auth/douyin-login` with the fresh code and the required accepted IDs/phone credential fields defined by the contract. Never cache a one-use platform code as a reusable password. Phone authorization is a separate platform-specific proof; do not conflate an OpenID with a verified phone number.
 
-## Part 2 — New user registration path
+## Backend identity boundary
 
-```
-If no user exists for this openid:
-  1. if phone_code missing → 428 PHONE_AUTH_REQUIRED
-  2. commit the read transaction, then exchange_phone_code(settings, phone_code)
-       POST WECHAT_PHONE_NUMBER_URL  (…/wxa/business/getuserphonenumber)
-       ──► { countryCode, phoneNumber }
-       • invalid  → 401 WECHAT_PHONE_CODE_INVALID
-       • malformed→ 502 WECHAT_PHONE_INVALID
-  3. normalize phone → phone_e164
-  4. re-check openid under row lock (prevents concurrent duplicate accounts)
-  5. SELECT user WHERE phone_e164 = phone
-     • phone bound to a DIFFERENT openid → 409 WECHAT_IDENTITY_MISMATCH
-     • no phone user → CREATE user:
-           remaining_tokens = effective_campaign_token_amount(
-               CampaignCode.NEW_USER_REGISTRATION, fallback=INITIAL_USER_TOKENS)
-           allowed_workspaces = INITIAL_USER_ALLOWED_WORKSPACES
-           + TokenLedgerEntry(reason=INITIAL_TOKEN_GRANT)  if tokens > 0
-           + create_personal_workspace(db, user)
-     • existing phone user → link wechat_openid to this user (is_new_user=false)
-```
+The identity domain validates the selected platform/mode and resolves the external identity. Phone-linked identities can share an existing application account; account status, binding conflicts and consent requirements remain server checks. The backend records acceptance and creates/rotates a durable `auth_sessions` record before returning JWTs. Starter/campaign rewards, where configured, are ledgered business effects rather than a hard-coded client balance.
 
-## Part 3 — Consent + tokens (both paths)
+If current legal configuration is unavailable (`503 LEGAL_DOCUMENTS_UNAVAILABLE`), stop and retry later. A stale or incomplete acceptance yields `409 LEGAL_ACCEPTANCE_REQUIRED`; display the new required documents and ask for actual renewed consent. Account deactivation/reactivation has dedicated endpoints and must not be bypassed by making another platform identity.
 
-```
-  6. verify user.is_active (else 403 ACCOUNT_REMOVED)
-  7. current_required_documents(db, settings, locale)
-     record_required_acceptances(user, documents, accepted_document_ids)
-       → persists legal_document_acceptances rows
-  8. user.last_login_at = now
-  9. issue_token_pair(db, user, settings)
-       • create auth_sessions row (sid)
-       • sign access JWT (sub, sid, exp = ACCESS_TOKEN_SECONDS)
-       • sign refresh JWT (sub, sid, exp = REFRESH_TOKEN_SECONDS)
- 10. return WeChatLoginResponse
-       { access_token, refresh_token,
-         access_expires_at, refresh_expires_at, token_type: "bearer",
-         is_new_user: true|false }
-```
+## Refresh and logout
 
-## Part 4 — Frontend persists and continues
+The request layer sends the access token on authenticated API calls. On access expiry, refresh once through `/v1/auth/refresh`, serialize concurrent refreshes and replace **both** returned tokens. A revoked/invalid refresh means clear local credentials and restart login, not an infinite retry loop.
 
-```
-Frontend src/stores/session.ts
-  sessionTokenStore.applyTokenPair(response)
-  1. persist under key "yuanzhu.session.tokens.v1" (SESSION_TOKEN_STORAGE_KEY)
-  2. the interrupted action (e.g. design submission) continues
-```
+`POST /v1/auth/logout` takes the refresh token and invalidates its durable session. Client caches and pending continuations must remain scoped to the user/session generation so a late response cannot populate another account's state. Token storage is application-local state, not a permission bypass.
 
-## Token refresh (automatic)
+## What to verify
 
-On any `401 AUTH_TOKEN_EXPIRED_OR_INVALID`:
+Exercise first login with current documents, returning login, stale consent, missing legal configuration, platform-code failure, phone-account reuse, access expiry/refresh rotation, revoked session and account reactivation. Verify platform live behavior separately from mocked identity. See [authentication](/backend/authentication) and [API boundaries](/reference/openapi).
 
-```
-request.ts → rotateTokens()
-  POST /v1/auth/refresh  { refresh_token }
-  app/api.py: refresh_user_token
-    1. decode refresh JWT (sid, sub) → 401 REFRESH_TOKEN_INVALID if bad
-    2. load auth_sessions (row lock)
-    3. rotate/replace the session, sign a new pair
-  → sessionTokenStore.applyTokenPair(response);
-    replay the original request with the new access token
-```
+## Source evidence
 
-Concurrent 401s share one in-flight refresh promise — only one refresh call happens. A
-terminal session error calls `sessionTokenStore.clear()`.
+Verified against the [documented source revisions](/reference/source-revisions).
 
-## Logout (server-side)
-
-```
-POST /v1/auth/logout
-  app/api.py: logout_user   → 204 No Content
-    • revoke/delete the auth_sessions row (invalidates the refresh token)
-  Frontend sessionTokenStore.clear()
-```
-
-## Data written during this flow
-
-| Table | What |
-| --- | --- |
-| `users` | new row (registration) / `last_login_at` / `wechat_openid` link |
-| `token_ledger_entries` | `INITIAL_TOKEN_GRANT` (new user, if tokens > 0) |
-| `workspaces` + `workspace_memberships` (+ `personal_workspaces`) | personal workspace (new user) |
-| `legal_document_acceptances` | consent rows |
-| `auth_sessions` | one row per token pair |
-
-## Local vs production
-
-- **Local / cloud-test:** `WECHAT_CODE_TO_SESSION_URL` and
-  `WECHAT_PHONE_NUMBER_URL` point at `mock-wechat-identity-provider:8083`, so login and
-  phone exchange are fully fake and deterministic.
-- **Production:** the three `api.weixin.qq.com` URLs are used; `MOCK_WECHAT_IDENTITY_ENDPOINTS_ENABLED=false`.
-
-## Related call chains
-
-- [Design Job Lifecycle](/reference/flows/design-job-lifecycle) — the login gate appears
-  right before submit.
-- [Payment Flow](/reference/flows/payment-flow) — the same JWT protects payments.
+- [Account gate](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/accountGate.ts)
+- [Request/refresh coordination](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts)
+- [Platform and password identity API](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/identity/api.py)
+- [Durable authentication sessions](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/identity/auth.py)
+- [Current legal documents](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/identity/legal_api.py)

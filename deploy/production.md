@@ -1,172 +1,60 @@
-# Production Promotion & Rollback
+# Production Promotion and Recovery
 
-This page covers moving a **proven** image to the production SAE namespace and rolling
-back when needed. Production is a controlled environment: it never rebuilds, forces
-interactive approval, stops the API as a database-write fence, captures a fresh RDS
-recovery point, and records every release.
+Promotion reuses an image already verified in cloud test. It does not rebuild. The namespace owner approves the outage, candidate, distinct rollback identity, evidence and second reviewer before execution.
 
-## What "production" means here
+## Protected promotion
 
-Production uses `--stage=production` against a namespace (typically
-`yuanzhu-prod`, whose public API is `https://api.yuanzhushuzhi.com`). The stage selects
-the protected release policy; it does not rename the namespace or rewrite the
-cloud-owned `ENVIRONMENT`. A routine test-stage deployment of an application already
-configured with `ENVIRONMENT=production` is rejected.
-
-Promotion **never rebuilds**. It promotes a full-SHA image that already exists in ACR
-and has cloud-test evidence.
-
-## Promotion
+From the reviewed backend checkout on the approved deployment host:
 
 ```bash
 ./deploy/sae/deploy.sh \
-  --namespace=yuanzhu-prod \
-  --stage=production \
-  --promote=<40-char-cloud-tested-sha> \
-  --rollback-sha=<40-char-current-safe-sha> \
-  --cloud-test-workflow='https://github.com/.../actions/runs/...' \
-  --smoke-evidence='change-ticket-or-artifact-reference' \
-  --approver='second-reviewer' \
-  --change-record='CHG-1234'
+  --namespace=yuanzhu-prod --stage=production \
+  --promote="$RELEASE_SHA" --rollback-sha="$ROLLBACK_SHA" \
+  --cloud-test-workflow="$CLOUD_TEST_WORKFLOW_URL" \
+  --smoke-evidence="$SMOKE_EVIDENCE" --approver="$APPROVER" \
+  --change-record="$CHANGE_RECORD"
 ```
 
-### Required inputs
+Both SHAs are full immutable revisions. The script proves current/selected/recovery full-SHA tags against ACR digests and compatibility boundaries, captures all three roles' identities and configured/running capacities, stops API and repeatedly proves `STOPPED`/zero/no active change order, establishes an RDS recovery point, migrates and installs compatible workloads, then explicitly restores service and verifies capacity. Complete each interactive checkpoint.
 
-| Input | Why |
-| --- | --- |
-| `--promote=<sha>` | Full 40-char SHA that passed cloud-test verification |
-| `--rollback-sha=<sha>` | Known-good full SHA to fall back to |
-| `--cloud-test-workflow=<url>` | Evidence the image was verified in cloud-test |
-| `--smoke-evidence=<ref>` | Smoke/change-ticket artifact reference |
-| `--approver=<name>` | Second reviewer (two-person rule) |
-| `--change-record=<id>` | Change-ticket ID, e.g. `CHG-1234` |
+A candidate whose pending migrations require stopped workers must additionally use the upstream `--maintenance-mode` procedure. It stops API and both workers, installs the complete compatible fleet while stopped, then starts workers before API. A failure after migration can intentionally leave the fleet stopped for deliberate forward repair; this is not a checkpoint-resumable release.
 
-The deployer resolves the four canonical workload names inside the namespace
-(`yuanzhu-ai-api`, `yuanzhu-ai-submit-worker`, `yuanzhu-ai-poll-worker`, plus the
-temporary migration runner) and validates any `SAE_*_APP_ID` override against the
-resolved ID.
+## Project outcomes are an activation boundary
 
-### Preflight checks (interactive approval)
+`PROJECT_OUTCOMES_ENABLED` defaults to `false`. First deploy outcome-capable API and workers with the flag off and verify migration `b7c4e8a1d629`. Confirm the matching frontend supports WON/LOST, loss details, separate counts and complete project lists, and allow time for client adoption.
 
-Before any mutation, the script verifies:
+Activation uses a separately approved API outage and the **ordinary protected** path, not maintenance-mode. At the migration-success/submit-worker checkpoint, keep the prompt waiting and independently prove API stopped/zero. Stage the literal flag on API and both workers through freshly read, complete merged Envs arrays with SAE `DeployApplication --Deploy false`; preserve unrelated values, Secret references, image/version and capacity. Read back each result. Only then let the protected process roll workers and, after verifying both enabled workers, the API. `configure-env.sh` is not a general flag editor.
 
-- Selected **and** rollback images already exist in ACR.
-- API and both workers currently run **one immutable image revision** with one full
-  `APP_VERSION`; each role's configured and fully running replica count is captured.
-- Selected, rollback, and captured-current SHAs are descendants of the normalized-Provider
-  floor `3059428f0fe1bdda95abe329eb97bcaae50e87c2` (or the sole reviewed PR #249
-  squash-source equivalent), and every full-SHA tag resolves to its observed immutable
-  digest.
-- API and both workers have **at least two** configured/running instances.
-- API readiness, preStop, minimum-ready, and **300-second termination grace**; worker
-  300-second termination grace with
-  `WORKER_JOB_COMPLETION_WAIT_SECONDS=270`.
-- Production provider settings, shared RDS/Redis/OSS configuration, and one matching
-  whole-Secret reference across API/workers.
-- Explicit operator confirmation for: expand-compatible migration, Seedream timeout,
-  **real** WeChat Pay configuration (mock mode is forbidden; `disabled` or `live` are
-  accepted), cloud-test evidence, and two-person review.
+Do not run enabled and disabled API instances together: enabled instances can write WON/LOST that disabled readers cannot project. Before outcome data exists, the reviewed stopped-fleet procedure can restore the previous configuration. After any WON/LOST write, keep the flag enabled, compatible readers/writers and schema; disabling it or downgrading schema is not a valid rollback. Do not erase outcomes to bypass the boundary.
 
-### Rollout order (deliberate API outage)
+## Project activity has its own recovery boundary
 
-```text
-capture current state
-  -> stop API (prove STOPPED, 0 running, no active change order)
-  -> create full RDS snapshot backup (#238, wait for available)
-  -> migration on the promoted image (alembic upgrade head + checks)
-  -> yuanzhu-ai-submit-worker
-  -> yuanzhu-ai-poll-worker
-  -> yuanzhu-ai-api (at captured capacity)
-  -> live verification
-```
+Activity migration `c8d5f1a2e730` requires maintenance-mode while pending. Preserve outcomes configuration and use a separate window from first outcome activation. The `PROJECT_ACTIVITY_COMPATIBILITY_V1` Git-tree marker distinguishes compatible writers from older Project-schema images. A bootstrap predecessor recorded as `BOOTSTRAP_PRE_MIGRATION_ONLY` is not authorized for recovery after migration begins. A marker proves image compatibility identity, not database trust.
 
-The API outage is a **database-write fence**. Stopped state is revalidated around
-backup/migration boundaries, on both sides of every application cutover, and immediately
-before start. A worker capacity change detected before outage or after any cutover stops
-the flow before the next mutation.
+If old writers actually ran after the activity boundary, stop/isolate every writer, prove open transactions ended with authorized DBA visibility, install compatible configurations while stopped and use the focused `app.workspaces.project_activity_operator` show/advance procedure with its exact expected epoch and incident reference. Preserve its receipt and projections. A backup restore also needs reconciliation of snapshot time and the incident interval; missing/older/null state must not silently restore trust. Do not clear or decrease the activity epoch.
 
-If migration or a cutover fails, the script restores every already-changed role to the
-captured pre-outage image/`APP_VERSION` (only when that exact identity passed the
-pre-outage floor and digest checks), then restarts the API. If verification fails after
-traffic was accepted, the API is stopped but **no automatic revision recovery** is
-attempted — the two schema representations may already have diverged.
+## Application rollback
 
-## Smoke tests
-
-- **Built-in rollout verification** runs automatically after the API starts:
-  `/health/ready` (PostgreSQL + Redis) and a release-critical OpenAPI route contract.
-- **Credentialed smoke** (when a `.env.cloud-test` secret is available) runs
-  `scripts/run_smoke_tests.sh` for the real API → Redis → workers → mock-provider path.
-  Triggered with `--require-smoke` on `--verify-only`.
-- Evidence is recorded in the secret-free release record.
-
-## Database migrations
-
-- Migrations run **only** on the promoted image, inside the stopped-API window.
-- The migration runner uses the dedicated `yuanzhu-migration-secrets` Secret
-  (`MIGRATION_DATABASE_URL`), never the runtime `DATABASE_URL` (#214/#234).
-- The runner fails closed: `alembic current --check-heads` and `alembic check` must both
-  pass or application rollout aborts.
-- Migrations must be **expand-compatible** (additive, backward-read compatible) so a
-  rollback image keeps working against the post-migration schema.
-
-## Rollback
-
-Rollback is an incident/recovery operation, not a routine post-deployment step. It
-**never downgrades or executes the database migration**.
+For a reviewed compatible recovery image:
 
 ```bash
 ./deploy/sae/deploy.sh \
-  --namespace=yuanzhu-prod \
-  --stage=production \
-  --rollback=<40-char-rollback-sha> \
-  --approver='second-reviewer' \
-  --change-record='CHG-1234'
+  --namespace=yuanzhu-prod --stage=production \
+  --rollback="$ROLLBACK_SHA" --approver="$APPROVER" \
+  --change-record="$CHANGE_RECORD"
 ```
 
-Rollback order:
+Rollback redeploys application code; it does not downgrade PostgreSQL. Normalized-provider, subscription-tier, Project-schema and activity compatibility checks still apply. Once a boundary is active, an older image is not made safe by possessing its digest. If no compatible recovery image exists after migration, keep the affected fleet stopped and use an approved forward repair or separately authorized verified backup recovery with explicit RPO/data-loss acceptance.
 
-```text
-capture current state -> compatibility + digest proof -> stop API
-  -> NO migration -> submit worker -> poll worker -> API
-  -> start API at captured capacity -> verification
-```
+## Incident evidence
 
-Before the API is stopped, both the selected rollback and captured-current revisions must
-prove against the Git floor and bind each `APP_VERSION` to its immutable ACR digest. The
-legacy `image_provider_configs` table and `design_job_types.provider_adapter` column were
-removed by a normalized-only cleanup migration; recovery is **forward-only**: use a
-prevalidated compatible image, or restore the fresh RDS recovery point created at the
-start of the failed/rolled-back release. If the schema is not backward compatible, stop
-and forward-fix instead.
+Retain the secret-free release record, exact change orders, workload IDs/capacities, candidate/current/recovery digests, migration state, backup reference and any external activity receipt. Reconcile uncertain stop/start/deploy responses read-only before retrying. A canceled checkpoint can invoke recovery and restart API while preserving current cloud Envs; keep the session open during manual configuration reconciliation and do not assume cancellation reverses staged flags.
 
-## Release records
+## Source evidence
 
-Real production attempts write a **secret-free Markdown release record** to:
+Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-```text
-${RELEASE_RECORD_DIR:-/tmp/yuanzhu-sae-release-records}
-```
-
-The record includes the namespace ID, every resolved AppId, selected SHA/digest, each
-role's captured image/`APP_VERSION`/capacity, the exact floor proof method, stop/start
-and migration-runner change-order IDs, uncertainty states, target/recovery change orders,
-approver/operator, live verification status, and rollback information. Set
-`RELEASE_RECORD_DIR` to an operations-managed location so records persist.
-
-## Safety summary
-
-| Property | Enforcement |
-| --- | --- |
-| No rebuild in production | Promote an existing ACR digest only |
-| Human approval | Two-person review + `--approver` + change record |
-| Migration safety | API-stop fence; fails closed; dedicated migration Secret |
-| Recovery point | Fresh full RDS snapshot before every migration (#238) |
-| Evidence trail | `--cloud-test-workflow`, `--smoke-evidence`, release records |
-| Graceful shutdown | 300 s termination grace > 270 s worker completion wait |
-| Forward-only schema | No DB downgrade on rollback; legacy tables removed |
-
-## Next steps
-
-- [SAE Deployment Runbook](/deploy/sae-deployment) — the full operator flow.
-- [CI/CD with GitHub Actions](/deploy/ci-cd) — automation around it.
+- [Production, outcome and activity procedures](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [Protected release implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/deploy.sh)
+- [Activity operator](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_activity_operator.py)
+- [Activity compatibility marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)

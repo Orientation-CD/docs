@@ -1,45 +1,20 @@
-# Campaigns
+# Campaign Token amounts
 
-The Campaigns page at `GET /admin/campaigns` (template `app/templates/admin/campaigns.html`) configures the free token grants the product hands out at acquisition milestones. It is intentionally simple — each campaign has exactly one configurable number: the token amount.
+`/admin/campaigns` controls future new-user and referral grants without restarting the service. It is not a bulk balance editor.
 
-## What a campaign is
-
-A **campaign** is a named code that grants a fixed number of tokens when a specific user event happens. Examples wired into the current product:
-
-| Campaign code | Event | Min amount |
+| Campaign | Applies to | Allowed amount |
 | --- | --- | --- |
-| `NEW_USER_REGISTRATION` | A new user signs up. | 0 |
-| Referral campaign code (from settings) | A referral reward is earned. | 1 |
+| `NEW_USER_REGISTRATION` | A genuinely new account's one-time initial grant | Zero or positive integer |
+| `REFERRAL_FIRST_PURCHASE` | The inviter's eligible first-purchase reward | Positive integer |
 
-Campaign codes are enumerated in `CampaignCode` (`app/db_models.py`). The page renders one card per known campaign.
+The UI shows whether the value comes from environment fallback or database management, along with the last save time and version. Until the first administrator save, the configured environment fallback applies. Amounts are bounded to 1,000,000,000 whole Tokens; the referral minimum is one.
 
-## Editing a campaign
+Saving sends `expected_version`. A concurrent save returns `CAMPAIGN_CONFIGURATION_CHANGED`: reload, inspect the winning value and reapply the intended change. Do not overwrite a peer's edit by repeatedly resending an old form.
 
-Each card shows the campaign name, description, the currently effective token amount, and an inline form to change it. Submit via `POST /admin/campaigns/{code}`.
+The new amount applies only to future qualifying events. Existing user balances, promised reward amounts, claimed rewards and immutable ledger entries do not change retroactively. Setting the registration amount to zero disables that future grant; it does not revoke a prior award.
 
-| Field | Type | Required | Description | Default |
-| --- | --- | --- | --- | --- |
-| Token amount | number | Yes | Tokens granted per event. Range 0 … **1,000,000,000** (the `MAX_CAMPAIGN_TOKEN_AMOUNT` ceiling in `app/campaign_configuration.py`). | current value |
-| Expected version | hidden | Yes | Optimistic-lock version used to detect concurrent edits. | current |
+Referral eligibility, first-wins attribution, non-refundable purchase/use conditions and explicit reward claim remain enforced independently of this amount. See [Tokens and rewards](/backend/billing-tokens) and the [REST contract](/reference/rest-api).
 
-### How the save works
+---
 
-The save uses `save_campaign_token_amount(...)`:
-- It takes a Postgres advisory lock on `campaign-configuration:<code>` so two admins cannot interleave writes.
-- It compares the submitted `expected_version` to the stored version. If another admin saved in between, you get `409 CAMPAIGN_CONFIGURATION_CHANGED` and must refresh.
-- On success the version increments and the acting admin is recorded as `updated_by_user_id`.
-
-### Database vs. environment fallback
-
-If no database row exists yet (bootstrap/migration gap), the effective amount falls back to the environment-configured default for that campaign (`effective_campaign_token_amount(..., fallback=...)`). Once you save on this page, the database value takes over permanently.
-
-## Effects
-
-- New registrations receive the configured number of free tokens immediately.
-- Referral rewards credit the configured amount when the referral event triggers.
-- Because the value is read at event time, **changing it applies only to future events** — it does not retroactively adjust already-granted balances.
-
-## Tips
-
-- Set the registration grant deliberately: it is your first-use cost. Too high inflates free usage; too low blocks users from trying the product.
-- Keep referral amounts ≥ 1 and smaller than the registration grant unless you specifically want to reward invites over signups.
+Source evidence · backend `b13cc566`: [app/admin/marketing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/marketing.py) · [app/marketing/campaign_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/marketing/campaign_configuration.py) · [app/templates/admin/campaigns.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/campaigns.html).

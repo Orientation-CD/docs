@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-20",
+  "docsBaseCommit": "172cee9be81849af2662de62a573bfebb8a78485",
+  "repositories": {
+    "frontend": {
+      "repository": "Orientation-CD/wechat_mini_program",
+      "branch": "ui-integration",
+      "commit": "eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f",
+      "authorities": [
+        {
+          "path": "package.json",
+          "sha256": "710a58e88b1da8284b68b2b28f29725b50512ca87a40cb32070764f16eff3e73"
+        },
+        {
+          "path": ".env.example",
+          "sha256": "d1793575545a8a561863af85c3c2546d33b0d55a56a1c37790881bd4ac374f51"
+        },
+        {
+          "path": "src/env.d.ts",
+          "sha256": "35cd12e7ec752b0d634c56fb6ac4212ba62d38cc750dc47e453d0b1049c55864"
+        },
+        {
+          "path": "config/build-targets.mjs",
+          "sha256": "673127daf4a40bced2225de115bfc974c90ea28847a54463633a8809b349f178"
+        }
+      ]
+    },
+    "backend": {
+      "repository": "Orientation-CD/YuanZhu-AI",
+      "branch": "main",
+      "commit": "b13cc5668920620a274cb91a3393ed9fadac72ae",
+      "authorities": [
+        {
+          "path": "app/api/__init__.py",
+          "sha256": "387fd93429b9244578987a7a54a7eeaae194cfc94fb20175f30f8b7beedc1424"
+        },
+        {
+          "path": "app/core/models.py",
+          "sha256": "5bbcfd44a7ed04c90ed605f3e05cf215592b1cd983a6847a4619150534a5364b"
+        },
+        {
+          "path": "app/core/config.py",
+          "sha256": "81b6feaba09b1b7f824d55daa1f7f29c9224df93c114c89016a5217b5c310ad7"
+        },
+        {
+          "path": "app/persistence/db_models.py",
+          "sha256": "3f281ff63a29d0b78c5b15b87ea4ca2e7f5e8d1cef9b9a18ee8c974d3f1871a1"
+        },
+        {
+          "path": "documents/REST_API_INTERFACE.md",
+          "sha256": "bafa76001eb81469a684b3a1abfde1d631aab8cf66cf695d6be4c279a248f339"
+        },
+        {
+          "path": "scripts/runbook.md",
+          "sha256": "c767df49bcf0bbfb68582fcf15275e7164cd5e8501d8fd87a430ff8d866402c3"
+        },
+        {
+          "path": "deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md",
+          "sha256": "b8ccec3f958ce897c71d722ec19f49395de99a80fb638ffe9d134be0264d37db"
+        },
+        {
+          "path": "documents/DOUYIN_PAYMENT.md",
+          "sha256": "ba6e109450e76e4db9c6f4e4380bc269fca096ee914b4ba2582e4816091cef94"
+        },
+        {
+          "path": "documents/ai_copywriting_setup.md",
+          "sha256": "3cd28fa19a427d8f9f75600ed78766cdc50c2cd2ffa7051c77b0e74329e3625a"
+        }
+      ]
+    }
+  }
+}

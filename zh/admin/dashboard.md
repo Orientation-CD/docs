@@ -1,49 +1,26 @@
-# 总览仪表盘
+# 概览仪表盘
 
-仪表盘是 `GET /admin` 的落地页（模板 `app/templates/admin/dashboard.html`）。它是面向决策的、一目了然的业务概览。它不替代详细的营销数据、财务、性能监控或任务页面——而是引导你前往这些页面。
+`/admin` 汇总持久经营结果、当前账号构成与运维跟进事项，只读展示；修改需进入对应领域页面。
 
-## 报表来源与时间窗口
+## 阅读各面板
 
-页面由 `app/overview.py` 中的 `build_overview_report(db, redis, settings, days=...)` 构建。`days` 查询参数只接受 **7** 或 **30**；头部控件可在两者之间切换。所有数字都基于持久运营记录计算（积分台账、设计任务、支付、退款、用户）——没有任何估算值。
+摘要包含今日完成数、过去 24 小时终态任务完成率、30 日活跃用户与本月至今财务结果。各指标窗口不同，修改完成任务图的时间范围不会重定义全部摘要。
 
-## KPI 卡片
+完成任务图支持 **7 或 30 天**，按 UTC 日分组，区分个人/企业付款任务。活动账号构成把当前非管理员客户归为个人、企业成员或企业所有者，与[营销数据](/zh/admin/marketing)中的生成活跃用户不是同一指标。
 
-顶行显示以下指标：
+行动中心通过认证的 `/admin/overview/alerts` 刷新，每条告警链接到详细运营页面。需关注任务链接到[任务](/zh/admin/design-jobs)，干预前核对任务家族与执行代际。
 
-| KPI | 含义 |
+## 跟进告警
+
+| 现象 | 下一步 |
 | --- | --- |
-| 今日完成数 | 当前 UTC 自然日内成功完成的任务数（个人 + 企业）。 |
-| 24 小时完成率 | 最近 24 小时内终态任务中成功完成的比例（来自终态汇总）。 |
-| 活跃用户 · 30 天 | 最近 30 天内活跃并登录过的非管理员账号。 |
-| 净收入 · 月初至今 | 月初至今的净收入，单位为分（成功支付减去退款），来自财务报表。 |
-| 利润 · 月初至今 | 月初至今的利润，单位为分（净收入减去已记录的云服务+模型成本），附带利润率百分比。 |
-| 提供商积分消耗 | 已完成设计任务在提供商侧计费的积分总和。 |
+| 任务缓慢或失败 | 查看详情/诊断，再看[性能](/zh/admin/performance) |
+| 商业或余额问题 | 核对[计费](/zh/admin/billing)、钱包账本与已结算消费 |
+| 配置不可用 | 核对模型模态、节点选择与 Feature 开放状态 |
+| 财务结果缺失 | 核对完整月度成本与时间范围 |
 
-## 图表
+摘要不证明支付平台已结算或供应商实时健康。具体事件应依据持久订单/任务证据，见[可观测性](/zh/backend/observability)。
 
-- **按账号类型统计的完成任务** —— 每日柱状/面积图，在选定的 7 天或 30 天窗口内将完成任务拆分为**个人**和**企业**两个范围。由 reason 为 `DESIGN_JOB_CONSUMED` 的 `TokenLedgerEntry` 行驱动。
-- **活跃账号构成** —— 环形图展示活跃非管理员账号的构成：**个人**用户、**企业成员**和**企业所有者**。管理员不包含在内。
+---
 
-## 行动中心（告警）
-
-"需要关注"面板（`app/templates/admin/_overview_alerts.html`）列出可操作的异常情况。它每 **60 秒**从 `GET /admin/overview/alerts` 自动刷新，该接口以 JSON 片段形式返回相同的告警列表。每条告警有一个严重程度和一个深链接：
-
-| 告警 | 严重程度 | 触发条件 | 深链接 |
-| --- | --- | --- | --- |
-| 活跃任务需要关注 | critical | 任务仍处于 pending/running 且超过配置的慢任务阈值（`design_job_slow_log_seconds`）。 | `/admin/design-jobs` |
-| 24 小时内任务失败 | warning | 最近 24 小时内失败的任务。 | `/admin/design-jobs?status=failed` |
-| 退款活动需要审查 | warning | 退款订单失败，或已挂起超过一小时。 | `/admin/billing` |
-| 待支付订单需要对账 | warning | 支付订单超过了支付截止时间+宽限期仍未解决。 | `/admin/billing?status=pending` |
-| 企业账号已满 | info | 活跃工作区的成员数已达到成员上限。 | `/admin/workspaces?capacity=full` |
-
-当没有告警时，面板显示"无需立即操作"的消息。
-
-## 需要关注的任务
-
-图表下方，列出最多 8 个需要人工介入的任务：失败任务排在最前面，然后是卡住的 pending/running 任务，最新的在前。每个链接到[任务详情](/admin/design-jobs)页面。
-
-## 如何解读仪表盘
-
-- 将仪表盘视为**分诊面板**，而不是你导出的报表。由于 60 秒告警刷新和报表缓存，数字有边界且可能比实时系统延迟最多一分钟。
-- 月初至今的收入/利润数字来自同一个[财务](/admin/finance)报表；如果你需要按月细分或录入成本，请打开财务页面。
-- "活跃任务需要关注"是提示你打开[任务](/admin/design-jobs)并检查或标记失败卡住的任务。
+代码依据 · backend `b13cc566`: [app/admin/dashboard.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/dashboard.py) · [app/admin/overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/overview.py) · [app/templates/admin/dashboard.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/dashboard.html).

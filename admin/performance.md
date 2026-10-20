@@ -1,58 +1,28 @@
-# Performance
+# Performance dashboard
 
-The Performance page at `GET /admin/performance` (template `app/templates/admin/performance.html`) shows how the running service is behaving: HTTP throughput/latency, job execution times, queue depths, and a live snapshot. Reports come from `app/performance.py`.
+`/admin/performance` separates HTTP pressure, durable Job health and queue/execution phases. Authentication uses the normal admin session; this is not a public metrics endpoint.
 
-## Controls
+## Choose the view
 
-| Control | Values | Effect |
-| --- | --- | --- |
-| Minutes | 5 … 60 | Sliding window for HTTP minute charts. |
-| Hours | 1 … 24 | Window for job-performance aggregation. |
-| Trend | traffic / latency / failures / admission_queue / poll_queue / jobs | Which chart/table emphasis to show (`PerformanceTrend`). |
+The page preserves independent job-health hours, trend type and rolling minutes. Trend choices cover traffic, latency, failures, admission queue, poll queue and job phases. Historical reports may use a short admin cache; live pressure is collected separately.
 
-Changing a control auto-submits.
+| Signal | What it helps distinguish |
+| --- | --- |
+| Incoming vs handled traffic | Demand and admission/processing capacity |
+| Total, admission wait, handler time | Queueing before the handler vs application work |
+| p99 estimates / event-loop lag | Tail pressure rather than only average latency |
+| 4xx, 5xx, provider/result/interruption failures | Expected rejection vs infrastructure or execution failure |
+| Queue depth and oldest age | Backlog size and how long work has waited |
+| Submission/finalization phases | Provider dispatch vs result validation/storage |
 
-## HTTP performance
+The page uses authenticated `/admin/performance/refresh` for report HTML and `/admin/performance/live` for bounded live JSON. Missing samples or unavailable collection are not zero traffic. Percentiles are bounded aggregates, not an unlimited request trace database.
 
-`build_http_performance_report(db, window_minutes=...)` aggregates request events into per-minute buckets. Each minute includes:
+## Investigate a bottleneck
 
-- Incoming count, handled count.
-- Total average and p99 latency ms, split into **admission** (queue wait) and **handler** (work) segments.
-- Status 4xx, 429 (rate limited), 5xx counts.
-- Admission-queue average depth, max depth, and oldest queued request age.
+Start from the slow stage and a concrete task/request ID. Check [Jobs](/admin/design-jobs) diagnostics for the matching attempt generation, DB pressure for long transactions and storage/provider evidence for external stages. Increasing the provider timeout cannot solve admission saturation.
 
-## Job performance
+No button here restarts workers, changes production capacity or authorizes replay of an uncertain paid provider request. Those actions follow [deployment](/deploy/sae-deployment) and the persisted retry contract. See [observability](/backend/observability) for health-probe limits.
 
-`build_job_performance_report(db, window_hours=...)` aggregates design-job duration and outcomes:
+---
 
-- Per-minute job throughput and duration metrics.
-- Failure counts by normalized error code.
-- Terminal outcome summary (completed/failed and completion rate) — also used by the dashboard.
-
-Both HTTP and job reports are cached in the process-local `AdminReportCache` (keyed by window settings).
-
-## Live performance snapshot
-
-`build_live_performance_report(...)` is **not cached**. It is served as JSON at `GET /admin/performance/live` and rendered by the page. It reports:
-
-- Incoming RPS, handled RPS, in-flight requests.
-- Admission waiters, HTTP p99, server-error rate, rate-limited rate.
-- Admission-queue depth and event-loop lag.
-- Active job count and DB lock waiters.
-
-### Active job snapshot & runtime bottleneck
-
-- `build_active_job_snapshot(...)` lists currently running jobs.
-- `build_runtime_bottleneck_report(...)` cross-references slow jobs, queue depths, and lock waiters to point at the actual bottleneck (worker pool vs. provider vs. DB).
-
-## Refresh mechanism
-
-- `GET /admin/performance/refresh` performs a **full page replacement** — it rebuilds the HTML with freshly computed reports (cache-refreshed) and the browser swaps the document.
-- The live snapshot (`/admin/performance/live`) polls independently on an interval so the top-of-page live metrics move without disturbing the historical charts.
-- Because cached reports have a TTL, the charts may lag the live snapshot by up to the cache window; use `/refresh` to force a recompute.
-
-## How to use it
-
-- **Latency trend rising** → check admission-queue depth: waiters piling up means the worker/admission pool is saturated (queue bottleneck), not the DB.
-- **5xx climbing** → correlate with [providers](/admin/providers) and [failed jobs](/admin/design-jobs?status=failed).
-- **Slow active jobs** → the runtime-bottleneck section and the dashboard alert tell you whether to inspect a job or scale out a provider.
+Source evidence · backend `b13cc566`: [app/admin/performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/performance.py) · [app/core/performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/performance.py) · [app/templates/admin/performance.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/performance.html).
