@@ -11,7 +11,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 71
+      "line": 71,
+      "handler": {
+        "source": "app/core/health_api.py",
+        "symbol": "live",
+        "line": 12
+      }
     },
     {
       "method": "GET",
@@ -19,7 +24,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 73
+      "line": 73,
+      "handler": {
+        "source": "app/core/health_api.py",
+        "symbol": "ready",
+        "line": 18
+      }
     },
     {
       "method": "GET",
@@ -27,7 +37,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/asset_api.py",
-      "line": 551
+      "line": 551,
+      "handler": {
+        "source": "app/assets/asset_api.py",
+        "symbol": "list_assets_route",
+        "line": 563
+      }
     },
     {
       "method": "POST",
@@ -35,7 +50,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/assets/asset_api.py",
-      "line": 367
+      "line": 367,
+      "handler": {
+        "source": "app/assets/asset_api.py",
+        "symbol": "create_asset_upload_intent",
+        "line": 392
+      }
     },
     {
       "method": "DELETE",
@@ -43,7 +63,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/assets/asset_api.py",
-      "line": 633
+      "line": 633,
+      "handler": {
+        "source": "app/assets/asset_api.py",
+        "symbol": "delete_asset_route",
+        "line": 644
+      }
     },
     {
       "method": "GET",
@@ -51,7 +76,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/asset_api.py",
-      "line": 596
+      "line": 596,
+      "handler": {
+        "source": "app/assets/asset_api.py",
+        "symbol": "get_asset_route",
+        "line": 608
+      }
     },
     {
       "method": "POST",
@@ -59,7 +89,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/asset_api.py",
-      "line": 491
+      "line": 491,
+      "handler": {
+        "source": "app/assets/asset_api.py",
+        "symbol": "complete_asset_upload_route",
+        "line": 509
+      }
     },
     {
       "method": "POST",
@@ -67,7 +102,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/assets/asset_api.py",
-      "line": 445
+      "line": 445,
+      "handler": {
+        "source": "app/assets/asset_api.py",
+        "symbol": "copy_design_result_to_input_route",
+        "line": 462
+      }
     },
     {
       "method": "POST",
@@ -75,7 +115,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 83
+      "line": 83,
+      "handler": {
+        "source": "app/identity/api.py",
+        "symbol": "douyin_login",
+        "line": 474
+      }
     },
     {
       "method": "POST",
@@ -83,7 +128,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/identity/account_lifecycle_api.py",
-      "line": 167
+      "line": 167,
+      "handler": {
+        "source": "app/identity/account_lifecycle_api.py",
+        "symbol": "reactivate_with_douyin",
+        "line": 168
+      }
     },
     {
       "method": "POST",
@@ -91,7 +141,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 79
+      "line": 79,
+      "handler": {
+        "source": "app/identity/api.py",
+        "symbol": "login_user",
+        "line": 243
+      }
     },
     {
       "method": "POST",
@@ -99,7 +154,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 87
+      "line": 87,
+      "handler": {
+        "source": "app/identity/api.py",
+        "symbol": "logout_user",
+        "line": 703
+      }
     },
     {
       "method": "POST",
@@ -107,7 +167,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/identity/account_lifecycle_api.py",
-      "line": 83
+      "line": 83,
+      "handler": {
+        "source": "app/identity/account_lifecycle_api.py",
+        "symbol": "reactivate_with_password",
+        "line": 84
+      }
     },
     {
       "method": "POST",
@@ -115,7 +180,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 85
+      "line": 85,
+      "handler": {
+        "source": "app/identity/api.py",
+        "symbol": "refresh_user_token",
+        "line": 650
+      }
     },
     {
       "method": "POST",
@@ -123,7 +193,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 75
+      "line": 75,
+      "handler": {
+        "source": "app/identity/api.py",
+        "symbol": "register_user",
+        "line": 134
+      }
     },
     {
       "method": "POST",
@@ -131,7 +206,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 81
+      "line": 81,
+      "handler": {
+        "source": "app/identity/api.py",
+        "symbol": "wechat_login",
+        "line": 313
+      }
     },
     {
       "method": "POST",
@@ -139,7 +219,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/identity/account_lifecycle_api.py",
-      "line": 128
+      "line": 128,
+      "handler": {
+        "source": "app/identity/account_lifecycle_api.py",
+        "symbol": "reactivate_with_wechat",
+        "line": 129
+      }
     },
     {
       "method": "GET",
@@ -147,7 +232,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/billing/billing_api.py",
-      "line": 280
+      "line": 280,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "billing_catalog",
+        "line": 286
+      }
     },
     {
       "method": "GET",
@@ -155,7 +245,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 275
+      "line": 275,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "billing_catalog",
+        "line": 286
+      }
     },
     {
       "method": "POST",
@@ -163,7 +258,12 @@
       "status": 409,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 103
+      "line": 103,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "create_design_job_quote",
+        "line": 954
+      }
     },
     {
       "method": "GET",
@@ -171,7 +271,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 180
+      "line": 180,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "list_design_jobs",
+        "line": 1309
+      }
     },
     {
       "method": "POST",
@@ -179,7 +284,12 @@
       "status": 202,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 110
+      "line": 110,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "create_design_job",
+        "line": 967
+      }
     },
     {
       "method": "DELETE",
@@ -187,7 +297,12 @@
       "status": 204,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 140
+      "line": 140,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "delete_design_job",
+        "line": 1152
+      }
     },
     {
       "method": "GET",
@@ -195,7 +310,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 169
+      "line": 169,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "get_design_job",
+        "line": 1281
+      }
     },
     {
       "method": "POST",
@@ -203,7 +323,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 188
+      "line": 188,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "move_design_job_route",
+        "line": 1380
+      }
     },
     {
       "method": "GET",
@@ -211,7 +336,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 148
+      "line": 148,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "download_design_presentation",
+        "line": 1190
+      }
     },
     {
       "method": "GET",
@@ -219,7 +349,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 158
+      "line": 158,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "view_design_report",
+        "line": 1229
+      }
     },
     {
       "method": "GET",
@@ -227,7 +362,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 204
+      "line": 204,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "download_design_result",
+        "line": 1475
+      }
     },
     {
       "method": "POST",
@@ -235,7 +375,12 @@
       "status": 202,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 125
+      "line": 125,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "retry_failed_design_job",
+        "line": 1099
+      }
     },
     {
       "method": "GET",
@@ -243,7 +388,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/billing/billing_api.py",
-      "line": 269
+      "line": 269,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "billing_catalog",
+        "line": 286
+      }
     },
     {
       "method": "GET",
@@ -251,7 +401,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 65
+      "line": 65,
+      "handler": {
+        "source": "app/identity/legal_api.py",
+        "symbol": "get_current_legal_documents",
+        "line": 23
+      }
     },
     {
       "method": "GET",
@@ -259,7 +414,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 67
+      "line": 67,
+      "handler": {
+        "source": "app/identity/legal_api.py",
+        "symbol": "get_current_legal_document_content",
+        "line": 83
+      }
     },
     {
       "method": "GET",
@@ -267,7 +427,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 89
+      "line": 89,
+      "handler": {
+        "source": "app/identity/api.py",
+        "symbol": "get_user_profile",
+        "line": 731
+      }
     },
     {
       "method": "PATCH",
@@ -275,7 +440,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 93
+      "line": 93,
+      "handler": {
+        "source": "app/identity/api.py",
+        "symbol": "update_user_profile",
+        "line": 742
+      }
     },
     {
       "method": "POST",
@@ -283,7 +453,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/identity/account_lifecycle_api.py",
-      "line": 66
+      "line": 66,
+      "handler": {
+        "source": "app/identity/account_lifecycle_api.py",
+        "symbol": "deactivate_current_user",
+        "line": 67
+      }
     },
     {
       "method": "GET",
@@ -291,7 +466,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 87
+      "line": 87,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "list_history_workspaces",
+        "line": 88
+      }
     },
     {
       "method": "GET",
@@ -299,7 +479,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 126
+      "line": 126,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "list_workspace_removal_notices",
+        "line": 127
+      }
     },
     {
       "method": "GET",
@@ -307,7 +492,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 91
+      "line": 91,
+      "handler": {
+        "source": "app/workspaces/api.py",
+        "symbol": "get_my_workspaces",
+        "line": 13
+      }
     },
     {
       "method": "GET",
@@ -315,7 +505,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 861
+      "line": 861,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "payment_history",
+        "line": 862
+      }
     },
     {
       "method": "GET",
@@ -323,7 +518,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 718
+      "line": 718,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "payment_detail",
+        "line": 722
+      }
     },
     {
       "method": "POST",
@@ -331,7 +531,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 820
+      "line": 820,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "close_owned_payment",
+        "line": 824
+      }
     },
     {
       "method": "POST",
@@ -339,7 +544,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 743
+      "line": 743,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "resume_owned_payment",
+        "line": 747
+      }
     },
     {
       "method": "POST",
@@ -347,7 +557,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/douyin_api.py",
-      "line": 256
+      "line": 256,
+      "handler": {
+        "source": "app/billing/douyin_api.py",
+        "symbol": "reconcile_payment",
+        "line": 257
+      }
     },
     {
       "method": "POST",
@@ -355,7 +570,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 884
+      "line": 884,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "request_payment_refund",
+        "line": 889
+      }
     },
     {
       "method": "GET",
@@ -363,7 +583,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/project_status_api.py",
-      "line": 18
+      "line": 18,
+      "handler": {
+        "source": "app/workspaces/project_status_api.py",
+        "symbol": "get_project_statuses",
+        "line": 19
+      }
     },
     {
       "method": "GET",
@@ -371,7 +596,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/prompts/prompt_preset_api.py",
-      "line": 52
+      "line": 52,
+      "handler": {
+        "source": "app/prompts/prompt_preset_api.py",
+        "symbol": "get_prompt_presets",
+        "line": 53
+      }
     },
     {
       "method": "POST",
@@ -379,7 +609,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/prompts/prompt_preset_api.py",
-      "line": 67
+      "line": 67,
+      "handler": {
+        "source": "app/prompts/prompt_preset_api.py",
+        "symbol": "post_prompt_preset",
+        "line": 72
+      }
     },
     {
       "method": "DELETE",
@@ -387,7 +622,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/prompts/prompt_preset_api.py",
-      "line": 109
+      "line": 109,
+      "handler": {
+        "source": "app/prompts/prompt_preset_api.py",
+        "symbol": "remove_prompt_preset",
+        "line": 110
+      }
     },
     {
       "method": "PATCH",
@@ -395,7 +635,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/prompts/prompt_preset_api.py",
-      "line": 87
+      "line": 87,
+      "handler": {
+        "source": "app/prompts/prompt_preset_api.py",
+        "symbol": "patch_prompt_preset",
+        "line": 88
+      }
     },
     {
       "method": "GET",
@@ -403,7 +648,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 95
+      "line": 95,
+      "handler": {
+        "source": "app/prompts/api.py",
+        "symbol": "list_prompt_templates",
+        "line": 33
+      }
     },
     {
       "method": "GET",
@@ -411,7 +661,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 99
+      "line": 99,
+      "handler": {
+        "source": "app/prompts/api.py",
+        "symbol": "get_prompt_template",
+        "line": 58
+      }
     },
     {
       "method": "POST",
@@ -419,7 +674,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/marketing/referral_api.py",
-      "line": 47
+      "line": 47,
+      "handler": {
+        "source": "app/marketing/referral_api.py",
+        "symbol": "create_user_referral_invitation",
+        "line": 52
+      }
     },
     {
       "method": "POST",
@@ -427,7 +687,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/marketing/referral_api.py",
-      "line": 153
+      "line": 153,
+      "handler": {
+        "source": "app/marketing/referral_api.py",
+        "symbol": "accept_user_referral_invitation",
+        "line": 157
+      }
     },
     {
       "method": "POST",
@@ -435,7 +700,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/marketing/referral_api.py",
-      "line": 127
+      "line": 127,
+      "handler": {
+        "source": "app/marketing/referral_api.py",
+        "symbol": "preview_user_referral_invitation",
+        "line": 131
+      }
     },
     {
       "method": "GET",
@@ -443,7 +713,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 939
+      "line": 939,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "refund_history",
+        "line": 940
+      }
     },
     {
       "method": "POST",
@@ -451,7 +726,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/douyin_api.py",
-      "line": 272
+      "line": 272,
+      "handler": {
+        "source": "app/billing/douyin_api.py",
+        "symbol": "reconcile_owned_refund",
+        "line": 273
+      }
     },
     {
       "method": "GET",
@@ -459,7 +739,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/marketing/referral_api.py",
-      "line": 79
+      "line": 79,
+      "handler": {
+        "source": "app/marketing/referral_api.py",
+        "symbol": "list_user_rewards",
+        "line": 80
+      }
     },
     {
       "method": "POST",
@@ -467,7 +752,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/marketing/referral_api.py",
-      "line": 98
+      "line": 98,
+      "handler": {
+        "source": "app/marketing/referral_api.py",
+        "symbol": "claim_user_rewards",
+        "line": 99
+      }
     },
     {
       "method": "POST",
@@ -475,7 +765,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 540
+      "line": 540,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "accept_workspace_share_invitation",
+        "line": 544
+      }
     },
     {
       "method": "POST",
@@ -483,7 +778,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 518
+      "line": 518,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "preview_workspace_share_invitation",
+        "line": 522
+      }
     },
     {
       "method": "POST",
@@ -491,7 +791,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 422
+      "line": 422,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "create_subscription",
+        "line": 427
+      }
     },
     {
       "method": "POST",
@@ -499,7 +804,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 565
+      "line": 565,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "create_token_purchase",
+        "line": 570
+      }
     },
     {
       "method": "POST",
@@ -507,7 +817,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 410
+      "line": 410,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "create_voice_upload_session",
+        "line": 421
+      }
     },
     {
       "method": "GET",
@@ -515,7 +830,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 452
+      "line": 452,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "get_voice_upload_session",
+        "line": 453
+      }
     },
     {
       "method": "POST",
@@ -523,7 +843,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/douyin_api.py",
-      "line": 460
+      "line": 460,
+      "handler": {
+        "source": "app/billing/douyin_api.py",
+        "symbol": "douyin_notification",
+        "line": 463
+      }
     },
     {
       "method": "POST",
@@ -531,7 +856,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/douyin_api.py",
-      "line": 461
+      "line": 461,
+      "handler": {
+        "source": "app/billing/douyin_api.py",
+        "symbol": "douyin_notification",
+        "line": 463
+      }
     },
     {
       "method": "POST",
@@ -539,7 +869,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/douyin_api.py",
-      "line": 462
+      "line": 462,
+      "handler": {
+        "source": "app/billing/douyin_api.py",
+        "symbol": "douyin_notification",
+        "line": 463
+      }
     },
     {
       "method": "POST",
@@ -547,7 +882,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 1360
+      "line": 1360,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "wechat_pay_notification",
+        "line": 1362
+      }
     },
     {
       "method": "POST",
@@ -555,7 +895,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 1361
+      "line": 1361,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "wechat_pay_notification",
+        "line": 1362
+      }
     },
     {
       "method": "GET",
@@ -563,7 +908,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 184
+      "line": 184,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "list_design_jobs",
+        "line": 1309
+      }
     },
     {
       "method": "POST",
@@ -571,7 +921,12 @@
       "status": 202,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 118
+      "line": 118,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "create_workflow",
+        "line": 1075
+      }
     },
     {
       "method": "DELETE",
@@ -579,7 +934,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 144
+      "line": 144,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "delete_design_job",
+        "line": 1152
+      }
     },
     {
       "method": "POST",
@@ -587,7 +947,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 192
+      "line": 192,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "move_design_job_route",
+        "line": 1380
+      }
     },
     {
       "method": "GET",
@@ -595,7 +960,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 154
+      "line": 154,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "download_design_presentation",
+        "line": 1190
+      }
     },
     {
       "method": "GET",
@@ -603,7 +973,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 165
+      "line": 165,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "view_design_report",
+        "line": 1229
+      }
     },
     {
       "method": "GET",
@@ -611,7 +986,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 208
+      "line": 208,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "download_design_result",
+        "line": 1475
+      }
     },
     {
       "method": "POST",
@@ -619,7 +999,12 @@
       "status": 202,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 133
+      "line": 133,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "retry_failed_design_job",
+        "line": 1099
+      }
     },
     {
       "method": "GET",
@@ -627,7 +1012,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 176
+      "line": 176,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "get_workflow",
+        "line": 1296
+      }
     },
     {
       "method": "GET",
@@ -635,7 +1025,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 1109
+      "line": 1109,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "current_workspace_management",
+        "line": 1110
+      }
     },
     {
       "method": "GET",
@@ -643,7 +1038,12 @@
       "status": 200,
       "deprecated": true,
       "source": "app/api/__init__.py",
-      "line": 196
+      "line": 196,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "list_workspace_design_jobs",
+        "line": 1397
+      }
     },
     {
       "method": "GET",
@@ -651,7 +1051,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 1020
+      "line": 1020,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "received_workspace_invitations",
+        "line": 1024
+      }
     },
     {
       "method": "POST",
@@ -659,7 +1064,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 990
+      "line": 990,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "invite_workspace_member",
+        "line": 995
+      }
     },
     {
       "method": "DELETE",
@@ -667,7 +1077,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 1089
+      "line": 1089,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "revoke_outgoing_invitation",
+        "line": 1093
+      }
     },
     {
       "method": "POST",
@@ -675,7 +1090,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 1047
+      "line": 1047,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "accept_invitation_by_id",
+        "line": 1051
+      }
     },
     {
       "method": "POST",
@@ -683,7 +1103,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 1069
+      "line": 1069,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "decline_invitation_by_id",
+        "line": 1073
+      }
     },
     {
       "method": "DELETE",
@@ -691,7 +1116,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/billing/billing_api.py",
-      "line": 1165
+      "line": 1165,
+      "handler": {
+        "source": "app/billing/billing_api.py",
+        "symbol": "remove_member",
+        "line": 1169
+      }
     },
     {
       "method": "GET",
@@ -699,7 +1129,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/api/__init__.py",
-      "line": 200
+      "line": 200,
+      "handler": {
+        "source": "app/workflows/api.py",
+        "symbol": "list_workspace_design_jobs",
+        "line": 1397
+      }
     },
     {
       "method": "POST",
@@ -707,7 +1142,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 323
+      "line": 323,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "create_workspace",
+        "line": 328
+      }
     },
     {
       "method": "GET",
@@ -715,7 +1155,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 160
+      "line": 160,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "get_workspace",
+        "line": 161
+      }
     },
     {
       "method": "PATCH",
@@ -723,7 +1168,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 391
+      "line": 391,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "update_workspace",
+        "line": 392
+      }
     },
     {
       "method": "POST",
@@ -731,7 +1181,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 452
+      "line": 452,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "invite_workspace_member",
+        "line": 457
+      }
     },
     {
       "method": "DELETE",
@@ -739,7 +1194,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 731
+      "line": 731,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "remove_workspace_member",
+        "line": 735
+      }
     },
     {
       "method": "DELETE",
@@ -747,7 +1207,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 670
+      "line": 670,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "leave_workspace_membership",
+        "line": 674
+      }
     },
     {
       "method": "GET",
@@ -755,7 +1220,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 171
+      "line": 171,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "get_enterprise_overview",
+        "line": 175
+      }
     },
     {
       "method": "GET",
@@ -763,7 +1233,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/project_api.py",
-      "line": 215
+      "line": 215,
+      "handler": {
+        "source": "app/workspaces/project_api.py",
+        "symbol": "list_projects",
+        "line": 216
+      }
     },
     {
       "method": "POST",
@@ -771,7 +1246,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/workspaces/project_api.py",
-      "line": 253
+      "line": 253,
+      "handler": {
+        "source": "app/workspaces/project_api.py",
+        "symbol": "create_project",
+        "line": 254
+      }
     },
     {
       "method": "PUT",
@@ -779,7 +1259,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/project_api.py",
-      "line": 303
+      "line": 303,
+      "handler": {
+        "source": "app/workspaces/project_api.py",
+        "symbol": "set_default_project",
+        "line": 304
+      }
     },
     {
       "method": "GET",
@@ -787,7 +1272,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/project_api.py",
-      "line": 321
+      "line": 321,
+      "handler": {
+        "source": "app/workspaces/project_api.py",
+        "symbol": "get_project",
+        "line": 322
+      }
     },
     {
       "method": "PATCH",
@@ -795,7 +1285,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/project_api.py",
-      "line": 342
+      "line": 342,
+      "handler": {
+        "source": "app/workspaces/project_api.py",
+        "symbol": "update_project",
+        "line": 343
+      }
     },
     {
       "method": "POST",
@@ -803,7 +1298,12 @@
       "status": 202,
       "deprecated": false,
       "source": "app/workspaces/project_api.py",
-      "line": 440
+      "line": 440,
+      "handler": {
+        "source": "app/workspaces/project_api.py",
+        "symbol": "delete_project",
+        "line": 449
+      }
     },
     {
       "method": "GET",
@@ -811,7 +1311,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 580
+      "line": 580,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "list_workspace_share_invitations",
+        "line": 584
+      }
     },
     {
       "method": "POST",
@@ -819,7 +1324,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 484
+      "line": 484,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "create_workspace_share_invitation",
+        "line": 489
+      }
     },
     {
       "method": "DELETE",
@@ -827,7 +1337,12 @@
       "status": 204,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 610
+      "line": 610,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "revoke_workspace_share_invitation",
+        "line": 614
+      }
     },
     {
       "method": "GET",
@@ -835,7 +1350,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/workspaces/workspace_api.py",
-      "line": 195
+      "line": 195,
+      "handler": {
+        "source": "app/workspaces/workspace_api.py",
+        "symbol": "get_workspace_token_detail",
+        "line": 199
+      }
     },
     {
       "method": "GET",
@@ -843,7 +1363,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 481
+      "line": 481,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "voice_upload_page",
+        "line": 482
+      }
     },
     {
       "method": "GET",
@@ -851,7 +1376,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 486
+      "line": 486,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "voice_upload_script",
+        "line": 487
+      }
     },
     {
       "method": "POST",
@@ -859,7 +1389,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 501
+      "line": 501,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "exchange_voice_upload_handoff",
+        "line": 502
+      }
     },
     {
       "method": "POST",
@@ -867,7 +1402,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 652
+      "line": 652,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "complete_voice_upload_file",
+        "line": 653
+      }
     },
     {
       "method": "POST",
@@ -875,7 +1415,12 @@
       "status": 201,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 553
+      "line": 553,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "create_voice_upload_file_intent",
+        "line": 564
+      }
     },
     {
       "method": "GET",
@@ -883,7 +1428,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 526
+      "line": 526,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "get_voice_upload_browser_session",
+        "line": 527
+      }
     },
     {
       "method": "GET",
@@ -891,7 +1441,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 496
+      "line": 496,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "voice_upload_styles",
+        "line": 497
+      }
     },
     {
       "method": "GET",
@@ -899,7 +1454,12 @@
       "status": 200,
       "deprecated": false,
       "source": "app/assets/voice_upload_api.py",
-      "line": 491
+      "line": 491,
+      "handler": {
+        "source": "app/assets/voice_upload_api.py",
+        "symbol": "voice_upload_validation_script",
+        "line": 492
+      }
     }
   ],
   "settings": [
@@ -5051,5 +5611,1820 @@
       "tests/workflow_report_helpers.py",
       "tests/workflow_schema_helpers.py"
     ]
-  }
+  },
+  "traceEvidence": [
+    {
+      "repository": "backend",
+      "path": "app/admin/enterprise_overview.py",
+      "symbol": "enterprise_overview",
+      "line": 52,
+      "sourceSha256": "a41197823a8245bed61a61e742aec7638da1b70fbd7c03e8652562971532abeb"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_api.py",
+      "symbol": "complete_asset_upload_route",
+      "line": 509,
+      "sourceSha256": "dcbc045187fc1d9400b9779059625761bbb2426755d4910911f40e11f23ad729"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_api.py",
+      "symbol": "copy_design_result_to_input_route",
+      "line": 462,
+      "sourceSha256": "dcbc045187fc1d9400b9779059625761bbb2426755d4910911f40e11f23ad729"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_api.py",
+      "symbol": "create_asset_upload_intent",
+      "line": 392,
+      "sourceSha256": "dcbc045187fc1d9400b9779059625761bbb2426755d4910911f40e11f23ad729"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_api.py",
+      "symbol": "delete_asset_route",
+      "line": 644,
+      "sourceSha256": "dcbc045187fc1d9400b9779059625761bbb2426755d4910911f40e11f23ad729"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_api.py",
+      "symbol": "get_asset_route",
+      "line": 608,
+      "sourceSha256": "dcbc045187fc1d9400b9779059625761bbb2426755d4910911f40e11f23ad729"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_api.py",
+      "symbol": "list_assets_route",
+      "line": 563,
+      "sourceSha256": "dcbc045187fc1d9400b9779059625761bbb2426755d4910911f40e11f23ad729"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_completion.py",
+      "symbol": "complete_asset_upload",
+      "line": 237,
+      "sourceSha256": "940d953a6282ae4e9bbed91b3adaf1674cf5c4f461b3ff5c6eb8425f733cac45"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_copies.py",
+      "symbol": "copy_result_to_design_input",
+      "line": 592,
+      "sourceSha256": "ee664a63730214a64c9277f172cd24374e7f98fae23c7d3135a13bf0b29f9aa5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_management.py",
+      "symbol": "delete_asset",
+      "line": 380,
+      "sourceSha256": "ae7d78328cda0fb15e77cbcfdfbe2b567ce0396f149ef71b9a5220a4f791d4d0"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_management.py",
+      "symbol": "get_asset",
+      "line": 229,
+      "sourceSha256": "ae7d78328cda0fb15e77cbcfdfbe2b567ce0396f149ef71b9a5220a4f791d4d0"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/asset_management.py",
+      "symbol": "list_assets",
+      "line": 254,
+      "sourceSha256": "ae7d78328cda0fb15e77cbcfdfbe2b567ce0396f149ef71b9a5220a4f791d4d0"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/assets.py",
+      "symbol": "create_upload_intent",
+      "line": 236,
+      "sourceSha256": "93d90b3d308685e448f5c81451eb135e59d89a5c6fbe7f5f82a8446043848fe3"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "_ready_assets",
+      "line": 262,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "complete_voice_upload_file",
+      "line": 653,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "create_voice_upload_file_intent",
+      "line": 564,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "create_voice_upload_session",
+      "line": 421,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "exchange_voice_upload_handoff",
+      "line": 502,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "get_voice_upload_browser_session",
+      "line": 527,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "get_voice_upload_session",
+      "line": 453,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "voice_upload_page",
+      "line": 482,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "voice_upload_script",
+      "line": 487,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "voice_upload_styles",
+      "line": 497,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_api.py",
+      "symbol": "voice_upload_validation_script",
+      "line": 492,
+      "sourceSha256": "235f0316ab075c8b12348f7fc67b0dc8d28b5c585f8a8b9ea6807e09d93cd91d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/assets/voice_upload_sessions.py",
+      "symbol": "VoiceUploadSessionStore.create",
+      "line": 255,
+      "sourceSha256": "6bdf039fc01e53544bc42ee4ce837cd51db2a7b4ae5c62fd3c701644f015cdf9"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "accept_invitation_by_id",
+      "line": 1051,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "billing_catalog",
+      "line": 286,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "close_owned_payment",
+      "line": 824,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "create_subscription",
+      "line": 427,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "create_token_purchase",
+      "line": 570,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "current_workspace_management",
+      "line": 1110,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "decline_invitation_by_id",
+      "line": 1073,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "invite_workspace_member",
+      "line": 995,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "payment_detail",
+      "line": 722,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "payment_history",
+      "line": 862,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "payment_response",
+      "line": 118,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "pending_token_purchase_count",
+      "line": 205,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "receive_wechat_event",
+      "line": 1185,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "received_workspace_invitations",
+      "line": 1024,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "refreshed_checkout_response",
+      "line": 150,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "refund_history",
+      "line": 940,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "refund_response",
+      "line": 177,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "remove_member",
+      "line": 1169,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "request_payment_refund",
+      "line": 889,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "resume_owned_payment",
+      "line": 747,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "revoke_outgoing_invitation",
+      "line": 1093,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "serialize_billing_order_creation",
+      "line": 195,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing_api.py",
+      "symbol": "wechat_pay_notification",
+      "line": 1362,
+      "sourceSha256": "9e2210d6dd8920aefd16fa5c2e0697a3fbcc726d4f93a3498280e8d7bd386af8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "accept_enterprise_invitation_by_id",
+      "line": 1101,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "active_membership",
+      "line": 140,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "build_user_response",
+      "line": 505,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "close_payment_order",
+      "line": 834,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "complete_payment_order",
+      "line": 732,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "create_enterprise_invitation",
+      "line": 901,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "deactivate_user_account",
+      "line": 1546,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "decline_enterprise_invitation",
+      "line": 1135,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "invitation_summary",
+      "line": 185,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "reactivate_deactivated_user_account",
+      "line": 1705,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "remove_enterprise_member",
+      "line": 1229,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/billing.py",
+      "symbol": "revoke_enterprise_invitation",
+      "line": 1155,
+      "sourceSha256": "c09aa3d55967d096c526181fa1b0989da02cff85d78213ce2fd66e472915bbd4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/douyin_api.py",
+      "symbol": "apply_platform_refund",
+      "line": 376,
+      "sourceSha256": "12a9ff1a4c272aa8a5b6a0870e5cc810af442451f4d00ddd282d5bc407148ce5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/douyin_api.py",
+      "symbol": "douyin_notification",
+      "line": 463,
+      "sourceSha256": "12a9ff1a4c272aa8a5b6a0870e5cc810af442451f4d00ddd282d5bc407148ce5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/douyin_api.py",
+      "symbol": "reconcile_order",
+      "line": 70,
+      "sourceSha256": "12a9ff1a4c272aa8a5b6a0870e5cc810af442451f4d00ddd282d5bc407148ce5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/douyin_api.py",
+      "symbol": "reconcile_owned_refund",
+      "line": 273,
+      "sourceSha256": "12a9ff1a4c272aa8a5b6a0870e5cc810af442451f4d00ddd282d5bc407148ce5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/douyin_api.py",
+      "symbol": "reconcile_payment",
+      "line": 257,
+      "sourceSha256": "12a9ff1a4c272aa8a5b6a0870e5cc810af442451f4d00ddd282d5bc407148ce5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/douyin_api.py",
+      "symbol": "reconcile_refund",
+      "line": 113,
+      "sourceSha256": "12a9ff1a4c272aa8a5b6a0870e5cc810af442451f4d00ddd282d5bc407148ce5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/douyin_callback_routing.py",
+      "symbol": "forward_refund_application",
+      "line": 18,
+      "sourceSha256": "14f5f264451ac5102de77ae39cd61f7651c73c1ff7826bdff5497b2198c0a3f4"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/douyin_pay.py",
+      "symbol": "verified_notification",
+      "line": 100,
+      "sourceSha256": "8b867fa6aa46a7e1494b4138a103edb34309315b95adb3225d3fc956c49b77fe"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/finance.py",
+      "symbol": "complete_refund_order",
+      "line": 374,
+      "sourceSha256": "23ec98b0d15c2bb040cbc0f0772a7ee3121f7944017ec9529e8a520aac46ca28"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/finance.py",
+      "symbol": "create_refund_order",
+      "line": 282,
+      "sourceSha256": "23ec98b0d15c2bb040cbc0f0772a7ee3121f7944017ec9529e8a520aac46ca28"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/finance.py",
+      "symbol": "fail_refund_order",
+      "line": 472,
+      "sourceSha256": "23ec98b0d15c2bb040cbc0f0772a7ee3121f7944017ec9529e8a520aac46ca28"
+    },
+    {
+      "repository": "backend",
+      "path": "app/core/health_api.py",
+      "symbol": "live",
+      "line": 12,
+      "sourceSha256": "1897a1b8937324de831300fb49b90b2ebbb84247434e1c573b15c7ac4ea14880"
+    },
+    {
+      "repository": "backend",
+      "path": "app/core/health_api.py",
+      "symbol": "ready",
+      "line": 18,
+      "sourceSha256": "1897a1b8937324de831300fb49b90b2ebbb84247434e1c573b15c7ac4ea14880"
+    },
+    {
+      "repository": "backend",
+      "path": "app/core/rate_limit.py",
+      "symbol": "enforce_rate_limit",
+      "line": 25,
+      "sourceSha256": "7ddc63f2adb814f7bda14894b869c79cdb136a436aef717709ee03d8254a559a"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/account_lifecycle_api.py",
+      "symbol": "deactivate_current_user",
+      "line": 67,
+      "sourceSha256": "407cfe6faf2852cd06eb448ee7a226484590355bd260f4d5cf88588bdf65daf5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/account_lifecycle_api.py",
+      "symbol": "reactivate_with_douyin",
+      "line": 168,
+      "sourceSha256": "407cfe6faf2852cd06eb448ee7a226484590355bd260f4d5cf88588bdf65daf5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/account_lifecycle_api.py",
+      "symbol": "reactivate_with_password",
+      "line": 84,
+      "sourceSha256": "407cfe6faf2852cd06eb448ee7a226484590355bd260f4d5cf88588bdf65daf5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/account_lifecycle_api.py",
+      "symbol": "reactivate_with_wechat",
+      "line": 129,
+      "sourceSha256": "407cfe6faf2852cd06eb448ee7a226484590355bd260f4d5cf88588bdf65daf5"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/api.py",
+      "symbol": "douyin_login",
+      "line": 474,
+      "sourceSha256": "928f5076a754005f2b290c056110c9fb6142f044ffa7f17c31d5fd6b0c48005c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/api.py",
+      "symbol": "get_user_profile",
+      "line": 731,
+      "sourceSha256": "928f5076a754005f2b290c056110c9fb6142f044ffa7f17c31d5fd6b0c48005c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/api.py",
+      "symbol": "login_user",
+      "line": 243,
+      "sourceSha256": "928f5076a754005f2b290c056110c9fb6142f044ffa7f17c31d5fd6b0c48005c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/api.py",
+      "symbol": "logout_user",
+      "line": 703,
+      "sourceSha256": "928f5076a754005f2b290c056110c9fb6142f044ffa7f17c31d5fd6b0c48005c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/api.py",
+      "symbol": "refresh_user_token",
+      "line": 650,
+      "sourceSha256": "928f5076a754005f2b290c056110c9fb6142f044ffa7f17c31d5fd6b0c48005c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/api.py",
+      "symbol": "register_user",
+      "line": 134,
+      "sourceSha256": "928f5076a754005f2b290c056110c9fb6142f044ffa7f17c31d5fd6b0c48005c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/api.py",
+      "symbol": "update_user_profile",
+      "line": 742,
+      "sourceSha256": "928f5076a754005f2b290c056110c9fb6142f044ffa7f17c31d5fd6b0c48005c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/api.py",
+      "symbol": "wechat_login",
+      "line": 313,
+      "sourceSha256": "928f5076a754005f2b290c056110c9fb6142f044ffa7f17c31d5fd6b0c48005c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/douyin_auth.py",
+      "symbol": "_decrypt_phone_payload",
+      "line": 295,
+      "sourceSha256": "1a7f9f162cd7101b37a2ed2a9e85478004e51992b86a45c0e0f0ecd8994cb5d7"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/douyin_auth.py",
+      "symbol": "exchange_phone_code",
+      "line": 331,
+      "sourceSha256": "1a7f9f162cd7101b37a2ed2a9e85478004e51992b86a45c0e0f0ecd8994cb5d7"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/legal_api.py",
+      "symbol": "get_current_legal_document_content",
+      "line": 83,
+      "sourceSha256": "b067fb90dd8b4ad2d4a544f72ea8f42f54352d77862236a703e6d647e921fdd2"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/legal_api.py",
+      "symbol": "get_current_legal_documents",
+      "line": 23,
+      "sourceSha256": "b067fb90dd8b4ad2d4a544f72ea8f42f54352d77862236a703e6d647e921fdd2"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/legal_documents.py",
+      "symbol": "current_required_documents",
+      "line": 60,
+      "sourceSha256": "3a91a5317c5354b977938e8d67717c2835b4da4072ee7cbac763c10810a64822"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/wechat_auth.py",
+      "symbol": "exchange_login_code",
+      "line": 69,
+      "sourceSha256": "376b93999c3c39eb0ae3fac442206edd4bc8f8005f5befd1dcb44af338d377fb"
+    },
+    {
+      "repository": "backend",
+      "path": "app/identity/wechat_auth.py",
+      "symbol": "exchange_phone_code",
+      "line": 96,
+      "sourceSha256": "376b93999c3c39eb0ae3fac442206edd4bc8f8005f5befd1dcb44af338d377fb"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_api.py",
+      "symbol": "accept_user_referral_invitation",
+      "line": 157,
+      "sourceSha256": "bbe05467e930d4668098fbc7b31f83748da756a9686d8b67e4e3bd1c8cab32c6"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_api.py",
+      "symbol": "claim_user_rewards",
+      "line": 99,
+      "sourceSha256": "bbe05467e930d4668098fbc7b31f83748da756a9686d8b67e4e3bd1c8cab32c6"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_api.py",
+      "symbol": "create_user_referral_invitation",
+      "line": 52,
+      "sourceSha256": "bbe05467e930d4668098fbc7b31f83748da756a9686d8b67e4e3bd1c8cab32c6"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_api.py",
+      "symbol": "list_user_rewards",
+      "line": 80,
+      "sourceSha256": "bbe05467e930d4668098fbc7b31f83748da756a9686d8b67e4e3bd1c8cab32c6"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_api.py",
+      "symbol": "preview_user_referral_invitation",
+      "line": 131,
+      "sourceSha256": "bbe05467e930d4668098fbc7b31f83748da756a9686d8b67e4e3bd1c8cab32c6"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_rewards.py",
+      "symbol": "accept_referral_invitation",
+      "line": 672,
+      "sourceSha256": "4fd85480b1cf7455b244007ce549554b594df15eaa4add36700300fb370c8ca3"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_rewards.py",
+      "symbol": "claim_referral_rewards",
+      "line": 488,
+      "sourceSha256": "4fd85480b1cf7455b244007ce549554b594df15eaa4add36700300fb370c8ca3"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_rewards.py",
+      "symbol": "create_referral_invitation",
+      "line": 156,
+      "sourceSha256": "4fd85480b1cf7455b244007ce549554b594df15eaa4add36700300fb370c8ca3"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_rewards.py",
+      "symbol": "has_claimable_rewards",
+      "line": 377,
+      "sourceSha256": "4fd85480b1cf7455b244007ce549554b594df15eaa4add36700300fb370c8ca3"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_rewards.py",
+      "symbol": "list_referral_rewards",
+      "line": 417,
+      "sourceSha256": "4fd85480b1cf7455b244007ce549554b594df15eaa4add36700300fb370c8ca3"
+    },
+    {
+      "repository": "backend",
+      "path": "app/marketing/referral_rewards.py",
+      "symbol": "preview_referral_invitation",
+      "line": 631,
+      "sourceSha256": "4fd85480b1cf7455b244007ce549554b594df15eaa4add36700300fb370c8ca3"
+    },
+    {
+      "repository": "backend",
+      "path": "app/persistence/db_models.py",
+      "symbol": "TokenLedgerEntry",
+      "line": 1766,
+      "sourceSha256": "3f281ff63a29d0b78c5b15b87ea4ca2e7f5e8d1cef9b9a18ee8c974d3f1871a1"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/api.py",
+      "symbol": "get_prompt_template",
+      "line": 58,
+      "sourceSha256": "512e4501509bca93ee6d2b3ae818cca22080a5ab5165e42a8d2390c62f783283"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/api.py",
+      "symbol": "list_prompt_templates",
+      "line": 33,
+      "sourceSha256": "512e4501509bca93ee6d2b3ae818cca22080a5ab5165e42a8d2390c62f783283"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/api.py",
+      "symbol": "prompt_template_response",
+      "line": 20,
+      "sourceSha256": "512e4501509bca93ee6d2b3ae818cca22080a5ab5165e42a8d2390c62f783283"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/prompt_preset_api.py",
+      "symbol": "get_prompt_presets",
+      "line": 53,
+      "sourceSha256": "5708dd01322b52244eb82d18ec79263ae17399929e53610fd268690e5daf5d2f"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/prompt_preset_api.py",
+      "symbol": "patch_prompt_preset",
+      "line": 88,
+      "sourceSha256": "5708dd01322b52244eb82d18ec79263ae17399929e53610fd268690e5daf5d2f"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/prompt_preset_api.py",
+      "symbol": "post_prompt_preset",
+      "line": 72,
+      "sourceSha256": "5708dd01322b52244eb82d18ec79263ae17399929e53610fd268690e5daf5d2f"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/prompt_preset_api.py",
+      "symbol": "remove_prompt_preset",
+      "line": 110,
+      "sourceSha256": "5708dd01322b52244eb82d18ec79263ae17399929e53610fd268690e5daf5d2f"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/prompt_presets.py",
+      "symbol": "create_prompt_preset",
+      "line": 59,
+      "sourceSha256": "08037c0dbb5cf1214a6d0aaa9810e4550b2706fe9cb79615e6d8aad4ef827f9e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/prompt_presets.py",
+      "symbol": "delete_prompt_preset",
+      "line": 129,
+      "sourceSha256": "08037c0dbb5cf1214a6d0aaa9810e4550b2706fe9cb79615e6d8aad4ef827f9e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/prompt_presets.py",
+      "symbol": "list_prompt_presets",
+      "line": 44,
+      "sourceSha256": "08037c0dbb5cf1214a6d0aaa9810e4550b2706fe9cb79615e6d8aad4ef827f9e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/prompts/prompt_presets.py",
+      "symbol": "update_prompt_preset",
+      "line": 103,
+      "sourceSha256": "08037c0dbb5cf1214a6d0aaa9810e4550b2706fe9cb79615e6d8aad4ef827f9e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/worker.py",
+      "symbol": "delete_design_job_task",
+      "line": 458,
+      "sourceSha256": "6f68a5a6e3f387d95c3ab1c67b7b272043c7654ab5faf3400cbbdab9da6d0c3c"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "create_design_job",
+      "line": 967,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "create_design_job_quote",
+      "line": 954,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "create_workflow",
+      "line": 1075,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "delete_design_job",
+      "line": 1152,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "download_design_presentation",
+      "line": 1190,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "download_design_result",
+      "line": 1475,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "get_design_job",
+      "line": 1281,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "get_workflow",
+      "line": 1296,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "list_design_jobs",
+      "line": 1309,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "list_workspace_design_jobs",
+      "line": 1397,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "move_design_job_route",
+      "line": 1380,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "retry_failed_design_job",
+      "line": 1099,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/api.py",
+      "symbol": "view_design_report",
+      "line": 1229,
+      "sourceSha256": "100ea26f97f3cdf856c87737134d1f3c4da706b0fae34b5a30318e3afdcce6fa"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/design_job.py",
+      "symbol": "delete_terminal_design_job",
+      "line": 159,
+      "sourceSha256": "33975a34d0c473ae67cf92524665f1531b1066198eb04c67789a68a1759fee9f"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/design_job.py",
+      "symbol": "reconcile_claimed_design_job_deletions",
+      "line": 679,
+      "sourceSha256": "33975a34d0c473ae67cf92524665f1531b1066198eb04c67789a68a1759fee9f"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/history_thumbnails.py",
+      "symbol": "attach_overview_thumbnails",
+      "line": 320,
+      "sourceSha256": "e2c3870db0ca898282cddb5426f07a0827634ebd15a6328ef4c2af75e8409980"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/operations/design_report/workflow_pptx_download.py",
+      "symbol": "download_presentation",
+      "line": 36,
+      "sourceSha256": "bc0a7e1d4e7184939315b1614d455825c7afa6e3aab09a09fd7548ec2cb8b238"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/operations/design_report/workflow_report_publication.py",
+      "symbol": "render_published_workflow_report",
+      "line": 1060,
+      "sourceSha256": "20f4ea5ce7fc682ad5ce8f5613b64420962dfae7bceaa831bf55b10c7458a83d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/submissions/workflow_submission_retry.py",
+      "symbol": "retry_workflow_job",
+      "line": 184,
+      "sourceSha256": "2cca1a536741b40910b91c108cae3d4541a609700acf87f19f0bb9715f3fb816"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/workflow_admission.py",
+      "symbol": "admit_legacy_image_compatibility_job",
+      "line": 2047,
+      "sourceSha256": "1deb3764e1a295ada5d7e2623cbbf6b2c9d642dd00948462d0fe54c425bdb2ae"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workflows/workflow_admission.py",
+      "symbol": "admit_workflow_job",
+      "line": 2426,
+      "sourceSha256": "1deb3764e1a295ada5d7e2623cbbf6b2c9d642dd00948462d0fe54c425bdb2ae"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/api.py",
+      "symbol": "get_my_workspaces",
+      "line": 13,
+      "sourceSha256": "9f4994f19366319189a42c3eba05cd8a23a161846540decb4930266e35d06fc1"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_activity.py",
+      "symbol": "maximum_activity_time",
+      "line": 51,
+      "sourceSha256": "f9b8a945323639017a96fbf54e99eff796112eee4b23bb8fc58d047d02ac7359"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_activity.py",
+      "symbol": "stamp_member_activity",
+      "line": 80,
+      "sourceSha256": "f9b8a945323639017a96fbf54e99eff796112eee4b23bb8fc58d047d02ac7359"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "_check_project_capacity",
+      "line": 241,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "_owned_project",
+      "line": 162,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "_project_responses",
+      "line": 185,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "create_project",
+      "line": 254,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "delete_project",
+      "line": 449,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "get_project",
+      "line": 322,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "list_projects",
+      "line": 216,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "set_default_project",
+      "line": 304,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_api.py",
+      "symbol": "update_project",
+      "line": 343,
+      "sourceSha256": "3cb67cb8323e26f528a8d710763848b69ac1ef81e3c727a41c181b792e0dc215"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_deletion.py",
+      "symbol": "delete_project_group",
+      "line": 138,
+      "sourceSha256": "7c58bb212d9ec64289f79802b42cca3c2f44b5d4ded82809a7356d830aa21fb8"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_jobs.py",
+      "symbol": "move_design_job",
+      "line": 77,
+      "sourceSha256": "670441570abf72d67ed6ce9028b029d709a11b85fc1c439e35388e4ccdf280f6"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_status_api.py",
+      "symbol": "get_project_statuses",
+      "line": 19,
+      "sourceSha256": "028aaddb411a5b27d5478a4f8ce28fe19e7a9a4b4d9fda34d14fd4997cb6050f"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/project_statuses.py",
+      "symbol": "visible_project_statuses",
+      "line": 108,
+      "sourceSha256": "306f68e93c6ded0d7e0855ccfdd1cb53b7455ab5a63082cbf37d93bdf0cf210d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/share_invitations.py",
+      "symbol": "accept_share_invitation",
+      "line": 360,
+      "sourceSha256": "652e4ec99457662333ce02d54f6da8efb0a79fc9c171c2b94bfbdf35f47671f0"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/share_invitations.py",
+      "symbol": "create_share_invitation",
+      "line": 178,
+      "sourceSha256": "652e4ec99457662333ce02d54f6da8efb0a79fc9c171c2b94bfbdf35f47671f0"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/share_invitations.py",
+      "symbol": "owner_item",
+      "line": 550,
+      "sourceSha256": "652e4ec99457662333ce02d54f6da8efb0a79fc9c171c2b94bfbdf35f47671f0"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/share_invitations.py",
+      "symbol": "preview_share_invitation",
+      "line": 292,
+      "sourceSha256": "652e4ec99457662333ce02d54f6da8efb0a79fc9c171c2b94bfbdf35f47671f0"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "accept_workspace_share_invitation",
+      "line": 544,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "create_workspace",
+      "line": 328,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "create_workspace_share_invitation",
+      "line": 489,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "get_enterprise_overview",
+      "line": 175,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "get_workspace",
+      "line": 161,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "get_workspace_token_detail",
+      "line": 199,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "invite_workspace_member",
+      "line": 457,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "leave_workspace_membership",
+      "line": 674,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "list_history_workspaces",
+      "line": 88,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "list_workspace_removal_notices",
+      "line": 127,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "list_workspace_share_invitations",
+      "line": 584,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "preview_workspace_share_invitation",
+      "line": 522,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "remove_workspace_member",
+      "line": 735,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "revoke_workspace_share_invitation",
+      "line": 614,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspace_api.py",
+      "symbol": "update_workspace",
+      "line": 392,
+      "sourceSha256": "1bc56cc50e986d5d474ed0119d0046fd11725ecaea927a2c92e5b6abe7c12d0b"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspaces.py",
+      "symbol": "accessible_history_workspace",
+      "line": 192,
+      "sourceSha256": "ccc73bba572baa35d97e85f4ab6c0638d255e24a03955513afe4ba9ba4b2802e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspaces.py",
+      "symbol": "accessible_workspace",
+      "line": 223,
+      "sourceSha256": "ccc73bba572baa35d97e85f4ab6c0638d255e24a03955513afe4ba9ba4b2802e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspaces.py",
+      "symbol": "ensure_scratch_project",
+      "line": 80,
+      "sourceSha256": "ccc73bba572baa35d97e85f4ab6c0638d255e24a03955513afe4ba9ba4b2802e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspaces.py",
+      "symbol": "list_workspace_summaries",
+      "line": 440,
+      "sourceSha256": "ccc73bba572baa35d97e85f4ab6c0638d255e24a03955513afe4ba9ba4b2802e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspaces.py",
+      "symbol": "remember_enterprise_membership",
+      "line": 168,
+      "sourceSha256": "ccc73bba572baa35d97e85f4ab6c0638d255e24a03955513afe4ba9ba4b2802e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspaces.py",
+      "symbol": "require_workspace_owner",
+      "line": 509,
+      "sourceSha256": "ccc73bba572baa35d97e85f4ab6c0638d255e24a03955513afe4ba9ba4b2802e"
+    },
+    {
+      "repository": "backend",
+      "path": "app/workspaces/workspaces.py",
+      "symbol": "workspace_detail",
+      "line": 473,
+      "sourceSha256": "ccc73bba572baa35d97e85f4ab6c0638d255e24a03955513afe4ba9ba4b2802e"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/components/projects/ProjectDeleteSheet.vue",
+      "symbol": "remove",
+      "line": 46,
+      "sourceSha256": "7a82b0aa178af7f30b42434f6826db87d950b94d44f0be621ac4da2577dbdce9"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pages/projects/index.vue",
+      "symbol": "loadProjects",
+      "line": 224,
+      "sourceSha256": "662ec5e89223ce99a22ac963be9bb5146e06112ff0ba63043cf769b15423ebb9"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/invitation/index.vue",
+      "symbol": "accept",
+      "line": 99,
+      "sourceSha256": "8b54b91c657b3f7e896f61a818e3d90d409a9fd278ef059edf993cba64b569d6"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/invitation/index.vue",
+      "symbol": "load",
+      "line": 83,
+      "sourceSha256": "8b54b91c657b3f7e896f61a818e3d90d409a9fd278ef059edf993cba64b569d6"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/login/index.vue",
+      "symbol": "authorize",
+      "line": 37,
+      "sourceSha256": "6d5806035c42cee5aaf76fd551092b66e754e562c0f3099b7d0f3c5bfffdd281"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/orders/index.vue",
+      "symbol": "checkRefund",
+      "line": 213,
+      "sourceSha256": "e8523407957aacc89412d59cf217f9abd983a3b47402e9d14fe4d9af880588af"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/orders/index.vue",
+      "symbol": "executeClose",
+      "line": 196,
+      "sourceSha256": "e8523407957aacc89412d59cf217f9abd983a3b47402e9d14fe4d9af880588af"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/orders/index.vue",
+      "symbol": "load",
+      "line": 46,
+      "sourceSha256": "e8523407957aacc89412d59cf217f9abd983a3b47402e9d14fe4d9af880588af"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/orders/index.vue",
+      "symbol": "resumePayment",
+      "line": 174,
+      "sourceSha256": "e8523407957aacc89412d59cf217f9abd983a3b47402e9d14fe4d9af880588af"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/organization/index.vue",
+      "symbol": "applyUpdate",
+      "line": 230,
+      "sourceSha256": "41db8937993aee57dff35aaef1d2d59280ae2b916422812948c887a62424c669"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/organization/index.vue",
+      "symbol": "confirmMembership",
+      "line": 120,
+      "sourceSha256": "41db8937993aee57dff35aaef1d2d59280ae2b916422812948c887a62424c669"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/organization/index.vue",
+      "symbol": "createOrganization",
+      "line": 202,
+      "sourceSha256": "41db8937993aee57dff35aaef1d2d59280ae2b916422812948c887a62424c669"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/organization/index.vue",
+      "symbol": "invite",
+      "line": 305,
+      "sourceSha256": "41db8937993aee57dff35aaef1d2d59280ae2b916422812948c887a62424c669"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/profile/index.vue",
+      "symbol": "logout",
+      "line": 84,
+      "sourceSha256": "e48c29dbba76e05c2ed59ede472217247842fa058b7c34e94417a7ca9d71774b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/rewards/index.vue",
+      "symbol": "acceptInvitation",
+      "line": 143,
+      "sourceSha256": "6e904684cf1c7cf13fe640d1f9435fc681014ebd4ff92c0df3a906d4ad75f58b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/rewards/index.vue",
+      "symbol": "claimRewards",
+      "line": 90,
+      "sourceSha256": "6e904684cf1c7cf13fe640d1f9435fc681014ebd4ff92c0df3a906d4ad75f58b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/rewards/index.vue",
+      "symbol": "loadPreview",
+      "line": 136,
+      "sourceSha256": "6e904684cf1c7cf13fe640d1f9435fc681014ebd4ff92c0df3a906d4ad75f58b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/rewards/index.vue",
+      "symbol": "loadRewards",
+      "line": 68,
+      "sourceSha256": "6e904684cf1c7cf13fe640d1f9435fc681014ebd4ff92c0df3a906d4ad75f58b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/rewards/index.vue",
+      "symbol": "prepareInvitation",
+      "line": 120,
+      "sourceSha256": "6e904684cf1c7cf13fe640d1f9435fc681014ebd4ff92c0df3a906d4ad75f58b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/store/index.vue",
+      "symbol": "initialize",
+      "line": 254,
+      "sourceSha256": "0f4b834cef3088c1c0c473db3b7b099213d4a73f9310daa67d3b26a1b1b44aa4"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/pages/store/index.vue",
+      "symbol": "runCheckout",
+      "line": 209,
+      "sourceSha256": "0f4b834cef3088c1c0c473db3b7b099213d4a73f9310daa67d3b26a1b1b44aa4"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/billingCatalog.ts",
+      "symbol": "billingCatalogRepository",
+      "line": 142,
+      "sourceSha256": "5eccf2dcc39de3e962ec84c961a1ed25b4d2570693d0a5aa90c2cb788b131aad"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/enterpriseMembership.ts",
+      "symbol": "enterpriseMembershipRepository",
+      "line": 44,
+      "sourceSha256": "a86501c4f18a377116a575e7f5ac41498482f62538cfbc279a8f5aeabe1d7e40"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/paymentClose.ts",
+      "symbol": "paymentCloseRepository",
+      "line": 30,
+      "sourceSha256": "caa9ceb079ad80eb87b03d148ccfdc8564a4a0aa3256ff8c1fcc6b8e143c1391"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/paymentHistory.ts",
+      "symbol": "paymentHistoryRepository",
+      "line": 26,
+      "sourceSha256": "0f7fb83d0b9486241da23da73d3e7f65e55bb8c67d919af1bc413197d3d9a186"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/paymentReconciliation.ts",
+      "symbol": "paymentReconciliationRepository",
+      "line": 47,
+      "sourceSha256": "0295e503a8057757ef73f031eade8ed282820d40974cebc902d6239a1d2b3f76"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/paymentRefund.ts",
+      "symbol": "paymentRefundRepository",
+      "line": 16,
+      "sourceSha256": "fa30c2a3091417cc1e5fbdb99cddc8f725f68eeb06285655c5db0371c07dc439"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/paymentResume.ts",
+      "symbol": "paymentResumeRepository",
+      "line": 35,
+      "sourceSha256": "1487ca40b3a6edc39b578383eb25a9f6e4bf09e70071e9f95d9478563e07da8b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/purchaseRequest.ts",
+      "symbol": "buildSubscriptionPurchaseRequest",
+      "line": 75,
+      "sourceSha256": "758776a27c5454e531b73a703717f64db525c97301a78402a791cb6481292c54"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/purchaseRequest.ts",
+      "symbol": "buildTokenPurchaseRequest",
+      "line": 84,
+      "sourceSha256": "758776a27c5454e531b73a703717f64db525c97301a78402a791cb6481292c54"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/purchaseRequest.ts",
+      "symbol": "executePurchaseRequest",
+      "line": 93,
+      "sourceSha256": "758776a27c5454e531b73a703717f64db525c97301a78402a791cb6481292c54"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/referralInvitations.ts",
+      "symbol": "referralInvitationRepository",
+      "line": 58,
+      "sourceSha256": "2978039549c8fe7b6f472e05ee98f303dba01035bbfd0e2ccce045a5cf012975"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/rewards.ts",
+      "symbol": "rewardRepository",
+      "line": 84,
+      "sourceSha256": "f458be433ccfa1436752e9bc0bb09fda9fe1ce9a4553ed39f2cd4fd937c0eb53"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/shareInvitationAcceptance.ts",
+      "symbol": "shareInvitationAcceptanceRepository",
+      "line": 89,
+      "sourceSha256": "e4be40ef91668ea6dd31f315c54c0203695df184103460d7e654aa5a2584717a"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/shareInvitationPreview.ts",
+      "symbol": "shareInvitationPreviewRepository",
+      "line": 70,
+      "sourceSha256": "c37857ed9bf4ef56319968427f7388e1854b6f79c2ef64b0205738b9a6018817"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/shareInvitations.ts",
+      "symbol": "shareInvitationOwnerRepository",
+      "line": 70,
+      "sourceSha256": "d55a283f9db209ebda53b80ed86c2204fba5f73ff5f0aadeaa8746bf3ed4c2e7"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/workspaceCreate.ts",
+      "symbol": "workspaceCreateRepository",
+      "line": 84,
+      "sourceSha256": "24488f72ec32036c4745bd3202e91883fd4e5ee7edb34280fad14ce0b67b67b2"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/workspaceDetail.ts",
+      "symbol": "workspaceDetailRepository",
+      "line": 113,
+      "sourceSha256": "89bac59f40a682abba5b170889fbdebdb316e9b7394f45ca9cc3134ac7b1d8ec"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/repositories/workspaceTokenDetail.ts",
+      "symbol": "workspaceTokenDetailRepository",
+      "line": 144,
+      "sourceSha256": "5cfef3eacb5610fe93476f983a519a5fff671108ddde4ff7185bf11fd82d6740"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-account/services/payment.ts",
+      "symbol": "requestDouyinPayment",
+      "line": 119,
+      "sourceSha256": "2c277cdf618c37308c83b086c364d73e29f4e14a341cf216d1f6e3891e02f0ea"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/pages/customized_design/index.vue",
+      "symbol": "prepareCopy",
+      "line": 199,
+      "sourceSha256": "328beee525d9c76ff0c72ad579d532b8c91850b70ce1b342c715d73e3ebc642c"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/pages/customized_design/index.vue",
+      "symbol": "presetAction",
+      "line": 266,
+      "sourceSha256": "328beee525d9c76ff0c72ad579d532b8c91850b70ce1b342c715d73e3ebc642c"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/pages/voice_summary/index.vue",
+      "symbol": "choosePhoneFiles",
+      "line": 888,
+      "sourceSha256": "97a54acf0c4213d07daef0e90f45ffb8410b6b2d72d6c95f8c134f13b90c1f11"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/pages/voice_summary/index.vue",
+      "symbol": "syncPhoneUploadSession",
+      "line": 835,
+      "sourceSha256": "97a54acf0c4213d07daef0e90f45ffb8410b6b2d72d6c95f8c134f13b90c1f11"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/customizedDesign.ts",
+      "symbol": "copyResultInput",
+      "line": 53,
+      "sourceSha256": "f3571be0a3a4b793e2665ffd396e58227e73a30c76119897f7f7c68191c1f8c1"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/customizedDesign.ts",
+      "symbol": "promptPresetRepository",
+      "line": 33,
+      "sourceSha256": "f3571be0a3a4b793e2665ffd396e58227e73a30c76119897f7f7c68191c1f8c1"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/designAssets.ts",
+      "symbol": "stageDesignImages",
+      "line": 180,
+      "sourceSha256": "a8c5b2de910f43fa302279f2a157ea0c65054e07751334f932ad203e106eea7c"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/designAssets.ts",
+      "symbol": "stageOne",
+      "line": 154,
+      "sourceSha256": "a8c5b2de910f43fa302279f2a157ea0c65054e07751334f932ad203e106eea7c"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/designJobSubmit.ts",
+      "symbol": "postPrepared",
+      "line": 128,
+      "sourceSha256": "2efcc14ef203bc3afc587e79e63419166011054e49304dd4134e7fbb5136a79a"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/promptCatalog.ts",
+      "symbol": "promptCatalogRepository",
+      "line": 170,
+      "sourceSha256": "3e4e5452007c4e1a7a373eedad0debe24114847f2296e0f31aa46ede36bbbe93"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/reportAttachment.ts",
+      "symbol": "verifyReportAttachment",
+      "line": 42,
+      "sourceSha256": "6312f8b7c126a0c2c83a404afb0b1d2fee8ef8b090ba4deeaaf45d5e4811a579"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/voiceUploadSessions.ts",
+      "symbol": "createVoiceUploadSession",
+      "line": 82,
+      "sourceSha256": "2f90896ce8a608e17d44d240370e0a2550c0b8c5a66e0e860d57a537a6cff21b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/voiceUploadSessions.ts",
+      "symbol": "getVoiceUploadSession",
+      "line": 100,
+      "sourceSha256": "2f90896ce8a608e17d44d240370e0a2550c0b8c5a66e0e860d57a537a6cff21b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/pages/detail/index.vue",
+      "symbol": "changeProjectStatus",
+      "line": 170,
+      "sourceSha256": "e3a90cd056caeb9a5a3ac2abcc3d0e6665c636f33f5bf6dbc8bb573b77a1b822"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/pages/editor/index.vue",
+      "symbol": "save",
+      "line": 102,
+      "sourceSha256": "c214533f0c4177ec03b945957b571775fdb9a3c1eb59380fd32d56190bce62c0"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/designJobDetail.ts",
+      "symbol": "designJobRepository",
+      "line": 186,
+      "sourceSha256": "022b919fc47670fafb85c84c1ff6c25027dde81abf0ec13d8fe2526fce3516d2"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/designJobDetail.ts",
+      "symbol": "readOwnerListJob",
+      "line": 146,
+      "sourceSha256": "022b919fc47670fafb85c84c1ff6c25027dde81abf0ec13d8fe2526fce3516d2"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/designJobs.ts",
+      "symbol": "personalDesignJobRepository",
+      "line": 462,
+      "sourceSha256": "a87f0c59d213b303e26b56bec18ff1d3ad11623c57b835790172703d9a12dc1d"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/historyWorkspaces.ts",
+      "symbol": "historyWorkspaceRepository",
+      "line": 45,
+      "sourceSha256": "5c2baff80aed2f6956bd87aff7eea6746c60eac181616f308500e1f3444c1a3b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/profile.ts",
+      "symbol": "currentProfileRepository",
+      "line": 130,
+      "sourceSha256": "c4a499e7c550b1aa3d30c63497b9e64fae99e233e58543bdb2148cef4c4b3c15"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/projectContext.ts",
+      "symbol": "fetchList",
+      "line": 97,
+      "sourceSha256": "3c0624ba79bce51ff40b6de7dba16f4a21e4417999808a57e4baef90312ecd5e"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/projectContext.ts",
+      "symbol": "projectContextRepository",
+      "line": 181,
+      "sourceSha256": "3c0624ba79bce51ff40b6de7dba16f4a21e4417999808a57e4baef90312ecd5e"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/projectOverview.ts",
+      "symbol": "loadProjectOverview",
+      "line": 88,
+      "sourceSha256": "2bc8585f4e348170d4c9add231440c990b7a43158064ff23d8a6c71ae429c8b2"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/projectStatusCatalog.ts",
+      "symbol": "projectStatusCatalogRepository",
+      "line": 83,
+      "sourceSha256": "918513a20339f76950cd9cb5d49761a8bb869b1f75f37ac5161af2f6a93557a3"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/resultFile.ts",
+      "symbol": "materializeResultFile",
+      "line": 123,
+      "sourceSha256": "0552967c9824b8e0c06b2279c550201a72e1f5876b4f70e000b1536a71f3ccfe"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/session.ts",
+      "symbol": "douyinSessionRepository",
+      "line": 171,
+      "sourceSha256": "acd3271b43b88b8e7ad67618201cc82ad3bd3b1cffbebddd1b45a813fd5fa7a0"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/session.ts",
+      "symbol": "wechatSessionRepository",
+      "line": 88,
+      "sourceSha256": "acd3271b43b88b8e7ad67618201cc82ad3bd3b1cffbebddd1b45a813fd5fa7a0"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/workflows.ts",
+      "symbol": "workflowsRepository",
+      "line": 13,
+      "sourceSha256": "34eeb28cef06fba76ceb95434a282ed2668633a7ff44733ce8fb93e1ae88a252"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/workspaceRead.ts",
+      "symbol": "workspaceReadRepository",
+      "line": 142,
+      "sourceSha256": "5437de7d1895ac623e88a9901c2e55a28f5f19bb732e348950f5f9b2b1ee4c3b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/workspaceRemovalNotices.ts",
+      "symbol": "loadWorkspaceRemovalNotices",
+      "line": 48,
+      "sourceSha256": "04031f9596bd839364db05bbce6bb9da3997272e59ee243b1f31460781b661d9"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/repositories/workspaces.ts",
+      "symbol": "workspaceContextRepository",
+      "line": 9,
+      "sourceSha256": "f48f468f3ee22a7957496048cb5446ce73fceed8d337de1ac181b397c613e143"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/services/accountGate.ts",
+      "symbol": "offerDouyinReactivation",
+      "line": 48,
+      "sourceSha256": "c36cddf73e4d5a6a9973b4a59c1b7be7d9910885123f2cc7bfa4a001fe6e9a2b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/services/accountGate.ts",
+      "symbol": "submitWechatPhoneRegistration",
+      "line": 164,
+      "sourceSha256": "c36cddf73e4d5a6a9973b4a59c1b7be7d9910885123f2cc7bfa4a001fe6e9a2b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/services/douyinAuth.ts",
+      "symbol": "buildRegistrationDouyinLoginRequest",
+      "line": 60,
+      "sourceSha256": "0fdf5f63c7e01aace1f2b284ee6cfcc830d8022728c0c81dc1211583f4e349c3"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/services/jobRetry.ts",
+      "symbol": "retryDesignJob",
+      "line": 45,
+      "sourceSha256": "d4ed361dfa68f560cac3e8c27990c13a3478c19ecd448a1ae17b8f0bf44b0d9d"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/services/reportCapability.ts",
+      "symbol": "getFreshReportCapability",
+      "line": 15,
+      "sourceSha256": "65a8b1bd6ff4c9ccf1d542947b19bf806fb570b44802c3401be86175e085364c"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/services/request.ts",
+      "symbol": "requestWithAuth",
+      "line": 341,
+      "sourceSha256": "89d9337aba66c66c5e59f3fb0d21cbb68a912cfb1fd1535a9bfb99db40464a4b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/services/request.ts",
+      "symbol": "rotateTokens",
+      "line": 299,
+      "sourceSha256": "89d9337aba66c66c5e59f3fb0d21cbb68a912cfb1fd1535a9bfb99db40464a4b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/services/workflowDownload.ts",
+      "symbol": "openWorkflowPresentation",
+      "line": 6,
+      "sourceSha256": "bad81c4d5b779f366b182841371b11cf78fb80b3a8a16b800b01d66707b4e36f"
+    }
+  ]
 }

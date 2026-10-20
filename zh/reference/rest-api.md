@@ -1,5 +1,7 @@
 # REST API 索引
 
+先读[源码跟读路径](/zh/reference/system-walkthrough)。本页把**每条公开路由**连到真实 FastAPI 处理函数与专门的全链路解释：界面/repository 或外部触发、授权、业务调用、数据库/Redis/存储变化、响应和失败恢复。
+
 本页按业务领域组织联调入口。[完整固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md) 是精确字段、成功/重放状态和可达业务错误的规范。Admin 内部接口与条件 mock 有各自边界。
 
 ## 约定与错误
@@ -120,7 +122,7 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 
 `/admin/*` 使用浏览器会话/CSRF，排除公开 OpenAPI；条件 `/mock/*` 和独立 mock provider 是测试接口。实现动作前阅读 [OpenAPI 边界](/zh/reference/openapi)与完整契约的逐端点错误表。
 
-## 生成的完整路由索引
+## 逐 API 全链路索引 {#generated-route-index}
 
 此清单记录声明的默认成功状态与 deprecated 元数据，不声明授权，也不穷举运行/重放响应。相关语义以上方人工说明和固定 REST 契约为准。
 

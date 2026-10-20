@@ -41,14 +41,37 @@ const topics = {
     ['deploy/cloud-architecture', 'Cloud architecture', '云架构'], ['deploy/sae-deployment', 'SAE runbook', 'SAE 部署手册'],
     ['deploy/ci-cd', 'CI/CD', '持续集成与发布'], ['deploy/production', 'Promotion and recovery', '生产发布与恢复'],
   ]],
-  reference: ['Reference', '参考', [
-    ['reference/rest-api', 'REST API guide', 'REST API 指南'], ['reference/openapi', 'OpenAPI', 'OpenAPI'],
-    ['reference/data-model', 'Data model', '数据模型'], ['reference/configuration', 'Configuration', '配置参考'],
-    ['reference/douyin-payment', 'Douyin payments', '抖音支付'],
-    ['reference/flows/wechat-login-flow', 'Login flow', '登录链路'], ['reference/flows/design-job-lifecycle', 'Workflow lifecycle', '工作流生命周期'],
-    ['reference/flows/asset-upload-flow', 'Asset upload', '资产上传链路'], ['reference/flows/payment-flow', 'Payment flow', '支付链路'],
-    ['reference/flows/report-view-flow', 'Report outputs', '报告产物链路'], ['reference/flows/workspace-membership-flow', 'Workspace membership', '工作区成员链路'],
-    ['reference/source-revisions', 'Verified source versions', '已核验源码版本'], ['reference/maintenance', 'Maintain these docs', '维护本文档'],
+  refLearn: ['Learn the system', '读懂系统', [
+    ['reference/system-walkthrough', 'From an action to stored evidence', '从操作追到存储证据'],
+  ]],
+  refIdentity: ['Identity and inputs', '身份与输入', [
+    ['reference/flows/wechat-login-flow', 'Login, consent and sessions', '登录、同意与会话'],
+    ['reference/flows/discovery-prompts-flow', 'Discovery and prompt configuration', '功能发现与提示词配置'],
+    ['reference/flows/asset-upload-flow', 'Upload, verify and reuse Assets', '上传、核验与复用资产'],
+    ['reference/flows/voice-upload-flow', 'Browser audio handoff', '浏览器音频接力'],
+  ]],
+  refWorkflow: ['Execution and results', '执行与产物', [
+    ['reference/flows/design-job-lifecycle', 'Admission, queues and workers', '准入、队列与 worker'],
+    ['reference/flows/workflow-products-flow', 'Image, voice, copywriting and video', '图片、语音、文案与视频分支'],
+    ['reference/flows/report-view-flow', 'Report graph, HTML and PPTX', '报告图、HTML 与 PPTX'],
+    ['reference/flows/workflow-history-flow', 'History, retry, move and deletion', '历史、重试、移动与删除'],
+  ]],
+  refBusiness: ['Collaboration and payments', '协作与交易', [
+    ['reference/flows/project-flow', 'Projects, outcomes and cleanup', '项目、成交流失与清理'],
+    ['reference/flows/workspace-membership-flow', 'Workspaces, members and invitations', '空间、成员与邀请'],
+    ['reference/flows/referral-rewards-flow', 'Referral attribution and rewards', '推荐归因与奖励'],
+    ['reference/flows/payment-flow', 'Purchase, callback and settlement', '购买、回调与结算'],
+    ['reference/douyin-payment', 'Douyin channel and RSA', '抖音渠道与 RSA'],
+    ['reference/flows/refund-flow', 'Refunds and reconciliation', '退款与对账'],
+  ]],
+  reference: ['Diagnosis and API reference', '诊断与接口索引', [
+    ['reference/flows/runtime-debugging', 'Trace one task through the runtime', '跨进程追踪一个任务'],
+    ['reference/rest-api', 'Every API and its full chain', '逐 API 全链路索引'],
+    ['reference/openapi', 'OpenAPI boundaries', 'OpenAPI 边界'],
+    ['reference/data-model', 'Data model', '数据模型'],
+    ['reference/configuration', 'Configuration', '配置参考'],
+    ['reference/source-revisions', 'Verified source versions', '已核验源码版本'],
+    ['reference/maintenance', 'Maintain these docs', '维护本文档'],
   ]],
 }
 export const localLink = (route, locale) => `${locale === 'zh' ? '/zh' : ''}/${route}`
@@ -69,13 +92,13 @@ export function navigation(locale) {
     ] },
     { text: zh ? '管理后台' : 'Administration', link: link('admin/overview') },
     { text: zh ? '部署与测试' : 'Deploy and test', link: link('deploy/local-stack') },
-    { text: zh ? '参考' : 'Reference', link: link('reference/rest-api') },
+    { text: zh ? '全链路参考' : 'Reference', link: link('reference/system-walkthrough') },
   ]
 }
 export function sidebar(locale) {
   const prefix = locale === 'zh' ? '/zh' : ''
   return Object.fromEntries([
     ['get-started', ['start']], ['frontend', ['frontend']], ['backend', ['backend']],
-    ['admin', ['admin']], ['deploy', ['deploy']], ['testing', ['deploy']], ['reference', ['reference']],
+    ['admin', ['admin']], ['deploy', ['deploy']], ['testing', ['deploy']], ['reference', ['refLearn', 'refIdentity', 'refWorkflow', 'refBusiness', 'reference']],
   ].map(([root, keys]) => [`${prefix}/${root}/`, keys.map((key) => section(key, locale))]))
 }

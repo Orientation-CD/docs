@@ -12,8 +12,8 @@ hero:
       text: Run the first local task
       link: /get-started/quickstart
     - theme: alt
-      text: API reference
-      link: /reference/rest-api
+      text: Follow the code end to end
+      link: /reference/system-walkthrough
 features:
   - icon: 🧭
     title: Get started
@@ -36,9 +36,9 @@ features:
     details: Run owned local stacks, verify storage environments, and follow cloud release, migration and recovery procedures.
     link: /deploy/local-stack
   - icon: 🔗
-    title: Reference
-    details: Current API contracts, environment settings, data models and traceable end-to-end flows.
-    link: /reference/rest-api
+    title: Follow the complete call chain
+    details: Trace every public API from its real UI or external trigger through handlers, workers, transactions and stored results, with diagrams and code maps.
+    link: /reference/system-walkthrough
 ---
 
 ## Choose a route

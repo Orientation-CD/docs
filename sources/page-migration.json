@@ -244,16 +244,48 @@
       "action": "rewrite"
     },
     {
+      "path": "reference/flows/discovery-prompts-flow.md",
+      "action": "add"
+    },
+    {
       "path": "reference/flows/payment-flow.md",
       "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/project-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/referral-rewards-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/refund-flow.md",
+      "action": "add"
     },
     {
       "path": "reference/flows/report-view-flow.md",
       "action": "rewrite"
     },
     {
+      "path": "reference/flows/runtime-debugging.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/voice-upload-flow.md",
+      "action": "add"
+    },
+    {
       "path": "reference/flows/wechat-login-flow.md",
       "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/workflow-history-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/workflow-products-flow.md",
+      "action": "add"
     },
     {
       "path": "reference/flows/workspace-membership-flow.md",
@@ -273,6 +305,10 @@
     },
     {
       "path": "reference/source-revisions.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/system-walkthrough.md",
       "action": "add"
     },
     {
@@ -521,16 +557,48 @@
       "action": "rewrite"
     },
     {
+      "path": "zh/reference/flows/discovery-prompts-flow.md",
+      "action": "add"
+    },
+    {
       "path": "zh/reference/flows/payment-flow.md",
       "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/project-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/referral-rewards-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/refund-flow.md",
+      "action": "add"
     },
     {
       "path": "zh/reference/flows/report-view-flow.md",
       "action": "rewrite"
     },
     {
+      "path": "zh/reference/flows/runtime-debugging.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/voice-upload-flow.md",
+      "action": "add"
+    },
+    {
       "path": "zh/reference/flows/wechat-login-flow.md",
       "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/workflow-history-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/workflow-products-flow.md",
+      "action": "add"
     },
     {
       "path": "zh/reference/flows/workspace-membership-flow.md",
@@ -550,6 +618,10 @@
     },
     {
       "path": "zh/reference/source-revisions.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/system-walkthrough.md",
       "action": "add"
     },
     {

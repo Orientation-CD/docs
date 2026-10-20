@@ -1,0 +1,521 @@
+[
+  {
+    "method": "POST",
+    "path": "/v1/workflows",
+    "page": "reference/flows/design-job-lifecycle",
+    "anchor": "submit-workflow",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "create_workflow"
+      },
+      {
+        "path": "app/workflows/workflow_admission.py",
+        "symbol": "admit_workflow_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/workflows.ts",
+        "symbol": "workflowsRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/design-jobs",
+    "page": "reference/flows/design-job-lifecycle",
+    "anchor": "submit-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "create_design_job"
+      },
+      {
+        "path": "app/workflows/workflow_admission.py",
+        "symbol": "admit_legacy_image_compatibility_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/designJobSubmit.ts",
+        "symbol": "postPrepared"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/design-job-quotes",
+    "page": "reference/flows/design-job-lifecycle",
+    "anchor": "retired-quote",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "create_design_job_quote"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Retired contract-only request; no current form round trip.",
+      "zh": "已退休契约请求，当前表单不再调用。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workflows",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "list-workflows",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "list_design_jobs"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/designJobs.ts",
+        "symbol": "personalDesignJobRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/design-jobs",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "list-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "list_design_jobs"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Available API/compatibility surface; current caller uses the corresponding alias described in this section.",
+      "zh": "可用 API/兼容面，当前调用者使用本节注明的对应别名。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workflows/{workflow_id}",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "get-workflow",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "get_workflow"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/designJobDetail.ts",
+        "symbol": "designJobRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/design-jobs/{design_job_id}",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "get-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "get_design_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/designJobDetail.ts",
+        "symbol": "designJobRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspace/workflows",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "list-owner-workflows",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "list_workspace_design_jobs"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Available API/compatibility surface; current caller uses the corresponding alias described in this section.",
+      "zh": "可用 API/兼容面，当前调用者使用本节注明的对应别名。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspace/design-jobs",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "list-owner-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "list_workspace_design_jobs"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/designJobDetail.ts",
+        "symbol": "readOwnerListJob"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workflows/{design_job_id}/retry",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "retry-workflow",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "retry_failed_design_job"
+      },
+      {
+        "path": "app/workflows/submissions/workflow_submission_retry.py",
+        "symbol": "retry_workflow_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/jobRetry.ts",
+        "symbol": "retryDesignJob"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workflows/{design_job_id}/move",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "move-workflow",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "move_design_job_route"
+      },
+      {
+        "path": "app/workspaces/project_jobs.py",
+        "symbol": "move_design_job"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Canonical API available; current plans move action uses design-jobs alias.",
+      "zh": "当前方案移动使用 design-jobs 别名，canonical API 可供集成。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/workflows/{design_job_id}",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "delete-workflow",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "delete_design_job"
+      },
+      {
+        "path": "app/workflows/design_job.py",
+        "symbol": "delete_terminal_design_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/designJobs.ts",
+        "symbol": "personalDesignJobRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workflows/{design_job_id}/result-file",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "result-workflow",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "download_design_result"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Canonical API available; authenticated frontend media fallback uses design-jobs alias.",
+      "zh": "canonical API 可用，前端认证媒体 fallback 使用 design-jobs 别名。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workflows/{design_job_id}/report",
+    "page": "reference/flows/report-view-flow",
+    "anchor": "report",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "view_design_report"
+      },
+      {
+        "path": "app/workflows/operations/design_report/workflow_report_publication.py",
+        "symbol": "render_published_workflow_report"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/reportCapability.ts",
+        "symbol": "getFreshReportCapability"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workflows/{design_job_id}/presentation",
+    "page": "reference/flows/report-view-flow",
+    "anchor": "presentation",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "download_design_presentation"
+      },
+      {
+        "path": "app/workflows/operations/design_report/workflow_pptx_download.py",
+        "symbol": "download_presentation"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/workflowDownload.ts",
+        "symbol": "openWorkflowPresentation"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/design-jobs/{design_job_id}/retry",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "retry-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "retry_failed_design_job"
+      },
+      {
+        "path": "app/workflows/submissions/workflow_submission_retry.py",
+        "symbol": "retry_workflow_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/jobRetry.ts",
+        "symbol": "retryDesignJob"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/design-jobs/{design_job_id}/move",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "move-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "move_design_job_route"
+      },
+      {
+        "path": "app/workspaces/project_jobs.py",
+        "symbol": "move_design_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/projectContext.ts",
+        "symbol": "projectContextRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/design-jobs/{design_job_id}",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "delete-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "delete_design_job"
+      },
+      {
+        "path": "app/workflows/design_job.py",
+        "symbol": "delete_terminal_design_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/designJobs.ts",
+        "symbol": "personalDesignJobRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/design-jobs/{design_job_id}/result-file",
+    "page": "reference/flows/workflow-history-flow",
+    "anchor": "result-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "download_design_result"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/resultFile.ts",
+        "symbol": "materializeResultFile"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/design-jobs/{design_job_id}/report",
+    "page": "reference/flows/report-view-flow",
+    "anchor": "report-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "view_design_report"
+      },
+      {
+        "path": "app/workflows/operations/design_report/workflow_report_publication.py",
+        "symbol": "render_published_workflow_report"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/reportCapability.ts",
+        "symbol": "getFreshReportCapability"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/design-jobs/{design_job_id}/presentation",
+    "page": "reference/flows/report-view-flow",
+    "anchor": "presentation-compatibility",
+    "backend": [
+      {
+        "path": "app/workflows/api.py",
+        "symbol": "download_design_presentation"
+      },
+      {
+        "path": "app/workflows/operations/design_report/workflow_pptx_download.py",
+        "symbol": "download_presentation"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/workflowDownload.ts",
+        "symbol": "openWorkflowPresentation"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/detail action through the cited repository; compatibility choice is explained in the chapter.",
+      "zh": "方案/详情操作经列出的 repository 调用，实际兼容选择见章节。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/health/live",
+    "page": "reference/flows/runtime-debugging",
+    "anchor": "health-live",
+    "backend": [
+      {
+        "path": "app/core/health_api.py",
+        "symbol": "live"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Deployment probe or operator, no mini-program button.",
+      "zh": "部署探针或运维触发，没有小程序按钮。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/health/ready",
+    "page": "reference/flows/runtime-debugging",
+    "anchor": "health-ready",
+    "backend": [
+      {
+        "path": "app/core/health_api.py",
+        "symbol": "ready"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Deployment probe or operator, no mini-program button.",
+      "zh": "部署探针或运维触发，没有小程序按钮。"
+    }
+  }
+]

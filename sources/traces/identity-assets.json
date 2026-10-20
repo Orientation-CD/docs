@@ -1,0 +1,874 @@
+[
+  {
+    "method": "POST",
+    "path": "/v1/auth/register",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "password-register",
+    "backend": [
+      {
+        "path": "app/identity/api.py",
+        "symbol": "register_user"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Contract or integration script only; the audited mini-program login UI does not call this password endpoint.",
+      "zh": "契约/集成脚本入口；当前小程序登录 UI 不调用密码注册接口。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/auth/login",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "password-login",
+    "backend": [
+      {
+        "path": "app/identity/api.py",
+        "symbol": "login_user"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Contract or integration script only; the audited mini program has no password-login form.",
+      "zh": "契约/集成脚本入口；当前小程序无密码登录表单。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/auth/wechat-login",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "wechat-login",
+    "backend": [
+      {
+        "path": "app/identity/api.py",
+        "symbol": "wechat_login"
+      },
+      {
+        "path": "app/identity/wechat_auth.py",
+        "symbol": "exchange_login_code"
+      },
+      {
+        "path": "app/identity/wechat_auth.py",
+        "symbol": "exchange_phone_code"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/session.ts",
+        "symbol": "wechatSessionRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/login/index.vue",
+        "symbol": "authorize"
+      },
+      {
+        "path": "src/services/accountGate.ts",
+        "symbol": "submitWechatPhoneRegistration"
+      }
+    ],
+    "trigger": {
+      "en": "Login gate silent login or agree + authorize phone button.",
+      "zh": "登录门禁静默登录，或勾选协议后点击授权手机号并登录。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/auth/douyin-login",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "douyin-login",
+    "backend": [
+      {
+        "path": "app/identity/api.py",
+        "symbol": "douyin_login"
+      },
+      {
+        "path": "app/identity/douyin_auth.py",
+        "symbol": "exchange_phone_code"
+      },
+      {
+        "path": "app/identity/douyin_auth.py",
+        "symbol": "_decrypt_phone_payload"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/session.ts",
+        "symbol": "douyinSessionRepository"
+      },
+      {
+        "path": "src/services/douyinAuth.ts",
+        "symbol": "buildRegistrationDouyinLoginRequest"
+      }
+    ],
+    "trigger": {
+      "en": "Same login gate in Douyin runtime, using tt.login and phone authorization proof.",
+      "zh": "抖音模式下同一登录门禁，使用 tt.login 与手机授权证明。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/auth/refresh",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "refresh",
+    "backend": [
+      {
+        "path": "app/identity/api.py",
+        "symbol": "refresh_user_token"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/request.ts",
+        "symbol": "rotateTokens"
+      },
+      {
+        "path": "src/services/request.ts",
+        "symbol": "requestWithAuth"
+      }
+    ],
+    "trigger": {
+      "en": "Automatic single-flight refresh after a refreshable access-token error; no UI button.",
+      "zh": "可刷新 access 错误后自动合并刷新，没有 UI 按钮。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/auth/logout",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "logout",
+    "backend": [
+      {
+        "path": "app/identity/api.py",
+        "symbol": "logout_user"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/session.ts",
+        "symbol": "wechatSessionRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/profile/index.vue",
+        "symbol": "logout"
+      }
+    ],
+    "trigger": {
+      "en": "Profile page logout confirmation.",
+      "zh": "个人资料页确认退出登录。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/me",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "profile-get",
+    "backend": [
+      {
+        "path": "app/identity/api.py",
+        "symbol": "get_user_profile"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "build_user_response"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/profile.ts",
+        "symbol": "currentProfileRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Open or refresh the profile page.",
+      "zh": "打开或刷新个人资料页。"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/v1/me",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "profile-patch",
+    "backend": [
+      {
+        "path": "app/identity/api.py",
+        "symbol": "update_user_profile"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "accessible_workspace"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "build_user_response"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/profile.ts",
+        "symbol": "currentProfileRepository"
+      },
+      {
+        "path": "src/repositories/workspaces.ts",
+        "symbol": "workspaceContextRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Profile save nickname or WeChat phone authorization; confirmed workspace switch also uses this endpoint.",
+      "zh": "资料页保存昵称或微信授权手机号；确认切换空间也使用此接口。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/me/deactivate",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "account-deactivate",
+    "backend": [
+      {
+        "path": "app/identity/account_lifecycle_api.py",
+        "symbol": "deactivate_current_user"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "deactivate_user_account"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Contract or integration script only; current mini program exposes logout but does not call account deactivation.",
+      "zh": "契约/集成脚本入口；当前小程序只有退出，没有调用停用账号。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/auth/reactivate",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "password-reactivate",
+    "backend": [
+      {
+        "path": "app/identity/account_lifecycle_api.py",
+        "symbol": "reactivate_with_password"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "reactivate_deactivated_user_account"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Contract or integration script only; the audited mini program has no caller for this recovery endpoint.",
+      "zh": "契约/集成脚本入口；当前小程序没有调用此恢复接口。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/auth/wechat-reactivate",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "wechat-reactivate",
+    "backend": [
+      {
+        "path": "app/identity/account_lifecycle_api.py",
+        "symbol": "reactivate_with_wechat"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "reactivate_deactivated_user_account"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Contract or integration script only; the audited mini program has no caller for this recovery endpoint.",
+      "zh": "契约/集成脚本入口；当前小程序没有调用此恢复接口。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/auth/douyin-reactivate",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "douyin-reactivate",
+    "backend": [
+      {
+        "path": "app/identity/account_lifecycle_api.py",
+        "symbol": "reactivate_with_douyin"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "reactivate_deactivated_user_account"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/accountGate.ts",
+        "symbol": "offerDouyinReactivation"
+      },
+      {
+        "path": "src/repositories/session.ts",
+        "symbol": "douyinSessionRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Douyin account gate offers recovery after removed-account login response.",
+      "zh": "抖音门禁在停用账号登录响应后提供恢复。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/legal-documents/current",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "legal-current",
+    "backend": [
+      {
+        "path": "app/identity/legal_api.py",
+        "symbol": "get_current_legal_documents"
+      },
+      {
+        "path": "app/identity/legal_documents.py",
+        "symbol": "current_required_documents"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/session.ts",
+        "symbol": "wechatSessionRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Login gate loads current terms and privacy versions before consent.",
+      "zh": "登录门禁在同意前读取当前用户协议与隐私版本。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/legal-documents/{document_id}/content",
+    "page": "reference/flows/wechat-login-flow",
+    "anchor": "legal-content",
+    "backend": [
+      {
+        "path": "app/identity/legal_api.py",
+        "symbol": "get_current_legal_document_content"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/session.ts",
+        "symbol": "wechatSessionRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Legal text page uses returned content URL; explicit repository request is local mock/LAN-only.",
+      "zh": "法律文本页面使用返回的内容 URL；显式 repository 请求限本地 mock/LAN 模式。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/assets/upload-intents",
+    "page": "reference/flows/asset-upload-flow",
+    "anchor": "upload-intent",
+    "backend": [
+      {
+        "path": "app/assets/asset_api.py",
+        "symbol": "create_asset_upload_intent"
+      },
+      {
+        "path": "app/assets/assets.py",
+        "symbol": "create_upload_intent"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/designAssets.ts",
+        "symbol": "stageOne"
+      },
+      {
+        "path": "src/pkg-features/repositories/designAssets.ts",
+        "symbol": "stageDesignImages"
+      }
+    ],
+    "trigger": {
+      "en": "Feature submit stages each selected file before Workflow admission.",
+      "zh": "功能提交先为每个所选文件准备 Asset，再接纳工作流。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/assets/{asset_id}/complete",
+    "page": "reference/flows/asset-upload-flow",
+    "anchor": "asset-complete",
+    "backend": [
+      {
+        "path": "app/assets/asset_api.py",
+        "symbol": "complete_asset_upload_route"
+      },
+      {
+        "path": "app/assets/asset_completion.py",
+        "symbol": "complete_asset_upload"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/designAssets.ts",
+        "symbol": "stageOne"
+      }
+    ],
+    "trigger": {
+      "en": "After storage multipart POST succeeds, verify the admitted object.",
+      "zh": "存储 multipart POST 成功后验证接纳对象。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/assets/{asset_id}",
+    "page": "reference/flows/asset-upload-flow",
+    "anchor": "asset-get",
+    "backend": [
+      {
+        "path": "app/assets/asset_api.py",
+        "symbol": "get_asset_route"
+      },
+      {
+        "path": "app/assets/asset_management.py",
+        "symbol": "get_asset"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/reportAttachment.ts",
+        "symbol": "verifyReportAttachment"
+      }
+    ],
+    "trigger": {
+      "en": "Restore or reuse a PPTX report attachment; verify READY metadata and expiry.",
+      "zh": "恢复或复用报告 PPTX 附件时检查 READY 元数据与到期。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/assets",
+    "page": "reference/flows/asset-upload-flow",
+    "anchor": "asset-list",
+    "backend": [
+      {
+        "path": "app/assets/asset_api.py",
+        "symbol": "list_assets_route"
+      },
+      {
+        "path": "app/assets/asset_management.py",
+        "symbol": "list_assets"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Administrator API or integration script only; no audited mini-program caller.",
+      "zh": "管理员 API/集成脚本入口；当前小程序没有调用。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/assets/{asset_id}",
+    "page": "reference/flows/asset-upload-flow",
+    "anchor": "asset-delete",
+    "backend": [
+      {
+        "path": "app/assets/asset_api.py",
+        "symbol": "delete_asset_route"
+      },
+      {
+        "path": "app/assets/asset_management.py",
+        "symbol": "delete_asset"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Administrator API only; no audited mini-program delete-material button calls this route.",
+      "zh": "管理员 API；当前小程序没有调用此路由的删除素材按钮。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/assets/{source_asset_id}/design-input-copies",
+    "page": "reference/flows/asset-upload-flow",
+    "anchor": "asset-copy",
+    "backend": [
+      {
+        "path": "app/assets/asset_api.py",
+        "symbol": "copy_design_result_to_input_route"
+      },
+      {
+        "path": "app/assets/asset_copies.py",
+        "symbol": "copy_result_to_design_input"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/customizedDesign.ts",
+        "symbol": "copyResultInput"
+      },
+      {
+        "path": "src/pkg-features/pages/customized_design/index.vue",
+        "symbol": "prepareCopy"
+      }
+    ],
+    "trigger": {
+      "en": "Use a generated result as a customized-design input.",
+      "zh": "使用生成结果作为自定义设计输入。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/voice-upload-sessions",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-session-create",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "create_voice_upload_session"
+      },
+      {
+        "path": "app/assets/voice_upload_sessions.py",
+        "symbol": "VoiceUploadSessionStore.create"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/voiceUploadSessions.ts",
+        "symbol": "createVoiceUploadSession"
+      },
+      {
+        "path": "src/pkg-features/pages/voice_summary/index.vue",
+        "symbol": "choosePhoneFiles"
+      }
+    ],
+    "trigger": {
+      "en": "Voice summary: tap phone files, authorize, bind current workspace and remaining slots.",
+      "zh": "语音总结点击手机文件，登录并绑定当前空间与剩余槽位。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/voice-upload-sessions/{session_id}",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-session-get",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "get_voice_upload_session"
+      },
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "_ready_assets"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/voiceUploadSessions.ts",
+        "symbol": "getVoiceUploadSession"
+      },
+      {
+        "path": "src/pkg-features/pages/voice_summary/index.vue",
+        "symbol": "syncPhoneUploadSession"
+      }
+    ],
+    "trigger": {
+      "en": "Return to voice-summary page or sync phone upload; import verified audio IDs.",
+      "zh": "回到语音总结或同步手机上传，导入验证音频 ID。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/voice-upload",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-static",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "voice_upload_page"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Backend-served browser shell/resource loaded by the mini-program web-view; not a frontend repository API call.",
+      "zh": "小程序 web-view 加载的后端网页/资源，不是前端 repository API 调用。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/voice-upload/app.js",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-static",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "voice_upload_script"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Backend-served browser shell/resource loaded by the mini-program web-view; not a frontend repository API call.",
+      "zh": "小程序 web-view 加载的后端网页/资源，不是前端 repository API 调用。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/voice-upload/validation.js",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-static",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "voice_upload_validation_script"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Backend-served browser shell/resource loaded by the mini-program web-view; not a frontend repository API call.",
+      "zh": "小程序 web-view 加载的后端网页/资源，不是前端 repository API 调用。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/voice-upload/styles.css",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-static",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "voice_upload_styles"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Backend-served browser shell/resource loaded by the mini-program web-view; not a frontend repository API call.",
+      "zh": "小程序 web-view 加载的后端网页/资源，不是前端 repository API 调用。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/voice-upload/exchange",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-exchange",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "exchange_voice_upload_handoff"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Backend-bundled browser script bootstrap exchanges one-use URL fragment; no mini-program API caller.",
+      "zh": "后端内置网页 bootstrap 交换一次性 fragment，小程序不直接调用。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/voice-upload/session",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-browser-session",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "get_voice_upload_browser_session"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Backend-bundled browser script bootstrap/upload recovery reads cookie-bound slots; no mini-program API caller.",
+      "zh": "后端内置网页初始化/上传恢复读取 Cookie 槽位，小程序不直接调用。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/voice-upload/files/{slot}/upload-intent",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-file-intent",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "create_voice_upload_file_intent"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Backend-bundled uploadOne handles browser upload button with cookie/CSRF; no mini-program API caller.",
+      "zh": "后端内置网页 uploadOne 响应上传按钮，带 Cookie/CSRF，小程序不直接调用。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/voice-upload/files/{slot}/complete",
+    "page": "reference/flows/voice-upload-flow",
+    "anchor": "voice-file-complete",
+    "backend": [
+      {
+        "path": "app/assets/voice_upload_api.py",
+        "symbol": "complete_voice_upload_file"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Backend-bundled uploadOne or completeLinked verifies uploaded slot; no mini-program API caller.",
+      "zh": "后端内置网页 uploadOne/completeLinked 验证槽位，小程序不直接调用。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/prompt-templates",
+    "page": "reference/flows/discovery-prompts-flow",
+    "anchor": "prompt-template-list",
+    "backend": [
+      {
+        "path": "app/prompts/api.py",
+        "symbol": "list_prompt_templates"
+      },
+      {
+        "path": "app/prompts/api.py",
+        "symbol": "prompt_template_response"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/promptCatalog.ts",
+        "symbol": "promptCatalogRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Design editor initialization or submission rechecks active template keys and field contracts.",
+      "zh": "设计编辑器初始化/提交时复查启用模板 key 与字段契约。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/prompt-templates/{prompt_template_name}",
+    "page": "reference/flows/discovery-prompts-flow",
+    "anchor": "prompt-template-get",
+    "backend": [
+      {
+        "path": "app/prompts/api.py",
+        "symbol": "get_prompt_template"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Contract or integration script only; current mini program reads the full catalog instead.",
+      "zh": "契约/集成脚本入口；当前小程序读取全目录。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/prompt-presets",
+    "page": "reference/flows/discovery-prompts-flow",
+    "anchor": "prompt-preset-list",
+    "backend": [
+      {
+        "path": "app/prompts/prompt_preset_api.py",
+        "symbol": "get_prompt_presets"
+      },
+      {
+        "path": "app/prompts/prompt_presets.py",
+        "symbol": "list_prompt_presets"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/customizedDesign.ts",
+        "symbol": "promptPresetRepository"
+      },
+      {
+        "path": "src/pkg-features/pages/customized_design/index.vue",
+        "symbol": "presetAction"
+      }
+    ],
+    "trigger": {
+      "en": "Customized design opens personal saved requirements.",
+      "zh": "自定义设计打开个人常用要求。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/prompt-presets",
+    "page": "reference/flows/discovery-prompts-flow",
+    "anchor": "prompt-preset-create",
+    "backend": [
+      {
+        "path": "app/prompts/prompt_preset_api.py",
+        "symbol": "post_prompt_preset"
+      },
+      {
+        "path": "app/prompts/prompt_presets.py",
+        "symbol": "create_prompt_preset"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/customizedDesign.ts",
+        "symbol": "promptPresetRepository"
+      },
+      {
+        "path": "src/pkg-features/pages/customized_design/index.vue",
+        "symbol": "presetAction"
+      }
+    ],
+    "trigger": {
+      "en": "Customized design saves a new requirement body.",
+      "zh": "自定义设计保存新的要求正文。"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/v1/prompt-presets/{preset_id}",
+    "page": "reference/flows/discovery-prompts-flow",
+    "anchor": "prompt-preset-patch",
+    "backend": [
+      {
+        "path": "app/prompts/prompt_preset_api.py",
+        "symbol": "patch_prompt_preset"
+      },
+      {
+        "path": "app/prompts/prompt_presets.py",
+        "symbol": "update_prompt_preset"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/customizedDesign.ts",
+        "symbol": "promptPresetRepository"
+      },
+      {
+        "path": "src/pkg-features/pages/customized_design/index.vue",
+        "symbol": "presetAction"
+      }
+    ],
+    "trigger": {
+      "en": "Customized design edits an existing saved requirement body.",
+      "zh": "自定义设计修改已有常用要求正文。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/prompt-presets/{preset_id}",
+    "page": "reference/flows/discovery-prompts-flow",
+    "anchor": "prompt-preset-delete",
+    "backend": [
+      {
+        "path": "app/prompts/prompt_preset_api.py",
+        "symbol": "remove_prompt_preset"
+      },
+      {
+        "path": "app/prompts/prompt_presets.py",
+        "symbol": "delete_prompt_preset"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/customizedDesign.ts",
+        "symbol": "promptPresetRepository"
+      },
+      {
+        "path": "src/pkg-features/pages/customized_design/index.vue",
+        "symbol": "presetAction"
+      }
+    ],
+    "trigger": {
+      "en": "Customized design confirms deletion of a personal preset.",
+      "zh": "自定义设计确认删除个人常用要求。"
+    }
+  }
+]

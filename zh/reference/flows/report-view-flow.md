@@ -1,46 +1,131 @@
-# Design Report 与演示文件
+# 报告 Blueprint、子设计、HTML 与 PPTX
 
-当前报告使用版本化 Blueprint Workflow，发布已验证 HTML，并按配置发布 presentation。历史仅 HTML 报告仍可查看；旧模板字段和旧 body 不是新创建契约。
+当前设计报告是**不可变来源和两种产物构成的执行图**，不是一份保存好的 HTML 模板。本章把表单、内含图片生成、模型合成、清理发布、本地转换和最终浏览/下载 API 连起来。不熟悉 Job/run/Submission，先看[共享生命周期](/zh/reference/flows/design-job-lifecycle)。
 
-## 1. 组装来源 Blueprint
+## 1. 表单怎样准备 Blueprint {#blueprint}
 
-前端根据所选来源/产品组装结构化 Blueprint。来源是经过校验的完成 Job/Asset，不是任意远程 URL。后端在准确版本验证后组装命名报告文档、请求内图片 alias，保持户型图/房间语义与顺序。
+从设计报告提交按钮进入 [src/pkg-features/pages/design_report/index.vue → submit](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/pages/design_report/index.vue#L575)，再看 [src/pkg-features/services/reportBlueprint.ts → buildReportWorkflowRequest](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/services/reportBlueprint.ts#L65)。用户选择已完成沟通总结、彩平图、室内方案，填项目/客户事实、选内容页数，可附已有 PPTX。builder 解析真实输出 Asset ID（含原始户型图输入）、核对角色/房间信息，创建有序页面声明。
 
-向 `/v1/workflows` 提交精确当前 `type`：`design_report_9`、`design_report_13`、`design_report_17`，分别产生 9/13/17 总页数，恰好一个 Blueprint，可选一个获准 append-PPTX。裸 `design_report` 仅保留历史 Job 身份，不用于新请求。`quote_id` 字段已退休，包括 `null` 在内只要出现就要求重新提交，必须完全省略。旧 protocol-zero `options`/`project`/completed-job 列表不能复制进新请求，完整形状以 Blueprint schema 为准，不能从渲染页面反推。
+当前 UI 的 **8 / 12 / 16 内容页**对应公开产品 `design_report_9 / design_report_13 / design_report_17`，完整页库存是 **9 / 13 / 17 页**。不要换成历史 S01 固定 `page_count: 8` 请求。产品 key、页面模板顺序、来源库存必须与当前协议一致。契约要求恰好一个 `kind: "json", role: "blueprint"` 输入，最多加一个支持的附加 PPTX 输入；不接受客户端自己传生成 HTML。
 
-## 2. 执行和发布
+| Blueprint 来源 | 从哪里产生 | 后端冻结什么 |
+| --- | --- | --- |
+| 现有 `asset_id` | 表单选择的 completed Job 结果/来源 | 有权限的对象身份、hash、version、尺寸/类型 |
+| generated 声明 | builder 请求内含 `style_material_board` / `lighting_design` | child Feature/模型/prompt/输入权限、稳定文件名绑定 |
+| `gallery_path` 声明 | builder 选择配置图库 | 允许的图库对象选择、精确 version/hash、alias |
+| 项目/客户事实 | 有界表单字段 | 版本化规范事实和有序页面契约 |
+| 可选附加 PPTX | 已完成核验的 Document 上传 | 包身份、转换输入 pin |
 
-冻结图执行依赖 Operation。模型仅接收验证过的形状：通用 Ark Responses adapter 使用报告 JSON/Markdown 和有序已验证图生成 staged HTML。PPTX 转换/拼接有独立有界 subprocess 和资源控制。客户附加 PPTX 是私有最终拼接材料，不作为模型提示内容。
+这些是不同来源类型。Blueprint alias 文件名是内部逻辑引用，不授予模型访问任意 URL 的权限。独立来源选择重复（规定的封面复用一张室内图除外）、缺房间角色、原图不可用、页面库存不符、来源证据变化，都会在生成前失败。
 
-worker 验证/暂存结果、发布类型化 Asset、通过持久执行结算聚合。部分失败、显式重试和 presentation 生成按服务端资格处理，不一律重启所有已完成模型节点。
+## 2. 父任务与内含 child 怎样执行 {#report-graph}
 
-## 3. 打开 capability URL
+```mermaid
+flowchart TD
+  UI[报告表单与版本化 Blueprint] --> A[校验并冻结全部权限配置]
+  A --> ROOT[根 Job / 报告 Feature 预留]
+  A --> C1[内含风格材质图片 child]
+  A --> C2[内含灯光图片 child]
+  C1 --> JOIN[关联精确的 completed child 输出]
+  C2 --> JOIN
+  ROOT --> JOIN
+  EXIST[已有总结 / 户型 / 室内 pin] --> JOIN
+  GALLERY[冻结图库与系统 logo pin] --> JOIN
+  JOIN --> REPORT[报告 operation / 模型 HTML]
+  REPORT --> CLEAN[清理并发布私有 HTML Document]
+  CLEAN --> EXPORT[本地 PPTX export Submission]
+  APPEND[可选附加 PPTX pin] --> EXPORT
+  EXPORT --> FINISH[绑定 preview 和 presentation / 结算根任务]
+```
 
-认证读取完成 Workflow，选择报告/演示输出与新过期信息。服务端签发例如 `/v1/workflows/{design_job_id}/report?token=...` 的短时 URL；浏览器/web-view 使用该 capability，无需通用 Bearer。presentation 使用独立 capability/attachment 路由。
+| 转换 | 跟进哪个具体函数 | SQL / 产物影响 |
+| --- | --- | --- |
+| 表单 → 根准入 | [src/pkg-features/pages/design_report/index.vue → submit](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/pages/design_report/index.vue#L575) → `admit_workflow_job` | 冻结精确 Blueprint、活动产品/协议 |
+| 准备内含 child | [app/workflows/workflow_report_children.py → prepare_report_children](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_report_children.py#L94) | 按稳定顺序锁相关 Feature/定义/模型/来源权限 |
+| 保存根与 child | [app/workflows/workflow_report_children.py → persist_report_children](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_report_children.py#L262) | `workflow_generated_sources` 把文件名绑到 child run，child 的 `parent_workflow_id` 指向根 |
+| child 终态 → 父可执行 | [app/workflows/workflow_report_dependencies.py → reconcile_report_dependencies](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_report_dependencies.py#L152) | 只关联预期 child/代次的有效完成输出，暂存父输入 pin |
+| 合成模型输入 | [app/workflows/operations/design_report/design_report_composer.py → compose_blueprint_design_report](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/design_report_composer.py#L546) | 读冻结 Markdown，构建报告文档/图片 alias 和指令 |
+| HTML → 私有 Document | [app/workflows/operations/design_report/workflow_report_publication.py → publish_workflow_report](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py#L913) | 清理、预留、写入/恢复精确对象，再关联输出 |
+| export 就绪 → PPTX | [app/workflows/submissions/workflow_local_pptx_submission.py → execute_local_pptx_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_local_pptx_submission.py#L1008) | 消费冻结 HTML/图片/附加输入，暂存转换证据并发布 PPTX |
+| 双输出 → 公开完成 | [生命周期](/zh/reference/flows/design-job-lifecycle#worker-chain)中的 `finalize_submission_workflow` | 绑定 `preview`、`presentation`，根结算一次并推进报告项目状态 |
 
-token 绑定 Job、用途和过期，是秘密 bearer capability，不作为永久身份日志/分享。过期后认证刷新 Workflow 获取 URL，不能弱化校验或把长期 JWT 放 query。
+根任务按报告 Feature 冻结价格付费。内含 child 的 `token_cost=0`，来源标记 `report_included_v1`，不是独立收费图片动作，也不进入普通创建人根历史。单独重试内含 child 会被阻止，由父任务控制恢复。child 绑定跨重试保留，不能让父新代次偷偷换成另一个生成来源。
 
-## 4. 小程序查看
+根准入推迟 report Submission，直到所需生成 child 成功关联。child 未完成，父合成等待；child 失败，结合活动 sibling 证据决定父失败和受保护释放。因此“报告失败”可能发生在模型 HTML 请求以前，先看依赖记录，再判断是不是报告供应商的问题。
 
-viewer 在跳转前检查身份/过期，并处理不可用/失效。微信/抖音 web-view HTTPS/域名要求独立满足，桌面可打开不等于平台已批准域名。
+## 3. 模型 HTML 怎样暂存、核验、发布 {#html-publication}
 
-模型 HTML 是不可信内容，保留发布/转换的内容与网络隔离，不注入 Admin 或普通无限制页面。使用报告路由，不直接打开对象存储原始 HTML。
+供应商 HTML 是不可信设计材料。[app/workflows/operations/design_report/workflow_report_publication.py → publish_workflow_report](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py#L913) 加载 staged locator，按精确 version/ETag/hash/字节数读取。[app/workflows/operations/design_report/workflow_report_html.py → sanitize_design_report_html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_html.py#L439) 在有界范围解析/修复 markup，校验结构/CSS/资源/页面契约，移除主动执行并要求声明的图片 alias；保留约束内的静态设计布局，不执行任意脚本、不访问任意模型 URL。
 
-## 兼容与排障
+发布有明确检查点：
 
-- 历史 HTML-only 无演示文件可能正常，检查输出和 pipeline 版本。
-- 旧 Blueprint/quote body 按当前 schema 重建，不只改一个模板名。
-- token 过期认证刷新；Job 失败走显式重试。
-- Asset/产物完整性失败需后端处理，客户端替换 URL 不是修复。
+1. 加载有权限的来源/attempt，锁外读取精确暂存字节。
+2. 从冻结 Blueprint 和 pin 推导 alias，核对客户/项目、页面库存。
+3. 清理并计算 canonical 内容 hash，推导 publication 指纹/目的地。
+4. SQL 预留私有 Document；已被证明的 canonical 结果可复用。
+5. 写入或恢复精确存储版本，比对身份/大小/hash。
+6. 当前权限下完成 Document、`operation_run_outputs`，再按受保护逻辑清理非 canonical 版本。
 
-参见[Workflow 生命周期](/zh/reference/flows/design-job-lifecycle)和[报告系统](/zh/backend/reports)。
+供应商响应成功，不代表证据齐全可以 completed。原始候选 HTML、清理后的存储 HTML、浏览器动态渲染 HTML 各有职责。存储文档保留逻辑图片引用，浏览时只为批准的冻结资源签名/替换，避免把永久过期的 URL 固化在不可变文档里。
 
-## 源码依据
+## 4. 导出是本地 operation，不是再调一次 LLM {#pptx-execution}
 
-已按[记录的源码版本](/zh/reference/source-revisions)核对。
+`convert_design_report_to_pptx` 在报告输出就绪后执行。[app/workflows/submissions/workflow_local_pptx_submission.py → execute_local_pptx_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_local_pptx_submission.py#L1008) claim 代次，从存储 HTML、图片/系统资源 pin 构建精确输入包，调用 [app/conversion/pptx_subprocess.py → SubprocessPptxClient](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/conversion/pptx_subprocess.py#L166)。有界子进程用 [app/conversion/pptx_converter.py → convert_design_report_html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/conversion/pptx_converter.py#L456)，走开启 sandbox 的 Chromium 布局/转换，再核验包结构、页面测量、hash、result manifest。可选附加输入走核验过的 native append，另查身份和包限制。
 
-- [Blueprint 组装](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/services/reportBlueprint.ts)
-- [报告提交](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/services/reportDesignSubmit.ts)
-- [来源 Blueprint 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/design_report_sources.py)
-- [发布与 capability](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py)
-- [输出投影](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py)
+worker 拿到候选 PPTX 后暂存 manifest/大小/digest，上传精确私有对象版本，关联 Document 与 `presentation` 输出，不能仅相信 converter 一句 success。暂存产物/上传可恢复，不必重复模型生成。worker export lock 串行转换，并有超时、内存、运行时前提；macOS 能浏览源码不证明 Linux 部署已经有可用 Chromium/converter。
+
+当前报告流水线从同一根任务返回 HTML 与 PPTX。独立 `type: "design_report_pptx"` schema 仍为兼容保留，但新准入返回 `WORKFLOW_UNAVAILABLE`，不能把它讲成当前导出按钮能成功调用的 POST。历史存储导出仍可有下载/读取路径。
+
+## 5. 用新 capability 打开报告 {#report}
+
+`GET /v1/workflows/{design_job_id}/report` 使用 **query `token`**，不是通用 Bearer header。UI 先认证读取 Job 取得新链接。[src/pkg-plans/pages/report/index.vue → load](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-plans/pages/report/index.vue#L20) 调 [src/services/reportCapability.ts → getFreshReportCapability](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/reportCapability.ts#L15)，核对配置 origin、过期和 scope，再把返回 URL 交给平台 `web-view`。页面重开是更新 capability，不是重新生成或扣费。
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant UI as 报告结果页
+  participant API as Job API
+  participant WEB as web-view / 下载客户端
+  participant VIEW as Capability 路由
+  participant DB as PostgreSQL
+  participant O as 对象存储
+  UI->>API: 认证读取 Job
+  API-->>UI: 限时 report/presentation URL
+  UI->>WEB: 打开核验后的返回 URL
+  WEB->>VIEW: 带 query token GET report / presentation
+  VIEW->>DB: 解 claims，核对 Job/输出身份和生命周期
+  VIEW->>O: 读取精确私有 version/hash/size
+  VIEW-->>WEB: 带签名资源的安全 HTML，或 PPTX 字节
+```
+
+| 消息 | 代码 |
+| --- | --- |
+| 1–2 | `job_response` / `workflow_preview_response` / `workflow_presentation_response` → [app/workflows/operations/design_report/workflow_report_publication.py → create_workflow_report_view_token](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py#L1002) |
+| 3 | [src/services/reportCapability.ts → getFreshReportCapability](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/reportCapability.ts#L15) / [src/services/workflowDownload.ts → openWorkflowPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/workflowDownload.ts#L6) |
+| 4 | [app/workflows/api.py → view_design_report](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L1229) / [app/workflows/api.py → download_design_presentation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L1190) |
+| 5 | [app/workflows/operations/design_report/workflow_report_publication.py → decode_workflow_report_view_token](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py#L1036) → [app/workflows/operations/design_report/workflow_report_publication.py → render_published_workflow_report](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py#L1060) 或 [app/workflows/operations/design_report/workflow_pptx_download.py → download_presentation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_pptx_download.py#L36) |
+| 6–7 | 上述函数的精确读取和 `render_sanitized_report_html` |
+
+签名 claims 绑定 Job ID、workspace ID、Asset ID、内容 hash、token 类型和过期。登录 JWT 不能代替它。[app/workflows/operations/design_report/workflow_report_publication.py → render_published_workflow_report](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py#L1060) 再核对 Job/run/operation 完成、删除/移除状态、公开输出与节点输出一致、私有 active Document、精确 hash/version/ETag，才读存储。签名有效也不能让旧 token 绕过已删除/替换输出。
+
+token 失效/过期会得到 `401 REPORT_VIEW_TOKEN_INVALID`；身份不符/不可用映射为该路由的不泄露错误；真实存储故障可为 `503 REPORT_STORAGE_UNAVAILABLE`。应认证重读 Job，不把 query-token URL 当永久身份，也不把它写进诊断日志或手改 origin。
+
+## 6. 下载 PowerPoint {#presentation}
+
+`GET /v1/workflows/{design_job_id}/presentation` 进入 [app/workflows/api.py → download_design_presentation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L1190) 和 [app/workflows/operations/design_report/workflow_pptx_download.py → download_presentation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_pptx_download.py#L36)，使用同类 capability 和精确输出核验。它专门要求 `convert_design_report_to_pptx` operation、`presentation` 公开/节点绑定、PPTX MIME/owner/hash/version 一致，精确读字节后以附件返回，带 `Cache-Control: no-store`、`Referrer-Policy: no-referrer`、`X-Content-Type-Options: nosniff`。
+
+UI 的 [src/services/reportPresentation.ts → openReportPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/reportPresentation.ts#L8) 先刷新 Job，要求 completed 报告及 presentation Artifact，再调 [src/services/workflowDownload.ts → openWorkflowPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/workflowDownload.ts#L6)：检查 URL/有效期/MIME，下载到平台临时文件，调用 `uni.openDocument(...fileType: "pptx", showMenu: true)`。手机打开失败可能发生在导出成功后，属于平台/域名/运行时问题，不代表可以重新生成报告。
+
+## 兼容浏览路由
+
+### 历史 HTML 路由 {#report-compatibility}
+
+`GET /v1/design-jobs/{design_job_id}/report` 绑定同一个 `view_design_report`、query token 解码和精确发布核验。旧链接可指向它，不复活已删除模板编辑器，也不接受 template ID；HTTP 响应是授权后的已发布 HTML。
+
+### 历史 PPTX 路由 {#presentation-compatibility}
+
+`GET /v1/design-jobs/{design_job_id}/presentation` 绑定同一 `download_design_presentation` / `download_presentation`。路径叫法不改变产物身份或 token 边界。当前下载客户端打开服务端返回 URL，不自行猜别名。
+
+## 按检查点读一份报告 {#exercise}
+
+使用已有本地模拟报告，不发起收费生成。在表单 builder 对应内容页数、产品和模板顺序。沿一个 generated filename 找 `workflow_generated_sources`、child Job/run、完成图片输出、父 pin；再找根 `operation_runs` 的 `report`、`export` 节点，解释为什么候选 HTML 已存在但公开根仍未 completed。最后在 capability 代码中找到 claims hash、Document/output 相同 hash、精确 version 读取。浏览器链接过期应重读 Job，而不是新 POST。

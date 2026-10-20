@@ -1,5 +1,7 @@
 # REST API Index
 
+Start with [the source-reading course](/reference/system-walkthrough). This index links **every public route** to its actual FastAPI handler and a dedicated full-chain explanation: UI/repository or external trigger, authorization, service calls, database/Redis/storage changes, response and failure recovery.
+
 This page is a domain-oriented integration map. The [complete pinned REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md) is normative for exact fields, successful/replay statuses and every reachable domain error. Internal Admin and conditional mocks have different boundaries.
 
 ## Conventions
@@ -122,7 +124,7 @@ The explicit payment/refund `/reconcile` endpoints use the Douyin gateway; they 
 
 `/admin/*` uses browser sessions/CSRF and is excluded from public OpenAPI. Conditional `/mock/*` payment helpers and standalone mock provider servers are test interfaces. Read [OpenAPI boundaries](/reference/openapi), the [full REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md), and its per-endpoint error tables before implementing a new action.
 
-## Generated route index
+## Every API and its call chain {#generated-route-index}
 
 This inventory records declared default success statuses and deprecation metadata, not endpoint authorization or every runtime/replay response. Use the manual guidance above and the pinned REST contract for those semantics.
 

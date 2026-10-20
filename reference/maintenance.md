@@ -61,6 +61,12 @@ The check defaults to the commits in the version record. Comparing with a newer 
 
 The repository contains `get-started/`, `frontend/`, `backend/`, `admin/`, `deploy/`, `testing/`, `reference/` and mirrored `zh/` pages. Generated include snippets live under `.vitepress/generated/`; change the extractor rather than editing them manually.
 
+## Maintain an endpoint's learning chain
+
+When a public route changes, update its entry in `sources/traces/*.json` and the matching explicit `{#anchor}` in both languages. Each entry names the real UI/external trigger, actual FastAPI handler and relevant frontend/backend symbols. Explain the concrete service/transaction/queue/storage path, returned state and failure recovery; a link to the REST contract alone is insufficient. Keep numbered diagram messages aligned with the code navigation table.
+
+`pnpm docs:sources` resolves route handlers and Python definitions with AST parsing, locates referenced frontend bindings without executing code, and stores symbol locations/file hashes in `sources/contracts.json`. It also generates each API's full-chain link. `docs:check` rejects any public route without a bilingual explanation, a missing anchor, unverified symbol or unmapped handler. These facts prove consistency with the pinned audited revision; they do not automatically prove business semantics. A reviewer still follows the actual call chain.
+
 ## Validate before review
 
 ```bash
@@ -69,9 +75,9 @@ pnpm exec playwright install chromium
 pnpm docs:test:browser
 ```
 
-The first command runs tokenizer tests, content/source-reference checks, a production build, and checks of rendered links, fragments, assets, locale boundaries and emitted search indexes. The browser suite starts a docs preview on `127.0.0.1:4173`; this port is for documentation only and is unrelated to a backend test session. Stop a preview you own before running the suite; do not stop another person's process to free the port.
+The first command runs tokenizer/formatting/coverage tests, content/source-reference and full-chain checks, a production build, and checks of rendered links, fragments, assets, locale boundaries and emitted search indexes. The browser suite starts a docs preview on `127.0.0.1:4173`; this port is for documentation only and is unrelated to a backend test session. Stop a preview you own before running the suite; do not stop another person's process to free the port.
 
-Browser checks cover both languages, search results, keyboard interaction, deep-link reloads, mobile navigation and theme changes. Failure screenshots/traces are local ignored artifacts and are uploaded on CI failure. External links are not availability-gated on every PR, so transient network failures do not block documentation builds.
+Browser checks cover both languages, search results, keyboard interaction, deep-link reloads, mobile navigation and theme changes. It also parses every actual Mermaid fence with the installed browser renderer and checks the new endpoint index-to-chapter navigation. Failure screenshots/traces are local ignored artifacts and are uploaded on CI failure. External links are not availability-gated on every PR, so transient network failures do not block documentation builds.
 
 ## Search behavior
 

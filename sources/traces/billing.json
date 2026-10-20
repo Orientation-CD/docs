@@ -1,0 +1,490 @@
+[
+  {
+    "method": "GET",
+    "path": "/v1/billing/features",
+    "page": "reference/flows/payment-flow",
+    "anchor": "billing-features",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "billing_catalog"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/billingCatalog.ts",
+        "symbol": "billingCatalogRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/store/index.vue",
+        "symbol": "initialize"
+      }
+    ],
+    "trigger": {
+      "en": "Store entry loads the public catalog separately from the authenticated profile.",
+      "zh": "进入商店时，公开商品发现与已登录 profile 分开加载。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/billing/catalog",
+    "page": "reference/flows/payment-flow",
+    "anchor": "legacy-catalog",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "billing_catalog"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Deprecated public discovery alias; no current Store caller, same canonical billing_catalog handler.",
+      "zh": "公共发现兼容别名，当前商店不调用；进入同一个 billing_catalog 处理函数。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/design-workflows",
+    "page": "reference/flows/payment-flow",
+    "anchor": "legacy-design-workflows",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "billing_catalog"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Deprecated public discovery alias; no current Store caller, same canonical billing_catalog handler.",
+      "zh": "公共发现兼容别名，当前商店不调用；进入同一个 billing_catalog 处理函数。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/subscriptions",
+    "page": "reference/flows/payment-flow",
+    "anchor": "create-subscription",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "create_subscription"
+      },
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "serialize_billing_order_creation"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/store/index.vue",
+        "symbol": "runCheckout"
+      },
+      {
+        "path": "src/pkg-account/repositories/purchaseRequest.ts",
+        "symbol": "buildSubscriptionPurchaseRequest"
+      },
+      {
+        "path": "src/pkg-account/repositories/purchaseRequest.ts",
+        "symbol": "executePurchaseRequest"
+      }
+    ],
+    "trigger": {
+      "en": "Confirm a subscription card in personal Store; create a fixed-period pending order before opening the cashier.",
+      "zh": "个人商店确认购买订阅卡；先创建固定期限待付订单，再拉收银台。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/token-purchases",
+    "page": "reference/flows/payment-flow",
+    "anchor": "create-token-purchase",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "create_token_purchase"
+      },
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "pending_token_purchase_count"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/store/index.vue",
+        "symbol": "runCheckout"
+      },
+      {
+        "path": "src/pkg-account/repositories/purchaseRequest.ts",
+        "symbol": "buildTokenPurchaseRequest"
+      },
+      {
+        "path": "src/pkg-account/repositories/purchaseRequest.ts",
+        "symbol": "executePurchaseRequest"
+      }
+    ],
+    "trigger": {
+      "en": "Confirm a Token package card in personal Store.",
+      "zh": "在个人商店确认购买 Token 加油包卡片。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/payments",
+    "page": "reference/flows/payment-flow",
+    "anchor": "payment-history",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "payment_history"
+      },
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "payment_response"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/paymentHistory.ts",
+        "symbol": "paymentHistoryRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/orders/index.vue",
+        "symbol": "load"
+      }
+    ],
+    "trigger": {
+      "en": "Open Payment records; filter by current platform type and JWT owner.",
+      "zh": "打开支付记录，按当前平台 type 和 JWT 用户读取。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/payments/{payment_order_id}",
+    "page": "reference/flows/payment-flow",
+    "anchor": "payment-detail",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "payment_detail"
+      },
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "payment_response"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/paymentReconciliation.ts",
+        "symbol": "paymentReconciliationRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/orders/index.vue",
+        "symbol": "load"
+      }
+    ],
+    "trigger": {
+      "en": "WeChat local-status polling and selected-order deep link; no provider query in this GET.",
+      "zh": "微信本地状态轮询及指定订单深链接；该 GET 不查询平台。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/payments/{payment_order_id}/pay",
+    "page": "reference/flows/payment-flow",
+    "anchor": "payment-resume",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "resume_owned_payment"
+      },
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "refreshed_checkout_response"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/paymentResume.ts",
+        "symbol": "paymentResumeRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/orders/index.vue",
+        "symbol": "resumePayment"
+      }
+    ],
+    "trigger": {
+      "en": "Payment records Pay/Continue resumes the same owned, unexpired order and original channel.",
+      "zh": "支付记录的支付/继续支付，续付同一笔本人、未过期、原渠道订单。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/payments/{payment_order_id}/close",
+    "page": "reference/flows/payment-flow",
+    "anchor": "payment-close",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "close_owned_payment"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "close_payment_order"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/paymentClose.ts",
+        "symbol": "paymentCloseRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/orders/index.vue",
+        "symbol": "executeClose"
+      }
+    ],
+    "trigger": {
+      "en": "Confirm Close order in WeChat payment records; Douyin active closure is explicitly unsupported.",
+      "zh": "微信支付记录确认关闭订单；明确不支持抖音主动关单。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/payments/{payment_order_id}/reconcile",
+    "page": "reference/douyin-payment",
+    "anchor": "payment-reconcile",
+    "backend": [
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "reconcile_payment"
+      },
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "reconcile_order"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/paymentReconciliation.ts",
+        "symbol": "paymentReconciliationRepository"
+      },
+      {
+        "path": "src/pkg-account/services/payment.ts",
+        "symbol": "requestDouyinPayment"
+      }
+    ],
+    "trigger": {
+      "en": "Douyin confirmation poller and duplicate tt.requestOrder recovery query trusted provider evidence.",
+      "zh": "抖音确认轮询和 tt.requestOrder 重复订单恢复，查询可信平台证据。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/payments/{payment_order_id}/refunds",
+    "page": "reference/flows/refund-flow",
+    "anchor": "request-refund",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "request_payment_refund"
+      },
+      {
+        "path": "app/billing/finance.py",
+        "symbol": "create_refund_order"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authorized API caller only; paymentRefundRepository.create exists but no current page exposes Apply for refund.",
+      "zh": "仅授权 API 调用；存在 paymentRefundRepository.create，但当前页面没有申请退款入口。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/refunds",
+    "page": "reference/flows/refund-flow",
+    "anchor": "refund-history",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "refund_history"
+      },
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "refund_response"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/paymentRefund.ts",
+        "symbol": "paymentRefundRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/orders/index.vue",
+        "symbol": "load"
+      }
+    ],
+    "trigger": {
+      "en": "Douyin Payment records loads owned refund states; the backend read is not channel-restricted.",
+      "zh": "抖音支付记录加载本人退款；后端读取不限渠道。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/refunds/{refund_order_id}/reconcile",
+    "page": "reference/flows/refund-flow",
+    "anchor": "refund-reconcile",
+    "backend": [
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "reconcile_owned_refund"
+      },
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "reconcile_refund"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/paymentRefund.ts",
+        "symbol": "paymentRefundRepository"
+      },
+      {
+        "path": "src/pkg-account/pages/orders/index.vue",
+        "symbol": "checkRefund"
+      }
+    ],
+    "trigger": {
+      "en": "Refresh progress for an existing pending Douyin refund.",
+      "zh": "已有 pending 抖音退款点击刷新进度。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/webhooks/wechat/payments",
+    "page": "reference/flows/payment-flow",
+    "anchor": "wechat-payment-webhook",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "wechat_pay_notification"
+      },
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "receive_wechat_event"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "complete_payment_order"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "WeChat server signed APIv3 payment callback; no mini-program HTTP caller or JWT.",
+      "zh": "微信服务器签名 APIv3 支付回调，无小程序 HTTP 调用或 JWT。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/webhooks/wechat/refunds",
+    "page": "reference/flows/refund-flow",
+    "anchor": "wechat-refund-webhook",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "wechat_pay_notification"
+      },
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "receive_wechat_event"
+      },
+      {
+        "path": "app/billing/finance.py",
+        "symbol": "complete_refund_order"
+      },
+      {
+        "path": "app/billing/finance.py",
+        "symbol": "fail_refund_order"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "WeChat server signed/encrypted refund result; no mini-program HTTP caller.",
+      "zh": "微信服务器签名加密退款结果，无小程序 HTTP 调用。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/webhooks/douyin/payment",
+    "page": "reference/douyin-payment",
+    "anchor": "douyin-payment-webhook",
+    "backend": [
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "douyin_notification"
+      },
+      {
+        "path": "app/billing/douyin_pay.py",
+        "symbol": "verified_notification"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "complete_payment_order"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Douyin platform RSA-signed payment notification; no mini-program HTTP caller.",
+      "zh": "抖音平台 RSA 签名支付通知，无小程序 HTTP 调用。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/webhooks/douyin/refund",
+    "page": "reference/douyin-payment",
+    "anchor": "douyin-refund-webhook",
+    "backend": [
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "douyin_notification"
+      },
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "apply_platform_refund"
+      },
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "reconcile_refund"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Douyin platform refund result plus canonical server query; no mini-program HTTP caller.",
+      "zh": "抖音平台退款结果加服务端规范查询，无小程序 HTTP 调用。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/webhooks/douyin/refund-application",
+    "page": "reference/douyin-payment",
+    "anchor": "douyin-refund-application-webhook",
+    "backend": [
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "douyin_notification"
+      },
+      {
+        "path": "app/billing/douyin_api.py",
+        "symbol": "apply_platform_refund"
+      },
+      {
+        "path": "app/billing/douyin_callback_routing.py",
+        "symbol": "forward_refund_application"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Platform after-sales pre_create_refund extension; current mini program has no application button.",
+      "zh": "平台售后 pre_create_refund 扩展，当前小程序无申请按钮。"
+    }
+  }
+]
