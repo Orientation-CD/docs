@@ -28,7 +28,7 @@ The client uses the matching platform bridge: WeChat payment parameters versus D
 
 WeChat callbacks use APIv3 signature verification; Douyin uses RSA over raw request bytes and the Byte signature headers. Verify provider/application/order/amount identity and event idempotency before crediting tokens or activating a fixed-period subscription. A duplicate callback must not credit twice. Reconciliation queries trusted provider evidence through its channel-specific path. The explicit mobile `/reconcile` endpoints are Douyin-specific; do not use them as a generic WeChat manual reconciliation interface.
 
-`expires_at` ends the payable window; `close_after_at` includes the server's 30-second grace. Before expiry a pending order can show Pay/Resume. After expiry, disable payment and show confirming while polling. The backend's expiry/reconciliation task determines closure. Never mark an order `closed` solely because the client clock passed expiry.
+`expires_at` ends the payable window; the server-returned `close_after_at` includes the configured closing grace period. Use these returned timestamps instead of calculating a fixed interval on the client. Before expiry a pending order can show Pay/Resume. After expiry, disable payment and show confirming while polling. The backend's expiry/reconciliation task determines closure. Never mark an order `closed` solely because the client clock passed expiry.
 
 Poll while the payment screen is visible and refresh history on entry/resume. Stop at `paid`, `closed` or `refunded`; refreshing every hidden page indefinitely creates unnecessary load. After settlement, refresh account/workspace balances and entitlement snapshots.
 

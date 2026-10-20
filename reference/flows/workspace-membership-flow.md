@@ -8,7 +8,7 @@ An owner can invite a specific phone identity, or create a transferable share-ca
 
 For a share invitation:
 
-1. Owner calls `POST /v1/workspaces/{workspace_id}/share-invitations` with its required action key and empty body, receiving the one-time plaintext bearer and invitation identity/expiry.
+1. Owner calls `POST /v1/workspaces/{workspace_id}/share-invitations` with its required action key and the JSON body `{}` (`Content-Type: application/json`), receiving the one-time plaintext bearer and invitation identity/expiry. Omitting the body entirely is invalid.
 2. The recipient submits the bearer in the body to public `POST /v1/share-invitations/preview`. Display safe workspace/inviter/availability metadata; do not grant access based on preview.
 3. After authentication/consent, call `POST /v1/share-invitations/accept` under the recipient's account with the required idempotency key. The transaction rechecks token state/expiry, active enterprise, seat limit and membership rules.
 4. Refresh profile/workspaces and select the resulting accessible workspace. Replayed accepted actions must not add another member/seat.

@@ -8,7 +8,7 @@ owner 可定向邀请手机号，也可创建可转发分享卡片。两者有�
 
 分享链路：
 
-1. owner 向 `POST /v1/workspaces/{workspace_id}/share-invitations` 传动作 key 与空 body，得到一次性 bearer、身份与过期。
+1. owner 向 `POST /v1/workspaces/{workspace_id}/share-invitations` 传动作 key 和 JSON 请求体 `{}`（`Content-Type: application/json`），得到一次性 bearer、身份与过期。不能完全省略请求体。
 2. 接收者把 bearer 放 body 调公开 `POST /v1/share-invitations/preview`，仅展示安全的空间/邀请者/可用性信息，预览不授访问。
 3. 登录/同意后，以接收账号向 `POST /v1/share-invitations/accept` 提交要求的幂等 key。事务重新检查 token/过期、企业活跃、座位与成员规则。
 4. 刷新资料/空间，选择可访问目标。重放不能重复添加成员/占座。

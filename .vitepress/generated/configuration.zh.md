@@ -11,7 +11,7 @@
 | `ENVIRONMENT` | `Literal['development', 'test', 'staging', 'production']` | `development` | `development` |
 | `DATABASE_URL` | `str` | `postgresql+asyncpg://floorplan:floorplan@localhost:5432/floorplan` | `postgresql+asyncpg://floorplan:floorplan@db:5432/floorplan` |
 | `DATABASE_ECHO` | `bool` | `false` | — |
-| `PPTX_CONVERTER_IMAGE` | `str &#124; None` | `null` | — |
+| `PPTX_CONVERTER_IMAGE` | `str \| None` | `null` | — |
 | `PPTX_CONVERTER_MODE` | `Literal['subprocess', 'docker']` | `subprocess` | — |
 | `PPTX_CONVERTER_SECCOMP_PROFILE` | `str` | `/opt/yuanzhu/pptx/chromium-seccomp.json` | — |
 | `PPTX_CONVERTER_DOCKER_EXECUTABLE` | `str` | `/usr/local/bin/docker` | — |
@@ -91,8 +91,8 @@
 | `REFERRAL_RATE_LIMIT_WINDOW_SECONDS` | `int` | `300` | `300` |
 | `LEGAL_DOCUMENTS_LOCALE` | `str` | `zh-CN` | `zh-CN` |
 | `LEGAL_DOCUMENTS_REQUIRED` | `bool` | `true` | `true` |
-| `LEGAL_DOCUMENTS_PUBLIC_BASE_URL` | `AnyHttpUrl &#124; None` | `null` | — |
-| `PUBLIC_API_BASE_URL` | `AnyHttpUrl &#124; None` | `null` | — |
+| `LEGAL_DOCUMENTS_PUBLIC_BASE_URL` | `AnyHttpUrl \| None` | `null` | — |
+| `PUBLIC_API_BASE_URL` | `AnyHttpUrl \| None` | `null` | — |
 | `VOICE_UPLOAD_ENABLED` | `bool` | `true` | `true` |
 | `VOICE_UPLOAD_SESSION_SECONDS` | `int` | `1800` | `1800` |
 | `VOICE_UPLOAD_RETRIEVAL_SECONDS` | `int` | `86400` | `86400` |
@@ -106,8 +106,8 @@
 | `SEED_DEMO_BILLING_CATALOG` | `bool` | `false` | `true` |
 | `ADMIN_SESSION_SECRET` | `SecretStr` | `<secret; see source>` | `<secret example redacted>` |
 | `ADMIN_SESSION_HTTPS_ONLY` | `bool` | `false` | `false` |
-| `ADMIN_PHONE` | `str &#124; None` | `null` | `+8613812345678` |
-| `ADMIN_PASSWORD` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
+| `ADMIN_PHONE` | `str \| None` | `null` | `+8613812345678` |
+| `ADMIN_PASSWORD` | `SecretStr \| None` | `null` | `<secret example redacted>` |
 | `ADMIN_DISPLAY_NAME` | `str` | `Administrator` | `Administrator` |
 | `CONFIG_ENCRYPTION_KEY` | `SecretStr` | `<secret; see source>` | `<secret example redacted>` |
 | `REDIS_URL` | `str` | `redis://localhost:6379/0` | `redis://redis:6379/0` |
@@ -117,14 +117,14 @@
 | `MAX_REQUEST_BYTES` | `int` | `23068672` | `23068672` |
 | `MAX_IMAGE_PIXELS` | `int` | `40000000` | `40000000` |
 | `PROVIDER_ADAPTER` | `Literal['mock_async', 'seedream', 'doubao_text', 'gpt_image']` | `mock_async` | `mock_async` |
-| `PROVIDER_MODEL` | `str &#124; None` | `null` | `` |
+| `PROVIDER_MODEL` | `str \| None` | `null` | `""` |
 | `PROVIDER_IMAGE_SIZE` | `str` | `1.5K` | `1.5K` |
 | `PROVIDER_OUTPUT_FORMAT` | `Literal['jpeg', 'png']` | `jpeg` | `jpeg` |
 | `PROVIDER_WATERMARK` | `bool` | `false` | `false` |
 | `PROVIDER_BASE_URL` | `AnyHttpUrl` | `https://image-provider.example.com` | `http://mock-image-provider:8082` |
 | `PROVIDER_SUBMIT_PATH` | `str` | `/v1/renders` | `/v1/renders` |
 | `PROVIDER_STATUS_PATH` | `str` | `/v1/renders/{job_id}` | `/v1/renders/{job_id}` |
-| `PROVIDER_API_KEY` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
+| `PROVIDER_API_KEY` | `SecretStr \| None` | `null` | `<secret example redacted>` |
 | `PROVIDER_AUTH_HEADER` | `str` | `Authorization` | — |
 | `PROVIDER_AUTH_SCHEME` | `str` | `Bearer` | — |
 | `PROVIDER_OUTPUT_HOSTS` | `list[str]` | `<required or default factory; see source>` | `["object-storage.example.com"]` |
@@ -141,7 +141,7 @@
 | `PROVIDER_HTTP_KEEPALIVE_EXPIRY_SECONDS` | `float` | `30` | `30` |
 | `MOCK_IMAGE_PROVIDER_BUCKET` | `str` | `mockimageprovider` | `replace-with-private-cloud-bucket` |
 | `MOCK_IMAGE_PROVIDER_OBJECT_KEY` | `str` | `rendered_floorplan.jpeg` | `mock-provider/rendered_floorplan.jpeg` |
-| `MOCK_IMAGE_PROVIDER_S3_PRESIGN_ENDPOINT` | `str &#124; None` | `null` | — |
+| `MOCK_IMAGE_PROVIDER_S3_PRESIGN_ENDPOINT` | `str \| None` | `null` | — |
 | `MOCK_IMAGE_PROVIDER_SEED_PATH` | `Path` | `Path('/service/app/assets/rendered_floorplan.jpeg')` | — |
 | `MOCK_IMAGE_PROVIDER_CONTROLS_ENABLED` | `bool` | `false` | `false` |
 | `WECHAT_PAY_MODE` | `Literal['disabled', 'mock', 'live']` | `mock` | `mock` |
@@ -156,47 +156,47 @@
 | `WECHAT_STABLE_ACCESS_TOKEN_URL` | `AnyHttpUrl` | `https://api.weixin.qq.com/cgi-bin/stable_token` | `http://mock-wechat-identity-provider:8083/cgi-bin/stable_token` |
 | `WECHAT_PHONE_NUMBER_URL` | `AnyHttpUrl` | `https://api.weixin.qq.com/wxa/business/getuserphonenumber` | `http://mock-wechat-identity-provider:8083/wxa/business/getuserphonenumber` |
 | `WECHAT_AUTH_REQUEST_TIMEOUT_SECONDS` | `float` | `30` | `30` |
-| `WECHAT_APP_ID` | `str &#124; None` | `null` | `wxmocknativeapp0001` |
-| `WECHAT_MINI_PROGRAM_APP_SECRET` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
-| `DOUYIN_APP_ID` | `str &#124; None` | `null` | `` |
-| `DOUYIN_MINI_PROGRAM_APP_SECRET` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
+| `WECHAT_APP_ID` | `str \| None` | `null` | `wxmocknativeapp0001` |
+| `WECHAT_MINI_PROGRAM_APP_SECRET` | `SecretStr \| None` | `null` | `<secret example redacted>` |
+| `DOUYIN_APP_ID` | `str \| None` | `null` | `""` |
+| `DOUYIN_MINI_PROGRAM_APP_SECRET` | `SecretStr \| None` | `null` | `<secret example redacted>` |
 | `DOUYIN_CODE_TO_SESSION_URL` | `AnyHttpUrl` | `https://developer.toutiao.com/api/apps/v2/jscode2session` | `https://developer.toutiao.com/api/apps/v2/jscode2session` |
 | `DOUYIN_CLIENT_TOKEN_URL` | `AnyHttpUrl` | `https://open.douyin.com/oauth/client_token/` | `https://open.douyin.com/oauth/client_token/` |
 | `DOUYIN_PHONE_NUMBER_URL` | `AnyHttpUrl` | `https://open.douyin.com/api/apps/v1/get_phonenumber_info/` | `https://open.douyin.com/api/apps/v1/get_phonenumber_info/` |
-| `DOUYIN_APP_PRIVATE_KEY` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
-| `DOUYIN_APP_PRIVATE_KEY_FILE` | `Path &#124; None` | `null` | `<secret example redacted>` |
+| `DOUYIN_APP_PRIVATE_KEY` | `SecretStr \| None` | `null` | `<secret example redacted>` |
+| `DOUYIN_APP_PRIVATE_KEY_FILE` | `Path \| None` | `null` | `<secret example redacted>` |
 | `DOUYIN_PAY_MODE` | `Literal['mock', 'live']` | `mock` | `mock` |
-| `DOUYIN_PAY_MERCHANT_ID` | `str &#124; None` | `null` | `` |
-| `DOUYIN_APP_KEY_VERSION` | `str &#124; None` | `null` | `` |
-| `DOUYIN_PLATFORM_PUBLIC_KEY` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
-| `DOUYIN_PLATFORM_PUBLIC_KEY_FILE` | `Path &#124; None` | `null` | `` |
-| `DOUYIN_PAYMENT_NOTIFY_URL` | `str &#124; None` | `null` | `` |
-| `DOUYIN_REFUND_NOTIFY_URL` | `str &#124; None` | `null` | `` |
+| `DOUYIN_PAY_MERCHANT_ID` | `str \| None` | `null` | `""` |
+| `DOUYIN_APP_KEY_VERSION` | `str \| None` | `null` | `""` |
+| `DOUYIN_PLATFORM_PUBLIC_KEY` | `SecretStr \| None` | `null` | `<secret example redacted>` |
+| `DOUYIN_PLATFORM_PUBLIC_KEY_FILE` | `Path \| None` | `null` | `""` |
+| `DOUYIN_PAYMENT_NOTIFY_URL` | `str \| None` | `null` | `""` |
+| `DOUYIN_REFUND_NOTIFY_URL` | `str \| None` | `null` | `""` |
 | `DOUYIN_REFUND_APPLICATION_FORWARD_ENABLED` | `bool` | `false` | `false` |
-| `DOUYIN_REFUND_APPLICATION_FALLBACK_URL` | `str &#124; None` | `null` | `` |
+| `DOUYIN_REFUND_APPLICATION_FALLBACK_URL` | `str \| None` | `null` | `""` |
 | `DOUYIN_PAY_REQUEST_TIMEOUT_SECONDS` | `float` | `30` | `30` |
 | `DOUYIN_AUTH_REQUEST_TIMEOUT_SECONDS` | `float` | `30` | `30` |
-| `WECHAT_PAY_MERCHANT_ID` | `str &#124; None` | `null` | `1900000109` |
-| `WECHAT_PAY_API_V3_KEY` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
-| `WECHAT_PAY_MERCHANT_SERIAL` | `str &#124; None` | `null` | `MOCK_MERCHANT_CERT_SERIAL` |
-| `WECHAT_PAY_MERCHANT_PRIVATE_KEY` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
-| `WECHAT_PAY_MERCHANT_PRIVATE_KEY_FILE` | `Path &#124; None` | `null` | `<secret example redacted>` |
-| `WECHAT_PAY_PUBLIC_KEY_ID` | `str &#124; None` | `null` | `PUB_KEY_ID_MOCK_001` |
-| `WECHAT_PAY_PUBLIC_KEY` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
-| `WECHAT_PAY_PUBLIC_KEY_FILE` | `Path &#124; None` | `null` | `tests/resources/keys/mock_wechat_public_key.pem` |
-| `WECHAT_PAYMENT_NOTIFY_URL` | `str &#124; None` | `null` | `` |
+| `WECHAT_PAY_MERCHANT_ID` | `str \| None` | `null` | `1900000109` |
+| `WECHAT_PAY_API_V3_KEY` | `SecretStr \| None` | `null` | `<secret example redacted>` |
+| `WECHAT_PAY_MERCHANT_SERIAL` | `str \| None` | `null` | `MOCK_MERCHANT_CERT_SERIAL` |
+| `WECHAT_PAY_MERCHANT_PRIVATE_KEY` | `SecretStr \| None` | `null` | `<secret example redacted>` |
+| `WECHAT_PAY_MERCHANT_PRIVATE_KEY_FILE` | `Path \| None` | `null` | `<secret example redacted>` |
+| `WECHAT_PAY_PUBLIC_KEY_ID` | `str \| None` | `null` | `PUB_KEY_ID_MOCK_001` |
+| `WECHAT_PAY_PUBLIC_KEY` | `SecretStr \| None` | `null` | `<secret example redacted>` |
+| `WECHAT_PAY_PUBLIC_KEY_FILE` | `Path \| None` | `null` | `tests/resources/keys/mock_wechat_public_key.pem` |
+| `WECHAT_PAYMENT_NOTIFY_URL` | `str \| None` | `null` | `""` |
 | `STORAGE_BACKEND` | `Literal['local', 's3']` | `local` | `s3` |
 | `LOCAL_STORAGE_PATH` | `Path` | `Path('/tmp/floorplan-designer')` | `/data` |
 | `S3_BUCKET` | `str` | `backend` | `replace-with-private-cloud-bucket` |
 | `S3_REGION` | `str` | `us-east-1` | `cn-chengdu` |
-| `S3_ENDPOINT` | `str &#124; None` | `null` | `https://s3.oss-cn-chengdu-internal.aliyuncs.com` |
-| `S3_PRESIGN_ENDPOINT` | `str &#124; None` | `null` | `https://s3.oss-cn-chengdu.aliyuncs.com` |
-| `S3_ACCESS_KEY` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
-| `S3_SECRET_KEY` | `SecretStr &#124; None` | `null` | `<secret example redacted>` |
+| `S3_ENDPOINT` | `str \| None` | `null` | `https://s3.oss-cn-chengdu-internal.aliyuncs.com` |
+| `S3_PRESIGN_ENDPOINT` | `str \| None` | `null` | `https://s3.oss-cn-chengdu.aliyuncs.com` |
+| `S3_ACCESS_KEY` | `SecretStr \| None` | `null` | `<secret example redacted>` |
+| `S3_SECRET_KEY` | `SecretStr \| None` | `null` | `<secret example redacted>` |
 | `S3_SIGNATURE_VERSION` | `Literal['s3', 's3v4']` | `s3v4` | `s3` |
 | `S3_PRESIGN_SECONDS` | `int` | `3600` | `3600` |
 | `S3_UPLOAD_FORM_SECONDS` | `int` | `900` | `900` |
-| `S3_SERVER_SIDE_ENCRYPTION` | `str &#124; None` | `null` | `AES256` |
+| `S3_SERVER_SIDE_ENCRYPTION` | `str \| None` | `null` | `AES256` |
 | `S3_FORCE_PATH_STYLE` | `bool` | `true` | `false` |
 | `S3_MULTIPART_THRESHOLD_BYTES` | `int` | `8388608` | `8388608` |
 | `S3_TRANSFER_CHUNK_BYTES` | `int` | `8388608` | `8388608` |
@@ -217,8 +217,8 @@
 | `VITE_MINI_PROGRAM_AUTH_MODE` | — |
 | `VITE_MINI_PROGRAM_PLATFORM` | — |
 | `VITE_PAYMENT_MODE` | `mock` |
-| `VITE_REPORT_WEB_ORIGIN` | `` |
-| `VITE_RESULT_STORAGE_ORIGINS` | `` |
+| `VITE_REPORT_WEB_ORIGIN` | `""` |
+| `VITE_RESULT_STORAGE_ORIGINS` | `""` |
 | `VITE_SHOW_BACKEND_STATUS` | `true` |
 | `VITE_WECHAT_AUTH_MODE` | `mock` |
 | `VITE_WECHAT_CORP_ID` | — |

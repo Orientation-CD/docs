@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import { settingsWithExamples } from './source-utils.mjs'
+import { settingsWithExamples, markdownCodeCell } from './source-utils.mjs'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const args = process.argv.slice(2)
@@ -64,7 +64,7 @@ const revisions = { schemaVersion: 1, verifiedAt: previous.verifiedAt, docsBaseC
 }])) }
 const json = (value) => JSON.stringify(value, null, 2) + '\n'
 const outputs = { 'sources/revisions.json': json(revisions), 'sources/contracts.json': json(snapshot) }
-const cell = (value) => '`' + String(typeof value === 'object' ? JSON.stringify(value) : value).replaceAll('|', '&#124;').replaceAll('`', '&#96;').replaceAll('\n', ' ') + '`'
+const cell = markdownCodeCell
 for (const locale of ['en', 'zh']) {
   const zh = locale === 'zh'
   const sourceRows = Object.entries(revisions.repositories).map(([key, repo]) => `| ${key} | [${repo.repository}](https://github.com/${repo.repository}/tree/${repo.commit}) | ${cell(repo.branch)} | ${cell(repo.commit)} |`)
