@@ -87,6 +87,14 @@ The pinned Mermaid plugin has a small lifecycle patch: detailed search temporari
 
 Keep the tokenizer self-contained: VitePress serializes functions with `toString()` and restores them in the browser. Captured imports, closures or runtime-dependent segmentation can create build/browser mismatches. Migration pages use `search: false` to avoid old guidance competing with current results.
 
+## Reading diagrams on different screens
+
+Documentation pages use the available window width. Ordinary paragraphs keep a comfortable line length; diagrams, tables and code can use the wider content area. On narrower desktops the section outline moves into the top **On this page** menu.
+
+Diagrams initially fit the content width on desktop and keep their original size on phones and tablets. Use **Fit width** for an overview, **Actual size** for the original text size, or the zoom buttons for details. **Full screen** opens a larger viewer with the same controls; tall diagrams scroll vertically. Press Escape or **Close** to return to the page. A focused diagram also supports horizontal scrolling with the arrow keys.
+
+When changing the theme, keep these behaviors covered by the responsive layout and diagram browser tests. Check a narrow phone, laptop and wide desktop; widening the page must not introduce page-level horizontal scrolling or shrink mobile diagram text by default.
+
 ## Publish
 
 Pull requests run checks and browser tests. Pushes to `main` and manual runs on `main` can publish the checked artifact to GitHub Pages. Deployment is restricted to `main`; review and merge remain team actions. Full Git history is checked out so page timestamps reflect their own commits.

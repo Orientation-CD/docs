@@ -3,7 +3,7 @@ import { withMermaid } from 'vitepress-plugin-mermaid'
 import { navigation, sidebar } from './navigation.mjs'
 import { tokenize } from './search.mjs'
 
-export default withMermaid(defineConfig({
+const config = withMermaid(defineConfig({
   base: '/docs/',
   cleanUrls: true,
   lastUpdated: true,
@@ -73,3 +73,14 @@ export default withMermaid(defineConfig({
     },
   },
 }))
+
+// The plugin's bare CJS includes assume hoisted dependencies and predate
+// Mermaid 11. Prebundle its actual import entry so all nested CommonJS modules
+// receive browser interop under pnpm, including dynamically loaded diagrams.
+const legacyMermaidIncludes = new Set(['@braintree/sanitize-url', 'dayjs', 'debug', 'cytoscape-cose-bilkent', 'cytoscape'])
+config.vite!.optimizeDeps!.include = [
+  ...config.vite!.optimizeDeps!.include!.filter(dependency => !legacyMermaidIncludes.has(dependency)),
+  'mermaid',
+]
+
+export default config

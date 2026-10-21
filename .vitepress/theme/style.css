@@ -19,31 +19,5 @@
   .vp-doc th, .vp-doc td { padding: 8px 10px; }
 }
 
-/* Keep dense call chains at Mermaid's natural size within the reading column. */
-.VPDoc main .vp-doc .diagram-scroll {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-inline: contain;
-  padding: 12px 0;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 6px;
-}
-.VPDoc main .vp-doc .diagram-scroll:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 3px;
-}
-.VPDoc main .vp-doc .diagram-scroll > svg {
-  display: block;
-  flex-shrink: 0;
-  margin-inline: auto;
-}
-.VPDoc main .vp-doc .diagram-scroll-hint {
-  margin: 12px 0 8px;
-  color: var(--vp-c-text-2);
-  font-size: .82rem;
-  line-height: 1.6;
-}
 /* Source maps use long paths/symbols. Permit wrapping without widening cells. */
 .vp-doc :is(th, td) a { overflow-wrap: anywhere; }
