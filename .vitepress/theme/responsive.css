@@ -1,0 +1,172 @@
+/* Use the window for technical content instead of VitePress's centered book
+ * column. Keep the home page's existing, bounded card layout. */
+:root {
+  --vp-sidebar-width: 272px;
+  --docs-page-gutter: 24px;
+  --docs-outline-width: 224px;
+  --docs-outline-gap: 32px;
+  --docs-prose-width: 96ch;
+}
+
+#VPContent .VPDoc {
+  padding: 32px var(--docs-page-gutter) 96px;
+}
+
+#VPContent .VPDoc > .container {
+  display: block;
+  width: 100%;
+  max-width: none;
+}
+
+#VPContent .VPDoc > .container > .content {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+#VPContent .VPDoc .content-container {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+
+#VPContent .VPDoc > .container > .aside {
+  display: none;
+}
+
+/* Shorter text lines aid reading without squeezing diagrams, tables and code
+ * back into the same narrow column. Section rules still span the content. */
+#VPContent .vp-doc > :is(p, ul, ol, blockquote),
+#VPContent .vp-doc > div > :is(p, ul, ol, blockquote) {
+  max-width: var(--docs-prose-width);
+  overflow-wrap: anywhere;
+}
+
+#VPContent .vp-doc table {
+  max-width: 100%;
+}
+
+/* The five main sections need more space than VitePress's default 768px
+ * navbar breakpoint allows, especially with the longer English labels. Keep
+ * search and the language/appearance flyout beside the menu on small laptops. */
+@media (max-width: 1279px) {
+  .VPNavBar .VPNavBarMenu {
+    display: none;
+  }
+
+  .VPNavBar .VPNavBarHamburger {
+    display: flex;
+  }
+
+  .VPNav .VPNavScreen {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --docs-page-gutter: 32px;
+  }
+
+  #VPContent .VPDoc {
+    padding-top: 48px;
+    padding-bottom: 128px;
+  }
+}
+
+@media (min-width: 960px) {
+  /* Override every matching 1440px container calculation together: changing
+   * only the article leaves the sidebar and header stranded in outer gutters. */
+  .Layout .VPContent.has-sidebar {
+    padding-right: 0;
+    padding-left: var(--vp-sidebar-width);
+  }
+
+  .Layout .VPSidebar {
+    width: var(--vp-sidebar-width);
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .Layout .VPSidebar > .curtain {
+    margin-right: -24px;
+    margin-left: -24px;
+  }
+
+  .VPNavBar.has-sidebar > .wrapper > .container > .title {
+    width: var(--vp-sidebar-width);
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .VPNavBar.has-sidebar > .wrapper > .container > .content {
+    min-width: 0;
+    padding-right: var(--docs-page-gutter);
+    padding-left: var(--vp-sidebar-width);
+  }
+
+  .VPNavBar.has-sidebar > .divider {
+    padding-left: var(--vp-sidebar-width);
+  }
+
+  .Layout .VPLocalNav.has-sidebar {
+    padding-left: var(--vp-sidebar-width);
+  }
+
+  .VPLocalNav > .container {
+    justify-content: flex-end;
+  }
+
+  .VPLocalNavOutlineDropdown {
+    padding-right: var(--docs-page-gutter);
+    padding-left: var(--docs-page-gutter);
+  }
+
+  .VPLocalNavOutlineDropdown > .items {
+    right: var(--docs-page-gutter);
+    left: auto;
+    width: min(360px, calc(100vw - var(--vp-sidebar-width) - 64px));
+  }
+
+  #VPContent .VPDoc {
+    padding-bottom: 64px;
+  }
+}
+
+/* Leave the article its full width on laptops. The section menu remains
+ * available at the top while the persistent right outline is hidden. */
+@media (min-width: 1280px) and (max-width: 1599px) {
+  .Layout .VPLocalNav:not(.empty) {
+    display: block;
+  }
+}
+
+@media (min-width: 1600px) {
+  #VPContent .VPDoc > .container {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  #VPContent .VPDoc > .container > .content {
+    flex: 1 1 0;
+    order: 1;
+  }
+
+  #VPContent .VPDoc > .container > .aside {
+    display: block;
+    flex: 0 0 calc(var(--docs-outline-width) + var(--docs-outline-gap));
+    order: 2;
+    width: calc(var(--docs-outline-width) + var(--docs-outline-gap));
+    max-width: none;
+    padding-right: 0;
+    padding-left: var(--docs-outline-gap);
+  }
+
+  #VPContent .VPDoc .aside-container,
+  #VPContent .VPDoc .aside-curtain {
+    width: var(--docs-outline-width);
+  }
+}
