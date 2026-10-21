@@ -4,6 +4,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { settingsWithExamples, markdownCodeCell } from './source-utils.mjs'
+import { loadTraces, evidenceKey, frontendSymbolLine, traceKey } from './trace-utils.mjs'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const args = process.argv.slice(2)
@@ -34,6 +35,23 @@ if (version[0] < 3 || version[0] === 3 && version[1] < 12) throw new Error('Sour
 const facts = JSON.parse(execFileSync(python, [path.join(root, 'scripts/extract-source-facts.py')], {
   input: JSON.stringify({ files: repos.backend.files }), encoding: 'utf8', maxBuffer: 32 * 1024 * 1024,
 }))
+const traces = await loadTraces(root)
+const traceEvidence = new Map()
+for (const trace of traces) {
+  for (const repository of ['backend', 'frontend']) {
+    for (const reference of trace[repository]) {
+      const key = evidenceKey(repository, reference)
+      if (traceEvidence.has(key)) continue
+      const repo = repos[repository]
+      if (!repo.allPaths.includes(reference.path)) throw new Error(`Missing trace source ${key}`)
+      const source = repo.files[reference.path] ?? git(option(`--${repository}`, path.join(root, '..', repo.repository.split('/')[1])), 'show', `${repo.commit}:${reference.path}`)
+      const definition = repository === 'backend' ? facts.symbols.find(item => item.source === reference.path && item.symbol === reference.symbol) : null
+      const line = repository === 'backend' ? definition?.line : frontendSymbolLine(source, reference.symbol)
+      if (!line) throw new Error(`Missing trace symbol ${key}`)
+      traceEvidence.set(key, { repository, ...reference, line, sourceSha256: createHash('sha256').update(source).digest('hex') })
+    }
+  }
+}
 const parseEnv = (source) => Object.fromEntries(source.split('\n').flatMap((line) => {
   const m = line.match(/^([A-Z][A-Z0-9_]*)=(.*)$/)
   if (!m) return []
@@ -50,6 +68,7 @@ const snapshot = {
   settings,
   frontend: { packageManager: JSON.parse(repos.frontend.files['package.json']).packageManager, scripts: frontendScripts, envNames: frontendEnv, examples: parseEnv(repos.frontend.files['.env.example']) },
   sourcePaths: Object.fromEntries(Object.entries(repos).map(([key, value]) => [key, value.allPaths])),
+  traceEvidence: [...traceEvidence.values()].sort((a, b) => evidenceKey(a.repository, a).localeCompare(evidenceKey(b.repository, b))),
 }
 const authorityPaths = {
   frontend: ['package.json', '.env.example', 'src/env.d.ts', 'config/build-targets.mjs'],
@@ -67,12 +86,18 @@ const outputs = { 'sources/revisions.json': json(revisions), 'sources/contracts.
 const cell = markdownCodeCell
 for (const locale of ['en', 'zh']) {
   const zh = locale === 'zh'
+  const traceMap = new Map(traces.map(row => [traceKey(row), row]))
   const sourceRows = Object.entries(revisions.repositories).map(([key, repo]) => `| ${key} | [${repo.repository}](https://github.com/${repo.repository}/tree/${repo.commit}) | ${cell(repo.branch)} | ${cell(repo.commit)} |`)
   outputs[`.vitepress/generated/revisions.${locale}.md`] = [zh ? '| 组件 | 仓库与已核验版本 | 分支 | 提交 SHA |' : '| Component | Repository at verified revision | Branch | Commit SHA |', '| --- | --- | --- | --- |', ...sourceRows, '', zh ? `核验日期：${revisions.verifiedAt}。` : `Verified on ${revisions.verifiedAt}.`, ''].join('\n')
   outputs[`.vitepress/generated/api.${locale}.md`] = [
     zh ? '以下为固定源码版本中的公开路由声明。状态码来自路由声明；通常为默认成功状态，退休接口也可声明 409。运行时可能返回其他状态。权限、错误和业务语义以相应指南与 REST 契约为准。' : 'Public route declarations at the pinned revision. Status comes from the route declaration, usually a success status; retired endpoints may declare 409. Runtime responses can differ. Consult the domain guides and REST contract for authorization, errors and business semantics.', '',
-    zh ? '| 方法 | 路由 | 默认状态 | 兼容状态 | 来源 |' : '| Method | Route | Default status | Compatibility | Source |', '| --- | --- | --- | --- | --- |',
-    ...facts.api.map(row => `| ${row.method} | ${cell(row.path)} | ${row.status} | ${row.deprecated ? (zh ? '已弃用的兼容接口' : 'Deprecated alias') : '—'} | [${row.source.split('/').at(-1)}](https://github.com/${revisions.repositories.backend.repository}/blob/${revisions.repositories.backend.commit}/${row.source}#L${row.line}) |`), '',
+    zh ? '| 方法 | 路由 | 默认状态 | 兼容状态 | FastAPI 处理函数 | 全链路讲解 |' : '| Method | Route | Default status | Compatibility | FastAPI handler | End-to-end explanation |', '| --- | --- | --- | --- | --- | --- |',
+    ...facts.api.map(row => {
+      const handler = row.handler
+      const trace = traceMap.get(traceKey(row))
+      const guide = trace ? `[${zh ? '追踪此接口' : 'Trace this API'}](${zh ? '/zh' : ''}/${trace.page}#${trace.anchor})` : '—'
+      return `| ${row.method} | ${cell(row.path)} | ${row.status} | ${row.deprecated ? (zh ? '已弃用的兼容接口' : 'Deprecated alias') : '—'} | [${handler.symbol}](https://github.com/${revisions.repositories.backend.repository}/blob/${revisions.repositories.backend.commit}/${handler.source}#L${handler.line}) | ${guide} |`
+    }), '',
   ].join('\n')
   const lines = [
     `<!-- Generated by pnpm docs:sources. Do not edit manually. -->`, '',

@@ -91,7 +91,7 @@ for (const { prefix, title, queries } of cases) {
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
     await page.goto(`${prefix}frontend/overview`)
     await page.locator('.DocSearch-Button').click()
-    await page.locator('#localsearch-input').fill(prefix ? '作业生命周期' : 'Workflow and Job Lifecycle')
+    await page.locator('#localsearch-input').fill(prefix ? 'Workflow 准入' : 'Workflow admission workers durable settlement')
     const result = page.locator('.VPLocalSearchBox .result[href*="reference/flows/design-job-lifecycle"]').first()
     await expect(result).toBeVisible()
     await expect(result.locator('.excerpt')).toBeVisible()

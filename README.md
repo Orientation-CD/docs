@@ -38,6 +38,8 @@ See [Maintenance](reference/maintenance.md) / [维护本文档](zh/reference/mai
 pnpm docs:sources --frontend ../wechat_mini_program --backend ../YuanZhu-AI --check
 ```
 
+`reference/system-walkthrough` begins the source-reading course. `sources/traces/*.json` maps every public route to a bilingual explanation, actual handler and source symbols. Generated indexes link directly to those chapters; the browser suite validates every Mermaid diagram.
+
 Normal CI compares against committed audited facts and does not need private application access. It cannot prove upstream has not changed; a maintainer must review and synchronize new source commits. [Page migration inventory](sources/page-migration.json) records rewritten, added and retired pages. Retired routes remain as migration pages excluded from search.
 
 PRs run content/build/browser checks. Publishing remains GitHub Pages from `main`, with full Git history for page timestamps. No application deployment is performed by this repository's validation.

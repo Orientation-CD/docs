@@ -1,0 +1,976 @@
+[
+  {
+    "method": "GET",
+    "path": "/v1/me/workspaces",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "list-workspaces",
+    "backend": [
+      {
+        "path": "app/workspaces/api.py",
+        "symbol": "get_my_workspaces"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "list_workspace_summaries"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/workspaceRead.ts",
+        "symbol": "workspaceReadRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Opening Projects / enterprise settings or the workspace switcher loads the context.",
+      "zh": "打开“我的项目”、企业设置或空间切换器时加载上下文。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspaces",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "create-workspace",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "create_workspace"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "ensure_scratch_project"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/organization/index.vue",
+        "symbol": "createOrganization"
+      },
+      {
+        "path": "src/pkg-account/repositories/workspaceCreate.ts",
+        "symbol": "workspaceCreateRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Enterprise page → create enterprise; `createOrganization()` calls `workspaceCreateRepository.create`.",
+      "zh": "企业页面 → 创建企业；`createOrganization()` 调用 `workspaceCreateRepository.create`。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "get-workspace",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "get_workspace"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "workspace_detail"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "accessible_workspace"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/workspaceDetail.ts",
+        "symbol": "workspaceDetailRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Enterprise page load / membership reconciliation calls `workspaceDetailRepository.get`.",
+      "zh": "企业页面加载或成员操作核对调用 `workspaceDetailRepository.get`。"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/v1/workspaces/{workspace_id}",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "update-workspace",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "update_workspace"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "require_workspace_owner"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/organization/index.vue",
+        "symbol": "applyUpdate"
+      },
+      {
+        "path": "src/pkg-account/repositories/workspaceDetail.ts",
+        "symbol": "workspaceDetailRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Enterprise page → Modify enterprise name / Adjust seats → `applyUpdate`.",
+      "zh": "企业页面 → 修改企业名称 / 调整席位 → `applyUpdate`。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/overview",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "workspace-overview",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "get_enterprise_overview"
+      },
+      {
+        "path": "app/admin/enterprise_overview.py",
+        "symbol": "enterprise_overview"
+      },
+      {
+        "path": "app/workflows/history_thumbnails.py",
+        "symbol": "attach_overview_thumbnails"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/projectContext.ts",
+        "symbol": "projectContextRepository"
+      },
+      {
+        "path": "src/repositories/projectOverview.ts",
+        "symbol": "loadProjectOverview"
+      }
+    ],
+    "trigger": {
+      "en": "Projects → member-project overview or enterprise token overview.",
+      "zh": "“我的项目” → 成员项目概览，或企业积分概览。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/token-detail",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "workspace-token-detail",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "get_workspace_token_detail"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/workspaceTokenDetail.ts",
+        "symbol": "workspaceTokenDetailRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Enterprise/personal token-detail screen uses `workspaceTokenDetailRepository`.",
+      "zh": "企业/个人积分明细页通过 `workspaceTokenDetailRepository` 加载。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspaces/{workspace_id}/share-invitations",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "create-share-invitation",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "create_workspace_share_invitation"
+      },
+      {
+        "path": "app/workspaces/share_invitations.py",
+        "symbol": "create_share_invitation"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/organization/index.vue",
+        "symbol": "invite"
+      },
+      {
+        "path": "src/pkg-account/repositories/shareInvitations.ts",
+        "symbol": "shareInvitationOwnerRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Enterprise → Generate invitation → `invite()`; the returned token is used in the share card / copy fallback.",
+      "zh": "企业 → 生成邀请 → `invite()`；返回 token 用于分享卡片及复制兜底。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/share-invitations/preview",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "preview-share-invitation",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "preview_workspace_share_invitation"
+      },
+      {
+        "path": "app/workspaces/share_invitations.py",
+        "symbol": "preview_share_invitation"
+      },
+      {
+        "path": "app/core/rate_limit.py",
+        "symbol": "enforce_rate_limit"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/invitation/index.vue",
+        "symbol": "load"
+      },
+      {
+        "path": "src/pkg-account/repositories/shareInvitationPreview.ts",
+        "symbol": "shareInvitationPreviewRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Open the invitation share card; invitation page `load()` requests preview without authentication.",
+      "zh": "打开邀请卡片，邀请页 `load()` 在未登录时请求预览。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/share-invitations/accept",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "accept-share-invitation",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "accept_workspace_share_invitation"
+      },
+      {
+        "path": "app/workspaces/share_invitations.py",
+        "symbol": "accept_share_invitation"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "remember_enterprise_membership"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "ensure_scratch_project"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/invitation/index.vue",
+        "symbol": "accept"
+      },
+      {
+        "path": "src/pkg-account/repositories/shareInvitationAcceptance.ts",
+        "symbol": "shareInvitationAcceptanceRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Invitation → register/login and confirm join → `accept()`. Consent cancellation never calls accept.",
+      "zh": "邀请页 → 注册登录并确认加入 → `accept()`；取消同意不会调用 accept。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/share-invitations",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "list-share-invitations",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "list_workspace_share_invitations"
+      },
+      {
+        "path": "app/workspaces/share_invitations.py",
+        "symbol": "owner_item"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/shareInvitations.ts",
+        "symbol": "shareInvitationOwnerRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Repository/contract surface `shareInvitationOwnerRepository.list`; the current organization page does not call this list method.",
+      "zh": "repository/契约入口 `shareInvitationOwnerRepository.list`；当前企业页未调用该列表方法。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/workspaces/{workspace_id}/share-invitations/{invitation_id}",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "revoke-share-invitation",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "revoke_workspace_share_invitation"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/repositories/shareInvitations.ts",
+        "symbol": "shareInvitationOwnerRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Repository/contract-only owner action `shareInvitationOwnerRepository.revoke`; no current page button calls it.",
+      "zh": "repository/契约层所有者动作 `shareInvitationOwnerRepository.revoke`；当前页面没有调用它的按钮。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/workspaces/{workspace_id}/membership",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "leave-workspace",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "leave_workspace_membership"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "remember_enterprise_membership"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/organization/index.vue",
+        "symbol": "confirmMembership"
+      },
+      {
+        "path": "src/pkg-account/repositories/enterpriseMembership.ts",
+        "symbol": "enterpriseMembershipRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Enterprise member → Exit enterprise → `confirmMembership(\"leave\", ...)`; PRIVATE_PROJECTS/API capability gates the current flow.",
+      "zh": "企业成员 → 退出企业 → `confirmMembership(\"leave\", ...)`；当前流程受 PRIVATE_PROJECTS/API 能力开关控制。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/workspaces/{workspace_id}/members/{member_user_id}",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "remove-workspace-member",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "remove_workspace_member"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "remove_enterprise_member"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/organization/index.vue",
+        "symbol": "confirmMembership"
+      },
+      {
+        "path": "src/pkg-account/repositories/enterpriseMembership.ts",
+        "symbol": "enterpriseMembershipRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Enterprise → member actions → Remove member → `confirmMembership(\"remove\", member)`.",
+      "zh": "企业 → 成员操作 → 移除成员 → `confirmMembership(\"remove\", member)`。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/me/history-workspaces",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "history-workspaces",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "list_history_workspaces"
+      },
+      {
+        "path": "app/workspaces/workspaces.py",
+        "symbol": "accessible_history_workspace"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/historyWorkspaces.ts",
+        "symbol": "historyWorkspaceRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Plans/history scope picker reads `historyWorkspaceRepository`; it does not change current workspace.",
+      "zh": "方案/历史范围选择器读取 `historyWorkspaceRepository`，不会切换当前空间。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/me/workspace-removal-notices",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "workspace-removal-notices",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "list_workspace_removal_notices"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/workspaceRemovalNotices.ts",
+        "symbol": "loadWorkspaceRemovalNotices"
+      }
+    ],
+    "trigger": {
+      "en": "Project context invokes `loadWorkspaceRemovalNotices`; UI tracks displayed event IDs locally.",
+      "zh": "项目上下文调用 `loadWorkspaceRemovalNotices`；UI 在本机记录已展示事件 ID。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspaces/{workspace_id}/invitations",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "phone-invite-explicit",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "invite_workspace_member"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "create_enterprise_invitation"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "No API-mode mini-program caller in this revision; authenticated REST contract/integration client entry.",
+      "zh": "该版本 API 模式小程序无调用者；入口是已登录的 REST 契约/集成客户端。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspace/invitations",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "phone-invite-current",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "invite_workspace_member"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "create_enterprise_invitation"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "No API-mode mini-program caller in this revision; authenticated REST contract/integration client entry.",
+      "zh": "该版本 API 模式小程序无调用者；入口是已登录的 REST 契约/集成客户端。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspace/invitations",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "phone-invitation-inbox",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "received_workspace_invitations"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "invitation_summary"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "No API-mode mini-program caller in this revision; authenticated REST contract/integration client entry.",
+      "zh": "该版本 API 模式小程序无调用者；入口是已登录的 REST 契约/集成客户端。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspace/invitations/{invitation_id}/accept",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "phone-invitation-accept",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "accept_invitation_by_id"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "accept_enterprise_invitation_by_id"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "No API-mode mini-program caller in this revision; authenticated REST contract/integration client entry.",
+      "zh": "该版本 API 模式小程序无调用者；入口是已登录的 REST 契约/集成客户端。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspace/invitations/{invitation_id}/decline",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "phone-invitation-decline",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "decline_invitation_by_id"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "decline_enterprise_invitation"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "No API-mode mini-program caller in this revision; authenticated REST contract/integration client entry.",
+      "zh": "该版本 API 模式小程序无调用者；入口是已登录的 REST 契约/集成客户端。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/workspace/invitations/{invitation_id}",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "phone-invitation-revoke",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "revoke_outgoing_invitation"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "revoke_enterprise_invitation"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "No API-mode mini-program caller in this revision; authenticated REST contract/integration client entry.",
+      "zh": "该版本 API 模式小程序无调用者；入口是已登录的 REST 契约/集成客户端。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspace",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "current-workspace-management",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "current_workspace_management"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "active_membership"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "No API-mode mini-program caller in this revision; authenticated REST contract/integration client entry.",
+      "zh": "该版本 API 模式小程序无调用者；入口是已登录的 REST 契约/集成客户端。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/workspace/members/{member_user_id}",
+    "page": "reference/flows/workspace-membership-flow",
+    "anchor": "current-workspace-remove-member",
+    "backend": [
+      {
+        "path": "app/billing/billing_api.py",
+        "symbol": "remove_member"
+      },
+      {
+        "path": "app/billing/billing.py",
+        "symbol": "remove_enterprise_member"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "No API-mode mini-program caller in this revision; authenticated REST contract/integration client entry.",
+      "zh": "该版本 API 模式小程序无调用者；入口是已登录的 REST 契约/集成客户端。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/project-statuses",
+    "page": "reference/flows/project-flow",
+    "anchor": "project-status-catalog",
+    "backend": [
+      {
+        "path": "app/workspaces/project_status_api.py",
+        "symbol": "get_project_statuses"
+      },
+      {
+        "path": "app/workspaces/project_statuses.py",
+        "symbol": "visible_project_statuses"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/projectStatusCatalog.ts",
+        "symbol": "projectStatusCatalogRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Project status preload / Projects and detail screens use `projectStatusCatalogRepository`.",
+      "zh": "项目阶段预加载、项目页和详情页使用 `projectStatusCatalogRepository`。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/projects",
+    "page": "reference/flows/project-flow",
+    "anchor": "list-projects",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "list_projects"
+      },
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "_project_responses"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pages/projects/index.vue",
+        "symbol": "loadProjects"
+      },
+      {
+        "path": "src/repositories/projectContext.ts",
+        "symbol": "fetchList"
+      }
+    ],
+    "trigger": {
+      "en": "Projects tab `loadProjects()` → context enter/refresh → `fetchList`.",
+      "zh": "“我的项目” `loadProjects()` → context enter/refresh → `fetchList`。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspaces/{workspace_id}/projects",
+    "page": "reference/flows/project-flow",
+    "anchor": "create-project",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "create_project"
+      },
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "_check_project_capacity"
+      },
+      {
+        "path": "app/workspaces/project_activity.py",
+        "symbol": "stamp_member_activity"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/pages/editor/index.vue",
+        "symbol": "save"
+      },
+      {
+        "path": "src/repositories/projectContext.ts",
+        "symbol": "projectContextRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Projects → + New → editor Save (`save`).",
+      "zh": "我的项目 → + 新建 → 编辑页保存（`save`）。"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/v1/workspaces/{workspace_id}/projects/default",
+    "page": "reference/flows/project-flow",
+    "anchor": "set-default-project",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "set_default_project"
+      },
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "_owned_project"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/projectContext.ts",
+        "symbol": "projectContextRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Project detail → more actions → Set default; repository `setDefault`.",
+      "zh": "项目详情 → 更多操作 → 设为默认；repository `setDefault`。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/projects/{project_id}",
+    "page": "reference/flows/project-flow",
+    "anchor": "get-project",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "get_project"
+      },
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "_project_responses"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/projectContext.ts",
+        "symbol": "projectContextRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Project row → detail or editor load → repository `detail`.",
+      "zh": "项目行 → 详情或编辑页加载 → repository `detail`。"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/v1/workspaces/{workspace_id}/projects/{project_id}",
+    "page": "reference/flows/project-flow",
+    "anchor": "update-project",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "update_project"
+      },
+      {
+        "path": "app/workspaces/project_activity.py",
+        "symbol": "maximum_activity_time"
+      },
+      {
+        "path": "app/workspaces/project_activity.py",
+        "symbol": "stamp_member_activity"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/pages/detail/index.vue",
+        "symbol": "changeProjectStatus"
+      },
+      {
+        "path": "src/repositories/projectContext.ts",
+        "symbol": "projectContextRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Editor Save; detail stage buttons; Mark won/lost sheet → `changeProjectStatus`.",
+      "zh": "编辑保存、详情阶段按钮、标记成交/流失弹层 → `changeProjectStatus`。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/delete",
+    "page": "reference/flows/project-flow",
+    "anchor": "delete-project",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "delete_project"
+      },
+      {
+        "path": "app/workspaces/project_deletion.py",
+        "symbol": "delete_project_group"
+      },
+      {
+        "path": "app/workflows/design_job.py",
+        "symbol": "reconcile_claimed_design_job_deletions"
+      },
+      {
+        "path": "app/worker.py",
+        "symbol": "delete_design_job_task"
+      },
+      {
+        "path": "app/workflows/design_job.py",
+        "symbol": "delete_terminal_design_job"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/components/projects/ProjectDeleteSheet.vue",
+        "symbol": "remove"
+      },
+      {
+        "path": "src/repositories/projectContext.ts",
+        "symbol": "projectContextRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Projects swipe Delete / detail more Delete → ProjectDeleteSheet → `remove(mode)`.",
+      "zh": "我的项目左滑删除 / 详情更多删除 → ProjectDeleteSheet → `remove(mode)`。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/referral-invitations",
+    "page": "reference/flows/referral-rewards-flow",
+    "anchor": "create-referral-invitation",
+    "backend": [
+      {
+        "path": "app/marketing/referral_api.py",
+        "symbol": "create_user_referral_invitation"
+      },
+      {
+        "path": "app/marketing/referral_rewards.py",
+        "symbol": "create_referral_invitation"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/rewards/index.vue",
+        "symbol": "prepareInvitation"
+      },
+      {
+        "path": "src/pkg-account/repositories/referralInvitations.ts",
+        "symbol": "referralInvitationRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Rewards → prepare/send invitation → `prepareInvitation()`.",
+      "zh": "奖励中心 → 准备/发送邀请 → `prepareInvitation()`。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/referral-invitations/preview",
+    "page": "reference/flows/referral-rewards-flow",
+    "anchor": "preview-referral-invitation",
+    "backend": [
+      {
+        "path": "app/marketing/referral_api.py",
+        "symbol": "preview_user_referral_invitation"
+      },
+      {
+        "path": "app/marketing/referral_rewards.py",
+        "symbol": "preview_referral_invitation"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/rewards/index.vue",
+        "symbol": "loadPreview"
+      },
+      {
+        "path": "src/pkg-account/repositories/referralInvitations.ts",
+        "symbol": "referralInvitationRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Open referral card → rewards landing `loadPreview()`.",
+      "zh": "打开推荐卡片 → 奖励落地页 `loadPreview()`。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/referral-invitations/accept",
+    "page": "reference/flows/referral-rewards-flow",
+    "anchor": "accept-referral-invitation",
+    "backend": [
+      {
+        "path": "app/marketing/referral_api.py",
+        "symbol": "accept_user_referral_invitation"
+      },
+      {
+        "path": "app/marketing/referral_rewards.py",
+        "symbol": "accept_referral_invitation"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/rewards/index.vue",
+        "symbol": "acceptInvitation"
+      },
+      {
+        "path": "src/pkg-account/repositories/referralInvitations.ts",
+        "symbol": "referralInvitationRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Referral landing → registration/login consent → `acceptInvitation()`.",
+      "zh": "推荐落地页 → 注册登录同意 → `acceptInvitation()`。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/rewards",
+    "page": "reference/flows/referral-rewards-flow",
+    "anchor": "list-rewards",
+    "backend": [
+      {
+        "path": "app/marketing/referral_api.py",
+        "symbol": "list_user_rewards"
+      },
+      {
+        "path": "app/marketing/referral_rewards.py",
+        "symbol": "list_referral_rewards"
+      },
+      {
+        "path": "app/marketing/referral_rewards.py",
+        "symbol": "has_claimable_rewards"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/rewards/index.vue",
+        "symbol": "loadRewards"
+      },
+      {
+        "path": "src/pkg-account/repositories/rewards.ts",
+        "symbol": "rewardRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Rewards page load / Load more → `loadRewards` and `loadMore`.",
+      "zh": "奖励页加载 / 加载更多 → `loadRewards`、`loadMore`。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/rewards/claim",
+    "page": "reference/flows/referral-rewards-flow",
+    "anchor": "claim-rewards",
+    "backend": [
+      {
+        "path": "app/marketing/referral_api.py",
+        "symbol": "claim_user_rewards"
+      },
+      {
+        "path": "app/marketing/referral_rewards.py",
+        "symbol": "claim_referral_rewards"
+      },
+      {
+        "path": "app/persistence/db_models.py",
+        "symbol": "TokenLedgerEntry"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-account/pages/rewards/index.vue",
+        "symbol": "claimRewards"
+      },
+      {
+        "path": "src/pkg-account/repositories/rewards.ts",
+        "symbol": "rewardRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Rewards → Claim → `claimRewards()` snapshots at most100 current claimable IDs.",
+      "zh": "奖励中心 → 领取 → `claimRewards()` 快照当前最多100个可领取 ID。"
+    }
+  }
+]

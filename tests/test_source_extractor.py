@@ -21,13 +21,18 @@ class Settings:
     jwt_secret: SecretStr = SecretStr("not-for-output")
     s3_endpoint: str = Field(default="http://localhost", validation_alias=AliasChoices("S3_ENDPOINT", "S3_ENDPOINT_URL"))
 ''',
+            'app/handlers.py': '''
+def imported_handler(): return 'not executed'
+''',
             'app/example_api.py': '''
+from app.handlers import imported_handler as imported
 router = APIRouter(prefix="/v1")
 mock = APIRouter(prefix="/mock")
 admin = APIRouter(prefix="/admin")
 @router.post("/retired", deprecated=True, status_code=status.HTTP_409_CONFLICT)
 def retired(): pass
 router.get("/workflows/{id}")(get_workflow)
+router.get("/imported")(imported)
 @mock.post("/settle")
 def settle(): pass
 @admin.get("/users")
@@ -44,9 +49,12 @@ def users(): pass
         self.assertNotIn('not-for-output', output.stdout)
         self.assertTrue(fields['config_encryption_key']['secret'])
         self.assertEqual(fields['s3_endpoint']['aliases'], ['S3_ENDPOINT', 'S3_ENDPOINT_URL'])
-        self.assertEqual([(row['method'], row['path']) for row in data['api']], [('POST', '/v1/retired'), ('GET', '/v1/workflows/{id}')])
-        self.assertEqual(data['api'][0]['status'], 409)
-        self.assertTrue(data['api'][0]['deprecated'])
+        self.assertEqual([(row['method'], row['path']) for row in data['api']], [('GET', '/v1/imported'), ('POST', '/v1/retired'), ('GET', '/v1/workflows/{id}')])
+        self.assertEqual(data['api'][1]['status'], 409)
+        self.assertTrue(data['api'][1]['deprecated'])
+        self.assertEqual(data['api'][0]['handler'], {'source': 'app/handlers.py', 'symbol': 'imported_handler', 'line': 2})
+        self.assertEqual(data['api'][1]['handler']['symbol'], 'retired')
+        self.assertTrue(any(row['source'] == 'app/handlers.py' and row['symbol'] == 'imported_handler' for row in data['symbols']))
 
 
 if __name__ == '__main__':

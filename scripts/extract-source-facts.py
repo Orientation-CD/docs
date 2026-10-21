@@ -8,6 +8,7 @@ payload = json.load(sys.stdin)
 files = payload['files']
 routes = []
 settings = []
+symbols = []
 
 
 def literal(node, constants=None):
@@ -35,6 +36,17 @@ for path, source in sorted(files.items()):
     if not path.endswith('.py'):
         continue
     tree = ast.parse(source, filename=path)
+    parents = {id(child): parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
+    imports = {}
+    for node in tree.body:
+        if isinstance(node, ast.ImportFrom) and node.module:
+            for alias in node.names:
+                imports[alias.asname or alias.name] = (node.module.replace('.', '/') + '.py', alias.name)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            owner = parents.get(id(node))
+            name = f'{owner.name}.{node.name}' if isinstance(owner, ast.ClassDef) else node.name
+            symbols.append({'source': path, 'symbol': name, 'line': node.lineno, 'endLine': node.end_lineno})
     prefixes = {}
     for node in tree.body:
         if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'APIRouter':
@@ -54,9 +66,17 @@ for path, source in sorted(files.items()):
         kwargs = {kw.arg: kw.value for kw in node.keywords}
         code = ast.unparse(kwargs['status_code']) if 'status_code' in kwargs else '200'
         code = re.search(r'HTTP_(\d+)', code).group(1) if re.search(r'HTTP_(\d+)', code) else code
+        parent = parents.get(id(node))
+        handler_name = None
+        if isinstance(parent, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            handler_name = parent.name
+        elif isinstance(parent, ast.Call) and parent.func is node and parent.args and isinstance(parent.args[0], ast.Name):
+            handler_name = parent.args[0].id
+        handler_source, handler_symbol = imports.get(handler_name, (path, handler_name))
         routes.append({'method': method.upper(), 'path': route, 'status': int(code) if code.isdigit() else code,
                        'deprecated': isinstance(kwargs.get('deprecated'), ast.Constant) and kwargs['deprecated'].value is True,
-                       'source': path, 'line': node.lineno})
+                       'source': path, 'line': node.lineno,
+                       'handler': {'source': handler_source, 'symbol': handler_symbol}})
     if path != 'app/core/config.py':
         continue
     constants = {}
@@ -90,4 +110,8 @@ for path, source in sorted(files.items()):
             result = '<secret; see source>'
         settings.append({'name': name, 'env': aliases[0] if aliases else name.upper(), 'aliases': aliases,
                          'type': type_name, 'default': result, 'secret': secret, 'line': node.lineno})
-print(json.dumps({'api': sorted(routes, key=lambda row: (row['path'], row['method'])), 'settings': settings}, ensure_ascii=False))
+for route in routes:
+    match = next((item for item in symbols if item['source'] == route['handler']['source'] and item['symbol'] == route['handler']['symbol']), None)
+    if match:
+        route['handler']['line'] = match['line']
+print(json.dumps({'api': sorted(routes, key=lambda row: (row['path'], row['method'])), 'settings': settings, 'symbols': symbols}, ensure_ascii=False))

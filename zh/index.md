@@ -12,8 +12,8 @@ hero:
       text: 跑通第一个本地任务
       link: /zh/get-started/quickstart
     - theme: alt
-      text: API 参考
-      link: /zh/reference/rest-api
+      text: 从操作跟读源码
+      link: /zh/reference/system-walkthrough
 features:
   - icon: 🧭
     title: 开始使用
@@ -36,9 +36,9 @@ features:
     details: 运行独立本地栈，验证存储环境，按手册完成云端发布、数据库迁移与恢复。
     link: /zh/deploy/local-stack
   - icon: 🔗
-    title: 参考
-    details: 当前 API 契约、环境设置、数据模型与可追溯端到端调用链。
-    link: /zh/reference/rest-api
+    title: 全链路源码跟读
+    details: 从真实界面或外部触发，沿每个公开 API 追到处理函数、worker、事务和持久结果，配图解与代码导航。
+    link: /zh/reference/system-walkthrough
 ---
 
 ## 选择阅读路径
