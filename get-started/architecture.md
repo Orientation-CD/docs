@@ -7,6 +7,7 @@ flowchart LR
   MP[WeChat / Douyin mini program] -->|REST and access token| API[FastAPI API]
   ADM[Admin browser] -->|Session and CSRF| API
   API --> DB[(PostgreSQL)]
+  API -->|Archive exact input versions| S
   API --> Q[(Redis / ARQ)]
   Q --> W[Background workers]
   W --> P[Model and media providers]
@@ -27,7 +28,7 @@ The frontend appends each route to `VITE_API_BASE_URL`. For a local stack on por
 1. The app discovers available Features, prices and applicable permissions. Authenticated template discovery supplies editable fields.
 2. Files use role-bound upload intents, direct object-storage upload and server completion verification. Text-only copywriting needs no file upload. Some recording-entry flows also use dedicated upload-session APIs.
 3. The app submits an idempotent request to `/v1/workflows` or a supported legacy `/v1/design-jobs` route. A `202` means accepted, not finished.
-4. The server checks the account, workspace/project, entitlement, concurrent-job limit and balances. Workers execute the configured Workflow operations and persist their results.
+4. Before final admission, the server commits an archive claim and copies owned input bytes outside a SQL transaction. It then rechecks locked evidence, account/workspace/project, entitlement, concurrency, wallet and member quota, and atomically commits ACTIVE input ownership, execution pins, reservation and outbox. Workers consume this durable execution graph.
 5. The app reads status with server-provided poll timing. It displays an image, Markdown, video or report when the server reports completion.
 
 Canonical Workflows and legacy design-job compatibility are explained in [Frontend workflows](/frontend/workflows) and [API reference](/reference/rest-api). Operation execution can involve image generation, speech/text processing, report assembly, local media work or export; it is not always a single external image-model request.
@@ -46,6 +47,10 @@ A local Docker stack contains the API, workers, PostgreSQL, Redis, MinIO and sel
 
 Follow [Quick Start](/get-started/quickstart) for a local acceptance loop and [Cloud architecture](/deploy/cloud-architecture) for deployment details.
 
+## Know which branch owns a capability
+
+[Integration status](/reference/integration-status) distinguishes current server routes from frontend candidate floor-plan contracts. Owner read-only task details, per-member monthly quota and bounded performance history are separate system boundaries. Follow [input archival](/reference/flows/asset-upload-flow), [quota accounting](/reference/flows/member-quota-flow) and [observability](/backend/observability) rather than assuming the upload, admission and execution all share one database transaction.
+
 ## Source evidence
 
-Documented against frontend `eca0a5f` and backend `b13cc56` (2026-10-20). [Frontend request client](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts) · [Backend application assembly](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py) · [Backend local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md).
+Documented against frontend `3662578` and backend `e59716c` (2026-10-28). [Frontend request client](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts) · [Backend application assembly](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [Backend local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md).

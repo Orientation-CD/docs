@@ -53,11 +53,17 @@ Record candidate/supplier revisions, digest, namespace, resolved application IDs
 
 If a lifecycle response is ambiguous, reconcile the existing change order and actual workload state before another write. Never infer success from a timeout or rerun the whole release blindly.
 
+## Schema and source evidence for this revision
+
+The current migration path includes Video Assets/reference media, input archive receipts/owned append provenance and member quota configuration/audits. Capture the heads packaged in the candidate and both `alembic current --check-heads` and `alembic check`; a migration that returns zero without schema proof is insufficient.
+
+The private video builder consumes the dependency's default branch and prints its resolved commit. Backend source SHA alone therefore does not identify that supplier wheel. Retain the supplier revision and built image digest, then run the relevant authorized supplier/deployed acceptance gates. A new frontend screen or candidate fixture is not deployed server evidence. Input repair is [separate targeted recovery](/deploy/production#input-recovery), not a routine migration step.
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Complete operational runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [Immutable image build](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/build-image.sh)
-- [Containerized test deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/run-deploy-container.sh)
-- [Protected deployment implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/deploy.sh)
+- [Complete operational runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [Immutable image build](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/build-image.sh)
+- [Containerized test deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/run-deploy-container.sh)
+- [Protected deployment implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy.sh)

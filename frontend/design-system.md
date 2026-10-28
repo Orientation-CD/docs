@@ -1,49 +1,71 @@
-# Design System and Shared Navigation
+# Design System, Themes and Home Content
 
-The visual system uses sage green actions, warm neutral surfaces and generated semantic tokens. Edit the source tokens or icon registry, regenerate, then inspect the actual mini-program UI. A generated-file diff alone cannot prove native button/text alignment.
+The current UI is driven by generated semantic tokens, theme definitions and shared components. Home's artwork/configuration is another layer. Changing a CDN image cannot grant a Feature, and changing theme JSON alone cannot recolor native navigation bars.
 
-## Sources and generated outputs
+## Source → generated output → live page
 
-| File | Role |
+```mermaid
+flowchart LR
+  B[design-tokens.json] --> G[generate-design-system.mjs]
+  T[themes/modern.json and minimal.json] --> G
+  G --> S[Generated SCSS and TypeScript]
+  G --> I[Generated SVG / native bitmap icons]
+  S --> ST[Theme store]
+  ST --> P[page-meta + root variables]
+  ST --> N[Native Tab / navigation / background APIs]
+```
+
+| Source or implementation | Purpose |
 | --- | --- |
-| `src/styles/design-tokens.json` | Primitive, semantic and component token source |
-| `src/styles/_design-primitives.generated.scss` | Generated SCSS primitives |
-| `src/styles/design-tokens.generated.scss` | Generated CSS custom properties |
-| `src/styles/designTokens.generated.ts` | Generated TypeScript colors |
-| `src/styles/designIcons.generated.ts` | Generated icon-name union |
-| `src/static/icons` | SVG/bitmap icons organized by use |
-| `scripts/generate-design-system.mjs` | Generator |
-| `scripts/check-design-system.mjs` | Consistency and usage checks |
+| `src/styles/design-tokens.json` | Primitive, semantic and component token baseline |
+| `src/styles/themes/*.json` | Theme metadata and overrides |
+| `scripts/lib/design-themes.mjs` | Resolve token references and merged themes |
+| `scripts/generate-design-system.mjs` | Emit token/style modules, theme data and icons |
+| `src/styles/themes.generated.ts` | Generated runtime theme definitions |
+| `src/stores/theme.ts` | Validated saved selection, reactive colors and native application |
+| `src/composables/usePageTheme.ts` | Per-page root and `page-meta` styles |
+| `src/main.ts` | Install the app-wide `themePageMixin` |
 
-`App.vue` imports the generated tokens globally. `uni.scss` maps library variables onto the design primitives. Components consume semantic `--yz-*` names for surfaces, text, actions, status, spacing, radius and typography, rather than introducing arbitrary local colors.
+Run from the frontend root after editing source definitions:
 
 ```bash
 pnpm design:generate
 pnpm check:design-system
 ```
 
-Commit the source change and generated outputs together. Never use a hand edit to a generated file as the durable fix.
+Commit inputs and generated outputs together. The checker covers generated drift, semantic usage, contrast for merged themes, theme coverage across registered pages, button layout and project press feedback. Pages compose the project's shared Vue components and native uni-app controls. `createApp` installs `themePageMixin`, and `pages.json` retains automatic component scanning without a third-party component-prefix mapping.
 
-## Component boundaries
+## What users can actually select
 
-`PageNavBar` provides shared back/home controls. `FeatureShell` composes feature layouts; project and result pages reuse the navigation behavior. The feature-group breadcrumb derives its parent path from the same group definitions as its cards. It returns to an existing parent when possible and falls back safely to the parent/home route.
+`DEFAULT_THEME` is `modern`. `minimal` remains a defined theme but has `selectable:false`; `SETTINGS_ENTRY_VISIBLE` is false. The current product must not be described as exposing an active two-theme switcher.
 
-Home uses full-width group entries, while group pages use the feature grid. Keep those roles separate when changing layout. `RemoteImage` handles CDN media and local placeholders; configure content images through the shared assets/advertisement mechanisms instead of bundling them into every package.
+At startup `savedTheme` accepts only a selectable saved ID, otherwise chooses modern. `setTheme` validates and writes storage before changing reactive state. A failed storage write returns false and shows a failure message; it must not claim the choice will persist. The storage key is `yuanzhu.theme.v1`.
 
-Feature steps reuse option grids, upload/confirmation, project client information, submitted state and Token-shortage dialogs. Account pages use the account shell; project outcomes and activity have their own reusable controls. Use these components to keep touch behavior and native rendering consistent.
+`themePageMixin.onShow` reapplies native APIs on initial entry, returning from a subpackage and switching Tabs. Each page also binds `themeStyle` and `themePageStyle`: a page background and a component root are different surfaces. `applyThemeTabBar` omits the Project Tab when its build flag is off and tolerates native API unavailability before the bar exists.
 
-## Native layout and accessibility
+## Home artwork and availability have different authorities
 
-Use rpx/token spacing, semantic status colors and the existing touch-target sizes. Native mini-program `button` line boxes differ from browser defaults: shared `_button-layout.scss` mixins explicitly align content and reset borders. Test text centering, outlines, long names and disabled states in DevTools, including narrow screens.
+Home composes `HeroCarousel`, `HomeBrandBar`, `HomeShortcutStrip`, `FeatureGroupEntries`, `HomeQuickEntries`, `HomeStores` and a conditional scope switch. Layout must work when any optional section is empty or an image fails. A failed hero image is removed; returning Home refreshes configuration without unnecessarily resetting already-bound media.
 
-Shared navigation must preserve member project/activity back stacks, and home actions must use the correct Tab navigation. Scrollable project/activity content needs a bounded flex/scroll container; adding `overflow` to an unbounded element is insufficient on a native mini program.
+| Data | Owner | What it may change |
+| --- | --- | --- |
+| Group tree, shortcut/quick definitions | `featureGroups.ts`, `homeEntries.ts` | Names, ordering and navigation |
+| CDN object paths | `homeAssets.ts`, `designLandingAssets.ts` | Which artwork belongs to each entry |
+| Version manifest and `homeHeroBanners` | CDN `config/ad-assets.json`, parsed by `adAssetVersions.ts` | Asset versions and ordered hero campaigns |
+| Feature availability, entitlement and prices | Backend catalog/profile and submit checks | Whether a business action is allowed |
 
-Markdown output uses its own safe rich-text presentation because scoped Vue styles do not automatically inherit into rich-text children. Parser-generated elements receive known styles, source HTML passes through the sanitizer, and unsupported markup stays visible as text.
+`refreshAdAssetVersions` deduplicates concurrent refreshes. An omitted `homeHeroBanners` preserves the last valid list, while an explicit valid empty array clears it. Failed fetching preserves cached configuration and produces a diagnostic warning. Register the CDN as a **request** domain for JSON as well as the domains needed for images.
 
-## Review a visual change
+Production wrappers use `cdn.yuanzhushuzhi.com`; test wrappers and `.env.example` use `static.yuanzhushuzhi.com`. Follow the selected build's setting rather than replacing all environments with one host. The pinned [Home banner guide](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/HOME_BANNERS.md) owns the full manifest shape and operator procedure.
 
-Run design-system and relevant component tests, then the appropriate [artifact gate](/frontend/testing). Inspect the built target for long translated text, loading/error/empty states, guest and read-only permissions, keyboard/safe-area behavior and image placeholders. For shared changes check both WeChat and Douyin; browser/happy-dom layout is only one source of evidence.
+## Shared components and native verification
+
+`PageNavBar` owns common back/home controls; group breadcrumbs derive their path from `featureGroups`. `FeatureShell`, option/upload/confirmation steps and account shells preserve state and touch behavior across products. Professional-design availability is [a separate integration boundary](/frontend/floor-plans).
+
+Inspect actual WeChat/Douyin artifacts after a visual change. Native button line boxes differ from browser layout; shared `_button-layout.scss` resets and aligns them. Check narrow screens, long project/member names, safe areas, loading/error/empty states, disabled controls and owner read-only views. Browser component tests cannot establish native pixel correctness.
+
+Markdown result rendering sanitizes input HTML and supplies known styles for rich-text descendants. Unsupported markup remains text. This result renderer should not be replaced by unrestricted HTML injection to match a design mockup.
 
 ## Source evidence
 
-Frontend `eca0a5f`, backend `b13cc56` (2026-10-20): [Token source](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/styles/design-tokens.json) · [Shared navigation](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/components/common/PageNavBar.vue) · [Button layout](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/styles/_button-layout.scss) · [Markdown rendering](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-plans/services/markdownSummary.ts).
+Verified 2026-10-28: [Theme state](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/stores/theme.ts#L4) · [Page theme binding](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/composables/usePageTheme.ts) · [Generator](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/generate-design-system.mjs) · [Design gate](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-design-system.mjs) · [Home lifecycle](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [Manifest parsing](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/adAssetVersions.ts#L136) · [Markdown rendering](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-plans/services/markdownSummary.ts).

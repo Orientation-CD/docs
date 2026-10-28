@@ -1,51 +1,85 @@
 # Frontend Architecture
 
-Pages coordinate presentation and lifecycle. Services orchestrate a user action. Repositories validate server data and manage scoped caching. The request client owns transport and token refresh. Production and tests select some implementations using aliases, so a passing mock test alone does not prove an API artifact is correct.
+A page owns its visible lifecycle; a service coordinates one action; a repository validates the server contract; the request client owns transport. Read these layers together. A TypeScript DTO alone cannot validate remote JSON, and a hidden button cannot enforce server authorization.
 
 ```mermaid
 flowchart TB
-  P[Pages and components] --> S[Services and composables]
-  S --> R[Repositories and validators]
-  R --> H[Request client]
-  H --> API[Backend /v1 routes]
+  U[Page / reusable component] --> S[Action service / composable]
+  S --> R[Repository + response validator]
+  R --> H[request.ts]
+  H --> API[Backend public API]
   H --> T[Session token store]
-  R --> C[Account and workspace scoped caches]
+  S --> D[Scoped draft and logical action]
+  R --> C[Scoped read cache]
+  U --> TH[Theme store + page-meta + native APIs]
 ```
 
-## Build-time boundaries
+## Find the implementation selected by the build
 
-`vite.config.ts` selects `AccountRepositoryRuntime`, `TaskRepositoryRuntime`, platform login helpers, developer overlays and subscription scenarios. `VITE_ENABLE_PRIVATE_PROJECTS` also sets the `PRIVATE_PROJECTS` preprocessing condition in `pages.json`, and selects enabled/disabled project implementations. Merely hiding a button is insufficient when a feature must be absent from a release artifact.
+`src/pages.json` registers the main package and subpackages. `vite.config.ts` selects runtime aliases before bundling. For an import ending in `Runtime`, inspect the alias rather than assuming it points to the adjacent API file.
 
-The old broad account repository is deliberately unavailable in API mode. Production uses narrower repositories for sessions, profiles, workspaces, projects, jobs, Workflows, billing and organization. Some narrow repositories branch internally; do not assume every repository has one separate mock file and one API file.
+| Boundary | Representative runtime alias | Consequence |
+| --- | --- | --- |
+| Account/task data | `AccountRepositoryRuntime`, `TaskRepositoryRuntime` | Frontend Mock and API packages contain different implementations |
+| Project binding | `DesignProjectBindingServiceRuntime` | Projectless builds exclude binding behavior |
+| Current Home scope | `HomeScopeSwitchRuntime` | No project UI in a disabled-project artifact |
+| Member result access | `MemberProjectReadRuntime` | Read-only member views compile only with projects |
+| Floor-plan movement | `FloorPlanMoveRuntime` | Project-disabled builds cannot acquire project move behavior |
 
-`src/pages.json` owns page/subpackage registration. Main-package code must respect the subpackage boundaries; compiled-artifact checks catch module-placement and startup problems that source-only tests cannot detect.
+`PRIVATE_PROJECTS` preprocessing also changes registered pages and Tab items. The [package gate](/frontend/testing) checks actual JS/JSON/template/style edges: a main package cannot import a feature subpackage, and sibling subpackages cannot directly import each other. A small duplicate handoff adapter can be deliberate when it preserves that boundary.
 
-## Sessions and transport
+## Session generations and late responses
 
-`src/stores/session.ts` stores the token pair under `yuanzhu.session.tokens.v1`. Session generations invalidate reads and scoped UI when an account changes. The store has no Pinia dependency.
+`src/stores/session.ts` owns the credential pair and a monotonically changing session generation. A scoped read records the generation, owner, workspace, project and page revision before its request. When it returns, those values must still match before it updates the screen.
 
-`src/services/request.ts` appends a route to `VITE_API_BASE_URL`, assigns `X-Request-ID`, attaches Bearer authentication when requested and normalizes failures into `ApiRequestError`. Concurrent expired-token requests share one refresh promise and replay with rotated credentials. Other authentication failures clear the session as appropriate.
+For example: an owner opens member A's project, then switches workspace before the overview response arrives. `memberProjectRead` invalidates its membership proof and the page's current operation. The old response is discarded even if its HTTP status was 200. The same pattern prevents a failed old request from clearing a new user's data.
 
-The base URL must use HTTPS, except loopback HTTP or explicitly enabled private-LAN HTTP for development. This transport rule is distinct from the platform's legal-domain list. Result files and reports have additional exact-origin/expiry checks; a valid API URL does not automatically authorize every media URL.
+`request.ts` resolves routes against `VITE_API_BASE_URL`, adds `X-Request-ID`, attaches Bearer credentials only for authenticated requests, and normalizes transport/API failures as `ApiRequestError`. Concurrent expired-token requests share the refresh operation. This is separate from application submission replay: refreshing credentials does not grant permission to rotate an uncertain action's key.
 
-## Discovery and data validation
+## Follow upload, submit and polling
 
-`designCatalog.ts` reads public `/v1/billing/features`, sends `If-None-Match` and caches ETag-backed `200/304` responses. It distinguishes standard job types, report Workflows and copywriting products. Template metadata is authenticated; client field controls must still match the advertised fields.
+```mermaid
+sequenceDiagram
+  autonumber
+  participant P as Feature page
+  participant S as Submit service
+  participant R as Asset/job repositories
+  participant API as Backend
+  participant OS as Object storage
+  P->>S: Confirm local fields and logical action
+  S->>API: Profile + Feature catalog
+  S->>R: Bind project and stage materials
+  R->>API: Create upload intent
+  R->>OS: Signed form POST with actual bytes
+  R->>API: Complete Asset
+  S->>R: Frozen body + Idempotency-Key
+  R->>API: Product-specific create request
+  API-->>R: 202 with public Job identity
+  R-->>P: Validated pending task
+  P->>API: Scheduled authorized reads
+  API-->>P: Status and typed outputs
+```
 
-DTO types describe expected JSON; repository normalizers enforce it at runtime. Job list/detail normalization validates input/output kinds, identifiers and media metadata. Typed errors such as `*_RESPONSE_INVALID` prevent malformed responses from becoming apparently valid UI state.
+Read the numbered steps in `standardDesignSubmit.ts` / `videoGenerationSubmit.ts`, `designAssets.ts`, `designJobSubmit.ts`, then the result page. Upload completion establishes a verified Asset; the backend's later durable input archival is a separate step before execution admission. Its actual transactions/queue boundaries are explained in [Admission and workers](/reference/flows/design-job-lifecycle).
 
-Session read caches deduplicate reads and expire scoped data. Project selection, plan counts, list filters and member reads additionally track owner, workspace, project and session. Delayed responses must not write into a newer scope after a switch or permission loss.
+The poll scheduler respects advertised delays and `Retry-After`, pauses with hidden pages and stops on disposal. It does not declare failure after a local timer. Result URLs are short-lived capabilities, so viewers obtain fresh authorized data instead of persisting signed links as durable identifiers.
 
-## Submission, recovery and results
+## Three different kinds of persistence
 
-Preparation validates local fields, server catalog, subscription permission, balance, workspace/project binding and staged Assets. One logical submission keeps a stable body/key while its acceptance is uncertain. Changed content becomes a new logical action. A request accepted with `202` continues as a pending/running task; a local timeout does not prove server failure.
+| State | Location and lifetime | What recovery must verify |
+| --- | --- | --- |
+| Selected local media | `localMediaStore.ts`, device filesystem | File still exists and has expected metadata |
+| Draft / uncertain action | Owner/workspace-scoped storage | Scope, local material availability, exact frozen request/key |
+| Accepted task / Asset | Backend database and object storage | Server access, persistent status and fresh output capability |
 
-The poll scheduler respects `poll_after_seconds` and `Retry-After`, pauses when hidden and disposes on exit. Result viewers revalidate access and fetch fresh capabilities for expired reports/files. Retry operates on the server-authorized existing task; deletion, movement and read-only enterprise views have separate write guards.
+On WeChat, when its local user directory is available, the content-addressed media store uses a 50 MiB budget, a 5 MiB per-file persistence threshold and reference counts. Douyin and runtimes without that directory use the native saving fallback; the shared cache budget is not a cross-platform persistence guarantee. `persistLocalMedia` hashes small files into `USER_DATA_PATH/media`; repeated content shares a path. Without a digest it uses a random name. Files above 5 MiB keep their temporary path. Old unreferenced files can be reclaimed after 10 minutes, with a quota-error sweep and one copy retry. This is a cache, not durable storage for every saved draft.
 
-App startup hydrates credentials and installs the app-update presenter. A ready update prompts while foregrounded and restarts only on explicit confirmation; cancellation lets the current version continue.
+`releaseLocalMedia` drops a reference before deleting an owned file. The sweep counts the entire local user root and prioritizes old owned media before other old cache files. Do not replace these rules with unconditional `saveFile` calls or assume a 100 MiB upload limit guarantees 100 MiB local persistence.
 
-See [Workflows](/frontend/workflows) for request families, [Projects](/frontend/projects) for scope behavior, and [Testing](/frontend/testing) for contract/artifact checks.
+## Theme startup is another lifecycle
+
+`main.ts` installs `themePageMixin`. The theme store hydrates synchronously, pages bind `usePageTheme` to `page-meta` and their root, and every `onShow` reapplies native Tab/navigation/background APIs. Retained Tab pages therefore refresh theme without recreating their component. See [Design system](/frontend/design-system).
 
 ## Source evidence
 
-Frontend `eca0a5f` (2026-10-20): [Build aliases](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/vite.config.ts) · [Request client](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts) · [Session store](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/stores/session.ts) · [App update](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/appUpdate.ts).
+Verified 2026-10-28: [Build aliases](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/vite.config.ts) · [Transport](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts) · [Sessions](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/stores/session.ts) · [Submit transport](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [Uploads](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L156) · [Local media lifecycle](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/localMediaStore.ts#L280) · [Member scope](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/memberProjectRead.ts#L25).

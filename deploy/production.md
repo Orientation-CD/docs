@@ -50,11 +50,25 @@ Rollback redeploys application code; it does not downgrade PostgreSQL. Normalize
 
 Retain the secret-free release record, exact change orders, workload IDs/capacities, candidate/current/recovery digests, migration state, backup reference and any external activity receipt. Reconcile uncertain stop/start/deploy responses read-only before retrying. A canceled checkpoint can invoke recovery and restart API while preserving current cloud Envs; keep the session open during manual configuration reconciliation and do not assume cancellation reverses staged flags.
 
+## Targeted input recovery {#input-recovery}
+
+New admissions archive owned inputs durably before acceptance. An existing completed task with eligible historical input may need an explicitly targeted repair; normal deployment does not scan and rewrite every input.
+
+From the matching backend environment, inspect the exact authorized Job/Asset pair first:
+
+```bash
+python -m app.assets.input_asset_repair --job-id '<job-uuid>' --asset-id '<asset-uuid>'
+```
+
+This is dry-run by default. `--apply` is an operator action for that same verified pair. The CLI does not discover targets, start services or create schema. It preserves executed physical pins, task status, charges and original content identity. `INPUT_REPAIR_AMBIGUOUS_OWNER` requires an ownership decision, not selecting the first consumer. Preserve copy receipts/leases after uncertain acknowledgements and use the documented recovery authority instead of deleting metadata.
+
+Record packaged Alembic heads, `alembic current --check-heads` and `alembic check`; do not hardcode one forever-current revision. The new input/video/quota schema does not remove existing stopped-fleet or compatibility requirements. Read [the current repair implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/input_asset_repair.py) and [archival implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py) before any write.
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Production, outcome and activity procedures](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [Protected release implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/deploy.sh)
-- [Activity operator](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_activity_operator.py)
-- [Activity compatibility marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)
+- [Production, outcome and activity procedures](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [Protected release implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy.sh)
+- [Activity operator](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_activity_operator.py)
+- [Activity compatibility marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)

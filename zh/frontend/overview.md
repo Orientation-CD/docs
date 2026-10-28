@@ -1,47 +1,62 @@
 # 前端总览
 
-`wechat_mini_program` 的 **`ui-integration`** 分支，基于 uni-app、Vue 3、TypeScript 和 uview-plus 分别构建微信、抖音小程序。固定包管理器为 **pnpm 9.15.9**。工程没有 Pinia 依赖：凭据存于模块级会话 Store，页面与仓储管理其余状态和作用域缓存。
+本轮核验前端 `ui-integration@3662578`、后端 `main@e59716c8`。本文描述这两个源码版本，完整提交见[源码版本记录](/zh/reference/source-revisions)。前端出现页面或提交了接口 fixture，并不能证明本轮核验的后端已实现对应契约。
 
-## 产品导航
+小程序使用 uni-app、Vue 3 和 TypeScript，界面由项目共享组件与 uni-app 原生控件组成，工具链为 **Node 22、pnpm 9.15.9**。会话和主题通过共享模块及 Vue 状态管理，没有 Pinia 依赖。真实 API、前端 Mock、平台适配和项目能力由构建配置在产物生成前选定。
 
-首页主入口为 **AI设计**、**AI创作**。AI设计包括室内设计、家居试搭、彩平图、录音总结、自定义设计、设计报告和旧房改造文件夹；旧房改造再包含局部、厨房、卫生间改造。AI创作包含视频与文案；AI问答从“我的”进入。分组页有面包屑和共享返回/首页导航。
+## 从真实导航找到功能
 
-`VITE_ENABLE_PRIVATE_PROJECTS=true` 时，主 Tab 为首页、联系我们、项目、方案、我的；否则项目 Tab 与项目分包从产物移除。通用 Mock 构建不自动启用项目。
+```mermaid
+flowchart TB
+  H[首页] --> D[AI设计]
+  D --> L[AI轻盈设计]
+  D --> P[AI专业设计]
+  L --> I[效果图 / 家居试搭 / 彩平图]
+  L --> R[录音总结 / 自定义设计 / 设计报告]
+  L --> O[旧房改造]
+  O --> K[局部 / 厨房 / 卫生间]
+  P --> F[户型编辑器与作品]
+  H --> C[AI创作]
+  C --> V[AI视频]
+  C --> T[AI文案]
+  A[我的] --> Q[AI问答]
+```
 
-| 能力 | 主要实现 | 结果 |
+首页还组合了轮播图、快捷入口、常用功能和门店卡片。`homeEntries.ts` 提供展示信息，`featureGroups.ts` 提供分组树与面包屑，`useFeatureLauncher` 再根据功能发现和资格判断决定可用性。卡片可见、显示价格、有权提交，是三件不同的事。
+
+**专业户型功能需要单独确认集成状态：** 当前前端已有页面和 repository，但本轮核验的后端 `main` 没有相应路由。进入此路径前先阅读[户型功能集成边界](/zh/frontend/floor-plans)。它与已存在的彩平图图片生成功能相互独立。
+
+| 产品 | 建议开始阅读的位置 | 结果或边界 |
 | --- | --- | --- |
-| 标准设计与改造 | `pkg-features/components/StandardFeaturePage.vue` | 图片 |
-| 家居试搭 | `pkg-features/pages/furniture` | 蒙版/参考图设计结果 |
-| 自定义设计 | `pkg-features/pages/customized_design` | 可编辑模板字段生成图片 |
-| 录音总结 | `pkg-features/pages/voice_summary` | Markdown 与原录音播放 |
-| AI视频 | `pkg-features/pages/video_generation` | 视频 |
-| 文案 / AI问答 | `pkg-features/pages/copywriting` | 八项纯文本 Markdown Workflow |
-| 设计报告 | `pkg-features/pages/design_report` | Blueprint 生成 HTML 报告，导出行为取决于支持的产品 |
-| 历史汇报 | `pkg-plans/pages/report` | 旧 `html_report` 兼容 |
+| 标准图片与改造 | `pkg-features/components/StandardFeaturePage.vue` | 图片任务、按角色上传与提示词选择 |
+| 家居试搭、自定义设计 | 对应页面与 `*DesignSubmit.ts` service | 蒙版/参考图或可编辑模板字段 |
+| 录音总结 | `pages/voice_summary`、`voiceSummarySubmit.ts` | Markdown 与原始录音 |
+| AI视频 | `pages/video_generation`、`videoGenerationSubmit.ts` | 剧本、系统同款、自传参考视频同款 |
+| AI文案、AI问答 | `services/copywriting.ts`、`copywritingSubmit.ts` | 八项独立的纯文本 Workflow 产品 |
+| 设计报告 | `reportBlueprint.ts`、`workflowSubmission.ts` | Blueprint 驱动的 HTML 和受支持的 PPTX 输出 |
+| 专业户型 | `useFloorPlanAvailability`、`floorPlanRepository` | 前端已实现，本轮后端尚未接通 |
 
-表格描述已实现界面。某个部署实际可用什么，还取决于匿名 `/v1/billing/features`、发布可见性和账号权益。价格使用服务端值；发现请求失败不能伪装成“成功但目录为空”。
+## 主包、分包与共享模块
 
-## 代码布局
+| 位置 | 负责什么 | 初次阅读时要问的问题 |
+| --- | --- | --- |
+| `src/pages` | 启动、首页、联系、项目/方案/我的 Tab、诊断 | 哪个按钮打开下一页？ |
+| `src/pkg-features` | 功能表单、上传与提交编排 | 什么内容会变成请求体？ |
+| `src/pkg-plans` | 图片、Markdown/音频、视频、报告与全景查看 | 进度怎样更新，结果怎样呈现？ |
+| `src/pkg-projects` | 项目编辑、当前成员只读视图、活动 | 正在读取谁的工作区和项目？ |
+| `src/pkg-account` | 登录、法律同意、订单、套餐、企业、草稿 | 哪个账户操作授予或确认权限？ |
+| `src/repositories`、`src/api/dto` | 请求和运行时响应校验 | 调哪个接口，接受什么 JSON？ |
+| `src/services`、`src/stores`、`src/domain` | 编排、凭据/主题、守卫与纯规则 | 哪些状态要保留、过期或失效？ |
+| `config`、`scripts`、`tests` | 构建档、生成资产、契约和产物门禁 | 真正生成的小程序里有什么？ |
 
-| 目录 | 职责 |
-| --- | --- |
-| `src/pages` | 启动页、首页、联系、项目/方案/我的 Tab、诊断与支付订单入口 |
-| `src/pkg-features` | 功能表单、上传/提交编排、本地草稿 |
-| `src/pkg-plans` | 图片对比、Markdown/音频、视频、报告结果 |
-| `src/pkg-projects` | 项目编辑/详情、成员项目及动态；条件编译分包 |
-| `src/pkg-account` | 登录、协议、资料、商店、权益、订单、Token、组织、草稿箱 |
-| `src/repositories`、`src/api/dto` | 经校验的数据访问与接口契约 |
-| `src/services`、`src/stores`、`src/domain` | 共享行为、会话凭据、纯领域逻辑 |
-| `config`、`scripts`、`tests` | 构建配置、产物/契约门禁、测试工具 |
+`VITE_ENABLE_PRIVATE_PROJECTS=true` 才编入项目 Tab、项目分包和相关实现；关闭时保留首页、联系、方案、我的。显式微信 Mock 构建会强制关闭项目，其他命令有各自的环境赋值，见[构建模式](/zh/frontend/data-source-modes)。
 
-## 构建和职责边界
+## 沿一次操作读完整链路
 
-前端 Mock 提供确定的图片/界面演示，不开放所有 API 专用能力。API 模式连接真实后端，认证与支付又可独立按平台选择。服务端密钥不能放进 `VITE_*`，这些值会进入客户端包。
+先选一次室内效果图操作，从页面提交处理函数读到 `standardDesignSubmit.ts`，继续到 `stageDesignImages`、`submitDesignJob` 和请求客户端。追踪结果页时，保留动作幂等键、返回的 Job ID、工作区和项目。当前前端的这类操作实际经过 `POST /v1/design-jobs`，后端再适配到统一执行引擎。新的 API 集成应使用规范的 [Workflow 契约](/zh/backend/workflows)。
 
-文档区分当前 UI 约束与更宽的公共契约。例如视频 UI 要求恰好一张场景参考图，后端允许零到十二张；剧本上限也不同，见[工作流](/zh/frontend/workflows)。
-
-先读[开发入门](/zh/frontend/getting-started)、[架构](/zh/frontend/architecture)；行为细分为[关键流程](/zh/frontend/key-flows)、[工作流](/zh/frontend/workflows)、[项目协作](/zh/frontend/projects)、[平台接入](/zh/frontend/platforms)。
+[架构](/zh/frontend/architecture)讲共享边界；[工作流](/zh/frontend/workflows)记录实际请求族和视频模式；[项目](/zh/frontend/projects)解释成员看板及只读权限；[全链路参考](/zh/reference/system-walkthrough)接着追到数据库、对象存储、队列和 worker。
 
 ## 源码依据
 
-前端 `eca0a5f`（2026-10-20）：[功能分组](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pages.json) · [依赖配置](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json)。
+核验日期 2026-10-28：[导航树](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts#L23) · [首页组合](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [实际提交路由](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [工具链](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)。

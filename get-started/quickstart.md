@@ -36,7 +36,7 @@ VITE_ENABLE_PRIVATE_PROJECTS=false npx --yes pnpm@9.15.9 build:mp-weixin:mock
 
 Open WeChat DevTools → **Import project**. Select `~/MyPrj/zyz/wechat_mini_program/dist/build/mp-weixin`, use AppID `wxec0d577de41255aa`, and compile. Your WeChat account needs developer access to that AppID. Do not import the source repository root or `src/`.
 
-After the startup screens, open **AI设计 → 室内设计**, choose a test room image and complete a simulated submission. Mock login and purchasing use the frontend's simulated data. No local server is involved. This starter build deliberately excludes the project tab.
+After the startup screens, open **AI设计 → AI轻盈设计 → 室内设计**, choose a test room image and complete a simulated submission. Mock login and purchasing use the frontend's simulated data. No local server is involved. This starter build deliberately excludes the project tab.
 
 **Checkpoint:** home, a design form and a simulated result open. A successful Mock preview proves the frontend environment, not the backend connection.
 
@@ -150,7 +150,7 @@ A new personal account still needs an active subscription that permits the selec
 This endpoint is authenticated, checks order ownership and exists only for mock WeChat settlement. It is not a real payment or a replacement for signed production notifications. If it returns 401, re-enter the account page to refresh your session; if the order is no longer pending, inspect the order before attempting another purchase.
 
 4. Return to **支付记录** and **权益管理**. Confirm the server order is `paid` and the subscription is active. If needed, buy and settle a local Token package the same way; use the ID from `/v1/token-purchases`.
-5. Open **AI设计 → 室内设计**, upload a small JPEG/PNG, complete the options and submit once. Observe upload/completion, an accepted task, polling and a completed result through the local mock provider.
+5. Open **AI设计 → AI轻盈设计 → 室内设计**, upload a small JPEG/PNG, complete the options and submit once. Observe upload/completion, an accepted task, polling and a completed result through the local mock provider.
 6. Open **我的方案**, then recompile/reopen the app without clearing storage. The task and purchased entitlement must still be present. Check Token detail for the corresponding reservation/settlement entries.
 
 **Checkpoint:** one paid server order, an active eligible entitlement, one completed server task and a retrievable result survive a frontend restart. Keep the selected port/project and source revision with your result. Stop only your own Compose group through Docker Desktop when finished; retain its volumes.
@@ -168,6 +168,21 @@ This endpoint is authenticated, checks order ownership and exists only for mock 
 
 Continue with [Frontend getting started](/frontend/getting-started), [Projects](/frontend/projects), [Local stack](/deploy/local-stack) and [FAQ](/get-started/faq).
 
+## Verify the new persistence boundary
+
+Use the original image exercise in **AI设计 → AI轻盈设计 → 室内设计**. Do not choose the professional floor-plan candidate as the first backend-main acceptance task. Record the actual submit endpoint: the current image UI can use the supported adapter even though new API examples use Workflows.
+
+After a successful owned-input task, have the local database operator inspect these **read-only** records in that same stack (replace the UUID with the upload Asset ID):
+
+```sql
+SELECT id, status, expires_at, object_key
+FROM assets WHERE id = '<upload-asset-uuid>'::uuid;
+SELECT id, asset_id, state, source_object_key, destination_object_key
+FROM asset_input_archives WHERE id = '<upload-asset-uuid>'::uuid;
+```
+
+Expected: the accepted owned input is ACTIVE with no expiry; the COMPLETED archive receipt and original Asset share identity, and its locator matches the durable destination. The Job and output still appear after reopening the client. A COMPLETED receipt with a READY/expiring Asset can be a staged archive followed by rejected admission, so it alone does not satisfy this checkpoint. Do not modify database state to force it to pass. See [the detailed chain](/reference/flows/asset-upload-flow).
+
 ## Source evidence
 
-Frontend `eca0a5f`, backend `b13cc56` (2026-10-20): [Build commands](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Session storage](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/stores/session.ts) · [Local launcher](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/create_stack.sh) · [Port derivation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/stack_ports.py) · [Mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing_api.py).
+Frontend `3662578`, backend `e59716c` (2026-10-28): [Build commands](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Session storage](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/stores/session.ts) · [Local launcher](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/create_stack.sh) · [Port derivation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/stack_ports.py) · [Mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing_api.py).

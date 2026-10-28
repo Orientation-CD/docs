@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+
+const auditedSources = JSON.parse(readFileSync(new URL('../../sources/contracts.json', import.meta.url)))
+const publicRouteCount = auditedSources.api.length
 
 for (const prefix of ['', 'zh/']) {
   test(`${prefix || 'en/'} API index opens its full source-reading chain`, async ({ page }) => {
@@ -7,7 +11,7 @@ for (const prefix of ['', 'zh/']) {
     await page.goto(`${prefix}reference/rest-api`)
     const table = page.locator('.vp-doc table').last()
     const rows = table.locator('tbody tr')
-    await expect(rows).toHaveCount(112)
+    await expect(rows).toHaveCount(publicRouteCount)
     for (const row of await rows.all()) {
       await expect(row.locator('a[href*="github.com"]').first()).toHaveAttribute('href', /\/blob\/[a-f0-9]{40}\/.*#L\d+$/)
       await expect(row.locator(`a[href^="/docs/${prefix}reference/"]`)).toHaveAttribute('href', /#[a-z0-9-]+$/)
@@ -20,7 +24,7 @@ for (const prefix of ['', 'zh/']) {
     await expect(page.locator('.mermaid svg').first()).toBeVisible({ timeout: 20_000 })
     await expect(page.locator('.VPSidebar')).toContainText(prefix ? '执行与产物' : 'Execution and results')
     const source = page.locator('.vp-doc a[href*="workflow_admission.py#L"]').first()
-    await expect(source).toHaveAttribute('href', /b13cc5668920620a274cb91a3393ed9fadac72ae/)
+    await expect(source).toHaveAttribute('href', new RegExp(`/blob/${auditedSources.commits.backend}/`))
     expect(errors).toEqual([])
   })
 }

@@ -24,6 +24,12 @@ PostgreSQL 保存账号、权限、余额、任务状态与执行回执。Redis 
 
 先读[本地启动](/zh/backend/getting-started)，再读[系统架构](/zh/backend/architecture)与 [Workflow 生命周期](/zh/backend/workflows)。产品能力分别见[设计报告](/zh/backend/reports)、[语音](/zh/backend/voice)、[文案](/zh/backend/copywriting)与[视频](/zh/backend/video)。
 
+## 当前持久化与授权边界
+
+Workflow 自有输入先归档，再进入最终准入事务；接受后成为 ACTIVE、无过期时间并形成不可变 pins。企业任务还检查提交成员的月额度，与共享钱包独立。owner 可以读取他人可见任务详情但不返回私有输入，写操作仍限创建者。见[资产](/zh/backend/assets-storage)、[额度](/zh/reference/flows/member-quota-flow)、[历史授权](/zh/reference/flows/workflow-history-flow)。
+
+视频现有脚本、系统同款、自传参考三条路径，并非都必须“脚本加一张场景图”。性能分析采用带版本的有界历史与完整窗口比较。[对齐表](/zh/reference/integration-status)还记录了此前端已有、此后端 main 缺失的户型能力。
+
 ---
 
-代码依据 · backend `b13cc566`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py) · [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/api/__init__.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_configuration.py).
+代码依据 · backend `e59716c8`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/api/__init__.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_configuration.py).

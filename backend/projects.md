@@ -28,6 +28,10 @@ Members receive shared balances/consumption; only owners receive member arrays, 
 
 Activity trust is deployment-owned. Missing/malformed state returns `503 PROJECT_ACTIVITY_STATE_UNAVAILABLE` on affected operations; never interpret null as inactivity or seed/reset trust to bypass the error. Staleness uses Beijing calendar dates and the catalog threshold, with a hint only **after** the threshold is exceeded. See the full [REST contract](/reference/rest-api) for thumbnail selection, former-member privacy and recovery behavior.
 
+## Owner detail and member dashboard
+
+The current server's shared task-detail loader authorizes the creator or the current owner of the active enterprise. Owner-other responses retain the real submitter and return `inputs: []`; retry, move, delete and source-copy remain creator operations. Frontend scoped member views refresh the active account/workspace and verify membership/project evidence before every polling lifecycle. The current dashboard shows current members, not a former-member section; backend history retention does not imply a matching current UI. See [frontend projects](/frontend/projects) and [the detail chain](/reference/flows/workflow-history-flow).
+
 ---
 
-Source evidence · backend `b13cc566`: [app/workspaces/project_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_api.py) · [app/workspaces/project_statuses.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_statuses.py) · [app/admin/enterprise_overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/enterprise_overview.py).
+Source evidence · backend `e59716c8`: [app/workspaces/project_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_api.py) · [app/workspaces/project_statuses.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_statuses.py) · [app/admin/enterprise_overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/enterprise_overview.py).

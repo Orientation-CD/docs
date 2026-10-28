@@ -23,8 +23,8 @@ Saving a compatible edit to an already-bound model is permitted; a change that b
 3. Configure the Feature's price, activation and subscription grants in [Billing](/admin/billing).
 4. Verify the intended product in the authorized environment.
 
-A saved credential is not a live vendor acceptance test. Existing accepted runs retain frozen provider configuration. The [provider integration policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/MODEL_PROVIDER_INTEGRATION_POLICY.md) keeps vendor-specific protocol behavior inside adapters.
+A saved credential is not a live vendor acceptance test. Existing accepted runs retain frozen provider configuration. The [provider integration policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/MODEL_PROVIDER_INTEGRATION_POLICY.md) keeps vendor-specific protocol behavior inside adapters.
 
 ---
 
-Source evidence · backend `b13cc566`: [app/admin/providers.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/providers.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/providers/provider_configuration.py) · [app/templates/admin/provider.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/provider.html).
+Source evidence · backend `e59716c8`: [app/admin/providers.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/providers.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_configuration.py) · [app/templates/admin/provider.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/provider.html).

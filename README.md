@@ -32,7 +32,7 @@ Build only with `pnpm docs:build`; output is `.vitepress/dist`. Use `pnpm docs:p
 
 English content lives in `get-started/`, `frontend/`, `backend/`, `admin/`, `deploy/`, `testing/` and `reference/`; `zh/` mirrors those routes. Shared bilingual navigation is in `.vitepress/navigation.mjs`. Local full-text search indexes each language, including Chinese and technical identifiers.
 
-See [Maintenance](reference/maintenance.md) / [维护本文档](zh/reference/maintenance.md) for the contribution workflow, snapshot synchronization and publishing. The source updater requires Git, Python 3 and access to local application clones:
+See [Maintenance](reference/maintenance.md) / [维护本文档](zh/reference/maintenance.md) for the contribution workflow, snapshot synchronization and publishing. The source updater requires Git, Python 3.12+ and access to local application clones:
 
 ```bash
 pnpm docs:sources --frontend ../wechat_mini_program --backend ../YuanZhu-AI --check
@@ -40,6 +40,6 @@ pnpm docs:sources --frontend ../wechat_mini_program --backend ../YuanZhu-AI --ch
 
 `reference/system-walkthrough` begins the source-reading course. `sources/traces/*.json` maps every public route to a bilingual explanation, actual handler and source symbols. Generated indexes link directly to those chapters; the browser suite validates every Mermaid diagram.
 
-Normal CI compares against committed audited facts and does not need private application access. It cannot prove upstream has not changed; a maintainer must review and synchronize new source commits. [Page migration inventory](sources/page-migration.json) records rewritten, added and retired pages. Retired routes remain as migration pages excluded from search.
+Normal CI compares against committed audited facts and does not need private application access. It cannot prove upstream has not changed; a maintainer must review and synchronize new source commits. [Page migration inventory](sources/page-migration.json) preserves original routes; the [current audit](sources/audit-2026-10-28.json) records all 164 pages. [Integration status](reference/integration-status.md) separates actual backend main capabilities from frontend-only candidate contracts. Retired routes remain as migration pages excluded from search.
 
 PRs run content/build/browser checks. Publishing remains GitHub Pages from `main`, with full Git history for page timestamps. No application deployment is performed by this repository's validation.

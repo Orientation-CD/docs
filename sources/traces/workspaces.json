@@ -972,5 +972,76 @@
       "en": "Rewards → Claim → `claimRewards()` snapshots at most100 current claimable IDs.",
       "zh": "奖励中心 → 领取 → `claimRewards()` 快照当前最多100个可领取 ID。"
     }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/me/token-quota",
+    "page": "reference/flows/member-quota-flow",
+    "anchor": "me-token-quota",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "get_own_member_token_quota"
+      },
+      {
+        "path": "app/billing/member_token_quotas.py",
+        "symbol": "read_member_token_quota"
+      },
+      {
+        "path": "app/billing/member_token_quotas.py",
+        "symbol": "member_token_quota"
+      },
+      {
+        "path": "app/billing/member_token_quotas.py",
+        "symbol": "enterprise_member_token_usage"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration/script entry; this pinned mini-program has no caller for the member quota API.",
+      "zh": "入口为已认证的集成客户端或脚本；该固定版本的小程序尚无成员额度接口调用者。"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/v1/workspaces/{workspace_id}/member-token-limit",
+    "page": "reference/flows/member-quota-flow",
+    "anchor": "workspace-token-limit",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "update_member_token_default"
+      },
+      {
+        "path": "app/billing/member_token_quotas.py",
+        "symbol": "set_enterprise_member_token_limit"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration/script entry; this pinned mini-program has no caller for the member quota API.",
+      "zh": "入口为已认证的集成客户端或脚本；该固定版本的小程序尚无成员额度接口调用者。"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/v1/workspaces/{workspace_id}/members/{user_id}/token-limit",
+    "page": "reference/flows/member-quota-flow",
+    "anchor": "member-token-limit",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "update_member_token_limit"
+      },
+      {
+        "path": "app/billing/member_token_quotas.py",
+        "symbol": "set_member_token_limit"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration/script entry; this pinned mini-program has no caller for the member quota API.",
+      "zh": "入口为已认证的集成客户端或脚本；该固定版本的小程序尚无成员额度接口调用者。"
+    }
   }
 ]

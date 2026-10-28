@@ -7,6 +7,7 @@ flowchart LR
   MP[微信 / 抖音小程序] -->|REST 与访问凭据| API[FastAPI API]
   ADM[Admin 浏览器] -->|会话与 CSRF| API
   API --> DB[(PostgreSQL)]
+  API -->|归档精确输入版本| S
   API --> Q[(Redis / ARQ)]
   Q --> W[后台 Worker]
   W --> P[模型与媒体提供商]
@@ -27,7 +28,7 @@ flowchart LR
 1. 前端发现可用 Feature、价格和套餐权限；认证后的模板发现提供可编辑字段。
 2. 文件通过绑定用途的上传凭证直接进入对象存储，再由服务端校验完成。纯文字文案不上传文件；部分录音入口另有上传会话接口。
 3. 前端携带幂等键向 `/v1/workflows` 或仍支持的旧 `/v1/design-jobs` 提交。`202` 表示已接收，并非生成完成。
-4. 后端检查账号、空间/项目、权益、并发任务上限与余额；Worker 执行配置好的 Workflow 操作并保存结果。
+4. 最终准入前，后端提交归档 claim，在 SQL 事务外复制自有输入字节；随后锁定复核证据、账号／空间／项目、权益、并发、钱包与成员额度，把 ACTIVE 输入归属、执行 pins、预留和 outbox 原子提交。Worker 消费此耐久执行图。
 5. 前端按服务端提供的时机查询状态，完成后展示图片、Markdown、视频或报告。
 
 规范 Workflow 与旧设计任务兼容接口见[前端工作流](/zh/frontend/workflows)和 [API 参考](/zh/reference/rest-api)。操作可以涉及图片生成、语音/文本处理、报告装配、本地媒体处理和导出，不一定是一条外部图片模型请求。
@@ -46,6 +47,10 @@ flowchart LR
 
 [快速开始](/zh/get-started/quickstart)提供本地闭环验收；部署细节见[云端架构](/zh/deploy/cloud-architecture)。
 
+## 确认能力属于哪条分支
+
+[对齐状态](/zh/reference/integration-status)区分当前服务端路由与前端候选户型契约。所有者只读任务详情、成员月额度、有界性能历史是不同系统边界。沿[输入归档](/zh/reference/flows/asset-upload-flow)、[额度记账](/zh/reference/flows/member-quota-flow)、[可观测性](/zh/backend/observability)阅读，不要以为上传、准入和执行共用一笔数据库事务。
+
 ## 源码依据
 
-核对版本：前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）。[前端请求层](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts) · [后端应用装配](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py) · [本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md)。
+核对版本：前端 `3662578`、后端 `e59716c`（2026-10-28）。[前端请求层](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts) · [后端应用装配](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)。

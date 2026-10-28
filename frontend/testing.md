@@ -1,32 +1,36 @@
-# Testing and Quality Gates
+# Frontend Tests and Artifact Gates
 
-Use source tests for business behavior, contract checks for server compatibility, and artifact checks for the actual platform bundle. Run commands from the frontend repository with Node 22 and pnpm 9.15.9. These are repository gates; do not infer that every command is currently wired to a CI workflow.
+Use Node 22 and pnpm 9.15.9 from the frontend root. A unit pass, a compiled artifact, an API integration and a live-provider/device acceptance prove different things. Select checks for the changed boundary and record the actual source revision and environment.
 
-## Local checks
+## Source tests and the current command chain
 
 ```bash
 pnpm type-check
 pnpm type-check:test
-pnpm test:domain
-pnpm test:unit
+pnpm test
 pnpm check:api-contract
 pnpm check:design-system
 ```
 
-`pnpm test` runs domain then unit tests. `test:domain` uses Node's `--experimental-strip-types` runner. Vitest uses happy-dom, Vue Test Utils and the `uni` harness; its aliases intentionally choose test implementations. `pnpm test:coverage` applies the thresholds in `vitest.config.ts`, including stricter per-file requirements. Read that configuration rather than carrying a fixed test count or threshold table in a second place.
+`pnpm test` now runs **domain → package-budget tests → unit tests**. Domain tests use Node's type-stripping runner. Vitest uses happy-dom, Vue Test Utils and the uni harness. Test aliases intentionally substitute implementations; a passing Mock component cannot prove the API build selected the right module.
 
-## Contract checks
+Use `pnpm test:unit` or affected test files for focused feedback. `test:coverage` applies the current `vitest.config.ts` global/per-file thresholds; do not maintain a second changing numeric threshold table in prose.
 
-The contract gate verifies committed OpenAPI/fixture evidence, DTOs, candidate compatibility, project status/activity evidence and route/artifact constraints. The latest command includes the issue 611 and 619 project contracts alongside earlier compatibility fixtures.
+## Contract evidence and its limits
 
-```bash
-pnpm check:openapi
-pnpm check:openapi:live
-```
+| Check | Evidence boundary |
+| --- | --- |
+| `check:openapi` | Committed general snapshot consistency |
+| `check:openapi:live` | The explicitly configured reachable backend's current OpenAPI |
+| `check:contract-fixtures`, `check:api-dtos` | Selected fixture/projection and DTO compatibility |
+| `check:api-contract` | Combined source/route/origin/fixture/DTO/project checks listed in package.json |
+| `openapi:update` | Intentional snapshot mutation; review its diff before accepting |
 
-The live check needs the intended configured backend. `pnpm openapi:update` intentionally changes the snapshot; use it only for a reviewed contract update, then inspect the diff. Some project evidence is captured from pinned backend AST/schema definitions instead of replacing the general snapshot. Do not blindly regenerate every fixture against a random running stack.
+The source contract gate understands a query suffix only when its local const binding is proven to contain a query or empty string. This avoids accidentally dropping dynamic route segments. Static-asset origins in build assignments are distinguished from forbidden remote API origins.
 
-## Platform artifacts
+Floor-plan fixtures come from a candidate backend branch. Their gate proves the frontend matches those fixtures; it does **not** prove audited backend `main` or a deployment supplies the feature. See [Floor-plan contract scope](/frontend/floor-plans). Do not regenerate unrelated contract fixtures against whichever stack happens to occupy a familiar port.
+
+## Actual mini-program package gates
 
 ```bash
 pnpm quality:mp-weixin:mock
@@ -34,30 +38,39 @@ pnpm quality:mp-weixin:api
 pnpm quality:mp-toutiao:mock
 ```
 
-The WeChat gates first run `test:weixin-babel`, then contract/design checks, build and compiled-code inspection. Production API also checks the project-enabled artifact. The Babel gate catches module-binding failures that can appear only after WeChat's additional transformation.
+WeChat quality chains include `test:weixin-babel` before contract/design, build and artifact inspection. This checks the extra transformation WeChat applies; module binding/startup failures can survive normal unit tests. Douyin chains check its own AppID, SDK metadata, privacy and profile runtime.
 
-WeChat artifact checks cover lazy component loading, minification and domain settings, main/subpackage sizes up to 1.5 MiB, individual bundled media up to 200 KiB (warning above 180 KiB), unwanted files, project isolation/navigation, import/vendor startup behavior and production removal of development code. Avoid copying historic measured package sizes as current results.
-
-Douyin gates verify platform AppID, industry SDK metadata, privacy setting, project navigation/isolation, module imports and profile runtime. Environment-specific gates are available as `quality:mp-toutiao:local-test`, `:cloud-test`, `:cloud-production`. They invoke wrappers that check live readiness and therefore need the selected environment to exist.
-
-## Integration and real UI checks
-
-| Command | Purpose |
+| Gate | Audited product rule |
 | --- | --- |
-| `test:integration:auth` | Backend authentication integration |
-| `test:integration:design-config` | Design configuration import integration |
-| `test:smoke:server` | Server-backed smoke flows |
-| `test:smoke:coverage` | Live API harness coverage |
-| `test:smoke:design-ui` | Real DevTools design vertical slice |
+| Main package and every subpackage | At most 1.5 MiB each, as this repository's budget |
+| Package references | Inspect JS imports/requires, JSON components, template includes and style imports; reject main→subpackage and cross-subpackage edges |
+| WeChat main headroom | At least 64 KiB when projects are enabled **and the artifact is not API production** |
+| Douyin main headroom | Common package inspector called with minimum 0; 1.5 MiB budget still applies |
+| Bundled media in WeChat | Hard 200 KiB, warning above 180 KiB |
+| Production API | Development overlays/scenario implementations removed; production origin and project checks applied |
 
-Read each runner's required environment before invoking it. A real DevTools session needs the project's authorization/setup and must preserve another session's stack. For first-run automation and selectors see the pinned frontend real-UI runbook linked below.
+These are implementation rules, not a restatement of a platform vendor's official maximum. The shared `inspectMiniProgramPackages` function owns package-size and cross-package-reference decisions; both platform gates consume its measured report and failures. Inspect the report for the actual candidate instead of copying old package sizes.
 
-Acceptance for this codebase should include account/workspace switches during pending reads, uncertain submission recovery, subscription/Token rejection, project stage/outcome and member read-only behavior, expired media URLs, safe Markdown, short-video handoff and platform-specific payment recovery. Use affected focused tests before expensive environment checks.
+Environment gates (`quality:mp-toutiao:local-test`, `:cloud-test`, `:cloud-production`) invoke readiness-checking wrappers and need the selected environment. They do not start an owned local stack automatically.
 
-## Record useful evidence
+## Focused suites worth knowing
 
-Report the source SHA, command, selected platform/profile, API origin, owned local project/port and result. Distinguish a compiled-artifact pass, a simulated UI pass, a real local API pass and a device/live-provider acceptance. Keep tokens, private keys, signed URLs and invitation bearers out of evidence.
+| Area | Examples in `tests/` |
+| --- | --- |
+| Themes and Home | `theme.test.ts`, `designThemes.test.mjs`, `homePage.test.ts`, `homeScopeSwitch.test.ts` |
+| Media and video | `localMediaStore.test.ts`, `sameStyleVideo.test.ts`, `videoGenerationSubmit.test.ts` |
+| Member dashboards/read-only | `memberProjectDashboard.test.ts`, `enterpriseProjectOverview.test.ts`, `enterpriseProjectDetails.test.ts` |
+| Professional floor plans | `floorPlan*.test.*` plus pinned source fixtures |
+| Package/runtime transformation | `miniProgramPackageBudget.test.mjs`, `weixinBabelArtifact.test.mjs` |
+
+A source fixture or simulated rendering is not final owner visual/device acceptance. Native validation should include narrow screens, unknown submission recovery, stale local files, account/workspace changes during pending reads, owner-role loss, playback and platform payment recovery.
+
+## Integration runners and useful evidence
+
+`test:integration:auth`, `test:integration:design-config`, `test:smoke:server`, `test:smoke:coverage` and `test:smoke:design-ui` have different setup requirements. Read the pinned real-UI runbook and selected runner before invoking them. Preserve other sessions' stacks and use the expressly chosen backend port; never claim a real integration pass from a source-only test.
+
+Record commit, command, platform/profile, API origin, local stack ownership and result. Exclude tokens, private keys, signed URLs, full editor handoff fragments and invite bearers. Separate artifact, simulated UI, local API and live-provider evidence.
 
 ## Source evidence
 
-Frontend `eca0a5f`, backend `b13cc56` (2026-10-20): [Commands](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Vitest configuration](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/vitest.config.ts) · [WeChat artifact checks](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/scripts/check-code-quality.mjs) · [Douyin checks](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/scripts/check-douyin-quality.mjs) · [Real UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/documents/MINIPROGRAM_REAL_UI_TESTING.md).
+Verified 2026-10-28: [Current command chain](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Package inspector](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/mini-program-package-budget.mjs#L3) · [WeChat headroom condition](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs#L189) · [Douyin gate](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-douyin-quality.mjs) · [Route source analysis](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/api-contract-source.mjs) · [Real UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/MINIPROGRAM_REAL_UI_TESTING.md).

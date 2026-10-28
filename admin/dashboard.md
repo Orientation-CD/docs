@@ -23,4 +23,4 @@ A summary does not prove payment gateway settlement or a supplier's real-time he
 
 ---
 
-Source evidence · backend `b13cc566`: [app/admin/dashboard.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/dashboard.py) · [app/admin/overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/overview.py) · [app/templates/admin/dashboard.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/dashboard.html).
+Source evidence · backend `e59716c8`: [app/admin/dashboard.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/dashboard.py) · [app/admin/overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/overview.py) · [app/templates/admin/dashboard.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/dashboard.html).

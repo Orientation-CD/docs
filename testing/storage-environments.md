@@ -63,11 +63,17 @@ The required coverage topology is two user containers with two mobile users each
 
 Docs-only work requires documentation validation, not these product gates. The normative upstream test policy and live runbook decide which actual tests are applicable; this page does not authorize paid model calls, real payment, cloud writes or destructive cleanup.
 
+## Reuse an upgraded fixture without replacing its configuration
+
+When the migration/deployed-upgrade gate has already prepared the retained stack's product configuration, use the smoke/E2E runner's `--preconfigured` option. It avoids importing an older cloud configuration over the candidate's validated state. A new session still follows port/project ownership and storage authorization checks.
+
+Storage evidence now includes input archival: claim SQL commit → exact-version copy/verification outside SQL → COMPLETED receipt → final ACTIVE ownership/pins at admission. Exercise recovery with the relevant source tests before authorizing storage writes; provider mocks alone do not establish OSS versioning, CORS, copy acknowledgement or orphan reconciliation. See [input archival](/reference/flows/asset-upload-flow) and [repair boundary](/deploy/production#input-recovery).
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Normative environment and gate policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/tests/documents/TEST_STRATEGY.md)
-- [Live stack/test runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md)
-- [Compose precedence and topology](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/docker-compose.yml)
-- [Upgrade gate](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/run_deployed_upgrade_gate.sh)
+- [Normative environment and gate policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
+- [Live stack/test runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)
+- [Compose precedence and topology](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/docker-compose.yml)
+- [Upgrade gate](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/run_deployed_upgrade_gate.sh)

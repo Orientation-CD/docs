@@ -41,11 +41,19 @@ Use the selected `ui-integration` snapshot's package scripts for type, design-sy
 - Keep secrets, private test evidence, local dependencies and generated distribution output out of Git.
 - Run the smallest appropriate docs checks after a documentation correction; do not start product stacks merely to check prose.
 
+## New validation boundaries
+
+Frontend `pnpm test` now includes `test:package-budget`; WeChat quality gates include artifact/Babel checks. Package budgets are project policy, not a quoted platform maximum. The candidate floor-plan fixture gate proves its recorded source contract, not compatibility with backend main.
+
+For an authorized backend deployed-baseline upgrade, `run_deployed_upgrade_gate.sh` preserves one ownership-verified disposable database through migration and selected MinIO/OSS gates. After that stack's product configuration was prepared, pass `--preconfigured` to affected smoke/E2E runners to avoid replacing it with an older cloud snapshot. This is distinct from docs validation. See [test/storage policy](/testing/storage-environments) and the [source runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md).
+
+A video image rebuild fetches private upstream default-branch code. Record the actual supplier commit and image digest even when the backend commit is unchanged; do not describe every rebuild as supplier-reproducible from the backend SHA alone.
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Backend documentation workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.github/workflows/sdd-docs.yml)
-- [Daily runtime workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.github/workflows/daily-endurance.yml)
-- [Normative test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/tests/documents/TEST_STRATEGY.md)
-- [Frontend scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json)
+- [Backend documentation workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.github/workflows/sdd-docs.yml)
+- [Daily runtime workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.github/workflows/daily-endurance.yml)
+- [Normative test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
+- [Frontend scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)

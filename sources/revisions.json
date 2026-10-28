@@ -1,35 +1,75 @@
 {
   "schemaVersion": 1,
-  "verifiedAt": "2026-10-20",
-  "docsBaseCommit": "172cee9be81849af2662de62a573bfebb8a78485",
+  "verifiedAt": "2026-10-28",
+  "docsBaseCommit": "cf5dcd08a80e28d3d1185a222fb1db26698dd15d",
   "repositories": {
     "frontend": {
       "repository": "Orientation-CD/wechat_mini_program",
       "branch": "ui-integration",
-      "commit": "eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f",
+      "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
       "authorities": [
         {
           "path": "package.json",
-          "sha256": "710a58e88b1da8284b68b2b28f29725b50512ca87a40cb32070764f16eff3e73"
+          "sha256": "ae17089db1954265b53cf96ad683fe36f0602a06b2b5ae1651dd88b5b21da136"
         },
         {
           "path": ".env.example",
-          "sha256": "d1793575545a8a561863af85c3c2546d33b0d55a56a1c37790881bd4ac374f51"
+          "sha256": "60cfcdfe49884fea946cde0157e7920f0ba45f2d7bc9d002dcf5f301f2efdf25"
         },
         {
           "path": "src/env.d.ts",
-          "sha256": "35cd12e7ec752b0d634c56fb6ac4212ba62d38cc750dc47e453d0b1049c55864"
+          "sha256": "8aafa05d0785a254a0dd19590617e7cbd96b20e63ce17242949260c0d4b64b5a"
         },
         {
           "path": "config/build-targets.mjs",
           "sha256": "673127daf4a40bced2225de115bfc974c90ea28847a54463633a8809b349f178"
+        },
+        {
+          "path": "src/stores/theme.ts",
+          "sha256": "c19a8fb8792979fdd9fc282b17bb5b1bdb81ae4ebd8199f79c4f85ddcb4d3f80"
+        },
+        {
+          "path": "src/styles/design-tokens.json",
+          "sha256": "6116c1e67b674f4573667c02e0e44e5a8e94f274d0053f6638afaa3338cc7a73"
+        },
+        {
+          "path": "src/styles/themes/minimal.json",
+          "sha256": "912721761fb300920df98b98c2fc4c4c55c1f9c809a8f8930085b60569bc8c79"
+        },
+        {
+          "path": "src/styles/themes/modern.json",
+          "sha256": "f0927fab052863706f49841de38ee213121da7888b9e9e5e1d985bac3e9e635a"
+        },
+        {
+          "path": "src/api/dto/floorPlan.ts",
+          "sha256": "57fa558ca47607828ea0499d4cda47399337f8dd5b3ad16468b36086878934b8"
+        },
+        {
+          "path": "scripts/api-contract-source.mjs",
+          "sha256": "8ab3437eeee1bb41c85e2cfcb338ac81b744add49f2a73fe0c809bd03e7ef8b2"
+        },
+        {
+          "path": "tests/fixtures/backend-floor-plan-group-6060-4bd4094c.json",
+          "sha256": "bc5cc94326108816d71d061a9b72860b2b20749e033b77881727a70ec0dae437"
+        },
+        {
+          "path": "tests/fixtures/backend-floor-plan-management-6060-4bd4094c.json",
+          "sha256": "a96c224038cf24022ccd8f4e877dd1d8a60d11aa094748489474b5bc7c541c35"
+        },
+        {
+          "path": "tests/fixtures/backend-floor-plan-panorama-6060-87737599.json",
+          "sha256": "9e82c18eedb2b8229ee3a15106020a2f830095394ca374fe9d927a31d2883a0c"
+        },
+        {
+          "path": "tests/fixtures/backend-floor-plan-workflows-t45-source.json",
+          "sha256": "314266e98830d7a02f3911ca57152a41ea01876360a2133686263876d8a73a5b"
         }
       ]
     },
     "backend": {
       "repository": "Orientation-CD/YuanZhu-AI",
       "branch": "main",
-      "commit": "b13cc5668920620a274cb91a3393ed9fadac72ae",
+      "commit": "e59716c83e087deda8477da5ea7b327a40cf65c5",
       "authorities": [
         {
           "path": "app/api/__init__.py",
@@ -37,7 +77,7 @@
         },
         {
           "path": "app/core/models.py",
-          "sha256": "5bbcfd44a7ed04c90ed605f3e05cf215592b1cd983a6847a4619150534a5364b"
+          "sha256": "dcdb4aa5b9989d85ccf049035cce5b5f5041c90cfb1034f70047bd7615e592f7"
         },
         {
           "path": "app/core/config.py",
@@ -45,15 +85,43 @@
         },
         {
           "path": "app/persistence/db_models.py",
-          "sha256": "3f281ff63a29d0b78c5b15b87ea4ca2e7f5e8d1cef9b9a18ee8c974d3f1871a1"
+          "sha256": "5a60794adef7a570ae4cb148ec6f7190c22a700fb14dc659d1f187c2a299e2f4"
+        },
+        {
+          "path": "app/workflows/workflow_admission.py",
+          "sha256": "93afd909e8770649988c5fbe4828c2002e2510484fa014db4bfcb1a8aeb1464e"
+        },
+        {
+          "path": "app/assets/asset_input_archival.py",
+          "sha256": "e210b4ad088b75a31bf40ee1d15066b03d0316055225989d05769143a0f8e056"
+        },
+        {
+          "path": "app/billing/member_token_quotas.py",
+          "sha256": "132bde343caeca6affcca5378f7ece779fb5de064875b3593bc4ce69592b61eb"
+        },
+        {
+          "path": "app/core/performance_history.py",
+          "sha256": "91737c9564946ce1793e74ad1d61a217d351d3a73de4bd9b13c61a1aada7ba0c"
         },
         {
           "path": "documents/REST_API_INTERFACE.md",
-          "sha256": "bafa76001eb81469a684b3a1abfde1d631aab8cf66cf695d6be4c279a248f339"
+          "sha256": "af7d411a0d91b51a19d48616704b313c10107fb7d5a95b32bb936cb56dd9217d"
+        },
+        {
+          "path": "documents/ASSET_STORAGE_OPERATIONS.md",
+          "sha256": "4b733b09d61808f7d5b9dc0f3e858d64325de564ffb07abca63cd4dd9e2fce71"
+        },
+        {
+          "path": "README.md",
+          "sha256": "cbdb861eb9a45f09de236739c75f7a2f7b47cff5ccc84e3ba6cc2acb01215a21"
+        },
+        {
+          "path": "tests/documents/TEST_STRATEGY.md",
+          "sha256": "e84769246fdc4d9fc5b12693126789266761b55d9a40a85365aa51fa42f15f0d"
         },
         {
           "path": "scripts/runbook.md",
-          "sha256": "c767df49bcf0bbfb68582fcf15275e7164cd5e8501d8fd87a430ff8d866402c3"
+          "sha256": "51b3c5b6df936cb8cbe3268e1a3826ad7750a652dbd99360e8ab7f5b31e250d3"
         },
         {
           "path": "deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md",

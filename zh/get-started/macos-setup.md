@@ -89,4 +89,4 @@ npx --yes pnpm@10.28.2 docs:dev
 
 ## 源码依据
 
-核对版本：前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）。[前端依赖与命令](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [后端本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md)。
+核对版本：前端 `3662578`、后端 `e59716c`（2026-10-28）。[前端依赖与命令](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [后端本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)。

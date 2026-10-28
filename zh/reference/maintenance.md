@@ -100,3 +100,26 @@ pnpm docs:test:browser
 PR 运行校验与浏览器测试。推送到 `main`，或在 `main` 手工触发，可将通过检查的产物发布到 GitHub Pages。部署只允许 `main`，审阅和合并沿用团队流程。CI 获取完整 Git 历史，使页面时间来自各自提交。
 
 页面更新时间表示正文变更时间，来源记录表示应用核验时间；报告文档新鲜度时应区分两者。
+
+## 把重构作为一致版本重新审核
+
+提取新快照**之前**保存旧版本记录：
+
+```bash
+git show HEAD:sources/revisions.json > /tmp/yuanzhu-docs-previous-revisions.json
+```
+
+把指定前后端分支作为明确版本对审核，结合实现、公开契约与测试；同名符号或前端夹具都不能证明当前行为。改动大的章节围绕最终架构重写，保留 API 索引引用的历史章节锚点。同一次修改同步两种语言、能力矩阵和页面审计清单。
+
+更新快照后，有证据地迁移源码链接，不盲目替换 SHA：
+
+```bash
+pnpm docs:links --from /tmp/yuanzhu-docs-previous-revisions.json --report /tmp/yuanzhu-docs-links.json
+pnpm docs:links --from /tmp/yuanzhu-docs-previous-revisions.json --report /tmp/yuanzhu-docs-links.json --write
+```
+
+第一条只读，第二条只更新已证明的 revision／path／line 映射及可见的路径:行号标签。不能确定的锚点保持不变、写入报告并返回非零；人工核对新旧代码后选择正确符号。等全部正文写入停止后再运行，工具会拒绝并发覆盖。
+
+普通 CI 检查已提交源码行范围及 trace 关联符号锚点。`apiScope: frontend-candidate` 仅允许用于户型双语指南，并只能引用固定前端夹具提取出的 method／path；主 API 清单仍只列后端真实路由。不能用候选 schema 悄悄扩充“主线已经实现”的范围。
+
+旧安装配置说明退出学习主线；真正仍暴露的适配入口集中在[兼容参考](/zh/reference/compatibility)，已移除页面仅留短迁移链接并排除搜索。这样清理旧指导，同时不隐瞒当前 UI 仍使用的代码。

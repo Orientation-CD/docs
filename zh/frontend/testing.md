@@ -1,32 +1,36 @@
-# 测试与质量门禁
+# 前端测试与产物门禁
 
-源码测试验证业务，契约检查验证后端兼容，产物检查验证真正的平台包。在前端仓库使用 Node22、pnpm9.15.9 运行。这些是仓库提供的门禁，不代表所有命令都已接入某条 CI。
+在前端根目录使用 Node22、pnpm9.15.9。单测通过、编译产物、API 集成、真实供应商/设备验收，证明的边界不同。按实际变化选择检查，并记录对应源码版本和环境。
 
-## 本地检查
+## 源码测试与当前命令链
 
 ```bash
 pnpm type-check
 pnpm type-check:test
-pnpm test:domain
-pnpm test:unit
+pnpm test
 pnpm check:api-contract
 pnpm check:design-system
 ```
 
-`pnpm test` 依次执行领域、单元测试。领域测试使用 Node `--experimental-strip-types`。Vitest 采用 happy-dom、Vue Test Utils、`uni` harness，别名明确选择测试实现。`pnpm test:coverage` 使用 `vitest.config.ts` 中阈值，包括更严格的逐文件要求；直接读取该配置，不维护第二份固定测试数量/阈值表。
+`pnpm test` 现在依次运行 **domain → 包体预算测试 → unit**。Domain 测试使用 Node 类型擦除 runner；Vitest 使用 happy-dom、Vue Test Utils 和 uni harness。测试 alias 有意替换实现，因此 Mock 组件通过不能证明 API 包选择了正确模块。
 
-## 契约检查
+可用 `pnpm test:unit` 或受影响文件快速反馈；`test:coverage` 使用当前 `vitest.config.ts` 的全局/逐文件阈值，不在正文维护另一份易过时的数字表。
 
-门禁检查 OpenAPI/fixture 证据、DTO、候选兼容、项目状态/动态契约及路由/产物约束。最新命令在旧兼容 fixture 之外，包含 issue611、619 项目契约。
+## 契约证据及其限制
 
-```bash
-pnpm check:openapi
-pnpm check:openapi:live
-```
+| 检查 | 证据边界 |
+| --- | --- |
+| `check:openapi` | 已提交通用快照的一致性 |
+| `check:openapi:live` | 明确指定且可访问的后端 OpenAPI |
+| `check:contract-fixtures`、`check:api-dtos` | 指定 fixture/投影与 DTO 兼容 |
+| `check:api-contract` | package.json 列出的源码/路由/origin/fixture/DTO/项目联合检查 |
+| `openapi:update` | 有意修改快照，接受前需审阅 diff |
 
-live 检查需要目标后端。`pnpm openapi:update` 会有意修改快照，仅在经评审的接口更新时使用并检查差异。部分项目证据从固定后端 AST/schema 提取，不取代总快照，不能随意对某个运行实例重生成全部 fixture。
+路由源码门禁只有证明局部 const 为查询串或空串，才移除相应尾部，这避免误删动态路由段；构建赋值中的静态素材 origin 与禁止的远端 API origin 分开识别。
 
-## 平台产物
+户型 fixture 来自候选后端分支。门禁证明前端符合这些 fixture，**不能**证明本轮后端 `main` 或线上部署已提供功能，见[户型契约范围](/zh/frontend/floor-plans)。不要对恰好占用熟悉端口的任意栈重新生成无关 fixture。
+
+## 实际小程序包体门禁
 
 ```bash
 pnpm quality:mp-weixin:mock
@@ -34,30 +38,39 @@ pnpm quality:mp-weixin:api
 pnpm quality:mp-toutiao:mock
 ```
 
-微信门禁先跑 `test:weixin-babel`，再执行契约/设计检查、构建、产物扫描；正式 API 同时检查项目启用包。Babel 检查针对微信二次转换后才出现的模块绑定错误。
+微信质量链在契约/设计、构建与产物检查前包含 `test:weixin-babel`，用于检查微信额外转译；普通单测可能漏过绑定/启动问题。抖音质量链核对自己的 AppID、SDK 信息、隐私和构建档运行时。
 
-微信产物检查覆盖组件懒加载、压缩与域名设置、主包/各分包不超过1.5MiB、单个随包媒体不超过200KiB（180KiB预警）、多余文件、项目隔离/导航、模块导入/供应商启动，以及发布剔除开发代码。不要将历史测量包体积复制为当前验证结果。
-
-抖音门禁检查 AppID、行业 SDK、隐私设置、项目导航/隔离、模块导入、构建档运行配置。环境门禁有 `quality:mp-toutiao:local-test`、`:cloud-test`、`:cloud-production`，会调用检查真实健康状态的脚本，需要相应环境可用。
-
-## 集成与真实 UI
-
-| 命令 | 用途 |
+| 门禁 | 本轮产品规则 |
 | --- | --- |
-| `test:integration:auth` | 后端认证集成 |
-| `test:integration:design-config` | 设计配置导入集成 |
-| `test:smoke:server` | 真实服务冒烟流程 |
-| `test:smoke:coverage` | live API harness 覆盖 |
-| `test:smoke:design-ui` | 真实开发者工具设计纵切 |
+| 主包及每个分包 | 各不超过1.5MiB，这是仓库自身预算 |
+| 包间引用 | 检查 JS import/require、JSON 组件、模板 include、样式 import，拒绝主包→分包及跨分包引用 |
+| 微信主包余量 | 开启项目且**不是 API 生产档**时至少64KiB |
+| 抖音主包余量 | 共用检查器 minimum 为0，仍执行1.5MiB预算 |
+| 微信随包媒体 | 硬上限200KiB，超过180KiB警告 |
+| 生产 API | 移除开发面板/情景实现，执行生产 origin 与项目检查 |
 
-运行前读取各 runner 环境要求。真实工具会话需要项目授权和首次设置，不能占用其它会话的服务栈。自动化配置与选择器见下方固定提交的真实 UI 手册。
+这些是实现规则，不是平台厂商官方上限的复述。共享 `inspectMiniProgramPackages` 函数负责包大小和跨包引用判断，两端门禁都消费它的测量报告与失败列表。应检查真实候选产物的报告，不能抄用历史包体数字。
 
-本仓库验收应涵盖读取中切账号/空间、提交不确定恢复、订阅/余额拒绝、项目阶段/结果、成员只读、媒体过期、安全 Markdown、脚本导入，以及各平台支付恢复。先跑受影响的聚焦测试，再做昂贵环境验证。
+环境档门禁（`quality:mp-toutiao:local-test`、`:cloud-test`、`:cloud-production`）会调用就绪检查包装脚本，需要所选环境已存在，不会自动创建属于当前会话的后端栈。
 
-## 记录有效证据
+## 值得先认识的聚焦测试
 
-报告提交 SHA、命令、平台/构建档、API Origin、自己拥有的本地项目/端口及结果。区分编译产物通过、模拟 UI 通过、真实本地 API 通过、真机/正式供应商验收。凭据、私钥、签名 URL、邀请凭据不能进入证据。
+| 范围 | `tests/` 示例 |
+| --- | --- |
+| 主题与首页 | `theme.test.ts`、`designThemes.test.mjs`、`homePage.test.ts`、`homeScopeSwitch.test.ts` |
+| 媒体与视频 | `localMediaStore.test.ts`、`sameStyleVideo.test.ts`、`videoGenerationSubmit.test.ts` |
+| 成员看板/只读 | `memberProjectDashboard.test.ts`、`enterpriseProjectOverview.test.ts`、`enterpriseProjectDetails.test.ts` |
+| 专业户型 | `floorPlan*.test.*` 及固定版本源码 fixture |
+| 包体/转译 | `miniProgramPackageBudget.test.mjs`、`weixinBabelArtifact.test.mjs` |
+
+源码 fixture 或模拟渲染不能代替所有者最终视觉/设备验收。原生验证应包含窄屏、未知提交恢复、本地文件失效、待处理读取时切换账户/工作区、owner身份丢失、音频播放与平台支付恢复。
+
+## 集成 runner 与有效证据
+
+`test:integration:auth`、`test:integration:design-config`、`test:smoke:server`、`test:smoke:coverage`、`test:smoke:design-ui` 的前提不同。调用前阅读固定版本真实 UI runbook 与对应 runner。保留其他会话的栈，使用明确选定的后端端口，不能用源码测试声称真实集成通过。
+
+记录提交、命令、平台/构建档、API origin、本地栈归属与结果。排除凭据、私钥、签名 URL、完整编辑器接力片段和邀请码 bearer。分别报告产物、模拟 UI、本地 API、真实供应商证据。
 
 ## 源码依据
 
-前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）：[命令](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Vitest配置](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/vitest.config.ts) · [微信产物检查](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/scripts/check-code-quality.mjs) · [抖音检查](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/scripts/check-douyin-quality.mjs) · [真实UI手册](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/documents/MINIPROGRAM_REAL_UI_TESTING.md)。
+核验日期 2026-10-28：[当前命令链](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [包体检查器](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/mini-program-package-budget.mjs#L3) · [微信余量条件](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs#L189) · [抖音门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-douyin-quality.mjs) · [路由源码分析](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/api-contract-source.mjs) · [真实 UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/MINIPROGRAM_REAL_UI_TESTING.md)。

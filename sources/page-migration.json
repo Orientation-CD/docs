@@ -168,6 +168,10 @@
       "action": "rewrite"
     },
     {
+      "path": "frontend/floor-plans.md",
+      "action": "add"
+    },
+    {
       "path": "frontend/getting-started.md",
       "action": "rewrite"
     },
@@ -224,6 +228,10 @@
       "action": "rewrite"
     },
     {
+      "path": "reference/compatibility.md",
+      "action": "add"
+    },
+    {
       "path": "reference/configuration.md",
       "action": "rewrite"
     },
@@ -245,6 +253,10 @@
     },
     {
       "path": "reference/flows/discovery-prompts-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/member-quota-flow.md",
       "action": "add"
     },
     {
@@ -290,6 +302,10 @@
     {
       "path": "reference/flows/workspace-membership-flow.md",
       "action": "rewrite"
+    },
+    {
+      "path": "reference/integration-status.md",
+      "action": "add"
     },
     {
       "path": "reference/maintenance.md",
@@ -481,6 +497,10 @@
       "action": "rewrite"
     },
     {
+      "path": "zh/frontend/floor-plans.md",
+      "action": "add"
+    },
+    {
       "path": "zh/frontend/getting-started.md",
       "action": "rewrite"
     },
@@ -537,6 +557,10 @@
       "action": "rewrite"
     },
     {
+      "path": "zh/reference/compatibility.md",
+      "action": "add"
+    },
+    {
       "path": "zh/reference/configuration.md",
       "action": "rewrite"
     },
@@ -558,6 +582,10 @@
     },
     {
       "path": "zh/reference/flows/discovery-prompts-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/member-quota-flow.md",
       "action": "add"
     },
     {
@@ -603,6 +631,10 @@
     {
       "path": "zh/reference/flows/workspace-membership-flow.md",
       "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/integration-status.md",
+      "action": "add"
     },
     {
       "path": "zh/reference/maintenance.md",

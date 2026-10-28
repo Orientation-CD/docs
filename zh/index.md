@@ -53,12 +53,16 @@ features:
 
 | 仓库 | 工作分支 | 本次文档依据 |
 | --- | --- | --- |
-| [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | `eca0a5f` |
-| [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | `b13cc56` |
+| [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | `3662578` |
+| [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | `e59716c` |
 | [docs](https://github.com/Orientation-CD/docs) | `main` | 当前双语文档站 |
 
-内容核对日期为 **2026-10-20**。分支已实现不表示部署已开启或完成真机/生产验收。当前公共产品 API 从 `/v1` 开始；源码依据区分客户端 UI 限制与较宽的后端契约。
+内容核对日期为 **2026-10-28**。分支已实现不表示部署已开启或完成真机/生产验收。当前公共产品 API 从 `/v1` 开始；源码依据区分客户端 UI 限制与较宽的后端契约。
 
 ## 源码依据
 
-[前端分组](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [前端命令](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [后端契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py) · [本地手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md)。
+[前端分组](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts) · [前端命令](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [后端契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py) · [本地手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)。
+
+## 已核验集成边界
+
+前端新增设计／主题／看板及候选户型 API；后端 main 新增同款视频、输入归档、成员额度与性能历史。开始全栈练习前，先看[哪些能力实际已对齐](/zh/reference/integration-status)。

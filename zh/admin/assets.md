@@ -1,21 +1,30 @@
-# 素材管理
+# 资产管理
 
-`/admin/assets` 搜索授权 Asset 元数据并生成访问 URL，是管理员文件查找入口；客户命名空间 `/v1/assets` 的列表/删除操作同样要求管理员权限。
+`/admin/assets`是管理员发现与移除已核验Asset的界面。客户路径`/v1/assets`的列表/删除也要求管理员权限，不是用户可以任意管理文件的图库。
 
-## 查找与检查
+## 查身份，而非只查URL
 
-使用关键词及可用筛选，查看 Asset ID、类型、用途、状态、可见性、文件名、大小与时间。图片提供认证缩略图/放大控件，其他对象通过支持的查看流程打开。
+按界面可用元数据搜索/过滤，检查Asset ID、子类型（Image/Audio/Document/Video）、purpose、状态、owner、文件名、大小和时间。签名URL会过期；只有已公开对象才可取public URL，请求该URL不改变可见性。私有上传表单和签名能力URL不能复制进持久文档。
 
-URL 表单可生成预签名 URL 或公开 URL。**只有原本公开的 Asset 才能生成公开 URL**，选择该项不会改变可见性。签名 URL 到期需重新生成，不能把上传字段或私有签名 URL 放进长期公开文档。
+当前模板参考片是真实Video Asset，封面是Image。提示词表单的参考媒体intent→存储multipart POST→complete使用管理员session/CSRF及`ADMIN_REFERENCE_MEDIA` purpose，complete核验字节并返回模板使用的规范私有key。客户自定义参考片则使用客户Video输入角色。见[提示词](/zh/admin/prompts)和[视频](/zh/backend/video)。
 
-管理员图片上传处理器与客户输入共用 intent → multipart POST 直传 → 完成核验流程，但使用管理员用途。法律发布有独立[法律文档](/zh/admin/legal-documents)流程与不可变元数据。
+## 删除前理解状态
 
-## 移除
+| 观测 | 含义 |
+| --- | --- |
+| READY且归档凭据COMPLETED | 私有输入字节已准备，最终准入可能尚未接受Job |
+| ACTIVE/无过期且有Job归属/pin | 已接受的持久输入，由保留中的执行证据决定能否删除 |
+| 历史原件RESERVED | 可能需要明确的已完成输入资格检查，不能SQL强制ACTIVE |
+| 独立结果复制Asset | 新输入自己的生命周期，不能把所有关联对象一起删掉 |
 
-移除确认涵盖 Asset 及其存储对象版本。服务端拒绝仍有保留引用、不正确状态或存储不可用的操作。不能手工删除 Workflow、报告、Logo/gallery 或法律接受记录保留的对象。
+新直接输入在准入冻结物理身份前归档。相同Asset ID可以迁到规范`design-jobs/inputs/`位置，而旧执行pin或凭据清理仍保留源证据。需要同时检查逻辑归属及精确key/version引用。
 
-历史结果复用为设计输入后，复制 Asset 拥有独立生命周期；删除一个身份不意味着可以移除所有相关版本。任务结果应走任务清理。精确版本完整性及保留规则见 [Asset 与存储](/zh/backend/assets-storage)。
+## 移除与恢复
+
+Remove Asset确认涵盖选定Asset及允许删除的存储版本。服务拒绝保留中的输入/输出、Operation pin、复制/归档claim、模板参考片、法律版本等受保护消费者。任务输入/结果通过任务清理，法律发布走[法律文档](/zh/admin/legal-documents)，不能直接删bucket对象。
+
+暂时存储/租约冲突不允许删除凭据。复制稳定前保留claim和源/目的身份，不确定写入由协调器处理。历史已完成输入修复是[资产与存储](/zh/backend/assets-storage)中的明确目标、默认dry-run命令，不是后台自动批量操作；它保持已执行pin、输出和收费不变。
 
 ---
 
-代码依据 · backend `b13cc566`: [app/admin/assets.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/assets.py) · [app/templates/admin/assets.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/assets.html) · [app/assets/asset_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/asset_api.py).
+源码依据 · backend `e59716c8`: [app/admin/assets.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/assets.py) · [app/assets/asset_management.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_management.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py) · [app/assets/asset_cleanup.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_cleanup.py).

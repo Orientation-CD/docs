@@ -23,8 +23,8 @@ API key 使用稳定配置加密密钥静态加密。密码输入留空保留已
 3. 在[计费](/zh/admin/billing)配置 Feature 价格、开放状态与套餐授权。
 4. 在授权环境验证对应产品。
 
-保存凭据不等于真实供应商验收。已接受任务保留冻结服务商配置。[服务商集成政策](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/MODEL_PROVIDER_INTEGRATION_POLICY.md)要求供应商协议差异封装在 adapter 内。
+保存凭据不等于真实供应商验收。已接受任务保留冻结服务商配置。[服务商集成政策](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/MODEL_PROVIDER_INTEGRATION_POLICY.md)要求供应商协议差异封装在 adapter 内。
 
 ---
 
-代码依据 · backend `b13cc566`: [app/admin/providers.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/providers.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/providers/provider_configuration.py) · [app/templates/admin/provider.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/provider.html).
+代码依据 · backend `e59716c8`: [app/admin/providers.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/providers.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_configuration.py) · [app/templates/admin/provider.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/provider.html).

@@ -1,6 +1,6 @@
 # OpenAPI and Contract Boundaries
 
-Use the running backend's `/openapi.json` for machine-readable transport schemas and `/docs` for Swagger UI. The pinned [REST client contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md) defines domain errors and retry semantics. These sources serve different purposes.
+Use the running backend's `/openapi.json` for machine-readable transport schemas and `/docs` for Swagger UI. The pinned [REST client contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md) defines domain errors and retry semantics. These sources serve different purposes.
 
 ## Read a schema from the selected environment
 
@@ -47,11 +47,15 @@ Compatibility paths are not proof that retired request fields remain accepted. S
 
 Generate a client from a saved, revision-identified schema with your team's pinned generator. Keep its output separate from handwritten domain/repository logic. Check discriminated unions, nullable values, endpoint-specific statuses (Asset/voice-session creation `201` new versus `200` replay; Workflow submission `202` for both), capability URLs and multipart **POST** storage forms manually. Schema generation cannot implement consent UX, entitlement handling, safe paid retries or platform payment bridges for you.
 
+## A candidate fixture is not this backend main
+
+The frontend contains captured floor-plan schemas from candidate source branches. This audited backend main exposes no dedicated floor-plan routes. [Integration status](/reference/integration-status) and [floor-plan source reading](/frontend/floor-plans) identify the gap; those client contracts are deliberately excluded from the main public-route inventory. Only the explicitly scoped candidate guide may reference their recorded method/path set. Do not generate a main client from a merged collection of incompatible schemas.
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions).
 
-- [Normative REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md)
-- [Application router registration](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py)
-- [Public schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)
-- [Conditional mock interfaces](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/MOCK_API_INTERFACE.md)
+- [Normative REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md)
+- [Application router registration](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py)
+- [Public schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
+- [Conditional mock interfaces](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/MOCK_API_INTERFACE.md)

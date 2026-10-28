@@ -1,50 +1,55 @@
-# 数据模型
+# 数据模型：身份、耐久输入与账务
 
-PostgreSQL 保存身份、私有 Project/工作区关系、财务状态与持久 Workflow 执行。本页是当前 ORM 的关系导读；精确列、约束和索引以固定版本模型及前向 Alembic 迁移为准。
+本页解释当前 ORM 的关系，不替代 DDL。精确列、索引和约束以固定版本模型及打包的前向迁移为准。公开 Workflow ID 就是 `design_jobs.id`；WorkflowRun、OperationRun、提交代次和供应商任务是不同身份。
 
-## 领域映射
+## 领域地图
 
-| 领域 | 当前表 | 主要约束 |
+| 领域 | 当前记录 | 不变量 |
 | --- | --- | --- |
-| 身份 | `users`、`auth_sessions` | 平台身份归并应用用户；refresh session 可持久撤销 |
-| 法律同意 | `legal_documents`、`current_legal_documents`、`legal_document_acceptances` | 同意引用不可变文档 ID，不引用可变 URL/正文 |
-| Asset 基类/子类 | `assets`、`images`、`audio_assets`、`documents`、`asset_display_metadata` | 真实二进制绑定对象版本，子类型元数据与字节一致 |
-| 上传/复制意图 | `asset_upload_intents`、`asset_copy_intents` | owner、role、约束和幂等不可变；复制形成独立输入 Asset |
-| 工作区 | `workspaces`、`personal_workspaces`、`enterprises`、`enterprise_memberships`、`enterprise_membership_history` | 个人/企业钱包和访问分离，离开历史不是活跃成员资格 |
-| Project | `projects`、`project_preferences`、`project_activity_state` | 创建者私有、原工作区不变，默认项目与活动可信状态持久化 |
-| 邀请 | `enterprise_invitations`、`workspace_share_invitations`、`share_invitation_idempotency` | 手机定向邀请与可转发卡片是不同协议 |
-| 执行配置 | `operation_definitions`、`workflow_definitions`、`features`、`workflow_node_configurations` | Feature 资格/价格/激活来自有效图和所选 Operation/模型 |
-| 执行图 | `design_jobs`、`workflow_runs`、`operation_runs`、`operation_run_inputs`、`operation_run_dependencies`、`operation_run_outputs` | 公开 Job 投影聚合，有序输入与持久依赖驱动执行 |
-| 调用/重试 | `design_job_submissions`、`operation_provider_calls`、`design_job_retry_requests` | 冻结调用身份，不盲目重复不确定的付费派发 |
-| 发布/调度 | `design_job_outputs`、`workflow_generated_sources`、`workflow_outbox_events` | 类型化发布 Asset、事务调度可跨重启恢复 |
-| 本地转换 | `pptx_export_attempts`、`pptx_export_reservations`、`video_render_attempts`、`video_render_reservations` | 有界资源预留与可恢复尝试 |
-| provider | `provider_connections`、`provider_model_configs` | 连接秘密与模型模态/传输设置分离、版本化；积分价格属于 Feature |
-| 财务 | `token_ledger_entries`、`subscription_plans`、`token_packages`、`user_subscriptions`、`payment_orders`、`purchased_token_batches`、`refund_orders` | 权威金融证据与冻结权益决定余额，不信任客户端价格 |
-| 营销/成本 | `campaign_configurations`、`referral_*`、`reward_*`、`finance_cost_entries` | 归因、显式领取、履约/outbox、成本分别保存 |
-| 平台事件/提示词 | `wechat_payment_events`、`douyin_payment_events`、`douyin_trade_configurations`、`prompt_templates`、`prompt_presets`、`prompt_variables`、`prompt_options` | 已验证回调与产品/提示词配置有独立审计边界 |
+| 身份／同意 | `users`、`auth_sessions`、`legal_documents`、`legal_document_acceptances` | 可撤销会话与已接受文档的不可变 ID |
+| Asset 类型层次 | `assets`、`images`、`audio_assets`、`documents`、`video_assets` | 已核验内容、类型、hash、大小和精确对象版本一致 |
+| 上传／复制 | `asset_upload_intents`、`asset_copy_intents` | 所有者、角色、上限与动作身份不可变 |
+| 输入归档 | `asset_input_archives` | Asset 自有迁移 receipt、精确源／目标版本、复制 lease 和回执可恢复 |
+| 工作区 | `workspaces`、`personal_workspaces`、`enterprises`、成员关系及历史 | 钱包归属、当前权限与曾经成员身份不同 |
+| 成员额度 | `enterprise_member_token_limits`、`enterprise_member_token_limit_audits`、企业默认值列 | 持久自定义配置和不可变配置审计；财务用量来自账本 |
+| 项目 | `projects`、`project_preferences`、`project_activity_state` | 创建者私有管理、持久默认选择和可信活动 epoch |
+| 执行 | `design_jobs`、`workflow_runs`、`operation_runs`、输入／依赖／输出行 | 冻结执行图与物理输入 pins |
+| 尝试／调度 | `design_job_submissions`、`operation_provider_calls`、重试 receipt、`workflow_outbox_events` | 代次保护与事务性交接 |
+| 发布 | `design_job_outputs`、`workflow_generated_sources` | 类型化不可变产物、保留依赖及精确发布身份 |
+| 本地转换 | PPTX／视频 attempts 与 reservations | 有界资源和可恢复暂存／发布 |
+| 配置 | Feature、Workflow／Operation 定义、节点配置、连接／模型、提示词模板 | 定价／权益、执行图／模型、提示词用途／参考媒体彼此独立 |
+| 账务 | `token_ledger_entries`、套餐、订阅、积分包、支付／退款订单 | 持久财务证据，不是 UI 余额计算 |
+| 协作／营销 | 企业／分享／推荐邀请、奖励、财务成本记录 | 入企业、推荐归因和奖励履约是独立协议 |
 
-## Project 与项目成败
+## 上传完成不等于输入激活
 
-每个创建者/工作区只有一个 scratch Project（`临时项目`）；普通 Project 包含客户、地址、状态。Job 必须保持创建者/工作区/项目身份一致。省略 `project_id` 时落入 scratch，显式项目必须属于所请求工作区且可访问。共享工作区不会让所有人的 Project 可互相编辑。
+```mermaid
+flowchart LR
+  U[签名上传] --> R[READY Asset / 有过期时间]
+  R --> C[提交归档 claim]
+  C --> O[SQL事务外复制精确对象版本]
+  O --> A[归档 receipt COMPLETED / Asset可能仍READY]
+  A --> G{最终准入成功?}
+  G -->|是| X[ACTIVE / 不过期 / Job归属 / pins / 预留 / outbox]
+  G -->|否| R2[无已接受Job / 保留暂存证据并正常清理]
+```
 
-主状态为 `NEW`、`REQUIREMENTS_CAPTURED`、`REPORT_PRODUCED`；启用 outcomes 后增加 `WON`/`LOST`、来源状态、关闭时间和流失信息。客户端读取 `/v1/project-statuses`，不自建状态标签/顺序或固定状态数量。`project_activity_state` 保存可信 epoch 和 incident reference，不是面向用户的开关。
+迁移不改变 Asset UUID 或文件字节，只把 locator 移到耐久输入存储。归档 receipt `COMPLETED` 不代表 Job 已接受，权益、企业余额或成员额度仍可能拒绝准入。最终激活锁定并复核证据，把归属、pins、资金及调度状态一起提交。借用的 ACTIVE 依赖保留原归属。见[Asset 生命周期](/zh/reference/flows/asset-upload-flow)。
 
-## Job 与 Asset 状态
+归档 `id` 稳定，Asset 删除后其可空 FK 可以变 null，保留的 tombstone 仍负责迟到的复制回执。删除 receipt 来“清除卡住的上传”可能丢失对象回收及恢复依据。
 
-公开 Job 为 `pending`、`running`、`completed`、`failed`；积分状态独立为 `unreserved`、`reserved`、`settled`、`released`。provider 派发有 `PREPARED`、`DISPATCHING`、`STAGED`、`TERMINAL`，以及接受确定性和重试处置。相关状态机不能相互替代。
+## 月额度不是第二个钱包
 
-Workflow 响应采用类型化 `inputs`/`outputs`。`result_kind` 仅保留兼容投影（`IMAGE`、`HTML_REPORT`、`MARKDOWN`、`VIDEO`），不能定位所有输出端口或演示文件。产物身份是 Asset ID/已验证元数据，不是会过期的签名 URL。provider payload 快照与凭据保持加密/私有。
+企业 `remaining_tokens - reserved_tokens` 是共享可用余额。成员额度字段 `used` 对已提交预留和消耗只计一次，额度字段 `reserved` 是其中待结算子集，二者相加会重复计数。释放计零。按 Asia/Shanghai 的预留月份记账，跨月结算仍归原月；没有预留历史的消耗才按结算月归属。
 
-## 已退休 schema
+没有 override 表示继承企业默认值；保存 null override 表示明确不限额；保存零表示暂停该成员。企业全局默认值不能是零。配置审计不产生财务流水。owner 豁免、离职历史及全局保存清空 override 见[成员额度](/zh/reference/flows/member-quota-flow)。
 
-旧文档中的 image-only `image_provider_configs`、Catalog 级 provider 选择和旧输出列，已由连接/模型归一化、Workflow 节点选择与类型化输出替换。历史迁移提到旧表，不代表当前运行依赖它；不要补建旧表或恢复旧应用快照修复当前部署。
+## 权限和状态是不同维度
 
-成败或兼容边界激活后，迁移可能明确拒绝降级。应用回滚保留前向 schema，只能选择兼容镜像，见[生产恢复](/zh/deploy/production)。
+项目管理仍创建者私有；当前企业 owner 有明确限定的任务／项目只读投影。他人任务详情返回 `inputs: []`，不授予重试、移动、删除或源素材复制权限。
 
-## 源码依据
+任务状态、资金状态、提交确定性、Asset 状态及归档 receipt 状态是不同状态机。短期 URL 是访问能力，不是耐久 Asset 身份。Redis 的有界性能历史不能替代 SQL 账务／执行记录。
 
-已按[记录的源码版本](/zh/reference/source-revisions)核对。
+选择回滚镜像前看[恢复流程](/zh/deploy/production)：应用回滚保留前向 schema，不能恢复已移除表或逆转兼容边界。
 
-- [当前 ORM 与约束](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/persistence/db_models.py)
-- [公开响应模型](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)
-- [项目状态词汇](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_statuses.py)
+源码：[app/persistence/db_models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/persistence/db_models.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)

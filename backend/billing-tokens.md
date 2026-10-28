@@ -1,40 +1,42 @@
-# Tokens, subscriptions and payments
+# Tokens, subscriptions and member quotas
 
-The server owns Feature prices, subscription benefits, package grants and order amounts. Clients discover current products through public `GET /v1/billing/features` and never submit a Token cost or authoritative payment amount.
-
-Catalog responses support ETag/`If-None-Match` and `304 Not Modified`. A failed catalog request means availability is unknown, not that every product is disabled.
+Feature prices, plan benefits, grants and order amounts are server authority. Read `GET /v1/billing/features`; catalog ETag/304 permits reuse of an unchanged representation. A failed read means unknown availability. The [quota full chain](/reference/flows/member-quota-flow) explains the new enterprise member boundary.
 
 ## Wallet arithmetic
 
-`remaining_tokens` includes held Tokens; the spendable amount is **remaining minus reserved**. A personal workspace uses its User wallet. An enterprise workspace uses its own Enterprise wallet with no personal-balance fallback.
+Spendable balance is `remaining_tokens - reserved_tokens`. A personal workspace bills its User wallet; an enterprise bills its Enterprise wallet, with no personal fallback.
 
-For a 10-Token task and a starting balance of 1,000:
-
-| Transition | Remaining | Reserved | Spendable |
+| A10-Token task, starting at1000 | Remaining | Reserved | Spendable |
 | --- | ---: | ---: | ---: |
-| Before admission | 1000 | 0 | 1000 |
-| Accepted: reserve | 1000 | 10 | 990 |
-| Successful: settle | 990 | 0 | 990 |
-| Alternatively failed: release | 1000 | 0 | 1000 |
+| Before acceptance |1000|0|1000|
+| Accepted, reserved |1000|10|990|
+| Successful, settled |990|0|990|
+| Alternatively failed, released |1000|0|1000|
 
-Ledger events distinguish reservations, consumed work, releases, funding and adjustments. Reservation deltas are audit events, not an additional balance debit. Idempotent state transitions prevent repeated settlement/release. Enterprise settled consumption excludes temporary holds and funding changes.
+Reservation ledger deltas are audit evidence, not a second balance debit. Exactly-once transitions prevent a repeated finalizer from settling twice. Enterprise consumption summaries count settled consumption, not reservations, releases or funding.
 
-## Products and entitlements
+## Member monthly capacity is a separate calculation
 
-Features own current Token prices and map to executable Workflows. Standard/premium subscription plans grant Features and personal-workspace discounts. Checkout snapshots the purchased plan identity and numeric benefits, so later catalog edits do not rewrite an existing purchase. A user has at most one pending or active subscription across tiers; there is no current tier-switch/early-renewal API.
+| Field | Meaning |
+| --- | --- |
+| `limit` | null unlimited; otherwise the effective current member cap |
+| `used` | Accepted reservations and settled consumption counted once |
+| `reserved` | Pending subset of `used`; **never add it again** |
+| `source` | `default`, `custom` or `owner` |
+| `month` | Asia/Shanghai calendar month, `YYYY-MM` |
 
-Token packages separate paid and bonus grants. Customer purchases fund the **personal** account; enterprise pools are managed separately through audited administrator adjustments. New-account grants use the current New user registration Campaign amount, with `INITIAL_USER_TOKENS` as fallback; changes affect future grants.
+Usage follows the reservation's month even if settlement/release happens later. Released generations contribute zero. Explicit retry generations are separate reservations. Immutable event identities retain attribution after Job deletion. Only historical attributed consumption without a recorded reservation falls back to its settlement month. This differs deliberately from `consumption.current_month`, which remains a settlement-month view.
 
-## Payment lifecycle
+The current owner can set a global member limit (null or strict integer1..10,000,000) or a member override (null or0..10,000,000). **Every global save clears all overrides**, even unchanged/null values and overrides belonging to departed members. Individual0 is a persistent pause across month changes. An individual save is `custom` even if equal to the default; leaving/rejoining retains it unless a global save cleared it. Owners are unlimited; their consumption is still attributable.
 
-Create `/v1/subscriptions` or `/v1/token-purchases` with a durable idempotency key and the supported checkout `type`. Use `/v1/payments` for history and the order's pay/close/refunds operations. Provider-confirmed evidence, not a successful client checkout screen, authorizes fulfillment. Purchased-token batches and refund reservations protect used Tokens from being refunded twice.
+Admission checks enterprise available balance first (`TOKEN_SHORTAGE_WORKSPACE`), then finite member capacity (`used + required <= limit`). A quota rejection is402 `MEMBER_MONTHLY_TOKEN_LIMIT_REACHED`, with `limit`, `used`, `required`. It creates no new Job/reservation/outbox. Same-key accepted replay does not reserve again. Explicit retry uses the original frozen price and its new reservation month; already accepted work can settle/release after a cap is reduced.
 
-WeChat and Douyin have separate signing, callback and compensation paths. Douyin uses `type: douyin`, channel reconciliation endpoints and its own mock/live mode. See [Douyin payments](/reference/douyin-payment). Payment polling reads local state; channel reconciliation actively queries provider evidence.
+## Products, orders and refunds
 
-Referral rewards become claimable only after the qualifying purchase/use conditions, then require an explicit claim. [Campaigns](/admin/campaigns) changes amounts for future events, not historical ledger entries. Detailed errors and refund rules are in [REST API](/reference/rest-api).
+Plans grant Features and personal-workspace discounts. Checkout snapshots purchased plan identity/numeric benefits; later catalog edits do not rewrite past purchases. Customer Token purchases fund personal wallets. Enterprise funding remains a separate audited administrative adjustment. Quota configuration writes a configuration audit, never a financial event or new balance.
 
-At this baseline both Mini Programs keep refund-application entry points closed. Server refund APIs remain implemented, but WeChat query recovery and subscription reclamation have documented gaps; admin anomaly display is not a manual approval/resolution workflow. See [Billing operations](/admin/billing).
+`POST /v1/subscriptions` and `/v1/token-purchases` use durable action keys. Provider-confirmed evidence authorizes fulfillment; a successful client checkout screen alone does not. Payment GETs read local state, while explicit reconciliation queries the provider. See [payment chain](/reference/flows/payment-flow), [refund chain](/reference/flows/refund-flow), [Douyin](/reference/douyin-payment) and [integration status](/reference/integration-status) for current UI availability and operational boundaries.
 
 ---
 
-Source evidence · backend `b13cc566`: [app/billing/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing.py) · [app/billing/billing_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing_api.py) · [documents/PAYMENT_REFUNDS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/PAYMENT_REFUNDS.md).
+Source evidence · backend `e59716c8`: [app/billing/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py).

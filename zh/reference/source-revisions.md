@@ -28,3 +28,11 @@
 普通 CI 无需访问私有应用仓库，会检查文档与**已提交审核快照**是否一致，并验证双语路由、资源、搜索及渲染行为。它不能独立证明上游没有变化，也不能证明手工修改的快照来源真实。
 
 更新文档时，有源码权限的维护者应执行来源比较。工具只读取 Git 对象、解析 Python 语法，不会导入应用、读取 `.env`、启动服务或调用供应商。更新命令与审核流程见[维护本文档](/zh/reference/maintenance)。
+
+## 跨仓库及源文档差异
+
+[对齐表](/zh/reference/integration-status)记录前端已存在、此 main 尚无专用后端的户型能力，也区分了没有小程序编辑入口的额度 API，以及设置入口隐藏的主题基础设施。快照覆盖范围不意味着每个界面都已端到端可用。
+
+当前后端详情处理函数及 Get Workflow Status 契约允许 owner 只读，但 result-file 一段仍残留早期“仅创建者详情”描述。本文档依据共享加载器与当前详情契约，明确分开读写权限。同样，后台表单可以保存空同款模板，运行时脚本验证却拒绝空文本；保存不代表准入成功。见固定版本[实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py)和[视频规则](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/video_template_rules.py)。
+
+`sources/audit-2026-10-28.json` 记录相对上一 docs 基线的每个双语页面处理方式。源码链接按函数身份或已证明文本上下文迁移，不能确定的映射经过人工复核。见[维护说明](/zh/reference/maintenance)。

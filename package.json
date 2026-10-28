@@ -12,6 +12,7 @@
     "docs:check": "node --test tests/*.test.mjs && node scripts/check-content.mjs && node scripts/check-traces.mjs && pnpm docs:build && node scripts/check-site.mjs",
     "docs:test:browser": "playwright test",
     "docs:sources": "node scripts/sync-sources.mjs",
+    "docs:links": "node scripts/rebase-source-links.mjs",
     "docs:test:sources": "python3 -m unittest discover -s tests -p 'test_*.py'"
   },
   "devDependencies": {

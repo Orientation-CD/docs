@@ -41,11 +41,19 @@ VitePress 输出 `.vitepress/dist`，GitHub Pages 在 `/docs/` 提供服务。PR
 - 不提交秘密材料、私有测试证据、依赖目录或分发产物。
 - 文档修正运行最小相关检查，不为检查文字启动产品栈。
 
+## 新校验边界
+
+前端 `pnpm test` 现包含 `test:package-budget`，微信质量门禁包含构建产物／Babel 检查。包体预算是项目规则，不是引用平台官方上限。户型候选夹具门禁只证明记录的源码契约，不证明与后端 main 兼容。
+
+授权的后端部署基线升级使用 `run_deployed_upgrade_gate.sh`，在同一所有权已核验的一次性数据库上完成迁移及选定 MinIO／OSS 门禁。该栈产品配置已准备后，受影响 smoke／E2E runner 使用 `--preconfigured`，避免被旧云端快照覆盖。这与文档校验不同，见[测试／存储策略](/zh/testing/storage-environments)及[源码 runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)。
+
+视频镜像重建会读取私有上游默认分支，即使后端 commit 不变，也应记录实际供应商提交和镜像 digest，不能声称仅凭后端 SHA 就能复现每次供应商构建。
+
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [后端文档工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.github/workflows/sdd-docs.yml)
-- [定时运行工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.github/workflows/daily-endurance.yml)
-- [规范测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/tests/documents/TEST_STRATEGY.md)
-- [前端脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json)
+- [后端文档工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.github/workflows/sdd-docs.yml)
+- [定时运行工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.github/workflows/daily-endurance.yml)
+- [规范测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
+- [前端脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)

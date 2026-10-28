@@ -1,6 +1,6 @@
 # OpenAPI 与契约边界
 
-运行后端的 `/openapi.json` 提供机器可读传输 schema，`/docs` 提供 Swagger UI。[固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md) 决定业务错误和重试语义，两者用途不同。
+运行后端的 `/openapi.json` 提供机器可读传输 schema，`/docs` 提供 Swagger UI。[固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md) 决定业务错误和重试语义，两者用途不同。
 
 ## 从选定环境读取
 
@@ -47,11 +47,15 @@ curl --fail "$API_BASE_URL/openapi.json" -o openapi.json
 
 用团队固定版本 generator 读取已保存并标注版本的 schema；生成代码与手写业务/仓储逻辑分离。人工检查 discriminated union、nullable、逐端点状态（Asset/语音 session 新建 `201`、重放 `200`；Workflow 两者都是 `202`）、capability URL 和存储 multipart **POST**。生成器不会替你实现同意 UX、权益检查、安全付费重试和平台支付桥。
 
+## 候选夹具不等于此后端 main
+
+前端保存了候选源码分支的户型 schema，但此已核验后端 main 没有专用户型路由。[对齐状态](/zh/reference/integration-status)与[户型源码跟读](/zh/frontend/floor-plans)说明差异；这些客户端契约不进入主线公开路由清单。仅明确标记的候选指南可引用其已记录 method／path 集合。不要混合不兼容 schema 后生成“主线客户端”。
+
 ## 源码依据
 
 已按[记录的源码版本](/zh/reference/source-revisions)核对。
 
-- [规范 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md)
-- [应用路由注册](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py)
-- [公开 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)
-- [条件 mock 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/MOCK_API_INTERFACE.md)
+- [规范 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md)
+- [应用路由注册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py)
+- [公开 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
+- [条件 mock 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/MOCK_API_INTERFACE.md)

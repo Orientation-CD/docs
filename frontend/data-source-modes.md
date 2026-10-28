@@ -1,64 +1,62 @@
 # Data Source and Build Modes
 
-A build fixes the frontend data source, platform, authentication, payment and feature flags. There is no end-user switch between Mock and API. Recompile when these settings change.
+A package fixes its data source, platform, identity, payment and compile-time capabilities. There is no user-facing switch that turns an installed Mock package into an API package. Rebuild and reimport after changing these settings.
 
-## Independent axes
+## Read the command before the environment file
 
-| Axis | Values | Responsibility |
+`runtimeConfig` supplies fallbacks, `.env` supplies build values, inline script assignments override their named values, and Douyin's `build-targets.mjs` fixes profile settings. A script with an assignment can overwrite a prefixed shell variable. The complete [configuration reference](/reference/configuration) is generated from the audited source.
+
+| Axis | Current settings | Boundary |
 | --- | --- | --- |
-| `VITE_DATA_SOURCE` | `mock`, `api` | Simulated frontend repositories or real backend calls |
-| `VITE_MINI_PROGRAM_PLATFORM` | `weixin`, `douyin` | Platform capability/presentation behavior |
-| `VITE_MINI_PROGRAM_AUTH_MODE` | `mock`, `wechat`, `douyin` | Identity flow; explicit setting takes precedence over the legacy WeChat setting |
-| `VITE_WECHAT_AUTH_MODE` | `mock`, `live` | Legacy WeChat code-helper selection; keep it consistent with the chosen profile |
-| `VITE_PAYMENT_MODE` | `mock`, `wechat`, `douyin` | Payment runtime configuration; does not itself fake WeChat native JSAPI calls |
-| `VITE_ENABLE_PRIVATE_PROJECTS` | `true`, `false` | Compile in project routes, bindings, member views and related UI |
-| `VITE_SHOW_BACKEND_STATUS` | `true`, `false` | Include development connection status and health calls |
-| `VITE_ENABLE_SUBSCRIPTION_SCENARIOS` | `true`, `false` | Include client-only subscription overrides and their panel |
+| Data | `VITE_DATA_SOURCE=mock/api` | Frontend simulation or actual backend requests |
+| Platform | `VITE_MINI_PROGRAM_PLATFORM=weixin/douyin` | Sharing, file schemes and platform presentation |
+| Identity | `VITE_MINI_PROGRAM_AUTH_MODE=mock/wechat/douyin` | Explicit mode; existing WeChat helpers also use `VITE_WECHAT_AUTH_MODE=mock/live` |
+| Payment | `VITE_PAYMENT_MODE=mock/wechat/douyin` | Frontend payment runtime; backend merchant/mode is separate |
+| Projects | `VITE_ENABLE_PRIVATE_PROJECTS` | Routes, Tab, bindings and member views compiled in/out |
+| Diagnostics | `VITE_SHOW_BACKEND_STATUS` | Development status and health checks |
+| Demo entitlements | `VITE_ENABLE_SUBSCRIPTION_SCENARIOS` | Client scenario implementations, not server purchases |
 
-Runtime defaults are `mock` data, `weixin` platform and mock payment/authentication unless explicit or legacy settings select otherwise. Build scripts override many of these values. `.env` content and a script's inline assignments both matter; read the selected command rather than guessing from its name.
+Absent configuration defaults to frontend Mock, WeChat and mock identity/payment. Explicit `.env.example` uses API data. Neither fact describes every npm script: always inspect its actual assignments.
 
-Frontend Mock simulates the initial image/UI flows and deliberately marks several API-only capabilities unavailable. API mode uses a real service even when that service mocks identity, payment or the model provider. These two kinds of mocking test different boundaries.
+## Supported profiles and output
 
-## Supported profiles
+| Profile | Data / identity / payment | Project behavior |
+| --- | --- | --- |
+| WeChat `build:mp-weixin:mock` | Frontend Mock | Explicitly forces projects off |
+| WeChat `dev:mp-weixin:mock` | Frontend Mock | Does not force the project flag; it can inherit build environment |
+| WeChat `:api-local` | API fixed to 8080 / mock identity / mock payment setting | Project flag not forced |
+| WeChat `:api-local-wechat` | API / real WeChat identity / mock payment setting | Base can be supplied; otherwise 8080 |
+| WeChat `:api` | API / real WeChat / WeChat payment | Projects on; production static asset base selected |
+| Douyin `:mock` | Frontend Mock / mock / mock | Projects off |
+| Douyin `:local-test` | API / real Douyin / Douyin runtime | Projects off; development LAN permitted |
+| Douyin `:cloud-test` / `:cloud-production` | API / real Douyin / Douyin runtime | Projects on; LAN and development status off |
+| Douyin `:project-candidate` | API / real Douyin / Douyin runtime | Projects on; development status/LAN allowed |
 
-| Profile | Data | Identity | Payment | Projects |
-| --- | --- | --- | --- | --- |
-| WeChat `:mock` | Frontend Mock | Simulated UI | Simulated UI | Not forced on |
-| WeChat `:api-local` | API at fixed 8080 | Mock | Backend mock configuration; native bridge remains | Not forced on |
-| WeChat `:api` | API | Real WeChat | Real WeChat | Enabled |
-| Douyin `:mock` | Frontend Mock | Mock | Mock | Disabled |
-| Douyin `:local-test` | API | Real Douyin | Douyin runtime, backend mode configured separately | Disabled |
-| Douyin `:cloud-test` / `:cloud-production` | API | Real Douyin | Douyin runtime | Enabled |
-| Douyin `:project-candidate` | API | Real Douyin | Douyin runtime | Enabled; development status/LAN allowed |
+Build output is `dist/build/<platform>`; watch output is `dist/dev/<platform>`. Reusing one directory for successive profiles overwrites the previous artifact. Check it before uploading. Frontend Mock does not validate the database, worker, model supplier or server settlement; a real API backed by mock suppliers exercises a different boundary.
 
-Douyin profiles are centralized in `config/build-targets.mjs`. Cloud wrappers supply specific API/storage/report origins and check readiness. Those hardcoded environment wrappers are convenient team entry points, not generic deployment discovery.
+## Origins are separate capabilities
 
-## Address and content settings
-
-| Setting | What to configure |
+| Setting | Purpose |
 | --- | --- |
-| `VITE_API_BASE_URL` | Backend base, normally an origin; current product paths start `/v1` |
-| `VITE_ASSET_BASE_URL` | Static content/CDN base; team examples use `https://static.yuanzhushuzhi.com`; missing base falls back to bundled placeholders |
-| `VITE_ALLOW_INSECURE_LAN_HTTP` | Opt into private-LAN HTTP in development; loopback has its own exception |
-| `VITE_RESULT_STORAGE_ORIGINS` | Exact comma-separated trusted media origins, including the correct MinIO port locally |
-| `VITE_REPORT_WEB_ORIGIN` | Single report viewer origin; HTTPS for released packages, local exceptions only in development |
-| `VITE_DESIGN_PROMPT_FIELD_MAX_LENGTH` | Editable-design field limit aligned with deployment; example value 4000, supported configuration range 1–12000 |
-| `VITE_WECHAT_CORP_ID`, `VITE_WECHAT_CUSTOMER_SERVICE_URL` | Optional enterprise WeChat customer-service settings |
+| `VITE_API_BASE_URL` | Backend base for public product routes |
+| `VITE_ASSET_BASE_URL` | Public static/CDN assets; production wrappers use CDN, test wrappers use static host |
+| `VITE_ALLOW_INSECURE_LAN_HTTP` | Development opt-in for private-LAN HTTP; not a platform domain registration |
+| `VITE_RESULT_STORAGE_ORIGINS` | Exact allowed result origins, including the owned MinIO port locally |
+| `VITE_REPORT_WEB_ORIGIN` | Authorized HTML report origin |
+| `VITE_FLOOR_PLAN_WEB_ORIGIN` | Expected professional-editor/viewer origin, falling back to API origin |
+| `VITE_DESIGN_PROMPT_FIELD_MAX_LENGTH` | Editable design text limit; example 4000, supported 1–12000 |
+| `VITE_WECHAT_CORP_ID`, `VITE_WECHAT_CUSTOMER_SERVICE_URL` | Optional enterprise WeChat customer-service configuration |
 
-These are public client settings, not a place for secrets. Backend `PROJECT_OUTCOMES_ENABLED` and `VIDEO_MODEL_SELECTION_ENABLED` are server settings; frontend discovery reflects their effect rather than controlling their rollout.
+These values are bundled into the client. Never include AppSecrets, provider credentials or private keys. A trusted report origin is not automatically trusted for storage or the floor-plan editor. Professional-editor configuration also cannot create routes missing from [the audited backend](/frontend/floor-plans).
 
-## Dynamic advertisements and static content
+## Local and cloud wrappers
 
-Advertisements are configured through CDN `config/ad-assets.json`, with cached versions, splash mapping and ordered `homeBanners`. Operators can publish zero or more banners and enable/disable entries without recompiling the app. The splash default is `ads/splash.jpg`. Feature banners have their own enable controls; the enterprise WeChat card is the shared `contact/enterprise-wechat-card.jpg` object.
+For a custom API port, use the explicit environment/build command in [Quick Start](/get-started/quickstart). Prefixing a different URL onto the fixed 8080 `:api-local` helper does not change its inline assignment. The WeChat LAN wrapper still fixes 7070; the Douyin local wrapper accepts `--port` and `--ip`.
 
-Old environment names for per-ad URLs, card URL or service phone are not supported. The contact phone is defined by the application. CDN JSON fetching requires the CDN in the platform's request allow-list; see [Platforms](/frontend/platforms).
+Cloud wrappers check readiness before building, select API/report/storage/static origins and run their target artifact gate. They are team environment entry points, not environment discovery. Production asset URLs now use `https://cdn.yuanzhushuzhi.com`; test examples retain `https://static.yuanzhushuzhi.com`.
 
-## Release boundaries
-
-Production API artifacts must omit health overlays, frontend scenario overrides and offline account/task implementations. Keep `VITE_ENABLE_SUBSCRIPTION_SCENARIOS=false` for a server-entitlement acceptance test; selecting a demo subscriber never purchases a real subscription.
-
-For a custom local port use [Quick Start's explicit build](/get-started/quickstart), not a prefixed override of the fixed-8080 `api-local` script. Validate both source checks and compiled artifacts with [Testing](/frontend/testing).
+API-local WeChat does not replace the native payment bridge with a fake callback. Confirm a mock order through the documented backend mock-settlement flow. Disable demo subscription scenarios when checking actual server entitlement. Backend `PROJECT_OUTCOMES_ENABLED` and `VIDEO_MODEL_SELECTION_ENABLED` are deployment controls; client flags cannot enable them.
 
 ## Source evidence
 
-Frontend `eca0a5f` (2026-10-20): [Runtime defaults](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/runtime.ts) · [Profiles](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/config/build-targets.mjs) · [Environment declarations](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/env.d.ts) · [Advertisement configuration](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/adAssetVersions.ts).
+Verified 2026-10-28: [Commands and inline assignments](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Runtime](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/runtime.ts) · [Douyin profiles](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/config/build-targets.mjs) · [Environment example](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/.env.example) · [Production wrapper](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/build_mp-weixin-cloud-production.sh) · [Douyin production wrapper](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/build_mp-toutiao-cloud-production.sh).

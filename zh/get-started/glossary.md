@@ -61,6 +61,19 @@
 
 症状排查见 [FAQ](/zh/get-started/faq)，基础命令见 [macOS 准备](/zh/get-started/macos-setup)，接口契约见 [API 参考](/zh/reference/rest-api)。
 
+## 本轮重构新增术语
+
+| 术语 | 精确定义 |
+| --- | --- |
+| 归档 receipt／激活 | 精确自有对象已迁移的证据／最终事务赋予已接受 Job、ACTIVE 生命周期与执行 pins。receipt 完成不等于任务接受。 |
+| 成员额度／共享钱包 | 归属于成员的按月准入上限／企业实际资金。`used` 已包含 `reserved`。 |
+| 所有者只读详情 | 查看他人可见企业任务的授权投影；`inputs: []`，没有创建者写权限。 |
+| 同款参考 | 作为故事来源的系统或自传 Video；模板字段、替换项、录音是不同输入。 |
+| 候选契约 | 功能分支的源码 schema 快照，不证明后端 main 或部署已实现。 |
+| 性能覆盖 | 真正贡献证据的进程／版本／时间桶；缺失不能当作零。 |
+
+相关边界见[对齐状态](/zh/reference/integration-status)与[当前数据模型](/zh/reference/data-model)。
+
 ## 源码依据
 
-核对版本：前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）。[前端功能分组](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [Workflow请求类型](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)。
+核对版本：前端 `3662578`、后端 `e59716c`（2026-10-28）。[前端功能分组](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts) · [Workflow请求类型](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)。

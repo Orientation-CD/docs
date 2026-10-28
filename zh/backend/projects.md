@@ -28,6 +28,10 @@
 
 活跃度可信边界由部署状态管理。状态缺失/损坏时相关操作返回 `503 PROJECT_ACTIVITY_STATE_UNAVAILABLE`；不能把 null 理解为不活跃，也不能通过初始化/清空可信状态绕过错误。停滞按北京时间日历日及目录阈值计算，只有**超过**阈值才提示。缩略图选择、前成员隐私及恢复规则见完整 [REST 合同](/zh/reference/rest-api)。
 
+## 所有者详情与成员看板
+
+当前服务端共享任务详情加载器允许创建者，或活动企业的当前 owner 读取。owner 查看他人任务保留真实提交者并返回 `inputs: []`；重试、移动、删除、源素材复制仍属于创建者操作。前端成员只读视图在轮询生命周期重新核对账号／空间与成员／项目证据。当前看板展示在职成员，没有“离职成员”分区；后端保留历史不代表现有 UI 也展示。见[前端项目](/zh/frontend/projects)和[详情链路](/zh/reference/flows/workflow-history-flow)。
+
 ---
 
-代码依据 · backend `b13cc566`: [app/workspaces/project_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_api.py) · [app/workspaces/project_statuses.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_statuses.py) · [app/admin/enterprise_overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/enterprise_overview.py).
+代码依据 · backend `e59716c8`: [app/workspaces/project_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_api.py) · [app/workspaces/project_statuses.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_statuses.py) · [app/admin/enterprise_overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/enterprise_overview.py).

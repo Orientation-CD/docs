@@ -46,7 +46,15 @@ for path, source in sorted(files.items()):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             owner = parents.get(id(node))
             name = f'{owner.name}.{node.name}' if isinstance(owner, ast.ClassDef) else node.name
-            symbols.append({'source': path, 'symbol': name, 'line': node.lineno, 'endLine': node.end_lineno})
+            qualified = [node.name]
+            ancestor = owner
+            while ancestor is not None:
+                if isinstance(ancestor, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    qualified.insert(0, ancestor.name)
+                ancestor = parents.get(id(ancestor))
+            start = min([node.lineno] + [item.lineno for item in node.decorator_list])
+            symbols.append({'source': path, 'symbol': name, 'qualifiedSymbol': '.'.join(qualified),
+                            'line': node.lineno, 'startLine': start, 'endLine': node.end_lineno})
     prefixes = {}
     for node in tree.body:
         if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'APIRouter':
