@@ -14,7 +14,7 @@
 
 ## 从“手机文件”创建会话 {#voice-session-create}
 
-**接口：`POST /v1/voice-upload-sessions`。** [`choosePhoneFiles`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/voice_summary/index.vue#L891) 先经过登录门禁，取权威资料并检查空间未变；可用槽为 `3 - files.length`。请求前保存 launch 身份，随后 [`createVoiceUploadSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/voiceUploadSessions.ts#L82) 带 Bearer、稳定 `Idempotency-Key` 发送：
+**接口：`POST /v1/voice-upload-sessions`。** [`choosePhoneFiles`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/voice_summary/index.vue#L891) 先经过登录门禁，取权威资料并检查空间未变；可用槽为 `3 - files.length`。请求前保存 launch 身份，随后 [`createVoiceUploadSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/voiceUploadSessions.ts#L82) 带 Bearer、稳定 `Idempotency-Key` 发送：
 
 ```json
 {
@@ -48,9 +48,9 @@ sequenceDiagram
 
 | 步骤 | 打开代码 | 关注的边界 |
 | --- | --- | --- |
-| 1–2 | [`choosePhoneFiles`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/voice_summary/index.vue#L891)、[`createVoiceUploadSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/voiceUploadSessions.ts#L82) | 登录门禁保留草稿，但不能悄悄把会话绑到变化后的空间。 |
+| 1–2 | [`choosePhoneFiles`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/voice_summary/index.vue#L891)、[`createVoiceUploadSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/voiceUploadSessions.ts#L82) | 登录门禁保留草稿，但不能悄悄把会话绑到变化后的空间。 |
 | 3–5 | [`create_voice_upload_session`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_api.py#L421)、[`VoiceUploadSessionStore.create`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_sessions.py#L255) | 检查空间后结束读取事务再操作 Redis；Lua 一起原子发布会话/handoff/幂等记录。 |
-| 6 | [`stageVoiceUploadHandoff`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/voiceUploadHandoff.ts#L9)、[`consumeVoiceUploadHandoff`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/voiceUploadHandoff.ts#L14) | 页面消费暂存 URL，再显示 web-view；URL fragment 是一次性能力凭证。 |
+| 6 | [`stageVoiceUploadHandoff`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/voiceUploadHandoff.ts#L9)、[`consumeVoiceUploadHandoff`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/voiceUploadHandoff.ts#L14) | 页面消费暂存 URL，再显示 web-view；URL fragment 是一次性能力凭证。 |
 | 7–9 | [`bootstrap`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/static/voice-upload.js#L77)、[`exchange_voice_upload_handoff`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_api.py#L502) | 浏览器交换 fragment 后用 `history.replaceState` 清除它；Cookie 限路径并且 HttpOnly。 |
 | 10 | [`get_voice_upload_browser_session`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_api.py#L527) | 后续浏览器请求解析受限 Cookie，小程序 Bearer 从未被交过去。 |
 
@@ -120,7 +120,7 @@ sequenceDiagram
 
 ## 把 READY 文件取回小程序 {#voice-session-get}
 
-**接口：`GET /v1/voice-upload-sessions/{session_id}`。** 返回/显示页面或显式同步时，[`syncPhoneUploadSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/voice_summary/index.vue#L838) → [`getVoiceUploadSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/voiceUploadSessions.ts#L100) 使用小程序 Bearer，与浏览器 Cookie 路由故意分开。
+**接口：`GET /v1/voice-upload-sessions/{session_id}`。** 返回/显示页面或显式同步时，[`syncPhoneUploadSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/voice_summary/index.vue#L838) → [`getVoiceUploadSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/voiceUploadSessions.ts#L100) 使用小程序 Bearer，与浏览器 Cookie 路由故意分开。
 
 [`get_voice_upload_session`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_api.py#L453) 按 ID 取 Redis，会核对所有者、重查空间，并调用 [`_ready_assets`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_api.py#L262)。它把 Redis READY 槽投影到**当前仍然**本人所有、未过期、READY、DESIGN_JOB_INPUT/recording 且验证元数据完整的 Audio 行。旧 Redis 快照不能接纳已删除、过期或他人文件。
 

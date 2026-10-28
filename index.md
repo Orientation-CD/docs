@@ -53,7 +53,7 @@ YuanZhu AI (装易装AI) supports design/renovation images, recording summaries,
 
 | Repository | Working branch | Documented source |
 | --- | --- | --- |
-| [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | `21db6d8` |
+| [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | `3662578` |
 | [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | `e59716c` |
 | [docs](https://github.com/Orientation-CD/docs) | `main` | This bilingual documentation site |
 
@@ -61,7 +61,7 @@ The content was checked on **2026-10-28**. Implementation in a branch does not p
 
 ## Source evidence
 
-[Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/featureGroups.ts) · [Frontend commands](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [Backend contracts](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py) · [Local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md).
+[Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts) · [Frontend commands](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Backend contracts](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py) · [Local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md).
 
 ## Audited integration boundary
 

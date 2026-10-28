@@ -56,4 +56,4 @@ VitePress 输出 `.vitepress/dist`，GitHub Pages 在 `/docs/` 提供服务。PR
 - [后端文档工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.github/workflows/sdd-docs.yml)
 - [定时运行工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.github/workflows/daily-endurance.yml)
 - [规范测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
-- [前端脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json)
+- [前端脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)

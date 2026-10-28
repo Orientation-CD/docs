@@ -23,8 +23,8 @@ sequenceDiagram
 
 | 消息 | 代码 | 应该找到什么 |
 | --- | --- | --- |
-| 1 | [src/services/pollScheduler.ts → createPollScheduler](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/pollScheduler.ts#L33) | 可见性、单个在途请求、计时器、代次保护 |
-| 2 | [src/repositories/designJobDetail.ts → designJobRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/designJobDetail.ts#L189) | canonical/compatibility 路径开关与类型映射 |
+| 1 | [src/services/pollScheduler.ts → createPollScheduler](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/pollScheduler.ts#L33) | 可见性、单个在途请求、计时器、代次保护 |
+| 2 | [src/repositories/designJobDetail.ts → designJobRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/designJobDetail.ts#L189) | canonical/compatibility 路径开关与类型映射 |
 | 3 | [_get_design_job_response](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1320) | 可见历史、创建者或当前企业 owner 复核；不调用供应商 |
 | 4–5 | [app/workflows/api.py → job_response](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L760) | 读取输出、签新 URL、提供 retry 和 `poll_after_seconds` |
 | 6–7 | repository 中 `mapDesignJobDetail` 和轮询器 | 丢弃过时响应，终态停止调度 |
@@ -35,7 +35,7 @@ sequenceDiagram
 
 ### 个人 canonical 列表 {#list-workflows}
 
-`GET /v1/workflows` 由方案/历史界面的 [src/repositories/designJobs.ts → personalDesignJobRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/designJobs.ts#L468) 发起。[app/workflows/api.py → list_design_jobs](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1391) 限定 `DesignJob.user_id` 为调用者，使用 `creator_root_history()`，再按可选 workspace/project、任务名 `q`、status 过滤；count、分页、预加载输出关系，每项调用 `job_response`。指定 Project 必须属于本人、处于 active，且与 workspace 筛选一致。它不启动 worker、不调模型。前端按稳定 Job ID 合并页，写操作后使项目计数缓存失效。
+`GET /v1/workflows` 由方案/历史界面的 [src/repositories/designJobs.ts → personalDesignJobRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/designJobs.ts#L468) 发起。[app/workflows/api.py → list_design_jobs](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1391) 限定 `DesignJob.user_id` 为调用者，使用 `creator_root_history()`，再按可选 workspace/project、任务名 `q`、status 过滤；count、分页、预加载输出关系，每项调用 `job_response`。指定 Project 必须属于本人、处于 active，且与 workspace 筛选一致。它不启动 worker、不调模型。前端按稳定 Job ID 合并页，写操作后使项目计数缓存失效。
 
 ### 兼容个人列表 {#list-compatibility}
 
@@ -47,7 +47,7 @@ sequenceDiagram
 
 ### 兼容详情 {#get-compatibility}
 
-`GET /v1/design-jobs/{design_job_id}` 进入 `get_design_job`，复用 `_get_design_job_response`。图片/语音/视频详情调用可在 [src/repositories/designJobDetail.ts → designJobRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/designJobDetail.ts#L189) 中选这个路径，创建者／owner 的可见性和输出投影规则相同。URL 参数变量名变化不改变 Job 身份。
+`GET /v1/design-jobs/{design_job_id}` 进入 `get_design_job`，复用 `_get_design_job_response`。图片/语音/视频详情调用可在 [src/repositories/designJobDetail.ts → designJobRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/designJobDetail.ts#L189) 中选这个路径，创建者／owner 的可见性和输出投影规则相同。URL 参数变量名变化不改变 Job 身份。
 
 ### 显式选定空间的 owner 列表 {#list-owner-workflows}
 
@@ -55,11 +55,11 @@ sequenceDiagram
 
 ### 兼容 owner 列表 {#list-owner-compatibility}
 
-`GET /v1/workspace/design-jobs` 也绑定 `list_workspace_design_jobs`。[src/repositories/designJobDetail.ts → readOwnerListJob](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/designJobDetail.ts#L149) 显式传 `workspace_id`，开关启用时传成员 Project scope；有界扫描分页，逐项校验选定成员/空间/项目，上下文变化就失败关闭，不猜测全局“当前企业”。
+`GET /v1/workspace/design-jobs` 也绑定 `list_workspace_design_jobs`。[src/repositories/designJobDetail.ts → readOwnerListJob](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/designJobDetail.ts#L149) 显式传 `workspace_id`，开关启用时传成员 Project scope；有界扫描分页，逐项校验选定成员/空间/项目，上下文变化就失败关闭，不猜测全局“当前企业”。
 
 ## 显式重试是一个持久动作 {#retry-workflow}
 
-`POST /v1/workflows/{design_job_id}/retry` 由 [src/services/jobRetry.ts → retryDesignJob](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/jobRetry.ts#L45) 为报告/文案选择。“重试原任务”先刷新状态和写入权限，以 Job ID、预期 retry count 为作用域保存 key。路由 [app/workflows/api.py → retry_failed_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1159) 调 [app/workflows/submissions/workflow_submission_retry.py → retry_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py#L185)，再尝试分发已提交 outbox，返回 **202**、`accepted_retry_generation`、`retry_replayed` 与当前 Job。
+`POST /v1/workflows/{design_job_id}/retry` 由 [src/services/jobRetry.ts → retryDesignJob](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/jobRetry.ts#L45) 为报告/文案选择。“重试原任务”先刷新状态和写入权限，以 Job ID、预期 retry count 为作用域保存 key。路由 [app/workflows/api.py → retry_failed_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1159) 调 [app/workflows/submissions/workflow_submission_retry.py → retry_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py#L185)，再尝试分发已提交 outbox，返回 **202**、`accepted_retry_generation`、`retry_replayed` 与当前 Job。
 
 控制器锁定准入/产品/聚合权限，核对原创建人、冻结执行/商业证据、删除/管理员失败/供应商不确定状态和重试上限。报告 child 要通过父任务重试，否则 `WORKFLOW_PARENT_RETRY_REQUIRED`。受理时写 `design_job_retry_requests`、推进代次、调度合格的重置 child，不创建新公开 Job。冻结价格和后端规则决定新预留，客户端不能另算节点费用，也不能手动释放旧预留。
 
@@ -80,7 +80,7 @@ sequenceDiagram
 
 | 消息 | 代码 |
 | --- | --- |
-| 1、5–6 | [src/services/jobRetry.ts → retryDesignJob](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/jobRetry.ts#L45) |
+| 1、5–6 | [src/services/jobRetry.ts → retryDesignJob](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/jobRetry.ts#L45) |
 | 2–3 | [app/workflows/submissions/workflow_submission_retry.py → retry_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py#L185) |
 | 4 | [app/workflows/api.py → retry_failed_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1159) 调用的 `dispatch_workflow_submission_outbox` |
 
@@ -92,7 +92,7 @@ sequenceDiagram
 
 ### 兼容重试 {#retry-compatibility}
 
-`POST /v1/design-jobs/{design_job_id}/retry` 同样使用 `retry_failed_design_job`。[src/services/jobRetry.ts → retryDesignJob](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/jobRetry.ts#L45) 为支持的非报告/非文案产品选它。仍是同一套回执和代次机制，不是客户端重新拼一次表单；key、权限和外部效果不确定性检查一致。
+`POST /v1/design-jobs/{design_job_id}/retry` 同样使用 `retry_failed_design_job`。[src/services/jobRetry.ts → retryDesignJob](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/jobRetry.ts#L45) 为支持的非报告/非文案产品选它。仍是同一套回执和代次机制，不是客户端重新拼一次表单；key、权限和外部效果不确定性检查一致。
 
 ## 移动一个终态 Job {#move-workflow}
 
@@ -100,7 +100,7 @@ sequenceDiagram
 
 ### 当前 UI 使用的兼容移动 {#move-compatibility}
 
-`POST /v1/design-jobs/{design_job_id}/move` 到同一个 `move_design_job_route`。[src/repositories/projectContext.ts → projectContextRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/projectContext.ts#L181) 从“我的方案”移动动作发送该别名，带选定源/目标和会话/scope 保护；成功后使两边计数失效，scope 已变化就拒绝应用迟到响应。canonical move 当前没有独立前端调用点。
+`POST /v1/design-jobs/{design_job_id}/move` 到同一个 `move_design_job_route`。[src/repositories/projectContext.ts → projectContextRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/projectContext.ts#L181) 从“我的方案”移动动作发送该别名，带选定源/目标和会话/scope 保护；成功后使两边计数失效，scope 已变化就拒绝应用迟到响应。canonical move 当前没有独立前端调用点。
 
 ## 删除一个终态 Job {#delete-workflow}
 
@@ -108,7 +108,7 @@ sequenceDiagram
 
 ### 兼容删除 {#delete-compatibility}
 
-`DELETE /v1/design-jobs/{design_job_id}` 绑定同一个 `delete_design_job`。[src/services/jobDeletion.ts → deleteJobWithConflictRetry](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/jobDeletion.ts#L9) 有界重试冲突并核对上下文，[src/repositories/designJobs.ts → personalDesignJobRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/designJobs.ts#L468) 在调用周围使项目计数失效。不要把删除失败的任务永久藏起来，也不要通过改 SQL 跳过对象清理。报告/来源引用可能需要先做明确的上游处理。
+`DELETE /v1/design-jobs/{design_job_id}` 绑定同一个 `delete_design_job`。[src/services/jobDeletion.ts → deleteJobWithConflictRetry](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/jobDeletion.ts#L9) 有界重试冲突并核对上下文，[src/repositories/designJobs.ts → personalDesignJobRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/designJobs.ts#L468) 在调用周围使项目计数失效。不要把删除失败的任务永久藏起来，也不要通过改 SQL 跳过对象清理。报告/来源引用可能需要先做明确的上游处理。
 
 ## 认证后下载媒体 {#result-workflow}
 
@@ -116,7 +116,7 @@ sequenceDiagram
 
 ### resolver 使用的兼容媒体下载 {#result-compatibility}
 
-`GET /v1/design-jobs/{design_job_id}/result-file` 仍是 `download_design_result`。前端 resolver 只接受配置 API origin 下这个精确的认证 API path，[src/repositories/resultFile.ts → materializeResultFile](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/resultFile.ts#L124) 下载时加 Bearer。已签存储 URL 走另一分支，校验 origin 与过期时间。canonical download 供 API 客户端使用，但 resolver 的认证 fallback 目前是此别名。不要把 API 凭据附到存储签名 URL。HTML/PPTX 浏览是不同的限时 query-token 边界，见[报告发布](/zh/reference/flows/report-view-flow)。
+`GET /v1/design-jobs/{design_job_id}/result-file` 仍是 `download_design_result`。前端 resolver 只接受配置 API origin 下这个精确的认证 API path，[src/repositories/resultFile.ts → materializeResultFile](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/resultFile.ts#L124) 下载时加 Bearer。已签存储 URL 走另一分支，校验 origin 与过期时间。canonical download 供 API 客户端使用，但 resolver 的认证 fallback 目前是此别名。不要把 API 凭据附到存储签名 URL。HTML/PPTX 浏览是不同的限时 query-token 边界，见[报告发布](/zh/reference/flows/report-view-flow)。
 
 ## 不新建收费任务的练习 {#exercise}
 

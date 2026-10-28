@@ -1,8 +1,8 @@
 # 前端总览
 
-本轮核验前端 `ui-integration@21db6d8`、后端 `main@e59716c8`。本文描述这两个源码版本，完整提交见[源码版本记录](/zh/reference/source-revisions)。前端出现页面或提交了接口 fixture，并不能证明本轮核验的后端已实现对应契约。
+本轮核验前端 `ui-integration@3662578`、后端 `main@e59716c8`。本文描述这两个源码版本，完整提交见[源码版本记录](/zh/reference/source-revisions)。前端出现页面或提交了接口 fixture，并不能证明本轮核验的后端已实现对应契约。
 
-小程序使用 uni-app、Vue 3、TypeScript 和 uview-plus，工具链为 **Node 22、pnpm 9.15.9**。会话和主题通过共享模块及 Vue 状态管理，没有 Pinia 依赖。真实 API、前端 Mock、平台适配和项目能力由构建配置在产物生成前选定。
+小程序使用 uni-app、Vue 3 和 TypeScript，界面由项目共享组件与 uni-app 原生控件组成，工具链为 **Node 22、pnpm 9.15.9**。会话和主题通过共享模块及 Vue 状态管理，没有 Pinia 依赖。真实 API、前端 Mock、平台适配和项目能力由构建配置在产物生成前选定。
 
 ## 从真实导航找到功能
 
@@ -59,4 +59,4 @@ flowchart TB
 
 ## 源码依据
 
-核验日期 2026-10-28：[导航树](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/featureGroups.ts#L23) · [首页组合](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages/home/index.vue) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages.json) · [实际提交路由](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designJobSubmit.ts#L182) · [工具链](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json)。
+核验日期 2026-10-28：[导航树](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts#L23) · [首页组合](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [实际提交路由](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [工具链](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)。

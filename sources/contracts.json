@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "commits": {
-    "frontend": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+    "frontend": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
     "backend": "e59716c83e087deda8477da5ea7b327a40cf65c5"
   },
   "api": [
@@ -3572,7 +3572,7 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-management-6060-4bd4094c.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "a96c224038cf24022ccd8f4e877dd1d8a60d11aa094748489474b5bc7c541c35"
           }
         ]
@@ -3584,7 +3584,7 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-group-6060-4bd4094c.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "bc5cc94326108816d71d061a9b72860b2b20749e033b77881727a70ec0dae437"
           }
         ]
@@ -3596,12 +3596,12 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-group-6060-4bd4094c.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "bc5cc94326108816d71d061a9b72860b2b20749e033b77881727a70ec0dae437"
           },
           {
             "path": "tests/fixtures/backend-floor-plan-workflows-t45-source.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "314266e98830d7a02f3911ca57152a41ea01876360a2133686263876d8a73a5b"
           }
         ]
@@ -3613,7 +3613,7 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-management-6060-4bd4094c.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "a96c224038cf24022ccd8f4e877dd1d8a60d11aa094748489474b5bc7c541c35"
           }
         ]
@@ -3625,12 +3625,12 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-management-6060-4bd4094c.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "a96c224038cf24022ccd8f4e877dd1d8a60d11aa094748489474b5bc7c541c35"
           },
           {
             "path": "tests/fixtures/backend-floor-plan-workflows-t45-source.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "314266e98830d7a02f3911ca57152a41ea01876360a2133686263876d8a73a5b"
           }
         ]
@@ -3642,7 +3642,7 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-workflows-t45-source.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "314266e98830d7a02f3911ca57152a41ea01876360a2133686263876d8a73a5b"
           }
         ]
@@ -3654,12 +3654,12 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-management-6060-4bd4094c.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "a96c224038cf24022ccd8f4e877dd1d8a60d11aa094748489474b5bc7c541c35"
           },
           {
             "path": "tests/fixtures/backend-floor-plan-workflows-t45-source.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "314266e98830d7a02f3911ca57152a41ea01876360a2133686263876d8a73a5b"
           }
         ]
@@ -3671,7 +3671,7 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-group-6060-4bd4094c.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "bc5cc94326108816d71d061a9b72860b2b20749e033b77881727a70ec0dae437"
           }
         ]
@@ -3683,7 +3683,7 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-panorama-6060-87737599.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "9e82c18eedb2b8229ee3a15106020a2f830095394ca374fe9d927a31d2883a0c"
           }
         ]
@@ -3695,7 +3695,7 @@
         "sources": [
           {
             "path": "tests/fixtures/backend-floor-plan-management-6060-4bd4094c.json",
-            "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+            "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
             "sha256": "a96c224038cf24022ccd8f4e877dd1d8a60d11aa094748489474b5bc7c541c35"
           }
         ]
@@ -4181,6 +4181,75 @@
       "documents/issue488-pr-a/screenshots/before-subscription-minimal.png",
       "documents/issue488-pr-a/screenshots/before-subscription-modern.png",
       "documents/issue488-pr-a/visual-results.json",
+      "documents/issue488-pr-b/README.md",
+      "documents/issue488-pr-b/after-packages.json",
+      "documents/issue488-pr-b/before-packages.json",
+      "documents/issue488-pr-b/build-device-packages.mjs",
+      "documents/issue488-pr-b/build-evidence.mjs",
+      "documents/issue488-pr-b/check-gate-regressions.mjs",
+      "documents/issue488-pr-b/dependency-audit.json",
+      "documents/issue488-pr-b/device-after.json",
+      "documents/issue488-pr-b/device-before.json",
+      "documents/issue488-pr-b/export-fixtures.mjs",
+      "documents/issue488-pr-b/gate-regressions.json",
+      "documents/issue488-pr-b/render.mjs",
+      "documents/issue488-pr-b/screenshots/after-contact-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-contact-modern.png",
+      "documents/issue488-pr-b/screenshots/after-feature-group-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-feature-group-modern.png",
+      "documents/issue488-pr-b/screenshots/after-home-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-home-modern.png",
+      "documents/issue488-pr-b/screenshots/after-plans-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-plans-modern.png",
+      "documents/issue488-pr-b/screenshots/after-profile-member-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-profile-member-modern.png",
+      "documents/issue488-pr-b/screenshots/after-profile-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-profile-modern.png",
+      "documents/issue488-pr-b/screenshots/after-profile-owner-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-profile-owner-modern.png",
+      "documents/issue488-pr-b/screenshots/after-profile-personal-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-profile-personal-modern.png",
+      "documents/issue488-pr-b/screenshots/after-project-editor-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-project-editor-modern.png",
+      "documents/issue488-pr-b/screenshots/after-projects-member-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-projects-member-modern.png",
+      "documents/issue488-pr-b/screenshots/after-projects-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-projects-modern.png",
+      "documents/issue488-pr-b/screenshots/after-projects-owner-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-projects-owner-modern.png",
+      "documents/issue488-pr-b/screenshots/after-projects-personal-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-projects-personal-modern.png",
+      "documents/issue488-pr-b/screenshots/after-subscription-minimal.png",
+      "documents/issue488-pr-b/screenshots/after-subscription-modern.png",
+      "documents/issue488-pr-b/screenshots/before-contact-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-contact-modern.png",
+      "documents/issue488-pr-b/screenshots/before-feature-group-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-feature-group-modern.png",
+      "documents/issue488-pr-b/screenshots/before-home-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-home-modern.png",
+      "documents/issue488-pr-b/screenshots/before-plans-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-plans-modern.png",
+      "documents/issue488-pr-b/screenshots/before-profile-member-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-profile-member-modern.png",
+      "documents/issue488-pr-b/screenshots/before-profile-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-profile-modern.png",
+      "documents/issue488-pr-b/screenshots/before-profile-owner-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-profile-owner-modern.png",
+      "documents/issue488-pr-b/screenshots/before-profile-personal-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-profile-personal-modern.png",
+      "documents/issue488-pr-b/screenshots/before-project-editor-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-project-editor-modern.png",
+      "documents/issue488-pr-b/screenshots/before-projects-member-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-projects-member-modern.png",
+      "documents/issue488-pr-b/screenshots/before-projects-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-projects-modern.png",
+      "documents/issue488-pr-b/screenshots/before-projects-owner-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-projects-owner-modern.png",
+      "documents/issue488-pr-b/screenshots/before-projects-personal-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-projects-personal-modern.png",
+      "documents/issue488-pr-b/screenshots/before-subscription-minimal.png",
+      "documents/issue488-pr-b/screenshots/before-subscription-modern.png",
+      "documents/issue488-pr-b/visual-results.json",
       "documents/project-detail-gap-evidence/collapsed-pending-detail.png",
       "documents/project-detail-gap-evidence/pending-detail.png",
       "documents/project-switch-counts-evidence/browser-320-projects.png",
@@ -4219,7 +4288,6 @@
       "index.html",
       "package.json",
       "patches/@vitest__coverage-v8@1.6.1.patch",
-      "patches/uview-plus@3.8.55.patch",
       "pnpm-lock.yaml",
       "pnpm-workspace.yaml",
       "project.config.json",
@@ -4817,7 +4885,6 @@
       "src/types/markdown-it-browser.d.ts",
       "src/types/memberProjectRead.ts",
       "src/types/projectScope.ts",
-      "src/types/uview-plus.d.ts",
       "src/uni.scss",
       "tests/accountGate.test.ts",
       "tests/accountPresentation.test.ts",
@@ -4830,6 +4897,7 @@
       "tests/apiObservability.test.ts",
       "tests/apiProductionArtifact.test.mjs",
       "tests/apiProductionRuntime.test.ts",
+      "tests/appBootstrap.test.ts",
       "tests/appUpdate.test.ts",
       "tests/assetHealth.test.ts",
       "tests/authApi.integration.test.mjs",
@@ -6262,8 +6330,8 @@
         "sha256": "673127daf4a40bced2225de115bfc974c90ea28847a54463633a8809b349f178"
       },
       "package.json": {
-        "lines": 138,
-        "sha256": "e8eda1d9c703369c6ec4f8deafddc7a68cf9ee59e8acff4accab6fed15a69cca"
+        "lines": 136,
+        "sha256": "ae17089db1954265b53cf96ad683fe36f0602a06b2b5ae1651dd88b5b21da136"
       },
       "scripts/api-contract-source.mjs": {
         "lines": 81,
@@ -6326,8 +6394,8 @@
         "sha256": "a0e48f4dee9792223b0ef54428146c085ae6abdc809d08a9f03800a5de019a2f"
       },
       "scripts/check-code-quality.mjs": {
-        "lines": 258,
-        "sha256": "fc095e9ea23c5728f9b43e8a5787dd2d4c9f465609216e80554ba2de0df64aa1"
+        "lines": 218,
+        "sha256": "d057ffdde41efbc1e5f398c63941f501913141ee7c85594d687144f5ffbd5643"
       },
       "scripts/check-contract-fixtures.mjs": {
         "lines": 182,
@@ -6622,16 +6690,16 @@
         "sha256": "8aafa05d0785a254a0dd19590617e7cbd96b20e63ce17242949260c0d4b64b5a"
       },
       "src/main.ts": {
-        "lines": 11,
-        "sha256": "78637f7279e7c15519e15cef588270ccd38eb02466ed88edf7b45eeea657d27c"
+        "lines": 9,
+        "sha256": "6daa1af502ca22571c7cd2a35cee7917ddb9de3b09a1fe692a7ef118958b324b"
       },
       "src/manifest.json": {
         "lines": 104,
         "sha256": "54050fa8f8cce5353343cbd0d19de9489fc1d4a573db7ee6d6b43851e4231bce"
       },
       "src/pages.json": {
-        "lines": 305,
-        "sha256": "292ebbbe699b09fb6815c445c0679fc8d7c6f1bb14a6d7304eabf07476b83041"
+        "lines": 302,
+        "sha256": "5eace5ef0d29b16c51c1e32dc9213d5849df22127f681b9289f0c8934c5013e5"
       },
       "src/pages/ad-splash/index.vue": {
         "lines": 281,
@@ -8541,13 +8609,9 @@
         "lines": 33,
         "sha256": "75cfa0198cece6f9f97078aa69180de0b5bac3f876c2a5174b9049b281b42ced"
       },
-      "src/types/uview-plus.d.ts": {
-        "lines": 6,
-        "sha256": "3edbc2b0c792a140c744179b11f993c25d9df8df126362eb1ea42927df3df9b3"
-      },
       "src/uni.scss": {
-        "lines": 80,
-        "sha256": "16b471348302b0a43346426e556c48c330fb8e1a729fc5b9b8d4bfff3f157e37"
+        "lines": 78,
+        "sha256": "f64f896ee9e1db6bb51ec53d09f185d529d6e77bb3b8f74cc3282f76343f6bed"
       },
       "tests/fixtures/backend-floor-plan-group-6060-4bd4094c.json": {
         "lines": 1448,

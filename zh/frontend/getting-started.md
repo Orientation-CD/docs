@@ -13,7 +13,7 @@ pnpm --version
 pnpm install --frozen-lockfile
 ```
 
-预期 pnpm 版本为9.15.9。冻结安装会应用仓库中的 Vitest、uview-plus 补丁。若 Corepack 不可用，用 `npx --yes pnpm@9.15.9` 替代 `pnpm`。不要通过删除 lockfile 或跳过补丁解决安装问题。用 `git rev-parse HEAD` 记录版本：已发布文档固定在[审计提交](/zh/reference/source-revisions)，新拉取分支可能继续前进。
+预期 pnpm 版本为9.15.9。冻结安装会应用仓库中的 Vitest coverage 补丁。若 Corepack 不可用，用 `npx --yes pnpm@9.15.9` 替代 `pnpm`。不要通过删除 lockfile 或跳过补丁解决安装问题。用 `git rev-parse HEAD` 记录版本：已发布文档固定在[审计提交](/zh/reference/source-revisions)，新拉取分支可能继续前进。
 
 ## 2. 构建前端 Mock 包
 
@@ -64,4 +64,4 @@ pnpm dev:mp-weixin:mock
 
 ## 源码依据
 
-核验日期 2026-10-28：[固定工具链、命令和补丁](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages.json) · [抖音构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/config/build-targets.mjs) · [真机地址检查](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/require-device-api-url.mjs) · [微信产物门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/check-code-quality.mjs)。
+核验日期 2026-10-28：[固定工具链、命令和补丁](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [抖音构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/config/build-targets.mjs) · [真机地址检查](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/require-device-api-url.mjs) · [微信产物门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs)。

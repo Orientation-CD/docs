@@ -4,7 +4,7 @@
 
 ## 从 UI 找到入口，分清两组角色名称 {#asset-entry}
 
-标准图片功能组件提交时调用 [`submitStandardDesign`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/standardDesignSubmit.ts#L51)：加载资料、Feature 与提示词可用性，检查权益，按开关绑定项目，再调用 `stageDesignImages`，之后才 `submitDesignJob`。家具功能则是 [`submit`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/furniture/index.vue#L608) → [`submitFurnitureDesign`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/furnitureDesignSubmit.ts#L51)，按 Feature 要求准备场景、蒙版与可选参考图。
+标准图片功能组件提交时调用 [`submitStandardDesign`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/standardDesignSubmit.ts#L51)：加载资料、Feature 与提示词可用性，检查权益，按开关绑定项目，再调用 `stageDesignImages`，之后才 `submitDesignJob`。家具功能则是 [`submit`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/furniture/index.vue#L608) → [`submitFurnitureDesign`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/furnitureDesignSubmit.ts#L51)，按 Feature 要求准备场景、蒙版与可选参考图。
 
 | 边界 | 图片角色名 | 为什么不同 |
 | --- | --- | --- |
@@ -16,7 +16,7 @@
 
 ## 创建凭证：先声明一个文件，不发送字节 {#upload-intent}
 
-**接口：`POST /v1/assets/upload-intents`。** 前端 [`stageOne`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designAssets.ts#L156) 根据用户、角色和逻辑文件 ID 得到稳定 key；带 Bearer 与 8–128 字符的 `Idempotency-Key`，发送：
+**接口：`POST /v1/assets/upload-intents`。** 前端 [`stageOne`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L156) 根据用户、角色和逻辑文件 ID 得到稳定 key；带 Bearer 与 8–128 字符的 `Idempotency-Key`，发送：
 
 ```json
 {
@@ -55,10 +55,10 @@ sequenceDiagram
 
 | 步骤 | 打开代码 | 应观察什么 |
 | --- | --- | --- |
-| 1 | [`stageOne`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designAssets.ts#L156) | 持久化幂等 key 对应一个逻辑文件/角色；响应不仅校验 UUID，还校验类型、用途和角色。 |
+| 1 | [`stageOne`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L156) | 持久化幂等 key 对应一个逻辑文件/角色；响应不仅校验 UUID，还校验类型、用途和角色。 |
 | 2–3 | [`create_asset_upload_intent`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py#L402)、[`create_upload_intent`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/assets.py#L290) | `_normalize_request`、`_validate_policy`、Redis 限流和指纹比较先于发布新凭证。 |
 | 4–6 | [`create_upload_intent`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/assets.py#L290)、[`S3Storage.create_upload_form`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/storage.py#L922) | 签名可能获取外部凭证，所以在短 SQL 发布锁外完成；签完重查并发同 key 请求。 |
-| 7–9 | [`directUpload`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designAssets.ts#L127) | POST multipart、`name: "file"` 与全部 `form.fields`；不把 API Authorization 带给对象存储。 |
+| 7–9 | [`directUpload`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L127) | POST multipart、`name: "file"` 与全部 `form.fields`；不把 API Authorization 带给对象存储。 |
 | 10–13 | [`complete_asset_upload_route`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py#L519)、[`complete_asset_upload`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_completion.py#L261) | 见下方验证算法。存储成功不是输入接纳成功。 |
 
 首次成功返回 `201`，完全一致的重放返回 `200` 与同一身份。相同 key 搭配不同规范化声明会报 `IDEMPOTENCY_KEY_REUSED`。已经核验或接受的重放可以是 `upload: null`，`stageOne` 直接使用 ID，不再上传；尚未上传完成的重放在到期校验后可以取得新的签名表单。把 key 与草稿一起保留，每次重试都换 key 就失去这层保护。
@@ -134,7 +134,7 @@ Asset解除关联/删除后，归档墓碑仍保留清理权威。结果复制�
 
 ## 读取单个 Asset：恢复并复查报告附件 {#asset-get}
 
-**接口：`GET /v1/assets/{asset_id}`。** 一个真实小程序调用是恢复/复用 PPTX 附件时的 [`verifyReportAttachment`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/reportAttachment.ts#L42)；提交前检查 UUID 一致、READY、DOCUMENT、DESIGN_JOB_INPUT、`attachment` 且未过期。
+**接口：`GET /v1/assets/{asset_id}`。** 一个真实小程序调用是恢复/复用 PPTX 附件时的 [`verifyReportAttachment`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/reportAttachment.ts#L42)；提交前检查 UUID 一致、READY、DOCUMENT、DESIGN_JOB_INPUT、`attachment` 且未过期。
 
 [`get_asset_route`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py#L618) → [`get_asset`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_management.py#L234) 加载元数据与子类型，只允许所有者或管理员。未知和别人的 ID 均表现为 unavailable，避免泄露所有权。已移除企业输出对普通用户隐藏；正在删除的项目/已移除输出不返回预览地址。响应可签发有权访问的预览 URL，但不会把裸存储 key 当成通用权限交给客户端。
 
@@ -150,7 +150,7 @@ Asset解除关联/删除后，归档墓碑仍保留清理权威。结果复制�
 
 ## 复用生成图：创建独立的输入副本 {#asset-copy}
 
-**接口：`POST /v1/assets/{source_asset_id}/design-input-copies` FastAPI 入口是 `copy_design_result_to_input_route`，随后调用下方的 `copy_result_to_design_input`。。** 用生成图进入自定义设计时，经过 [`prepareCopy`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/customized_design/index.vue#L201) → [`copyResultInput`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/customizedDesign.ts#L53)。稳定 key 包含用户、逻辑复制 ID、源 Asset ID，不是把公开结果 URL 当输入提交。
+**接口：`POST /v1/assets/{source_asset_id}/design-input-copies` FastAPI 入口是 `copy_design_result_to_input_route`，随后调用下方的 `copy_result_to_design_input`。。** 用生成图进入自定义设计时，经过 [`prepareCopy`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/customized_design/index.vue#L201) → [`copyResultInput`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/customizedDesign.ts#L53)。稳定 key 包含用户、逻辑复制 ID、源 Asset ID，不是把公开结果 URL 当输入提交。
 
 ```mermaid
 sequenceDiagram
@@ -169,7 +169,7 @@ sequenceDiagram
 
 | 步骤 | 源码 | 分支 |
 | --- | --- | --- |
-| 1 | [`copyResultInput`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/customizedDesign.ts#L53) | 仅对指定 `ASSET_COPY_IN_PROGRESS`/存储不可用做有限重试，并保留同 key。 |
+| 1 | [`copyResultInput`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/customizedDesign.ts#L53) | 仅对指定 `ASSET_COPY_IN_PROGRESS`/存储不可用做有限重试，并保留同 key。 |
 | 2–3 | [`_reserve_copy`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_copies.py#L157)、[`_claim_copy`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_copies.py#L314) | 慢 I/O 前持久化 intent 与目标身份，租约 Token 决定谁可最终提交。 |
 | 4 | [`copy_result_to_design_input`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_copies.py#L611) | 复制前先 HEAD 目标；存储响应不明确时做对账，避免已经完成却重复复制。 |
 | 5–6 | [`_finalize_copy`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_copies.py#L462) | 复查源任务完成、项目/空间仍有效与租约，写目标元数据和 COMPLETED intent 并提交。 |

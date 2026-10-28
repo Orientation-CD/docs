@@ -1,8 +1,8 @@
 # Frontend Overview
 
-The audited frontend is `ui-integration@21db6d8`; the backend is `main@e59716c8`. This guide describes those source versions, with full commit pins in [Source versions](/reference/source-revisions). A frontend screen or committed API fixture does not establish that the audited backend implements its contract.
+The audited frontend is `ui-integration@3662578`; the backend is `main@e59716c8`. This guide describes those source versions, with full commit pins in [Source versions](/reference/source-revisions). A frontend screen or committed API fixture does not establish that the audited backend implements its contract.
 
-The mini program uses uni-app, Vue 3, TypeScript and uview-plus, with **Node 22 and pnpm 9.15.9**. Shared session/theme modules use Vue state; there is no Pinia dependency. Build settings choose real APIs, frontend Mock, platform adapters and project capabilities before the package is produced.
+The mini program uses uni-app, Vue 3 and TypeScript, with project-owned shared components and native uni-app controls. Its toolchain is **Node 22 and pnpm 9.15.9**. Shared session/theme modules use Vue state; there is no Pinia dependency. Build settings choose real APIs, frontend Mock, platform adapters and project capabilities before the package is produced.
 
 ## Find a feature from the actual navigation
 
@@ -59,4 +59,4 @@ The [architecture guide](/frontend/architecture) explains shared boundaries. [Wo
 
 ## Source evidence
 
-Verified 2026-10-28: [Navigation tree](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/featureGroups.ts#L23) · [Home composition](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages/home/index.vue) · [Page registration](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages.json) · [Actual submit transport](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designJobSubmit.ts#L182) · [Toolchain](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json).
+Verified 2026-10-28: [Navigation tree](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts#L23) · [Home composition](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [Page registration](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [Actual submit transport](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [Toolchain](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json).

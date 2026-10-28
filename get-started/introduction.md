@@ -35,4 +35,4 @@ Labels, cards and themes are client presentation. Server discovery, active templ
 
 The [source record](/reference/source-revisions) pins full commits. Examples describe this pair, not an arbitrary deployment or an unmerged feature branch. Exposed adapters are explained in the [compatibility reference](/reference/compatibility); new integrations follow the canonical Workflow contract.
 
-Source: [src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/featureGroups.ts) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
+Source: [src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)

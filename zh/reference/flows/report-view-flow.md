@@ -4,7 +4,7 @@
 
 ## 1. 表单怎样准备 Blueprint {#blueprint}
 
-从设计报告提交按钮进入 [src/pkg-features/pages/design_report/index.vue → submit](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/design_report/index.vue#L577)，再看 [src/pkg-features/services/reportBlueprint.ts → buildReportWorkflowRequest](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/reportBlueprint.ts#L65)。用户选择已完成沟通总结、彩平图、室内方案，填项目/客户事实、选内容页数，可附已有 PPTX。builder 解析真实输出 Asset ID（含原始户型图输入）、核对角色/房间信息，创建有序页面声明。
+从设计报告提交按钮进入 [src/pkg-features/pages/design_report/index.vue → submit](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/design_report/index.vue#L577)，再看 [src/pkg-features/services/reportBlueprint.ts → buildReportWorkflowRequest](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/reportBlueprint.ts#L65)。用户选择已完成沟通总结、彩平图、室内方案，填项目/客户事实、选内容页数，可附已有 PPTX。builder 解析真实输出 Asset ID（含原始户型图输入）、核对角色/房间信息，创建有序页面声明。
 
 当前 UI 的 **8 / 12 / 16 内容页**对应公开产品 `design_report_9 / design_report_13 / design_report_17`，完整页库存是 **9 / 13 / 17 页**。不要换成历史 S01 固定 `page_count: 8` 请求。产品 key、页面模板顺序、来源库存必须与当前协议一致。契约要求恰好一个 `kind: "json", role: "blueprint"` 输入，最多加一个支持的附加 PPTX 输入；不接受客户端自己传生成 HTML。
 
@@ -45,7 +45,7 @@ flowchart TD
 
 | 转换 | 跟进哪个具体函数 | SQL / 产物影响 |
 | --- | --- | --- |
-| 表单 → 根准入 | [src/pkg-features/pages/design_report/index.vue → submit](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/design_report/index.vue#L577) → `admit_workflow_job` | 先重放／归档自有输入，再锁定冻结Blueprint／产品／耐久pins |
+| 表单 → 根准入 | [src/pkg-features/pages/design_report/index.vue → submit](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/design_report/index.vue#L577) → `admit_workflow_job` | 先重放／归档自有输入，再锁定冻结Blueprint／产品／耐久pins |
 | 准备内含 child | [app/workflows/workflow_report_children.py → prepare_report_children](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_report_children.py#L94) | 按稳定顺序锁相关 Feature/定义/模型/来源权限 |
 | 保存根与 child | [app/workflows/workflow_report_children.py → persist_report_children](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_report_children.py#L262) | `workflow_generated_sources` 把文件名绑到 child run，child 的 `parent_workflow_id` 指向根 |
 | child 终态 → 父可执行 | [app/workflows/workflow_report_dependencies.py → reconcile_report_dependencies](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_report_dependencies.py#L152) | 只关联预期 child/代次的有效完成输出，暂存父输入 pin |
@@ -83,7 +83,7 @@ worker 拿到候选 PPTX 后暂存 manifest/大小/digest，上传精确私有�
 
 ## 5. 用新 capability 打开报告 {#report}
 
-`GET /v1/workflows/{design_job_id}/report` 使用 **query `token`**，不是通用 Bearer header。UI 先认证读取 Job 取得新链接。[src/pkg-plans/pages/report/index.vue → load](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-plans/pages/report/index.vue#L22) 调 [src/services/reportCapability.ts → getFreshReportCapability](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/reportCapability.ts#L15)，核对配置 origin、过期和 scope，再把返回 URL 交给平台 `web-view`。页面重开是更新 capability，不是重新生成或扣费。
+`GET /v1/workflows/{design_job_id}/report` 使用 **query `token`**，不是通用 Bearer header。UI 先认证读取 Job 取得新链接。[src/pkg-plans/pages/report/index.vue → load](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-plans/pages/report/index.vue#L22) 调 [src/services/reportCapability.ts → getFreshReportCapability](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/reportCapability.ts#L15)，核对配置 origin、过期和 scope，再把返回 URL 交给平台 `web-view`。页面重开是更新 capability，不是重新生成或扣费。
 
 ```mermaid
 sequenceDiagram
@@ -106,7 +106,7 @@ sequenceDiagram
 | 消息 | 代码 |
 | --- | --- |
 | 1–2 | `job_response` / `workflow_preview_response` / `workflow_presentation_response` → [app/workflows/operations/design_report/workflow_report_publication.py → create_workflow_report_view_token](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/workflow_report_publication.py#L1002) |
-| 3 | [src/services/reportCapability.ts → getFreshReportCapability](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/reportCapability.ts#L15) / [src/services/workflowDownload.ts → openWorkflowPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/workflowDownload.ts#L6) |
+| 3 | [src/services/reportCapability.ts → getFreshReportCapability](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/reportCapability.ts#L15) / [src/services/workflowDownload.ts → openWorkflowPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/workflowDownload.ts#L6) |
 | 4 | [app/workflows/api.py → view_design_report](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1297) / [app/workflows/api.py → download_design_presentation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1258) |
 | 5 | [app/workflows/operations/design_report/workflow_report_publication.py → decode_workflow_report_view_token](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/workflow_report_publication.py#L1036) → [app/workflows/operations/design_report/workflow_report_publication.py → render_published_workflow_report](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/workflow_report_publication.py#L1060) 或 [app/workflows/operations/design_report/workflow_pptx_download.py → download_presentation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/workflow_pptx_download.py#L36) |
 | 6–7 | 上述函数的精确读取和 `render_sanitized_report_html` |
@@ -119,7 +119,7 @@ token 失效/过期会得到 `401 REPORT_VIEW_TOKEN_INVALID`；身份不符/不�
 
 `GET /v1/workflows/{design_job_id}/presentation` 进入 [app/workflows/api.py → download_design_presentation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1258) 和 [app/workflows/operations/design_report/workflow_pptx_download.py → download_presentation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/workflow_pptx_download.py#L36)，使用同类 capability 和精确输出核验。它专门要求 `convert_design_report_to_pptx` operation、`presentation` 公开/节点绑定、PPTX MIME/owner/hash/version 一致，精确读字节后以附件返回，带 `Cache-Control: no-store`、`Referrer-Policy: no-referrer`、`X-Content-Type-Options: nosniff`。
 
-UI 的 [src/services/reportPresentation.ts → openReportPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/reportPresentation.ts#L8) 先刷新 Job，要求 completed 报告及 presentation Artifact，再调 [src/services/workflowDownload.ts → openWorkflowPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/workflowDownload.ts#L6)：检查 URL/有效期/MIME，下载到平台临时文件，调用 `uni.openDocument(...fileType: "pptx", showMenu: true)`。手机打开失败可能发生在导出成功后，属于平台/域名/运行时问题，不代表可以重新生成报告。
+UI 的 [src/services/reportPresentation.ts → openReportPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/reportPresentation.ts#L8) 先刷新 Job，要求 completed 报告及 presentation Artifact，再调 [src/services/workflowDownload.ts → openWorkflowPresentation](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/workflowDownload.ts#L6)：检查 URL/有效期/MIME，下载到平台临时文件，调用 `uni.openDocument(...fileType: "pptx", showMenu: true)`。手机打开失败可能发生在导出成功后，属于平台/域名/运行时问题，不代表可以重新生成报告。
 
 ## 兼容浏览路由
 

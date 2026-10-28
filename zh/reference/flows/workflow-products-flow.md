@@ -12,7 +12,7 @@
 | 视频表单生成 | `submitVideoGeneration` → 类型化 `inputs`、`script`或`prompts`、可选替换/scope/模型 → `/v1/design-jobs` | 视频准入、本地视频 Submission | MP4 Asset |
 | 设计报告表单提交 | `prepareProjectWorkflow` / `postWorkflow` → `workflowsRepository.submit` → `/v1/workflows` | Blueprint 报告图、包含的 child、本地导出 | HTML 预览 + PPTX |
 
-打开 [src/pkg-features/repositories/designJobSubmit.ts → postPrepared](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designJobSubmit.ts#L182) 看真实路径条件。新 API 客户端可经 `/v1/workflows` 提交受支持的图片/语音/视频类型请求；修改现有表单路径必须同时符合 body/mapper 契约，不能只在文档里替换 URL。旧前端 helper 还看得到 `html_report` 分支，不代表服务端继续接受那个已退休请求。
+打开 [src/pkg-features/repositories/designJobSubmit.ts → postPrepared](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) 看真实路径条件。新 API 客户端可经 `/v1/workflows` 提交受支持的图片/语音/视频类型请求；修改现有表单路径必须同时符合 body/mapper 契约，不能只在文档里替换 URL。旧前端 helper 还看得到 `html_report` 分支，不代表服务端继续接受那个已退休请求。
 
 同款视频的`script`与`prompts`互斥，参考片、替换对和scope也进入冻结契约。直接自有图片/音频/视频输入在最终事务前先[耐久归档](/zh/reference/flows/asset-upload-flow#input-archive)，再冻结规范定位。现有UI是否走兼容适配器见[联调状态](/zh/reference/integration-status)。
 
@@ -84,7 +84,7 @@ sequenceDiagram
 | `copywriting_pitfalls` | 避坑内容 |
 | `copywriting_operations_experience` | 运营经验 |
 
-从表单 `submit` 跟进 [src/pkg-features/services/copywritingSubmit.ts → prepareCopywriting](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/copywritingSubmit.ts#L13)：校验对应 Feature 的字段，加载 profile/catalog/templates，核对上下文/权益，规范化字段，开关启用时绑定 Project，创建持久逻辑动作 key。`inputs` 是空数组，用户文本在具名提示词字段里，不应伪造 Asset 输入。模板名/字段名都是配置契约。
+从表单 `submit` 跟进 [src/pkg-features/services/copywritingSubmit.ts → prepareCopywriting](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/copywritingSubmit.ts#L13)：校验对应 Feature 的字段，加载 profile/catalog/templates，核对上下文/权益，规范化字段，开关启用时绑定 Project，创建持久逻辑动作 key。`inputs` 是空数组，用户文本在具名提示词字段里，不应伪造 Asset 输入。模板名/字段名都是配置契约。
 
 [app/core/models.py → CopywritingWorkflowDesignJobCreate](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py#L776) 拒绝非空 `inputs`。准入合成可配置 prompt，并经 [app/workflows/operations/summary/copywriting_kb.py → read_copywriting_kb](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/summary/copywriting_kb.py#L23) 读取空间/Feature 知识资料，冻结相关知识文本/配置，避免后续对象/配置变化悄悄改写本次执行。知识对象错误会在发模型前得到 `COPYWRITING_KB_INVALID`。
 
@@ -92,7 +92,7 @@ sequenceDiagram
 
 ## 视频：脚本或同款参考片，再进入一次本地执行 {#video-branch}
 
-真实表单为[src/pkg-features/pages/video_generation/index.vue → submit](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/video_generation/index.vue#L908)，默认同款模式，可选系统示例、上传参考片或脚本创作。[src/pkg-features/services/videoGenerationSubmit.ts → submitVideoGeneration](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/videoGenerationSubmit.ts#L69)校验模式/替换/上下文，准备图片/录音/自定义Video后，`postPrepared`当前仍把视频body发到`/v1/design-jobs`。规范类型API也支持`/v1/workflows`，不能因共用准入就说已上线UI换了URL。
+真实表单为[src/pkg-features/pages/video_generation/index.vue → submit](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/video_generation/index.vue#L908)，默认同款模式，可选系统示例、上传参考片或脚本创作。[src/pkg-features/services/videoGenerationSubmit.ts → submitVideoGeneration](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/videoGenerationSubmit.ts#L69)校验模式/替换/上下文，准备图片/录音/自定义Video后，`postPrepared`当前仍把视频body发到`/v1/design-jobs`。规范类型API也支持`/v1/workflows`，不能因共用准入就说已上线UI换了URL。
 
 | 层 | 脚本路径 | 同款路径 |
 | --- | --- | --- |
@@ -100,7 +100,7 @@ sequenceDiagram
 | 公共API | 脚本≤20,000字符，场景0..12，录音0..1 | prompts恰好一个选择，无script，场景0..1，MP3>5秒 |
 | 已安装执行器 | 镜像内脚本解析/媒体/模型能力 | 参考片驱动remake，省略场景可丢弃自动抽取场景 |
 
-所有模式都需一张 `character_image/primary` Image；剧本 UI 要求角色三视图合成图，同款 UI 要求一张本人照片，用于替换参考视频中的角色。自定义参考片是已完成Video Asset，最大100 MiB、120秒。UI与服务端参考片字节上限均为100×1024×1024（104857600），实际字节/内容仍由服务端核验。[src/pkg-features/services/sameStyleVideo.ts → buildCustomReferenceSelection](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/sameStyleVideo.ts#L69)提交`__user_reference__`和唯一`称呼`字段，不查后台模板，不建script pin。系统选择走`buildSameStyleSelection`，按`purpose=same_style_video`发现模板，得到短期参考片/封面预览URL。播放到期刷新发现，不预留积分。
+所有模式都需一张 `character_image/primary` Image；剧本 UI 要求角色三视图合成图，同款 UI 要求一张本人照片，用于替换参考视频中的角色。自定义参考片是已完成Video Asset，最大100 MiB、120秒。UI与服务端参考片字节上限均为100×1024×1024（104857600），实际字节/内容仍由服务端核验。[src/pkg-features/services/sameStyleVideo.ts → buildCustomReferenceSelection](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/sameStyleVideo.ts#L69)提交`__user_reference__`和唯一`称呼`字段，不查后台模板，不建script pin。系统选择走`buildSameStyleSelection`，按`purpose=same_style_video`发现模板，得到短期参考片/封面预览URL。播放到期刷新发现，不预留积分。
 
 ```mermaid
 sequenceDiagram
@@ -126,7 +126,7 @@ sequenceDiagram
 
 | 消息 | 打开源码 | 追什么数据 |
 | --- | --- | --- |
-|1|[src/pkg-features/services/videoGenerationSubmit.ts → submitVideoGeneration](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/videoGenerationSubmit.ts#L69)|准备不表示接受付费工作，不确定时保留逻辑key/草稿。|
+|1|[src/pkg-features/services/videoGenerationSubmit.ts → submitVideoGeneration](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/videoGenerationSubmit.ts#L69)|准备不表示接受付费工作，不确定时保留逻辑key/草稿。|
 |2–3|[app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2939)、`_video_request_mode`、`_resolve_video_inputs`、`render_video_script`|script/prompts互斥，系统模板拥有参考片，自定义要求调用者参考片，规范角色/pin后原子接受。|
 |4–6|[app/workflows/submissions/workflow_local_video_submission.py → execute_local_video_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_local_video_submission.py#L1034) → [app/workflows/submissions/workflow_local_video_submission.py → _build_render_request](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_local_video_submission.py#L552)|租约/代次、精确下载、冻结模型/称呼/替换/scope。|
 |6|[app/conversion/video_jinqiu_adapter.py → build_config](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/conversion/video_jinqiu_adapter.py#L224) → `_remake_config`或`_script_config`|参考片选择remake并保持script_path空，自定义不伪造script文件。|

@@ -13,7 +13,7 @@ pnpm --version
 pnpm install --frozen-lockfile
 ```
 
-Expected pnpm version:9.15.9. A frozen install applies the committed Vitest and uview-plus patches. If Corepack is unavailable, use `npx --yes pnpm@9.15.9` in place of `pnpm`. Do not solve an install failure by deleting the lockfile or bypassing patches. Record the installed commit with `git rev-parse HEAD`; published docs are tied to [the audited commits](/reference/source-revisions), while a newly pulled branch can be ahead.
+Expected pnpm version:9.15.9. A frozen install applies the committed Vitest coverage patch. If Corepack is unavailable, use `npx --yes pnpm@9.15.9` in place of `pnpm`. Do not solve an install failure by deleting the lockfile or bypassing the patch. Record the installed commit with `git rev-parse HEAD`; published docs are tied to [the audited commits](/reference/source-revisions), while a newly pulled branch can be ahead.
 
 ## 2. Build a frontend Mock package
 
@@ -64,4 +64,4 @@ Before review, run the relevant [tests and artifact gates](/frontend/testing). A
 
 ## Source evidence
 
-Verified 2026-10-28: [Pinned package/scripts/patches](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [Page registry](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages.json) · [Douyin build targets](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/config/build-targets.mjs) · [Device address guard](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/require-device-api-url.mjs) · [WeChat artifact gate](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/check-code-quality.mjs).
+Verified 2026-10-28: [Pinned package/scripts/patches](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Page registry](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [Douyin build targets](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/config/build-targets.mjs) · [Device address guard](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/require-device-api-url.mjs) · [WeChat artifact gate](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs).

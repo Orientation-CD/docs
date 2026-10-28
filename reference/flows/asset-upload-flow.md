@@ -4,7 +4,7 @@ A file selected on a phone is only a local path. A storage upload is only bytes.
 
 ## Locate the UI and understand the two vocabularies {#asset-entry}
 
-The standard image feature component's submit handler calls [`submitStandardDesign`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/standardDesignSubmit.ts#L51). It loads profile, Feature and prompt availability, checks eligibility, binds project context when enabled, then calls `stageDesignImages` before `submitDesignJob`. Furniture uses [`submit`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/furniture/index.vue#L608) → [`submitFurnitureDesign`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/furnitureDesignSubmit.ts#L51) to stage the scene, mask and optional reference roles needed by its Feature.
+The standard image feature component's submit handler calls [`submitStandardDesign`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/standardDesignSubmit.ts#L51). It loads profile, Feature and prompt availability, checks eligibility, binds project context when enabled, then calls `stageDesignImages` before `submitDesignJob`. Furniture uses [`submit`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/furniture/index.vue#L608) → [`submitFurnitureDesign`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/furnitureDesignSubmit.ts#L51) to stage the scene, mask and optional reference roles needed by its Feature.
 
 | Boundary | Image role names | Why the names differ |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ These strings are a contract, not interchangeable labels. The backend checks com
 
 ## Create an intent: declare one file, do not send its bytes {#upload-intent}
 
-**Endpoint: `POST /v1/assets/upload-intents`.** The frontend [`stageOne`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designAssets.ts#L156) derives a stable key from owner, role and logical file ID. It sends the declaration below, with Bearer authentication and an `Idempotency-Key` of 8–128 characters.
+**Endpoint: `POST /v1/assets/upload-intents`.** The frontend [`stageOne`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L156) derives a stable key from owner, role and logical file ID. It sends the declaration below, with Bearer authentication and an `Idempotency-Key` of 8–128 characters.
 
 ```json
 {
@@ -55,10 +55,10 @@ sequenceDiagram
 
 | Steps | Code to open | What to inspect |
 | --- | --- | --- |
-| 1 | [`stageOne`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designAssets.ts#L156) | The persistent idempotency key belongs to one logical file/role. Response validation checks type, purpose and role, not only the UUID. |
+| 1 | [`stageOne`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L156) | The persistent idempotency key belongs to one logical file/role. Response validation checks type, purpose and role, not only the UUID. |
 | 2–3 | [`create_asset_upload_intent`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py#L402), [`create_upload_intent`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/assets.py#L290) | `_normalize_request`, `_validate_policy`, Redis rate limit, and fingerprint comparison happen before publishing a new intent. |
 | 4–6 | [`create_upload_intent`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/assets.py#L290), [`S3Storage.create_upload_form`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/storage.py#L922) | Signing may involve external credentials, so it runs outside the short SQL publication lock. After signing the code rechecks for a concurrent same-key intent. |
-| 7–9 | [`directUpload`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designAssets.ts#L127) | POST multipart form, `name: "file"`, every signed `form.fields` value; no API Authorization header goes to storage. |
+| 7–9 | [`directUpload`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L127) | POST multipart form, `name: "file"`, every signed `form.fields` value; no API Authorization header goes to storage. |
 | 10–13 | [`complete_asset_upload_route`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py#L519), [`complete_asset_upload`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_completion.py#L261) | See the verification algorithm below. Storage success is not admission success. |
 
 First successful intent returns `201`; identical replay returns `200` and the same identity. Same key with different normalized declaration is `IDEMPOTENCY_KEY_REUSED`. A replay that is already verified or accepted can have `upload: null`; `stageOne` returns its ID rather than sending the file again. A pending replay can receive a refreshed signed form after expiry checks. Keep the key with the draft; generating a new key on every retry discards this protection.
@@ -134,7 +134,7 @@ Archive tombstones preserve cleanup authority even if the Asset is detached/dele
 
 ## Read one Asset: restore and recheck a report attachment {#asset-get}
 
-**Endpoint: `GET /v1/assets/{asset_id}`.** A concrete mini-program caller is [`verifyReportAttachment`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/reportAttachment.ts#L42) during PPTX attachment reuse/restoration. It checks the same UUID, READY, DOCUMENT, DESIGN_JOB_INPUT, `attachment` and unexpired time before submission.
+**Endpoint: `GET /v1/assets/{asset_id}`.** A concrete mini-program caller is [`verifyReportAttachment`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/reportAttachment.ts#L42) during PPTX attachment reuse/restoration. It checks the same UUID, READY, DOCUMENT, DESIGN_JOB_INPUT, `attachment` and unexpired time before submission.
 
 [`get_asset_route`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py#L618) → [`get_asset`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_management.py#L234) loads metadata and subtype, then allows the owner or an administrator. Unknown and foreign IDs both become unavailable, avoiding ownership leaks. Removed-enterprise outputs are hidden from ordinary users; preview URLs are suppressed for deleting projects/removed outputs. Response construction may sign an authorized preview URL; it never exposes a raw storage key as general authority.
 
@@ -150,7 +150,7 @@ The search covers original filename, display title and associated job/Asset iden
 
 ## Reuse a generated image: create an independent input copy {#asset-copy}
 
-**Endpoint: `POST /v1/assets/{source_asset_id}/design-input-copies`.** The FastAPI entry is `copy_design_result_to_input_route`, which calls `copy_result_to_design_input` below. A generated result used for customized design enters [`prepareCopy`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/pages/customized_design/index.vue#L201) → [`copyResultInput`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/customizedDesign.ts#L53). The stable key combines owner, logical copy ID and source Asset ID. It does not submit a public result URL.
+**Endpoint: `POST /v1/assets/{source_asset_id}/design-input-copies`.** The FastAPI entry is `copy_design_result_to_input_route`, which calls `copy_result_to_design_input` below. A generated result used for customized design enters [`prepareCopy`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/customized_design/index.vue#L201) → [`copyResultInput`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/customizedDesign.ts#L53). The stable key combines owner, logical copy ID and source Asset ID. It does not submit a public result URL.
 
 ```mermaid
 sequenceDiagram
@@ -169,7 +169,7 @@ sequenceDiagram
 
 | Steps | Source | Decision |
 | --- | --- | --- |
-| 1 | [`copyResultInput`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/customizedDesign.ts#L53) | Retry only bounded `ASSET_COPY_IN_PROGRESS` / storage-unavailable cases; retain the same key. |
+| 1 | [`copyResultInput`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/customizedDesign.ts#L53) | Retry only bounded `ASSET_COPY_IN_PROGRESS` / storage-unavailable cases; retain the same key. |
 | 2–3 | [`_reserve_copy`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_copies.py#L157), [`_claim_copy`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_copies.py#L314) | Persist intent and destination identity before slow I/O; a lease token owns finalization. |
 | 4 | [`copy_result_to_design_input`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_copies.py#L611) | HEAD destination before copying; reconcile ambiguous storage failure so a completed copy need not be duplicated. |
 | 5–6 | [`_finalize_copy`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_copies.py#L462) | Recheck completed source job, live project/workspace and lease; write verified destination and COMPLETED intent, commit. |

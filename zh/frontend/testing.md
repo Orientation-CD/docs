@@ -49,7 +49,7 @@ pnpm quality:mp-toutiao:mock
 | 微信随包媒体 | 硬上限200KiB，超过180KiB警告 |
 | 生产 API | 移除开发面板/情景实现，执行生产 origin 与项目检查 |
 
-这些是实现规则，不是平台厂商官方上限的复述。应检查真实候选产物的报告，不能抄用历史包体数字。真正属于主包的共享 uview 表单项，也不能被过宽前缀规则误删。
+这些是实现规则，不是平台厂商官方上限的复述。共享 `inspectMiniProgramPackages` 函数负责包大小和跨包引用判断，两端门禁都消费它的测量报告与失败列表。应检查真实候选产物的报告，不能抄用历史包体数字。
 
 环境档门禁（`quality:mp-toutiao:local-test`、`:cloud-test`、`:cloud-production`）会调用就绪检查包装脚本，需要所选环境已存在，不会自动创建属于当前会话的后端栈。
 
@@ -73,4 +73,4 @@ pnpm quality:mp-toutiao:mock
 
 ## 源码依据
 
-核验日期 2026-10-28：[当前命令链](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [包体检查器](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/mini-program-package-budget.mjs#L3) · [微信余量条件](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/check-code-quality.mjs#L230) · [抖音门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/check-douyin-quality.mjs) · [路由源码分析](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/api-contract-source.mjs) · [真实 UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/documents/MINIPROGRAM_REAL_UI_TESTING.md)。
+核验日期 2026-10-28：[当前命令链](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [包体检查器](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/mini-program-package-budget.mjs#L3) · [微信余量条件](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs#L189) · [抖音门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-douyin-quality.mjs) · [路由源码分析](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/api-contract-source.mjs) · [真实 UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/MINIPROGRAM_REAL_UI_TESTING.md)。

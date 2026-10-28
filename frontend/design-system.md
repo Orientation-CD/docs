@@ -33,7 +33,7 @@ pnpm design:generate
 pnpm check:design-system
 ```
 
-Commit inputs and generated outputs together. The checker covers generated drift, semantic usage, contrast for merged themes, theme coverage across registered pages, button layout and project press feedback. The `uview-plus@3.8.55` patch is part of the frozen install; bypassing it can change native component behavior.
+Commit inputs and generated outputs together. The checker covers generated drift, semantic usage, contrast for merged themes, theme coverage across registered pages, button layout and project press feedback. Pages compose the project's shared Vue components and native uni-app controls. `createApp` installs `themePageMixin`, and `pages.json` retains automatic component scanning without a third-party component-prefix mapping.
 
 ## What users can actually select
 
@@ -56,7 +56,7 @@ Home composes `HeroCarousel`, `HomeBrandBar`, `HomeShortcutStrip`, `FeatureGroup
 
 `refreshAdAssetVersions` deduplicates concurrent refreshes. An omitted `homeHeroBanners` preserves the last valid list, while an explicit valid empty array clears it. Failed fetching preserves cached configuration and produces a diagnostic warning. Register the CDN as a **request** domain for JSON as well as the domains needed for images.
 
-Production wrappers use `cdn.yuanzhushuzhi.com`; test wrappers and `.env.example` use `static.yuanzhushuzhi.com`. Follow the selected build's setting rather than replacing all environments with one host. The pinned [Home banner guide](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/documents/HOME_BANNERS.md) owns the full manifest shape and operator procedure.
+Production wrappers use `cdn.yuanzhushuzhi.com`; test wrappers and `.env.example` use `static.yuanzhushuzhi.com`. Follow the selected build's setting rather than replacing all environments with one host. The pinned [Home banner guide](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/HOME_BANNERS.md) owns the full manifest shape and operator procedure.
 
 ## Shared components and native verification
 
@@ -68,4 +68,4 @@ Markdown result rendering sanitizes input HTML and supplies known styles for ric
 
 ## Source evidence
 
-Verified 2026-10-28: [Theme state](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/stores/theme.ts#L4) · [Page theme binding](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/composables/usePageTheme.ts) · [Generator](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/generate-design-system.mjs) · [Design gate](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/check-design-system.mjs) · [Home lifecycle](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages/home/index.vue) · [Manifest parsing](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/adAssetVersions.ts#L136) · [Markdown rendering](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-plans/services/markdownSummary.ts).
+Verified 2026-10-28: [Theme state](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/stores/theme.ts#L4) · [Page theme binding](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/composables/usePageTheme.ts) · [Generator](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/generate-design-system.mjs) · [Design gate](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-design-system.mjs) · [Home lifecycle](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [Manifest parsing](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/adAssetVersions.ts#L136) · [Markdown rendering](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-plans/services/markdownSummary.ts).

@@ -45,12 +45,12 @@ sequenceDiagram
 
 | 图中步骤 | 打开的具体代码 | 输入 → 输出 / 分支 |
 | --- | --- | --- |
-| 1–2 | [`authorize`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-account/pages/login/index.vue#L39)、[`submitWechatPhoneRegistration`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/accountGate.ts#L164) | UI 事件 → 已确认的协议版本与当前平台 repository。取消登录会结束门禁，不会提交受保护操作。 |
-| 3–4 | [`buildRegistrationWechatLoginRequest`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/wechatAuth.ts#L58)、[`wechatSessionRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/session.ts#L88) | 新登录 code、新手机 code、接受的 UUID → JSON。`acceptSession` 先校验响应再保存。 |
+| 1–2 | [`authorize`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-account/pages/login/index.vue#L39)、[`submitWechatPhoneRegistration`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/accountGate.ts#L164) | UI 事件 → 已确认的协议版本与当前平台 repository。取消登录会结束门禁，不会提交受保护操作。 |
+| 3–4 | [`buildRegistrationWechatLoginRequest`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/wechatAuth.ts#L58)、[`wechatSessionRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/session.ts#L88) | 新登录 code、新手机 code、接受的 UUID → JSON。`acceptSession` 先校验响应再保存。 |
 | 5–6 | [`wechat_login`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L313)、[`exchange_login_code`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/wechat_auth.py#L69) | Redis 按 IP 限流；平台兑换；按 `wechat_openid` 查用户。平台拒绝是 `401`，上游不可用是 `503`。 |
 | 7–10 | [`exchange_phone_code`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/wechat_auth.py#L96)、[`wechat_login`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L313) | 缺少手机证明 → `428 PHONE_AUTH_REQUIRED`。平台 HTTP 前结束读事务，之后重新读身份。手机号已绑定别的 OpenID → `409 WECHAT_IDENTITY_MISMATCH`。 |
 | 11 | [`record_required_acceptances`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/legal_documents.py#L103)、[`issue_token_pair`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L79) | 校验当前协议、确保空间、持久化 `AuthSession`；提交后再组装响应，避免网络占用 SQL 连接。 |
-| 12–13 | [`acceptSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/session.ts#L82)、[`finishWechatRegistration`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/accountGate.ts#L217) | 保存两个 Token；回到等待的操作。声称静默登录却返回 `is_new_user=true` 会被客户端判为无效响应。 |
+| 12–13 | [`acceptSession`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/session.ts#L82)、[`finishWechatRegistration`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/accountGate.ts#L217) | 保存两个 Token；回到等待的操作。声称静默登录却返回 `is_new_user=true` 会被客户端判为无效响应。 |
 
 OpenID 已知时会跳过手机号兑换和创建账号，但仍检查 `is_active`、当前协议并更新 `last_login_at`，随后创建新的持久化刷新会话。新用户积分来自 `effective_campaign_token_amount(... NEW_USER_REGISTRATION ...)`，没有活动覆盖时才用配置兜底。正数赠送在同一账号创建事务中写积分流水，页面不自行决定初始余额。
 
@@ -98,7 +98,7 @@ sequenceDiagram
 
 | 步骤 | 源码 | 原因 |
 | --- | --- | --- |
-| 1 | [`buildRegistrationDouyinLoginRequest`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/douyinAuth.ts#L60)、[`douyinSessionRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/session.ts#L171) | 运行模式选择抖音凭证，不把微信 code 发到此路由。 |
+| 1 | [`buildRegistrationDouyinLoginRequest`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/douyinAuth.ts#L60)、[`douyinSessionRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/session.ts#L171) | 运行模式选择抖音凭证，不把微信 code 发到此路由。 |
 | 2–4 | [`douyin_login`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L474) | 先做 IP 保护与 OpenID 查询，已知活跃身份跳过手机分支。 |
 | 5–6 | [`_client_token`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/douyin_auth.py#L243)、[`exchange_phone_code`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/douyin_auth.py#L331) | Redis 缓存供应商 `client_token` 并协调刷新所有权；无效 Token 按匹配值失效。它与应用 refresh session 是两套东西。 |
 | 7–8 | [`_decrypt_phone_payload`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/douyin_auth.py#L295) | 使用 RSA PKCS#1 v1.5 私钥解密，并拒绝属于别的应用的 watermark。这里不是微信 AES/session-key 解密。 |
@@ -108,7 +108,7 @@ sequenceDiagram
 
 ## 协议目录：先知道版本，再表达同意 {#legal-current}
 
-**接口：`GET /v1/legal-documents/current?locale=zh-CN`。** 登录门禁调用 [`wechatSessionRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/session.ts#L88) 的 `currentLegalDocuments()`。当前 UI 请求 `zh-CN`，后端也接受 locale 查询参数或使用服务端配置。
+**接口：`GET /v1/legal-documents/current?locale=zh-CN`。** 登录门禁调用 [`wechatSessionRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/session.ts#L88) 的 `currentLegalDocuments()`。当前 UI 请求 `zh-CN`，后端也接受 locale 查询参数或使用服务端配置。
 
 [`get_current_legal_documents`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/legal_api.py#L23) 调用 [`current_required_documents`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/legal_documents.py#L60)。查询把 `CurrentLegalDocument` 指针关联到不可变的 `LegalDocument` 版本，并预加载文档 Asset。当前 locale 必须恰好拥有已发布、已生效、required、纯文本且 Asset 为 ACTIVE/PUBLIC 的 `terms` 与 `privacy`。正常运行环境缺少任何条件都会拒绝继续，返回 `503 LEGAL_DOCUMENTS_UNAVAILABLE`。
 
@@ -138,7 +138,7 @@ sequenceDiagram
 
 ## Access 过期与刷新：并发请求共用一次刷新 {#refresh}
 
-**接口：`POST /v1/auth/refresh`。** 没有“刷新 Token”按钮。[`requestWithAuth`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/request.ts#L341) 处理 `auth: true` 请求中的 `401 AUTH_TOKEN_EXPIRED_OR_INVALID`。若其他请求刚换过 access，就直接复用；否则 [`rotateTokens`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/request.ts#L299) 共用一个 `refreshPromise`，发送 `{ "refresh_token": "当前的-refresh-token" }`，保存**两个**新 Token，再重发原请求一次。
+**接口：`POST /v1/auth/refresh`。** 没有“刷新 Token”按钮。[`requestWithAuth`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts#L341) 处理 `auth: true` 请求中的 `401 AUTH_TOKEN_EXPIRED_OR_INVALID`。若其他请求刚换过 access，就直接复用；否则 [`rotateTokens`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts#L299) 共用一个 `refreshPromise`，发送 `{ "refresh_token": "当前的-refresh-token" }`，保存**两个**新 Token，再重发原请求一次。
 
 ```mermaid
 sequenceDiagram
@@ -158,21 +158,21 @@ sequenceDiagram
 
 | 步骤 | 源码 | 可观察边界 |
 | --- | --- | --- |
-| 1–2 | [`requestWithAuth`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/request.ts#L341)、[`rotateTokens`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/request.ts#L299) | 只有特定可刷新错误触发此流程；任意 `401` 都刷新会造成循环。 |
+| 1–2 | [`requestWithAuth`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts#L341)、[`rotateTokens`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts#L299) | 只有特定可刷新错误触发此流程；任意 `401` 都刷新会造成循环。 |
 | 3–5 | [`refresh_user_token`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L650)、[`hash_refresh_token`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/auth.py#L92) | `sid` 属于 refresh JWT。`AuthSession.user_id`、摘要、`revoked_at`、有效期与 `User.is_active` 必须符合；不满足为 `401 REFRESH_SESSION_UNAVAILABLE`。 |
-| 6–7 | [`replayOnce`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/request.ts#L332) | 刷新或重发遇到终结性会话错误会清除状态。可以观察两个业务请求共用一个 refresh 请求。 |
+| 6–7 | [`replayOnce`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts#L332) | 刷新或重发遇到终结性会话错误会清除状态。可以观察两个业务请求共用一个 refresh 请求。 |
 
 Access JWT 包含 `sub`、`typ`、`iat`、`exp`；refresh 另含 `sid`、`jti`。[`get_current_user`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/auth.py#L162) 校验 access JWT 并读取活跃 User，**不会**为每次业务请求读取 `AuthSession`。这决定了下面退出登录的实际边界。
 
 ## 退出：撤销 refresh 权限，清空客户端 {#logout}
 
-**接口：`POST /v1/auth/logout`。** 个人资料页“退出登录”调用 [`logout`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-account/pages/profile/index.vue#L86) → repository `logout()` → [`logout_user`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L703)。请求体带 refresh token；服务端解码、找到会话，只在摘要匹配时写 `revoked_at`，返回 `204`。即使网络失败，repository 的 `finally` 仍清除 Token、空间选择并记录主动退出。
+**接口：`POST /v1/auth/logout`。** 个人资料页“退出登录”调用 [`logout`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-account/pages/profile/index.vue#L86) → repository `logout()` → [`logout_user`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L703)。请求体带 refresh token；服务端解码、找到会话，只在摘要匹配时写 `revoked_at`，返回 `204`。即使网络失败，repository 的 `finally` 仍清除 Token、空间选择并记录主动退出。
 
 此接口撤销的是持久化 **refresh 会话**。已经发出的 access JWT 不会被这个 handler 单独作废，仍由 access 有效期与账号活跃检查约束；不能把退出写成所有设备的 access 立即失效。账号停用还会让 `get_current_user` 拒绝该用户。
 
 ## 读取当前资料 {#profile-get}
 
-**接口：`GET /v1/me`。** 个人资料页 `load()` 调用 [`currentProfileRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/profile.ts#L130)，repository 合并进行中的读取，并把服务端字段转换为页面模型。先经过 `get_current_user` 鉴权，再由 [`get_user_profile`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L731) 调用 `build_user_response`、提交并返回权威账号/空间/权益展示数据；“本地有 Token”本身不会生成资料。
+**接口：`GET /v1/me`。** 个人资料页 `load()` 调用 [`currentProfileRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/profile.ts#L130)，repository 合并进行中的读取，并把服务端字段转换为页面模型。先经过 `get_current_user` 鉴权，再由 [`get_user_profile`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L731) 调用 `build_user_response`、提交并返回权威账号/空间/权益展示数据；“本地有 Token”本身不会生成资料。
 
 具体数值来自 [`build_user_response`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing.py#L523)：解析当前空间/成员资格，以个人 remaining/reserved 开始，仅当解析到企业成员资格时叠加企业 remaining/reserved；读取当前个人订阅和生效 Feature 权益；按已验证手机号查询有效且未接受的邀请；计算是否有可领取推荐奖励。返回中**同时**有 personal 与 effective，UI 再相加会重复计算个人余额。如果旧空间不可用，还可持久化安全的当前空间回退。因此 GET 返回的是多表组装视图，不是直接把 `SELECT * FROM users` 序列化。
 
@@ -180,7 +180,7 @@ Access JWT 包含 `sub`、`typ`、`iat`、`exp`；refresh 另含 `sid`、`jti`�
 
 ## 修改昵称或经过验证的手机号 {#profile-patch}
 
-**接口：`PATCH /v1/me`。** “保存”触发 [`save`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-account/pages/profile/index.vue#L67) → `currentProfileRepository.updateDisplayName`；微信手机授权触发 `bindPhone` → `updateWechatPhone`。
+**接口：`PATCH /v1/me`。** “保存”触发 [`save`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-account/pages/profile/index.vue#L67) → `currentProfileRepository.updateDisplayName`；微信手机授权触发 `bindPhone` → `updateWechatPhone`。
 
 [`update_user_profile`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/api.py#L742) 去除昵称首尾空格、拒绝空值。`phone` 字段走直接规范化；`wechat_phone_code` 则要求已有微信身份，并在释放鉴权读取事务后兑换新的平台证明。再检查手机号是否被别的用户占用（`409 PHONE_ALREADY_LINKED`），修改 User、flush/commit、重建资料并返回。页面采用响应更新显示。当前 UI 没有把 raw-phone setter 暴露成直接输入手机号的捷径。
 
@@ -188,9 +188,9 @@ Access JWT 包含 `sub`、`typ`、`iat`、`exp`；refresh 另含 `sid`、`jti`�
 
 ### 同一个 PATCH 还负责确认切换空间
 
-`{ "current_workspace_id": "有权访问的空间-UUID" }` 走 `update_user_profile` 的第三分支：先调用 [`accessible_workspace`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspaces.py#L224)，再改 `User.current_workspace_id`、提交并重建资料。客户端是 [`workspaceContextRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/workspaces.ts#L9) 的 `select()` → `currentProfileRepository.selectWorkspace()`。
+`{ "current_workspace_id": "有权访问的空间-UUID" }` 走 `update_user_profile` 的第三分支：先调用 [`accessible_workspace`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspaces.py#L224)，再改 `User.current_workspace_id`、提交并重建资料。客户端是 [`workspaceContextRepository`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/workspaces.ts#L9) 的 `select()` → `currentProfileRepository.selectWorkspace()`。
 
-这里有容易误读的 UI 边界：在首页面板浏览别的空间时，可以只加载**预览**，并不修改服务端当前空间；确认路径才提交，[`confirmWorkspace`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/components/home/HomeScopeSwitch.vue#L386) 是其中一个具体入口。PATCH 后 repository 还检查会话代数、返回空间是否为目标，再记住草稿作用域与初始化项目上下文。随便拿一个空间 UUID 不够，服务端仍检查成员资格和空间活跃状态。
+这里有容易误读的 UI 边界：在首页面板浏览别的空间时，可以只加载**预览**，并不修改服务端当前空间；确认路径才提交，[`confirmWorkspace`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/components/home/HomeScopeSwitch.vue#L386) 是其中一个具体入口。PATCH 后 repository 还检查会话代数、返回空间是否为目标，再记住草稿作用域与初始化项目上下文。随便拿一个空间 UUID 不够，服务端仍检查成员资格和空间活跃状态。
 
 ## 停用账号 {#account-deactivate}
 
@@ -208,7 +208,7 @@ Access JWT 包含 `sub`、`typ`、`iat`、`exp`；refresh 另含 `sid`、`jti`�
 
 ## 恢复抖音关联账号 {#douyin-reactivate}
 
-**接口：`POST /v1/auth/douyin-reactivate`。** 这条已有 UI：[`offerDouyinReactivation`](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/accountGate.ts#L48) 在停用账号登录响应后提供恢复；`douyinSessionRepository.reactivate()` 获取新 code。[`reactivate_with_douyin`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/account_lifecycle_api.py#L168) 限流、验证 code、找 `douyin_openid`、调用共享恢复服务并提交 `204`。门禁随后重试登录，恢复操作自身不签发凭证。
+**接口：`POST /v1/auth/douyin-reactivate`。** 这条已有 UI：[`offerDouyinReactivation`](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/accountGate.ts#L48) 在停用账号登录响应后提供恢复；`douyinSessionRepository.reactivate()` 获取新 code。[`reactivate_with_douyin`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/account_lifecycle_api.py#L168) 限流、验证 code、找 `douyin_openid`、调用共享恢复服务并提交 `204`。门禁随后重试登录，恢复操作自身不签发凭证。
 
 ## 数据写入、定位失败与跟读练习 {#identity-debug}
 

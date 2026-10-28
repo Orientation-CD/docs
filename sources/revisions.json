@@ -6,11 +6,11 @@
     "frontend": {
       "repository": "Orientation-CD/wechat_mini_program",
       "branch": "ui-integration",
-      "commit": "21db6d824a7b32417bda88e7e31d3f0b91dfa51c",
+      "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
       "authorities": [
         {
           "path": "package.json",
-          "sha256": "e8eda1d9c703369c6ec4f8deafddc7a68cf9ee59e8acff4accab6fed15a69cca"
+          "sha256": "ae17089db1954265b53cf96ad683fe36f0602a06b2b5ae1651dd88b5b21da136"
         },
         {
           "path": ".env.example",
