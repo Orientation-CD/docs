@@ -7,7 +7,7 @@ const config = withMermaid(defineConfig({
   base: '/docs/',
   cleanUrls: true,
   lastUpdated: true,
-  srcExclude: ['README.md', 'sources/**', 'scripts/**', 'tests/**', 'playwright-report/**', 'test-results/**'],
+  srcExclude: ['README.md', 'AGENTS.md', '.agents/**', 'sources/**', 'scripts/**', 'tests/**', 'playwright-report/**', 'test-results/**'],
   head: [
     ['meta', { name: 'theme-color', content: '#526F5A' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/docs/favicon.svg' }],

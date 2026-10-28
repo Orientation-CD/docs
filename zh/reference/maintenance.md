@@ -2,6 +2,30 @@
 
 两种语言应对照相同的应用提交更新。编辑前先阅读[已核验源码版本](/zh/reference/source-revisions)，确认上次审核的范围。
 
+## 使用文档更新 skill
+
+仓库在 `.agents/skills/update-yuanzhu-docs/` 中维护 `update-yuanzhu-docs` skill，根目录的 `AGENTS.md` 提供简短入口。这些文件纳入版本管理供团队共享，不发布到文档站。在本仓库内启动 Codex 对话时，“更新 docs”“同步文档”等请求可以隐式匹配该 skill；也可用 `$update-yuanzhu-docs` 显式选择。
+
+如果希望从三个仓库的父目录启动对话时也能使用它，请**在 docs 仓库根目录**执行一次以下命令。它只为仓库中唯一维护的版本建立本机用户级链接：
+
+```bash
+yuanzhu_skill_source="$(pwd -P)/.agents/skills/update-yuanzhu-docs"
+yuanzhu_skill_entry="$HOME/.agents/skills/update-yuanzhu-docs"
+if [ ! -f "$yuanzhu_skill_source/SKILL.md" ]; then
+  printf '%s\n' '请先取得 skill，再从 docs 仓库根目录执行。'
+elif [ -e "$yuanzhu_skill_entry" ] || [ -L "$yuanzhu_skill_entry" ]; then
+  printf '%s\n' '入口已存在。请先用下列命令检查，再决定是否替换：'
+  ls -ld "$yuanzhu_skill_entry"
+else
+  mkdir -p "$HOME/.agents/skills"
+  ln -s "$yuanzhu_skill_source" "$yuanzhu_skill_entry"
+fi
+```
+
+命令会保留已有文件、目录和链接。请保留链接指向的仓库位置；移动仓库后，应检查并更新链接。若 Codex 未显示新 skill，可重启后再试。请求须与圆筑 AI 项目有关，此 skill 不替代其他项目的文档流程。同步源码需要能访问 docs、前端和后端三个仓库。
+
+默认审核最新前端 `ui-integration` 与后端 `main`，记录完整提交 SHA，并同步两种语言的源码导读、完整调用链和图表。Skill 复用下文的维护及校验命令，交付审阅后的改动、验证结果、预览和 PR。合并与发布按用户明确指令进行。
+
 ## 运行站点
 
 使用 Node.js 22.6 或更新版本，以及本仓库固定的 **pnpm 10.28.2**。小程序使用自己的 pnpm 版本，执行前先确认当前仓库目录。

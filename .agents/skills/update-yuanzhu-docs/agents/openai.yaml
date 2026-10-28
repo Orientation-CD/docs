@@ -1,0 +1,6 @@
+interface:
+  display_name: "圆筑 AI 文档更新"
+  short_description: "对照最新前后端源码同步双语文档，重建完整调用链与教学图表并校验交付"
+  default_prompt: "使用 $update-yuanzhu-docs，按最新前后端代码更新圆筑 AI 双语文档。"
+policy:
+  allow_implicit_invocation: true

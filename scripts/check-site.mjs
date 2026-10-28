@@ -8,6 +8,10 @@ import { tokenize } from '../.vitepress/search.mjs'
 
 const dist = '.vitepress/dist'
 const files = await walk(dist, '.html')
+const expectedPages = new Set((await pages()).map((page) => `${dist}/${page.replace(/\.md$/, '.html')}`))
+for (const file of files) {
+  assert(file === `${dist}/404.html` || expectedPages.has(file), `Unexpected published page ${file}; keep developer instructions and skills outside the site`)
+}
 const base = '/docs/'
 const documents = new Map()
 const errors = []
@@ -58,18 +62,26 @@ for (const locale of ['root', 'zh']) {
   const serialized = new Function(`return (${match[1]})`)()
   const index = MiniSearch.loadJSON(serialized, { fields: ['title', 'titles', 'text'], storeFields: ['title', 'titles'], tokenize: reconstructed, searchOptions: { combineWith: 'AND', prefix: true, fuzzy: .2 } })
   assert(index.documentCount > 0)
+  // Check every indexed section, including pages no smoke-test query would return.
+  const documentIds = Object.values(JSON.parse(serialized).documentIds)
+  assert(documentIds.length > 0, `Missing indexed document IDs in ${file}`)
+  for (const id of documentIds) {
+    assert.equal(typeof id, 'string', `Invalid search document ID in ${file}`)
+    const url = new URL(id, 'http://docs.local')
+    assert.equal(url.origin, 'http://docs.local', `External search page ${id}`)
+    assert(url.pathname.startsWith(base), `Search page escapes base: ${id}`)
+    assert.equal(url.pathname.startsWith('/docs/zh/'), locale === 'zh', `Wrong search locale: ${id}`)
+    const targetFile = routeFile(url)
+    assert(expectedPages.has(targetFile), `Unexpected search page ${id}; developer instructions and skills must not be indexed`)
+    const doc = documents.get(targetFile)
+    assert(doc, `Missing search page ${id}`)
+    if (url.hash) assert(doc.getElementById(decodeURIComponent(url.hash.slice(1))), `Missing search anchor ${id}`)
+  }
   for (const query of queries[locale]) {
     const results = index.search(query)
     assert(results.length, `${locale}: no search results for ${query}`)
-    for (const result of results.slice(0, 5)) {
-      const url = new URL(result.id, 'http://docs.local')
-      assert.equal(url.pathname.startsWith('/docs/zh/'), locale === 'zh', `Wrong search locale: ${result.id}`)
-      const doc = documents.get(routeFile(url))
-      assert(doc, `Missing search page ${result.id}`)
-      if (url.hash) assert(doc.getElementById(decodeURIComponent(url.hash.slice(1))), `Missing search anchor ${result.id}`)
-    }
   }
 }
-for (const page of await pages()) assert(documents.has(`${dist}/${page.replace(/\.md$/, '.html')}`), `Unbuilt page ${page}`)
+for (const page of expectedPages) assert(documents.has(page), `Unbuilt page ${page}`)
 if (errors.length) throw new Error(`Built site validation failed (${errors.length}):\n${[...new Set(errors)].join('\n')}`)
 console.log(`Built site verified: ${files.length} HTML pages; local links, anchors, assets, locale boundaries and emitted search indexes pass.`)
