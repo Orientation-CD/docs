@@ -50,11 +50,25 @@
 
 保留脱敏发布记录、change order、AppId/容量、候选/当前/恢复 digest、迁移状态、备份和外部活动回执。响应不明确先只读对账，不重复 stop/start/deploy。检查点取消可能触发恢复并启动 API，同时保留当前云端 Envs；手工配置协调期间保持会话打开，不能假设取消会撤销已暂存开关。
 
+## 定点输入恢复 {#input-recovery}
+
+新任务在接受前耐久归档自有输入。已有已完成任务的历史输入可能需要明确指定目标的修复；常规部署不会自动扫描、重写全部输入。
+
+在匹配的后端环境先只读检查授权的 Job／Asset 对：
+
+```bash
+python -m app.assets.input_asset_repair --job-id '<job-uuid>' --asset-id '<asset-uuid>'
+```
+
+默认 dry-run，`--apply` 是针对同一已核验对象对的运维写操作。CLI 不发现目标、不启动服务、不建 schema；已执行物理 pins、任务状态、收费及原始内容身份不变。`INPUT_REPAIR_AMBIGUOUS_OWNER` 需要归属决策，不能挑第一个消费者。复制回执不确定时保留 receipt／lease，按恢复契约处理，不删除元数据绕过。
+
+记录打包的 Alembic heads、`alembic current --check-heads`、`alembic check`，不要永久写死一个“最新 revision”。新增输入／视频／额度 schema 不替代原有停机和兼容要求。写操作前阅读[修复实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/input_asset_repair.py)及[归档实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py)。
+
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [生产、成败与活动运行流程](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/deploy.sh)
-- [活动修复操作器](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workspaces/project_activity_operator.py)
-- [活动兼容 marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)
+- [生产、成败与活动运行流程](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy.sh)
+- [活动修复操作器](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_activity_operator.py)
+- [活动兼容 marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)

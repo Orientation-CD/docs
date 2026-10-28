@@ -1,47 +1,62 @@
 # Frontend Overview
 
-`wechat_mini_program`, branch **`ui-integration`**, builds the WeChat and Douyin mini programs from uni-app, Vue 3, TypeScript and uview-plus. The pinned package manager is **pnpm 9.15.9**. There is no Pinia dependency: credentials use a module-level session store, while pages and repositories manage scoped state and caches.
+The audited frontend is `ui-integration@21db6d8`; the backend is `main@e59716c8`. This guide describes those source versions, with full commit pins in [Source versions](/reference/source-revisions). A frontend screen or committed API fixture does not establish that the audited backend implements its contract.
 
-## Product navigation
+The mini program uses uni-app, Vue 3, TypeScript and uview-plus, with **Node 22 and pnpm 9.15.9**. Shared session/theme modules use Vue state; there is no Pinia dependency. Build settings choose real APIs, frontend Mock, platform adapters and project capabilities before the package is produced.
 
-The main home entries are **AI设计** and **AI创作**. AI design contains interior, furniture try-on, colored floor plans, recording summary, customized design, design reports and an old-house-renovation folder; that folder contains local, kitchen and bathroom renovation. AI creation contains video and copywriting. AI Q&A is entered from the profile page. Group pages include a breadcrumb and shared back/home navigation.
+## Find a feature from the actual navigation
 
-With `VITE_ENABLE_PRIVATE_PROJECTS=true`, the main tabs are Home, Contact, Projects, Plans and Profile. Otherwise the Project tab and project subpackage are compiled out. A generic Mock build does not automatically enable projects.
+```mermaid
+flowchart TB
+  H[Home] --> D[AI design]
+  D --> L[Lightweight design]
+  D --> P[Professional design]
+  L --> I[Interior / furniture / colored floor plan]
+  L --> R[Recording summary / customized design / report]
+  L --> O[Old-house renovation]
+  O --> K[Local / kitchen / bathroom]
+  P --> F[Floor-plan editor and Works]
+  H --> C[AI creation]
+  C --> V[AI video]
+  C --> T[AI copywriting]
+  A[Profile] --> Q[AI Q&A]
+```
 
-| Capability | Main implementation | Output |
+Home also has a hero carousel, shortcut strip, quick actions and store cards. `homeEntries.ts` supplies presentation metadata; `featureGroups.ts` supplies the membership tree and breadcrumbs. `useFeatureLauncher` intersects the displayed entries with discovery and eligibility. A visible card, a displayed price and permission to submit are different facts.
+
+**Professional floor plans require separate integration attention:** this frontend contains their screens and repositories, but the audited backend `main` has no corresponding routes. Read [Floor-plan integration boundaries](/frontend/floor-plans) before trying that path. It is independent of the existing colored-floor-plan image feature.
+
+| Product | Start reading here | Result or boundary |
 | --- | --- | --- |
-| Standard design and renovation | `pkg-features/components/StandardFeaturePage.vue` | Image |
-| Furniture try-on | `pkg-features/pages/furniture` | Mask/reference-based image |
-| Customized design | `pkg-features/pages/customized_design` | Image using editable template fields |
-| Recording summary | `pkg-features/pages/voice_summary` | Markdown and original-audio playback |
-| Video creation | `pkg-features/pages/video_generation` | Video |
-| Copywriting / AI Q&A | `pkg-features/pages/copywriting` | Eight text-only Markdown Workflows |
-| Design report | `pkg-features/pages/design_report` | Blueprint-based HTML report, with export behavior determined by supported products |
-| Historical report | `pkg-plans/pages/report` | Earlier `html_report` compatibility |
+| Standard images and renovations | `pkg-features/components/StandardFeaturePage.vue` | Image task, role-based uploads and prompt selections |
+| Furniture and customized design | Their pages plus `*DesignSubmit.ts` services | Mask/reference material or editable template fields |
+| Recording summary | `pages/voice_summary` and `voiceSummarySubmit.ts` | Markdown and original recordings |
+| AI video | `pages/video_generation` and `videoGenerationSubmit.ts` | Script, system same-style or uploaded-reference same-style |
+| Copywriting and AI Q&A | `services/copywriting.ts`, `copywritingSubmit.ts` | Eight distinct text-only Workflow products |
+| Design report | `reportBlueprint.ts`, `workflowSubmission.ts` | Blueprint-driven HTML and supported PPTX outputs |
+| Professional floor plans | `useFloorPlanAvailability`, `floorPlanRepository` | Implemented frontend; audited backend integration absent |
 
-The table describes implemented UI. Anonymous `/v1/billing/features` discovery, release visibility and account entitlements determine what is available in a given deployment. Prices are server values. A discovery failure must not be presented as a successful empty catalog.
+## Main package, subpackages and shared modules
 
-## Code layout
+| Location | Responsibility | Typical first question |
+| --- | --- | --- |
+| `src/pages` | Startup, Home, Contact, Projects, Plans, Profile and diagnostics | Which button opens the next page? |
+| `src/pkg-features` | Forms, feature-specific upload/submission orchestration | What becomes the request body? |
+| `src/pkg-plans` | Image, Markdown/audio, video, report and panorama viewers | How is progress refreshed and output rendered? |
+| `src/pkg-projects` | Project editor, current-member read-only view and activity | Whose workspace/project is being read? |
+| `src/pkg-account` | Login, legal consent, orders, subscription, organization and drafts | Which account action grants or confirms access? |
+| `src/repositories`, `src/api/dto` | Requests and runtime response validation | Which endpoint is called, and what JSON is accepted? |
+| `src/services`, `src/stores`, `src/domain` | Orchestration, credentials/theme, shared guards and pure rules | Which state must survive, expire or be invalidated? |
+| `config`, `scripts`, `tests` | Build profiles, generated assets, contracts and artifact gates | What does the actual target package contain? |
 
-| Directory | Responsibility |
-| --- | --- |
-| `src/pages` | Startup screens, home, contact, projects/plans/profile tabs, diagnostics and payment-order entry |
-| `src/pkg-features` | Feature forms, upload/submit orchestration, local draft handling |
-| `src/pkg-plans` | Image comparison, Markdown/audio, video and report result viewers |
-| `src/pkg-projects` | Project editor/detail, member project view and activity; conditional subpackage |
-| `src/pkg-account` | Login, legal documents, account profile, store, subscription, orders, tokens, organization and drafts |
-| `src/repositories`, `src/api/dto` | Validated data access and API contracts |
-| `src/services`, `src/stores`, `src/domain` | Shared behavior, session credentials and pure domain logic |
-| `config`, `scripts`, `tests` | Build profiles, artifact/contract gates and test harnesses |
+`VITE_ENABLE_PRIVATE_PROJECTS=true` compiles the Project tab, project subpackage and related implementations. Otherwise the tab is absent, with Home, Contact, Plans and Profile remaining. The explicit WeChat Mock build forces projects off; other commands have their own assignments. See [Build modes](/frontend/data-source-modes).
 
-## Build and ownership boundaries
+## Read one complete action
 
-Frontend Mock provides deterministic image/UI demonstrations; it does not expose every API-only capability. API mode uses the real backend and can independently select platform authentication/payment. Server secrets never belong in `VITE_*` settings, because these values enter the client bundle.
+Start with an interior-image action. Follow the page's submit handler into `standardDesignSubmit.ts`, then `stageDesignImages`, then `submitDesignJob` and the request client. Keep the logical action key, accepted Job ID, workspace and project visible while following the result page. The frontend currently sends that action through `POST /v1/design-jobs`; the backend adapts it into its unified execution engine. New API integrations should use the canonical [Workflow contract](/backend/workflows).
 
-The frontend documents distinguish current UI constraints from the wider public contract. For example, video UI requires exactly one scene reference, while the backend accepts zero to twelve; the UI's script limit is also narrower. See [Workflows](/frontend/workflows).
-
-Start with [Getting started](/frontend/getting-started), then [Architecture](/frontend/architecture). Detailed behavior is split into [Key flows](/frontend/key-flows), [Workflows](/frontend/workflows), [Projects](/frontend/projects) and [Platforms](/frontend/platforms).
+The [architecture guide](/frontend/architecture) explains shared boundaries. [Workflows](/frontend/workflows) records the actual payload families and video modes. [Projects](/frontend/projects) explains member dashboards and read-only access. The [full-chain reference](/reference/system-walkthrough) continues from frontend requests into database, object storage, queues and workers.
 
 ## Source evidence
 
-Frontend `eca0a5f` (2026-10-20): [Feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [Page registration](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pages.json) · [Package](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json).
+Verified 2026-10-28: [Navigation tree](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/featureGroups.ts#L23) · [Home composition](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages/home/index.vue) · [Page registration](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages.json) · [Actual submit transport](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designJobSubmit.ts#L182) · [Toolchain](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json).

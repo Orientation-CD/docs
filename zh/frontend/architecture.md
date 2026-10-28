@@ -1,51 +1,85 @@
 # 前端架构
 
-页面管理呈现和生命周期，Service 编排用户动作，Repository 校验响应并管理作用域缓存，请求层负责传输和刷新会话。生产与测试使用别名选择部分实现，因此 Mock 测试通过不能单独证明 API 产物正确。
+页面负责可见生命周期，service 编排一次动作，repository 校验服务端契约，请求客户端负责传输。阅读时要把这些层连起来：只有 TypeScript DTO 不能验证远端 JSON，隐藏按钮也不能实施服务端授权。
 
 ```mermaid
 flowchart TB
-  P[页面与组件] --> S[Service 与组合函数]
-  S --> R[Repository 与校验器]
-  R --> H[请求层]
-  H --> API[后端 /v1 接口]
-  H --> T[会话 Token Store]
-  R --> C[账号与空间作用域缓存]
+  U[页面 / 复用组件] --> S[动作 service / composable]
+  S --> R[Repository 与响应校验]
+  R --> H[request.ts]
+  H --> API[后端公开 API]
+  H --> T[会话凭据 store]
+  S --> D[按作用域保存的草稿与动作]
+  R --> C[按作用域保存的读取缓存]
+  U --> TH[主题 store / page-meta / 原生 API]
 ```
 
-## 编译期边界
+## 找到构建实际选中的实现
 
-`vite.config.ts` 选择 `AccountRepositoryRuntime`、`TaskRepositoryRuntime`、平台登录辅助、开发连接提示和订阅场景。`VITE_ENABLE_PRIVATE_PROJECTS` 同时设置 `pages.json` 的 `PRIVATE_PROJECTS` 预处理条件，并选择启用/禁用项目实现。要求发布包剔除能力时，不能仅隐藏按钮。
+`src/pages.json` 注册主包和分包，`vite.config.ts` 在打包前选择 runtime alias。遇到以 `Runtime` 结尾的 import，应先查 alias，不能默认它就是旁边的 API 文件。
 
-旧的宽泛账号仓储在 API 模式明确不可用。正式功能使用会话、资料、空间、项目、任务、Workflow、计费和组织等较小仓储。部分仓储在内部判断模式，不能假定每个仓储都有一对独立 Mock/API 文件。
+| 边界 | 代表性 runtime alias | 影响 |
+| --- | --- | --- |
+| 账户/任务数据 | `AccountRepositoryRuntime`、`TaskRepositoryRuntime` | 前端 Mock 与 API 包包含不同实现 |
+| 项目绑定 | `DesignProjectBindingServiceRuntime` | 无项目构建排除绑定行为 |
+| 首页当前作用域 | `HomeScopeSwitchRuntime` | 关闭项目的产物不带项目 UI |
+| 成员结果读取 | `MemberProjectReadRuntime` | 项目启用时才编入成员只读视图 |
+| 户型作品移动 | `FloorPlanMoveRuntime` | 关闭项目的构建不能获得项目移动行为 |
 
-`src/pages.json` 定义页面与分包。主包代码须尊重分包边界；模块放置、启动绑定等问题通过编译产物检查补足源码测试。
+`PRIVATE_PROJECTS` 预处理还会改变页面注册和 Tab。[包体门禁](/zh/frontend/testing)检查真实 JS、JSON、模板和样式依赖：主包不能引用功能分包，兄弟分包不能直接互引。为维持此边界而保留一份很小的接力适配器，是有意设计。
 
-## 会话与请求
+## 会话代次与晚到响应
 
-`src/stores/session.ts` 以 `yuanzhu.session.tokens.v1` 保存凭据。会话 generation 在账号切换时使旧读取与作用域界面失效，不依赖 Pinia。
+`src/stores/session.ts` 管理凭据对和持续变化的会话代次。一次有作用域的读取，在发请求前记录代次、用户、工作区、项目和页面修订号；响应返回时，只有这些值仍匹配才允许更新页面。
 
-`src/services/request.ts` 将路径拼接到 `VITE_API_BASE_URL`，添加 `X-Request-ID`，按需附加 Bearer，并将错误统一为 `ApiRequestError`。并发过期请求共享一次刷新，使用轮换凭据重放；其它认证失败按约定清理会话。
+例如：所有者打开成员 A 的项目，随后在概览响应回来前切换工作区。`memberProjectRead` 会让成员关系证明和页面当前操作失效；即使旧请求返回 HTTP200，也应丢弃。相同机制还阻止旧请求的失败清空新账户数据。
 
-基础地址须用 HTTPS，开发时允许回环 HTTP 或明确启用的私有局域网 HTTP。这与平台合法域名校验是不同规则。结果文件和报告还有精确 Origin/有效期检查；API 地址合法不等于任意媒体 URL 都可信。
+`request.ts` 基于 `VITE_API_BASE_URL` 解析路径，添加 `X-Request-ID`，仅对需要认证的请求带上 Bearer，并将传输/API 错误统一为 `ApiRequestError`。并发的过期凭据请求共享刷新操作。凭据刷新与业务提交重放是两层机制：刷新成功并不允许给结果未知的动作换幂等键。
 
-## 发现与响应校验
+## 追踪上传、提交与轮询
 
-`designCatalog.ts` 请求公共 `/v1/billing/features`，发送 `If-None-Match`，缓存 ETag 支持的 `200/304` 响应，并区分标准任务、报告 Workflow 和文案产品。模板元数据需要认证，前端表单控件仍须匹配声明字段。
+```mermaid
+sequenceDiagram
+  autonumber
+  participant P as 功能页
+  participant S as 提交 service
+  participant R as Asset / Job repository
+  participant API as 后端
+  participant OS as 对象存储
+  P->>S: 确认本地字段和动作身份
+  S->>API: 读取资料与 Feature 目录
+  S->>R: 绑定项目并暂存素材
+  R->>API: 创建上传意图
+  R->>OS: 用签名表单 POST 真实字节
+  R->>API: 完成 Asset
+  S->>R: 冻结请求体和 Idempotency-Key
+  R->>API: 产品对应的创建请求
+  API-->>R: 202 与公开 Job 身份
+  R-->>P: 校验后的待处理任务
+  P->>API: 调度经过授权的读取
+  API-->>P: 状态与有类型的产物
+```
 
-DTO 描述期望 JSON，仓储 normalizer 在运行时执行验证。列表/详情统一校验输入输出类别、ID、媒体元信息。`*_RESPONSE_INVALID` 等错误阻止畸形响应变成看似有效的 UI 状态。
+按编号阅读 `standardDesignSubmit.ts` / `videoGenerationSubmit.ts`、`designAssets.ts`、`designJobSubmit.ts`，再读结果页。完成上传得到已验证的 Asset；后端在执行准入前做的耐久输入归档是另一步骤。其事务与队列边界见[准入与 worker](/zh/reference/flows/design-job-lifecycle)。
 
-会话读取缓存合并请求并过期清理。项目选择、方案计数、筛选和成员读取还跟踪账号、空间、项目、会话；切换或失权后，迟到响应不得写入新上下文。
+轮询调度器遵守服务端建议和 `Retry-After`，页面隐藏时暂停，销毁时停止；不能因本地定时器到期就宣布任务失败。结果 URL 是短期能力凭证，查看器应重新获取授权数据，而不是把签名地址保存为永久身份。
 
-## 提交、恢复与结果
+## 区分三种持久化
 
-准备阶段校验本地字段、服务端目录、套餐、余额、项目绑定和已上传 Asset。受理结果不确定时，同一逻辑动作保留原 body/key；修改内容则形成新动作。`202` 后任务仍待处理或运行中，本地超时不能证明后端失败。
+| 状态 | 存放位置与生命周期 | 恢复前核对什么 |
+| --- | --- | --- |
+| 选中的本地媒体 | `localMediaStore.ts` 与设备文件系统 | 文件仍存在，元数据符合要求 |
+| 草稿/结果未知动作 | 按用户、工作区分隔的存储 | 作用域、本地素材、冻结的原请求与键 |
+| 已接受任务/Asset | 后端数据库和对象存储 | 服务端权限、持久状态和新的输出能力 |
 
-轮询尊重 `poll_after_seconds`、`Retry-After`，页面隐藏时暂停、退出时释放。结果页再次校验访问权，报告/文件地址过期后重新取得能力。重试使用服务端授权的现有任务；删除、移动、企业只读读取各有写权限门禁。
+微信本地用户目录可用时，按内容寻址的媒体仓库预算为50MiB，单文件持久化阈值5MiB，并维护引用计数。抖音和无法取得该目录的运行时使用原生保存回退，不能把共享缓存预算当作两端持久化保证。`persistLocalMedia` 把较小文件按摘要存入 `USER_DATA_PATH/media`，相同内容复用路径；无法取摘要时退回随机名。超过5MiB的文件保留临时路径。超过10分钟且无引用的旧文件可回收，配额错误时先清理再重试一次复制。因此它是缓存，不能保证每份草稿的全部素材永久存在。
 
-启动时恢复凭据并安装应用更新提示。新版本准备好后在前台提示，只有明确确认才重启；取消可继续当前版本。
+`releaseLocalMedia` 先减少引用，再删除自有文件。清理会统计整个本地用户目录，优先删除旧的自有媒体，再考虑其他旧缓存。不要重新引入无条件 `saveFile`，也不要把100MiB上传上限误当作100MiB本地持久化保证。
 
-请求族见[工作流](/zh/frontend/workflows)，作用域行为见[项目](/zh/frontend/projects)，契约/产物验证见[测试](/zh/frontend/testing)。
+## 主题初始化也是生命周期
+
+`main.ts` 安装 `themePageMixin`。主题 store 同步恢复状态，页面通过 `usePageTheme` 绑定 `page-meta` 与根节点，每次 `onShow` 重新应用原生 Tab、导航和背景 API。这样保留实例的 Tab 页面不用重建也能同步主题，见[设计系统](/zh/frontend/design-system)。
 
 ## 源码依据
 
-前端 `eca0a5f`（2026-10-20）：[构建别名](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/vite.config.ts) · [请求层](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts) · [会话 Store](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/stores/session.ts) · [应用更新](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/appUpdate.ts)。
+核验日期 2026-10-28：[构建别名](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/vite.config.ts) · [传输](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/request.ts) · [会话](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/stores/session.ts) · [提交路由](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designJobSubmit.ts#L182) · [上传](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designAssets.ts#L156) · [本地媒体生命周期](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/localMediaStore.ts#L280) · [成员作用域](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/memberProjectRead.ts#L25)。

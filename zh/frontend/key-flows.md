@@ -1,47 +1,72 @@
-# 关键用户流程
+# 沿用户操作追踪前端
 
-本页从用户动作说明共享前端行为；请求族细节见[工作流](/zh/frontend/workflows)，项目所有权见[项目](/zh/frontend/projects)。
+选一次能在界面认出的动作，再依次追页面、动作 service、repository 和传输。把用户/工作区/项目作用域、动作幂等键与返回的任务 ID 放在一起。[全链路参考](/zh/reference/system-walkthrough)会继续追到后端事务、队列、worker 和产物。
 
-## 发现并进入功能
+## 首页 → 功能 → 最终确认
 
-首页与分组页共享 `useFeatureLauncher`，统一执行发布可见性、服务端发现、套餐解释、Token预检和五任务上限门禁。首页进入 AI设计/AI创作，旧房改造再下一层；面包屑与共享导航保留回首页路径。
+| 步骤 | 打开的源码 | 发生什么或检查什么 |
+| --- | --- | --- |
+| 打开首页 | `pages/home/index.vue` | 分别加载内容、Feature 可用性和 CDN 图片 |
+| 进入 AI设计/AI创作 | `services/featureGroups.ts` | 推导分组与面包屑；设计现在分为轻盈/专业 |
+| 选择业务动作 | `services/useFeatureLauncher.ts` | 可用性、登录/权益说明和入口守卫 |
+| 检查活跃任务 | `services/homeEntryGuard.ts` | 客户端五个活跃任务限制，不能代替服务端限制 |
+| 确认本地表单 | 功能页面与 `*Submit.ts` | 重查作用域、字段、服务端配置和素材 |
+| 提交 | `designJobSubmit.ts` 或 `workflowSubmission.ts` | 原请求体/幂等键与对应产品路由 |
 
-匿名目录使用 `/v1/billing/features`。成功响应缺少某项表示不可用；网络错误是待重试的发现失败，不是部署没有能力。价格和权限键以服务端值为准。
+成功目录缺少某产品，才表示不可用；网络错误表示发现失败，应保留重试，不能变成“成功获取空目录”。分组卡片可以是编辑定义的导航，不代表任何 Feature 权益。
 
-## 在相应动作注册
+专业设计有自己的页面级可用性加载器，并存在[后端版本尚未对齐的边界](/zh/frontend/floor-plans)，不能通过硬编码启用卡片绕过。
 
-可用图片流程允许游客完成本地选择，最终提交再请求注册。共享账号门禁处理现行法律文档、手机号授权与平台注册，并检测动作中的账号/空间变化。不要把所有 API 专用页面描述为游客可完整使用。
+## 注册属于具体动作
 
-微信、抖音使用不同后端登录交换。本地微信 mock code 是开发身份机制；正式包调用平台登录，密钥留在后端。
+可用的图片表单允许游客先做本地选择，在最终提交时请求注册；其他 API 专用流程可能更早需要身份。`accountGate` 协调平台注册、当前法律文档、手机号授权，以及离开页面/动作时的取消。
 
-## 创建图片或录音总结
+请求客户端与会话 store 管理凭据，动作仍需确认原作用域。注册或切换工作区使冻结上下文过时时，应让用户重新确认，不能悄悄绑定到另一个账户/项目。
 
-标准设计页收集选项与照片；家居试搭增加蒙版和参考图，自定义设计使用服务端声明的可编辑模板。提交时重新检查配置/权益，按需绑定项目，上传并验证 Asset，再发送一个逻辑动作。
+## 一次室内效果图：辨认五个边界
 
-录音总结可录制或选择最多三个 MP3/WAV/AAC/M4A 文件。本地检查签名及每文件 25,000,000 字节、120分钟上限；直接录音有更短的单次采集上限。重复录音、失效或不可读本地文件会在提交前被拒绝。
+1. 页面保存选择和本地图片；`standardDesignSubmit.ts` 解析提示词、资料、目录与项目绑定。
+2. `stageDesignImages` 检查角色和本地元数据；`stageOne` 创建上传意图，用返回的签名表单上传真实字节，再完成 Asset。已 READY 的重放可以直接复用 Asset。
+3. `submitDesignJob` 校验准备好的 body，重新检查写权限，用相同 `Idempotency-Key` 提交。当前图片 UI 实际调用 `POST /v1/design-jobs`，后端再适配进统一运行时。
+4. `202` 建立公开 Job 身份，不表示图片已完成。后端输入归档、积分预留与耐久提交见[准入链路](/zh/reference/flows/design-job-lifecycle)。
+5. 结果页轮询权威状态，校验有类型输出，再取得经过授权的 URL。预览 URL 不是 Asset ID，预览过期也不证明持久化结果已丢失。
 
-Markdown 结果页轮询至终态，渲染经安全处理的格式文本，并列出原始录音。切换录音时按 Asset 记住位置；离开页面暂停并最终释放音频资源。媒体能力过期后需从有权限的服务端获取新 URL。隐私、域名见[平台接入](/zh/frontend/platforms)。
+用家居试搭再做一次练习：找到原图、蒙版、参考图角色，再比较其提交 service 与标准设计。共享传输不变，局部素材契约不同。
 
-## 查看、重试和管理方案
+## 录音、视频与本地文件生命周期
 
-方案支持空间/项目、状态、类型筛选。企业全部方案仅所有者可看，与用户本人的方案列表区分。结果按类型进入图片/对比、录音、文案 Markdown、视频和报告页。
+录音总结接受最多三份 MP3/WAV/AAC/M4A，校验文件签名和元数据，单文件限制25,000,000字节、120分钟；原生每次录制还有自己的较短限制。总结结果渲染净化后的 Markdown，按 Asset 切换原录音，离页时暂停/释放音频资源。
 
-客户端不会因本地计时结束就把待处理任务标为失败。支持的重试依服务端资格执行，并保留现有任务身份；删除/移动检查当前写权限并使相关缓存、计数失效。成员项目只读页不提供提交、重试、删除、移动。
+视频现在有剧本、系统同款、自传参考视频同款三条路径。[工作流](/zh/frontend/workflows)解释各分支不同的必填素材、模板字段和替换指令。从完成的短视频脚本导入文本，只填充视频草稿，不会自动提交或收费。
 
-## 购买并确认权益
+本地素材恢复链路如下：
 
-商店与权益页将设计报告、AI文案、AI问答分组展示，但分组不会自动授予额外 Feature。价格、优惠、权益与适用空间来自后端。
+```mermaid
+flowchart LR
+  P[原生选择器 / 录音] --> G[页面与会话仍有效？]
+  G --> M[检查元数据并 persistLocalMedia]
+  M --> C[按内容寻址的小文件缓存]
+  M --> T[大文件临时路径]
+  C --> D[按用户与工作区保存草稿]
+  T --> D
+  D --> R[恢复时确认文件仍可读]
+  R --> U[暂存并完成服务端 Asset]
+```
 
-购买先创建幂等订单，平台桥调用微信 JSAPI 或抖音交易支付，再按服务端证据对账。取消、通知延迟、响应不确定都通过支付记录恢复。生效订阅显示手动续费提示；当前 UI 不支持提前续订或自动扣费。
+缓存的50MiB预算、5MiB持久化阈值和10分钟回收年龄，与上传 API 上限是不同规则。恢复草稿必须重新验证每个本地文件，不能只相信保存的路径。页面/会话变化后才返回的选择结果应释放，不能存进新草稿。详见[架构](/zh/frontend/architecture)。
 
-本地模拟微信支付不会自动替换原生调用；使用[快速开始](/zh/get-started/quickstart)明确的本人认证模拟结算。已支付模拟订单测试应用结算，不证明真实支付渠道已接入。
+## 方案 → 结果 → 重试、删除或移动
 
-## 草稿与安全恢复
+方案/结果路由区分图片、Markdown/音频、视频、报告和专业户型元数据。工作区/项目筛选及计数带作用域，账户切换会让待处理操作失效。
 
-功能草稿按账号和空间隔离，进入草稿箱，并在保存后校验可恢复性。受理不确定的请求保留准确 payload 与幂等键；切换账号/空间不能静默复用旧上下文。
+受支持的重试使用服务端已有任务和返回的资格；本地超时不能把任务改成失败。删除/移动需要最新写权限，并使相关计数失效。当前成员的只读视图保留结果读取/轮询，但不提供重试、删除、移动、复制输入或新提交，见[项目](/zh/frontend/projects)。
 
-可恢复错误保留输入，让用户刷新配置、恢复访问、选择套餐、补余额或重试原不确定动作。报告/文件页刷新过期能力，不能因签名 URL 过期就把结果认定为永久丢失。
+## 购买 → 原生桥 → 服务端证据
+
+商店/套餐页从后端获取价格和允许的 Feature。创建订单带幂等；微信调用 JSAPI 支付，抖音调用行业 SDK。原生成功、取消或未知结果，都要再与服务端订单证据对账。支付记录是恢复入口；前端分组和演示权益开关不能创建真实购买。
+
+当前有效套餐展示手动续费说明，不承诺自动扣费或提前续费。本地微信 mock 结算见[快速开始](/zh/get-started/quickstart)，选择 mock 配置不会自动替换原生支付调用。
 
 ## 源码依据
 
-前端 `eca0a5f`（2026-10-20）：[共享入口](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/useFeatureLauncher.ts) · [音频验证](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/services/voiceAudioFiles.ts) · [原生支付](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-account/services/payment.ts) · [草稿持久化](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureDrafts.ts)。
+核验日期 2026-10-28：[首页](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages/home/index.vue) · [入口守卫](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/homeEntryGuard.ts#L9) · [图片提交](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/standardDesignSubmit.ts) · [Asset 暂存](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designAssets.ts#L156) · [提交](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designJobSubmit.ts#L204) · [媒体缓存](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/localMediaStore.ts) · [音频验证](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/voiceAudioFiles.ts) · [支付桥](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-account/services/payment.ts)。

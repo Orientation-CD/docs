@@ -63,11 +63,17 @@ coverage 拓扑为两个用户容器、每容器两个手机用户，加一个�
 
 纯文档工作只需文档验证。具体产品测试由上游规范与实时 runbook 决定；本页不授权付费模型、真实支付、云写入或破坏性清理。
 
+## 复用已升级夹具而不覆盖配置
+
+迁移／部署升级门禁已经准备保留栈的产品配置时，smoke／E2E runner 使用 `--preconfigured`，避免旧云端配置覆盖候选已核验状态。新会话仍需核对端口、项目所有权和存储授权。
+
+存储证据现包含输入归档：SQL 提交 claim → SQL 外精确版本复制／核验 → COMPLETED receipt → 准入时最终 ACTIVE 归属及 pins。授权存储写操作前按相关源码测试验证恢复；模拟供应商不能证明 OSS 版本、CORS、复制回执或孤儿对象协调。见[归档链路](/zh/reference/flows/asset-upload-flow)和[修复边界](/zh/deploy/production#input-recovery)。
+
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [环境与门禁规范](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/tests/documents/TEST_STRATEGY.md)
-- [实时运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md)
-- [Compose 优先级和拓扑](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/docker-compose.yml)
-- [部署基线升级 runner](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/run_deployed_upgrade_gate.sh)
+- [环境与门禁规范](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
+- [实时运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)
+- [Compose 优先级和拓扑](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/docker-compose.yml)
+- [部署基线升级 runner](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/run_deployed_upgrade_gate.sh)

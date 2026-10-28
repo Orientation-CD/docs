@@ -26,6 +26,10 @@ Workflow 输出 HTML 预览和可编辑 PPTX。HTML 与图片引用经过校验�
 
 旧 `html_report`、`/v1/report-items`、报价拼装、报告 section 配置及 `/admin/report-templates` 编辑器已退役。兼容历史产物仍可读取，新任务使用 Blueprint 产品。参见[兼容说明](/zh/backend/design-jobs)与[部署](/zh/deploy/sae-deployment)。
 
+## 追加文件的耐久性
+
+直接自有的追加 PPTX 先归档，再随已接受 Job 和物理输入 pins 激活。后续转换不能依赖临时上传路径。已执行操作的输入 pins 不因归档或修复而重写。[输入归档](/zh/reference/flows/asset-upload-flow)与[定点恢复](/zh/deploy/production#input-recovery)解释该区别。整份报告仍须等待必要导出完成；归档成功既不是报告完成，也不是另一笔购买。
+
 ---
 
-代码依据 · backend `b13cc566`: [app/workflows/operations/design_report/design_report_products.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/design_report_products.py) · [app/workflows/operations/design_report/workflow_report_publication.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md).
+代码依据 · backend `e59716c8`: [app/workflows/operations/design_report/design_report_products.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/design_report_products.py) · [app/workflows/operations/design_report/workflow_report_publication.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/workflow_report_publication.py) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md).

@@ -1,32 +1,59 @@
-# 视频生成
+# 视频：脚本生成与同款重制
 
-`video_generation` Workflow 使用本地 `render_video` Operation，后端打包私有 jinqiu pipeline。结果为标准 Workflow 带类型输出中的 MP4；本地执行器不走普通 provider model 路由。
+`video_generation`是同一个Feature，使用本地`render_video` Operation。镜像内的私有jinqiu流水线执行耗时媒体/模型编排，本地执行器不走普通provider-model路由。两种视频模式都复用Job/Workflow、输入归档、钱包和结果发布机制。
 
-## 输入
+## 三种请求路径，一个Operation
 
-| 端口 | 要求 |
-| --- | --- |
-| `script` | scalar 脚本，最多 20,000 字符 |
-| `character_image` | 一张主角图，角色 `primary` |
-| `scene_images` | 0–12 张场景图，角色 `reference` |
-| `recording` | 可选单个录音 Asset，角色 `recording` |
+| 路径 | 请求主体 | 故事来源 | 附加约束 |
+| --- | --- | --- | --- |
+| 脚本 | `script`，无`prompts` | 冻结脚本 | 人物合成图恰好1，场景图0..12，录音0..1 |
+| 系统同款 | 一个具名`prompts`选择，无`script` | 模板参考视频 | 活跃`purpose=same_style_video`，字段恰好`称呼`，场景图0..1，必选MP3录音>5秒 |
+| 自定义同款 | `prompts`名称`__user_reference__`，上传`reference_video`，无`script` | 用户精确版本视频 | 相同字段/录音/场景限制；不查找/渲染模板，不创建script pin |
 
-先上传并完成 Asset，再按 [REST API](/zh/reference/rest-api)规定的脚本字段及精确端口/角色结构提交。服务端核验内容、所有权与冻结身份，不接受任意存储 key 或临时服务商 URL。
+所有路径都要求恰好一张`character_image`/`primary` Image。上传参考片是已完成的Video Asset，最大100 MiB、120秒，port/role都为`reference_video`，不能重复Asset ID。结构模型最多14项输入，可能先于模式校验拒绝超大清单。UI要求可以比公共schema更窄，详见[联调状态](/zh/reference/integration-status)。
 
-## 模型与计费
+脚本最大20,000字符。当前txt方言使用独立`【场景N】`标题和结构化标签；仍支持的历史markdown方言集中在[兼容边界](/zh/reference/compatibility)。同时传script+prompts或script+reference clip是`VIDEO_SCRIPT_CONFLICT`，两种主体都不传是`VIDEO_SCRIPT_REQUIRED`。
 
-后端 `VIDEO_MODEL_SELECTION_ENABLED` 控制发现接口是否返回完整支持的视频模型。关闭时本地/测试默认 `Doubao-Seedance-2.0-mini`。客户端发现当前选项与价格，不复制模型价格表。我方 Token 定价与服务商真实积分消耗独立。
+## 模板选择与可选台词替换
 
-提交、轮询、历史、显式重试、移动及删除使用 [canonical Workflows](/zh/backend/workflows)。显式工作空间付款，预留及最终结算/释放使用普通账本机制。
+小程序选择器读取`GET /v1/prompt-templates?purpose=same_style_video`；省略purpose只列通用模板。同款元数据包含展示名及短期参考片/封面URL，不暴露私有模板正文。播放能力过期应重新获取列表，预览不会创建Job或预留积分。
 
-## 执行与运维
+系统模板恰好定义`称呼`字段，无system/negative prompt，渲染脚本最多15,000字符，每场`【人物】`与称呼一致。称呼不能含空白或`、`、`,`、`，`。渲染文本经过校验并冻结，但重制流水线由参考片驱动，worker不传入另一份竞争脚本。自定义模式校验相同字段，但不写script输入。
 
-视频包含较长的解析、生成、导出阶段，具有 render lease、产物大小、spool 空间及上传截止时间限制。`video_render_budget_seconds` 根据场景数与阶段预算计算有界执行时间。使用返回的进度估计与轮询提示，API 健康不表示供应方有足够容量。
+可选顶层`replacements:[{"from":"旧台词","to":"新台词"}]`两端去空格后必须非空。`replace_scope`为`all`（默认）或`dialogue`，必须至少有一组替换。后端冻结并透传给镜头规划，不自己替换文本。默认all保持默认规范指纹，dialogue改变语义身份，不能修改替换内容后复用已接受动作key。
 
-提交 worker 执行本地视频任务，补偿与预留清理恢复符合条件的失败。迟到/旧代际不能覆盖当前结果。外部付费行为是否成功不明确时，必须服从持久重试分类，不能无条件自动重渲染。
+## 从接受Job到MP4
 
-镜像构建要求私有 supplier Git 访问。Supplier 打包进应用镜像，重建可能跟随其默认分支，因此发布证据需记录实际构建版本。参见[本地环境](/zh/deploy/local-stack)、[配置](/zh/reference/configuration)与[可观测性](/zh/backend/observability)。
+```mermaid
+sequenceDiagram
+  autonumber
+  participant UI as 视频表单
+  participant API as API/准入
+  participant DB as PostgreSQL
+  participant S as 版本化存储
+  participant W as Submit worker
+  participant P as 镜像内流水线
+  UI->>API: 完成的Asset ID与script或prompts
+  API->>S: 归档直接拥有的输入版本
+  API->>DB: 冻结模式/pin/替换 预留 图/outbox
+  W->>DB: 在代次围栏下claim渲染尝试
+  W->>S: 下载冻结的精确版本
+  W->>P: 脚本配置 或参考片remake配置
+  P-->>W: 渲染产物与阶段证据
+  W->>S: 核验并发布私有MP4
+  W->>DB: 绑定不可变输出并只结算一次
+  UI->>API: 轮询规范status URL
+  API-->>UI: VIDEO类型输出与新签名URL
+```
+
+先读[`_build_render_request`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_local_video_submission.py#L552)，再读[`build_config`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/conversion/video_jinqiu_adapter.py#L224)。存在参考视频时进入`_remake_config`，script_path保持空；否则`_script_config`读取暂存脚本和映射。输出是核验后的`video/mp4` Asset，不是任意供应商URL。
+
+## 模型、恢复与证据边界
+
+`VIDEO_MODEL_SELECTION_ENABLED`控制是否提供/透传模型选择，关闭时默认`Doubao-Seedance-2.0-mini`。应发现支持模型和价格，不能硬编码供应商积分表。平台Token与真实供应商消费是两回事。
+
+渲染有有界租约、总时长/阶段预算、spool及上传限制，可以运行数小时。API健康不证明供应商容量。失败本地视频渲染为终态，不自动重新生成；人工付费重跑由支持流程决定，过时代次不能覆盖新代次。发布证据记录镜像内私有供应商版本，并区分模拟测试与仍待真实供应商/长时运行验证的边界。[产品全链路](/zh/reference/flows/workflow-products-flow#video-branch)提供错误码和代码导航。
 
 ---
 
-代码依据 · backend `b13cc566`: [app/workflows/operations/video/workflow_video_definition.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/video/workflow_video_definition.py) · [app/workflows/operations/video/workflow_video_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/video/workflow_video_execution.py) · [scripts/runbook.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md).
+源码依据 · backend `e59716c8`: [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py) · [app/workflows/video_template_rules.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/video_template_rules.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_local_video_submission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_local_video_submission.py) · [app/conversion/video_jinqiu_adapter.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/conversion/video_jinqiu_adapter.py).

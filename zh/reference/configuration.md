@@ -37,11 +37,17 @@
 
 配置加密 key 要在角色之间和保留数据期间稳定。未经审阅的轮换可能导致既有 provider/支付快照无法解密。私钥 PEM 与凭据放忽略的受保护文件/Secret 挂载；源码快照与生成文档不得带秘密。
 
+## 配置不证明功能已部署
+
+`VITE_FLOOR_PLAN_WEB_ORIGIN` 是精确受信前端 H5 origin（否则用 API origin），不是补出后端户型路由的开关。主题选择也受 selectable 目录约束，当前设置页入口隐藏。见[对齐状态](/zh/reference/integration-status)。
+
+成员月额度是持久的企业／成员配置，不是环境变量开关。性能窗口与版本归属见[可观测性](/zh/backend/observability)，每个运行进程／镜像保留 `APP_VERSION`。生成表代码默认值不等于实际部署值。
+
 ## 源码依据
 
 已按[记录的源码版本](/zh/reference/source-revisions)核对。
 
-- [Settings 与校验](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/config.py)
-- [已提交本地示例](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.env.example)
-- [数据库 provider 配置](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/providers/provider_configuration.py)
-- [构建脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json)
+- [Settings 与校验](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/config.py)
+- [已提交本地示例](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.env.example)
+- [数据库 provider 配置](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_configuration.py)
+- [构建脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json)

@@ -17,4 +17,4 @@ Referral eligibility, first-wins attribution, non-refundable purchase/use condit
 
 ---
 
-Source evidence · backend `b13cc566`: [app/admin/marketing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/marketing.py) · [app/marketing/campaign_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/marketing/campaign_configuration.py) · [app/templates/admin/campaigns.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/campaigns.html).
+Source evidence · backend `e59716c8`: [app/admin/marketing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/marketing.py) · [app/marketing/campaign_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/marketing/campaign_configuration.py) · [app/templates/admin/campaigns.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/campaigns.html).

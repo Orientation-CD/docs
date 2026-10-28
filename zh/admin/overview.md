@@ -25,4 +25,4 @@ Studio Control 位于 API origin 的 `/admin`，使用服务端渲染页面管�
 
 ---
 
-代码依据 · backend `b13cc566`: [app/templates/admin/base.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/base.html) · [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/__init__.py).
+代码依据 · backend `e59716c8`: [app/templates/admin/base.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/base.html) · [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/__init__.py).

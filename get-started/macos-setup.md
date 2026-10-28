@@ -89,4 +89,4 @@ Open the local URL printed by VitePress. Leave that terminal running while readi
 
 ## Source evidence
 
-Documented against frontend `eca0a5f` and backend `b13cc56` (2026-10-20). [Frontend package and commands](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Backend local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/runbook.md).
+Documented against frontend `21db6d8` and backend `e59716c` (2026-10-28). [Frontend package and commands](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [Backend local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md).

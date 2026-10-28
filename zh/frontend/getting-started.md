@@ -1,64 +1,67 @@
-# 前端开发入门
+# 前端上手
 
-使用 **Node 22** 和仓库固定的 **pnpm 9.15.9**。第一次用终端请先读 [macOS 准备](/zh/get-started/macos-setup)，了解工具、目录和分支；完整前后端闭环见[快速开始](/zh/get-started/quickstart)。
+使用 Node22 和本仓库的 pnpm9.15.9。第一次用终端请先读 [macOS 环境准备](/zh/get-started/macos-setup)，完整真实服务闭环见[快速开始](/zh/get-started/quickstart)。下文命令都在**前端仓库**执行，不是在 docs 或后端目录。
 
-## 安装和预览 Mock
-
-在前端 `ui-integration` 分支运行：
+## 1. 确认分支并安装
 
 ```bash
+cd wechat_mini_program
+git switch ui-integration
+git pull --ff-only
+corepack enable
+pnpm --version
 pnpm install --frozen-lockfile
+```
+
+预期 pnpm 版本为9.15.9。冻结安装会应用仓库中的 Vitest、uview-plus 补丁。若 Corepack 不可用，用 `npx --yes pnpm@9.15.9` 替代 `pnpm`。不要通过删除 lockfile 或跳过补丁解决安装问题。用 `git rev-parse HEAD` 记录版本：已发布文档固定在[审计提交](/zh/reference/source-revisions)，新拉取分支可能继续前进。
+
+## 2. 构建前端 Mock 包
+
+```bash
 pnpm build:mp-weixin:mock
 ```
 
-没有全局 pnpm 时，将 `pnpm` 换成 `npx --yes pnpm@9.15.9`。微信开发者工具导入 **`dist/build/mp-weixin`**，使用公开 AppID `wxec0d577de41255aa` 和有开发权限的微信账号。不要导入源码根目录或 `src/`。
+预期产物：`dist/build/mp-weixin`。使用公开 AppID `wxec0d577de41255aa` 和已获开发权限的微信账户，将**这个目录**导入微信开发者工具，不要导入 `src/` 或仓库根目录。此显式 Mock 构建强制关闭项目，适合基础图片/UI 路径，不能证明服务端执行链路。
 
-监听开发模式：
+需要持续监听时：
 
 ```bash
 pnpm dev:mp-weixin:mock
 ```
 
-输出是 **`dist/dev/mp-weixin`**。保留终端运行，Control–C 停止。Mock 可演示初始图片流程，无需后端；不能由此推断 API 专用录音、视频、报告、文案都可用。
+预期目录改为 `dist/dev/mp-weixin`，保持终端运行并导入该目录，Control–C 停止监听。监听脚本不像前面的 Mock 构建那样强制项目开关，如果导航不同，先检查环境值。
 
-## 选择构建目标
+开发者工具仍显示旧 UI 时，先核对导入目录，重建所需构建档并重新编译。源码与编译产物是两棵不同的目录树。
 
-| 用途 | 命令或入口 | 重要行为 |
+## 3. 选择要验证的集成边界
+
+| 目标 | 命令或指南 | 验证什么 |
 | --- | --- | --- |
-| 微信 Mock | `build:mp-weixin:mock` / `dev:mp-weixin:mock` | 前端模拟数据，不强制开启项目 |
-| 本地 API + 模拟身份/支付 | `build:mp-weixin:api-local` / `dev:mp-weixin:api-local` | API 固定8080，开启前端订阅场景面板 |
-| 本地 API + 真实微信身份 | `build:mp-weixin:api-local-wechat` | 正式登录、后端模拟支付，可指定 API Origin |
-| 真机 + 正式微信身份 | `build:mp-weixin:api-device-wechat` | 要求明确的可用 LAN API URL，不会自动发现 Mac 地址 |
-| 正式 API | `build:mp-weixin:api` | 正式微信登录/支付、HTTPS、项目开启、无健康提示 |
-| 抖音 Mock | `build:mp-toutiao:mock` | 平台专用模拟预览 |
-| 抖音本地/云测试/生产 | `build:mp-toutiao:local-test`、`:cloud-test`、`:cloud-production` | 包装脚本检查环境并检查编译产物 |
+| 抖音前端 Mock | `pnpm build:mp-toutiao:mock` | 用抖音工具导入 `dist/build/mp-toutiao` |
+| 自己拥有的本地 API 栈 | [快速开始](/zh/get-started/quickstart)的显式构建 | 实际 API/存储/队列/数据库及选定认证/供应商模式 |
+| 微信生产 API 产物 | 配好 origin 后运行 `pnpm quality:mp-weixin:api` | 契约/设计、Babel 与生产产物门禁 |
+| 团队云环境 | 对应环境的[平台包装脚本](/zh/frontend/platforms) | 就绪、所选环境与产物检查 |
+| 专业户型 | 先读[集成边界](/zh/frontend/floor-plans) | 本轮后端尚未提供所需路由 |
 
-不存在 `dev:mp-weixin:api`。裸 `dev:mp-weixin` 直接执行 uni-app，依赖环境中已有设置，推荐显式模式。
+固定8080的 `:api-local` helper 只适合该端口确实属于当前会话的情况。不要在它前面加另一个 URL 就认为覆盖了脚本行内值。其他端口使用快速开始中的显式构建，包含匹配的结果/报告 origin，并关闭演示权益覆盖。
 
-## 本地 API 的前置条件
+模拟器可用 loopback；真机的127.0.0.1不是 Mac。真机测试应参考[平台指南](/zh/frontend/platforms)，使用自己栈的局域网地址及正确后端认证配置。
 
-先启动已配置且属于自己的后端。空白服务健康仍不够：需要法律文档、Feature、模板、套餐与生成配置。个人提交还需要允许该能力的生效订阅与 Token。
+## 4. 知道谁负责哪种配置
 
-`api-local` 在脚本内把 `VITE_API_BASE_URL` 覆盖成 `http://127.0.0.1:8080`。自定义端口使用[快速开始](/zh/get-started/quickstart)的显式环境变量加 `pnpm exec uni build -p mp-weixin` 示例，同时设置 MinIO/报告 Origin 并关闭演示权益覆盖。
-
-开发者工具启用本地 HTTP 域名/TLS 调试例外，重新编译 **API 产物**，注册后确认服务端权益，再提交任务。发布不能沿用调试例外。API-local 的微信支付桥仍是原生调用，本地模拟结算是独立后端测试步骤。
-
-## 配置文件与产物
-
-| 文件 | 职责 |
+| 文件或产物 | 负责什么 |
 | --- | --- |
-| `package.json`、`pnpm-lock.yaml` | 固定工具链与命令 |
-| `.env.example`、`src/env.d.ts` | 环境变量示例和类型声明 |
-| `src/manifest.json` | 应用/平台元信息与权限 |
-| `src/pages.json` | 路由、分包、Tab 与页面导航 |
-| `project.config.json` | 微信开发者工具发布设置 |
-| `project.private.config.json` | 本地工具覆盖 |
-| `vite.config.ts`、`config/build-targets.mjs` | 别名、预处理、抖音构建档 |
+| `package.json`、`pnpm-lock.yaml`、`patches/` | 工具链、命令、依赖补丁 |
+| `.env.example`、`src/env.d.ts` | 公开构建值与声明 |
+| `src/manifest.json`、`src/pages.json` | 平台信息、权限、页面、分包和 Tab |
+| `vite.config.ts`、`config/build-targets.mjs` | 构建别名、预处理与抖音档位 |
+| `project.config.json`、`project.private.config.json` | 微信工具公共/本地配置 |
+| `dist/build/*`、`dist/dev/*` | 导入/上传的编译产物 |
 
-前端环境值在编译时进入包。保留本地 `.env`，修改后重新构建，不能放入 AppSecret 或供应商密钥。文档仓库使用 pnpm **10.28.2**，依赖与应用分开安装。
+配置在构建时进入客户端；保留本地 `.env`，不要放服务端秘密。docs 仓库单独使用 pnpm10.28.2，不要在别的仓库目录安装依赖。
 
-交付前运行[测试与门禁](/zh/frontend/testing)。完整设置见[数据源模式](/zh/frontend/data-source-modes)，设备/域名要求见[平台接入](/zh/frontend/platforms)。
+提交审阅前运行相应[测试和产物门禁](/zh/frontend/testing)。构建通过是有用证据，但真实认证、支付与供应商验收仍需要对应环境。
 
 ## 源码依据
 
-前端 `eca0a5f`（2026-10-20）：[命令](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [抖音构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/config/build-targets.mjs) · [设备 URL 校验](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/scripts/require-device-api-url.mjs)。
+核验日期 2026-10-28：[固定工具链、命令和补丁](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pages.json) · [抖音构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/config/build-targets.mjs) · [真机地址检查](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/require-device-api-url.mjs) · [微信产物门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/scripts/check-code-quality.mjs)。

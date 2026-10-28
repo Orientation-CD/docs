@@ -12,13 +12,14 @@ const topics = {
     ['frontend/overview', 'Overview', '概览'], ['frontend/getting-started', 'Development setup', '开发入门'],
     ['frontend/architecture', 'Code map and state', '代码地图与状态'], ['frontend/data-source-modes', 'Build and data modes', '构建与数据源模式'],
     ['frontend/workflows', 'Feature workflows', '功能工作流'], ['frontend/projects', 'Projects and collaboration', '项目与协作'],
+    ['frontend/floor-plans', 'Floor plans: candidate boundary', '户型功能与候选边界'],
     ['frontend/platforms', 'WeChat and Douyin', '微信与抖音'], ['frontend/key-flows', 'User journeys', '核心用户流程'],
     ['frontend/design-system', 'Design system', '设计系统'], ['frontend/testing', 'Testing and quality', '测试与质量门禁'],
   ]],
   backend: ['Backend', '后端', [
     ['backend/overview', 'Overview', '概览'], ['backend/getting-started', 'Development setup', '开发入门'],
     ['backend/architecture', 'Architecture and code map', '架构与代码地图'], ['backend/authentication', 'Authentication', '认证与授权'],
-    ['backend/workflows', 'Workflow execution', '工作流执行'], ['backend/design-jobs', 'Lifecycle and compatibility', '生命周期与兼容接口'],
+    ['backend/workflows', 'Workflow execution', '工作流执行'], ['backend/design-jobs', 'Image generation', '图片生成'],
     ['backend/voice', 'Voice summaries and file handoff', '语音总结与文件接力'], ['backend/copywriting', 'AI copywriting', 'AI 文案'],
     ['backend/video', 'Video generation', '视频生成'], ['backend/reports', 'Reports and PowerPoint', '报告与 PowerPoint'],
     ['backend/projects', 'Private projects and activity', '私有项目与活动'], ['backend/workspaces-orgs', 'Workspaces and organizations', '工作区与组织'],
@@ -42,6 +43,7 @@ const topics = {
     ['deploy/ci-cd', 'CI/CD', '持续集成与发布'], ['deploy/production', 'Promotion and recovery', '生产发布与恢复'],
   ]],
   refLearn: ['Learn the system', '读懂系统', [
+    ['reference/integration-status', 'Frontend/backend integration status', '前后端对齐状态'],
     ['reference/system-walkthrough', 'From an action to stored evidence', '从操作追到存储证据'],
   ]],
   refIdentity: ['Identity and inputs', '身份与输入', [
@@ -59,6 +61,7 @@ const topics = {
   refBusiness: ['Collaboration and payments', '协作与交易', [
     ['reference/flows/project-flow', 'Projects, outcomes and cleanup', '项目、成交流失与清理'],
     ['reference/flows/workspace-membership-flow', 'Workspaces, members and invitations', '空间、成员与邀请'],
+    ['reference/flows/member-quota-flow', 'Member quota and accounting month', '成员额度与记账月份'],
     ['reference/flows/referral-rewards-flow', 'Referral attribution and rewards', '推荐归因与奖励'],
     ['reference/flows/payment-flow', 'Purchase, callback and settlement', '购买、回调与结算'],
     ['reference/douyin-payment', 'Douyin channel and RSA', '抖音渠道与 RSA'],
@@ -68,6 +71,7 @@ const topics = {
     ['reference/flows/runtime-debugging', 'Trace one task through the runtime', '跨进程追踪一个任务'],
     ['reference/rest-api', 'Every API and its full chain', '逐 API 全链路索引'],
     ['reference/openapi', 'OpenAPI boundaries', 'OpenAPI 边界'],
+    ['reference/compatibility', 'Compatibility boundaries', '兼容边界'],
     ['reference/data-model', 'Data model', '数据模型'],
     ['reference/configuration', 'Configuration', '配置参考'],
     ['reference/source-revisions', 'Verified source versions', '已核验源码版本'],

@@ -1,40 +1,42 @@
-# Tokens、订阅与支付
+# 积分、套餐与成员月额度
 
-Feature 价格、订阅权益、套餐赠送量和订单金额由服务端决定。客户端通过公开的 `GET /v1/billing/features` 发现当前产品，不提交 Token 成本或权威支付金额。
-
-目录响应支持 ETag/`If-None-Match` 与 `304 Not Modified`。目录请求失败表示可用性未知，不表示全部功能关闭。
+Feature价格、套餐权益、赠送与订单金额由服务端决定。客户端读取 `GET /v1/billing/features`；目录ETag/304可复用未变表示，读取失败表示可用性未知。[额度全链路](/zh/reference/flows/member-quota-flow)解释新增的企业成员容量边界。
 
 ## 钱包计算
 
-`remaining_tokens` 包含已预留 Tokens，**可用余额 = remaining − reserved**。个人工作空间使用 User 钱包，企业工作空间使用自己的 Enterprise 钱包，不回退到成员个人余额。
+可用余额为 `remaining_tokens - reserved_tokens`。个人空间扣User钱包，企业空间扣Enterprise钱包，不回退个人余额。
 
-初始余额 1,000、任务成本 10 Tokens 时：
-
-| 状态变化 | Remaining | Reserved | 可用余额 |
+| 初始1000积分、任务价格10 | Remaining | Reserved | 可用 |
 | --- | ---: | ---: | ---: |
-| 准入前 | 1000 | 0 | 1000 |
-| 接受任务：预留 | 1000 | 10 | 990 |
-| 成功：结算 | 990 | 0 | 990 |
-| 或者失败：释放 | 1000 | 0 | 1000 |
+| 接受前 |1000|0|1000|
+| 接受并预留 |1000|10|990|
+| 成功结算 |990|0|990|
+| 或失败释放 |1000|0|1000|
 
-账本区分预留、已消费任务、释放、入账与人工调整。预留的 delta 是审计事件，不是又一次扣减余额。幂等状态迁移防止重复结算或释放。企业已结算消费不包含临时预留和充值变化。
+预留流水的delta是审计证据，不是第二次扣余额。幂等状态转换防止finalizer重复结算。企业消耗统计只计已结算消耗，不计预留、释放或充值。
 
-## 产品与权益
+## 成员月容量是另一种计算
 
-Feature 拥有当前 Token 价格并映射到可执行 Workflow。标准/高级订阅套餐授权 Feature 及个人工作空间折扣。支付创建时快照套餐身份与数值权益，之后修改目录不会改写已有购买。一个用户跨等级最多一个待支付或生效订阅，目前没有切换等级或提前续费 API。
+| 字段 | 含义 |
+| --- | --- |
+| `limit` | null表示无限，否则是当前有效成员上限 |
+| `used` | 已接受的预留与已结算消耗各计一次 |
+| `reserved` | `used`中仍待结算的子集，**不能再次相加** |
+| `source` | `default`、`custom`、`owner` |
+| `month` | Asia/Shanghai自然月，格式`YYYY-MM` |
 
-Token 套餐区分购买与赠送量。客户购买进入**个人账户**，企业点数池通过独立的管理员审计调整维护。新账号奖励使用 New user registration 活动当前金额，`INITIAL_USER_TOKENS` 作为 fallback；修改只影响未来奖励。
+用量归属预留所在月份，即使之后跨月结算/释放也不换月。已释放代次计零；显式重试是独立的新预留。不可变事件身份使删除Job后仍能归因。仅“有归属但没有对应reserve”的历史消耗回退到结算月。这有意区别于仍按结算月统计的 `consumption.current_month`。
 
-## 支付生命周期
+当前owner可以设置全局成员额度（null或严格整数1..10,000,000），或成员专属额度（null或0..10,000,000）。**每次保存全局值都清空所有override**，即使值不变、保存null，或override属于离职成员。个人额度0是跨月持续暂停。单人保存即为`custom`，即使等于默认值；退出重加入保留该设置，除非全局保存已清除。owner无限，但其消耗仍统计归属。
 
-使用持久幂等键及支持的支付 `type` 创建 `/v1/subscriptions` 或 `/v1/token-purchases`。订单历史为 `/v1/payments`，继续支付、关闭及退款使用对应订单操作。权益发放依据平台确认的证据，不能依据客户端收银台成功页面。已购 Token 批次和退款预留防止已使用 Tokens 被重复退回。
+准入先检查企业可用余额（`TOKEN_SHORTAGE_WORKSPACE`），再检查有限成员容量（`used + required <= limit`）。额度拒绝为402 `MEMBER_MONTHLY_TOKEN_LIMIT_REACHED`，附`limit`、`used`、`required`，不创建新Job/预留/outbox。已接受请求的同key重放不重复预留。显式重试使用原冻结价格，计入新的预留月；降低额度后，已接受任务仍能结算或释放。
 
-微信与抖音使用独立签名、回调与补偿路径。抖音使用 `type: douyin`、独立查询补偿接口和 mock/live 模式，见[抖音支付](/zh/reference/douyin-payment)。普通支付轮询只读本地状态；渠道 reconciliation 才主动查询平台证据。
+## 产品、订单与退款
 
-推荐奖励需满足购买/使用条件后才可领取，并需要显式 claim。[活动配置](/zh/admin/campaigns)修改未来事件金额，不改写历史账本。完整错误及退款规则见 [REST API](/zh/reference/rest-api)。
+套餐授予Feature及个人空间折扣。支付创建时快照套餐身份和数值权益，后改目录不会重写历史购买。客户购买积分注入个人钱包，企业充值仍是独立的后台审计调整。额度设置只写配置审计，不产生财务事件或新余额。
 
-当前两个小程序均关闭申请退款入口。服务端保留退款 API，但微信退款查询恢复与订阅回收存在已记录缺口；后台异常展示不等于人工审批/解决流程。参见[计费运营](/zh/admin/billing)。
+`POST /v1/subscriptions`、`/v1/token-purchases`使用持久动作key。履约由供应商确认的证据授权，客户端支付成功画面不足以确认。支付GET只读本地状态，主动reconcile会查询支付渠道。当前UI可用性和运维边界见[支付链路](/zh/reference/flows/payment-flow)、[退款链路](/zh/reference/flows/refund-flow)、[抖音](/zh/reference/douyin-payment)与[联调状态](/zh/reference/integration-status)。
 
 ---
 
-代码依据 · backend `b13cc566`: [app/billing/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing.py) · [app/billing/billing_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing_api.py) · [documents/PAYMENT_REFUNDS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/PAYMENT_REFUNDS.md).
+源码依据 · backend `e59716c8`: [app/billing/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py).

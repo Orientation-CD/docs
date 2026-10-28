@@ -51,10 +51,14 @@ Cloud environment arrays, Secret/ConfigMap references and runtime settings are a
 
 Migrations, API and workers form one compatibility boundary. Current schema includes Workflows/Operations, typed Assets, private Projects, project outcomes and trusted activity state. Legacy provider/output tables cannot be restored by rolling application code backward. Read [production recovery](/deploy/production) before choosing any rollback image.
 
+## Data and observation lifetimes
+
+Object lifecycle rules must retain admitted input versions and published dependencies, not merely temporary upload prefixes. SQL archive receipts can outlive an Asset and still own a late copy acknowledgement. Never bulk-delete them to reduce storage. Redis performance history has bounded minute/day retention and release attribution; its loss must show unavailable/incomplete coverage, not fabricated zero history. The financial ledger and durable execution graph remain SQL authorities.
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Canonical SAE architecture](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_ARCHITECTURE.md)
-- [Namespace and release runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [SAE artifact deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/deploy-image.sh)
+- [Canonical SAE architecture](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_ARCHITECTURE.md)
+- [Namespace and release runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [SAE artifact deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy-image.sh)

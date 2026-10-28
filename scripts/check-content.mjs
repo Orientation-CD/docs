@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { pages, loadJSON, normalizeRoute } from './content-lib.mjs'
 import { topicRoutes, navigation, sidebar } from '../.vitepress/navigation.mjs'
+import { sourceLinks, checkSourceAnchor, candidateApiForPage, validateCandidateApi } from './source-links.mjs'
 
 const files = await pages()
 const available = new Set(files)
@@ -12,6 +13,7 @@ const env = { frontend: new Set(snapshot.frontend.envNames), backend: new Set(sn
 const ownScripts = Object.keys((await loadJSON('package.json')).scripts)
 const scripts = new Set([...Object.keys(snapshot.frontend.scripts), ...ownScripts, 'install', 'exec', 'add', 'dlx', 'approve-builds'])
 const errors = []
+errors.push(...validateCandidateApi(snapshot, revisions))
 const check = (condition, message) => { if (!condition) errors.push(message) }
 assert.equal(revisions.schemaVersion, snapshot.schemaVersion)
 for (const [key, source] of Object.entries(revisions.repositories)) {
@@ -25,27 +27,30 @@ const flatten = (items) => items.flatMap((item) => item.items ? flatten(item.ite
 const advertised = new Set([...flatten(navigation('en')), ...Object.values(sidebar('en')).flatMap(flatten)].map((url) => url.slice(1)))
 let apiAssertions = 0
 let scriptAssertions = 0
-let sourceLinks = 0
+let sourceLinkCount = 0
 for (const file of files) {
   const text = await readFile(file, 'utf8')
   const route = file.replace(/^zh\//, '').replace(/\.md$/, '')
   const counterpart = file.startsWith('zh/') ? file.slice(3) : `zh/${file}`
   check(available.has(counterpart), `${file}: missing locale counterpart`)
   const migration = /^search:\s*false\s*$/m.test(text)
+  const candidateScope = candidateApiForPage(file, text, snapshot)
+  if (candidateScope.error) errors.push(candidateScope.error)
   if (route !== 'index' && !migration) check(advertised.has(route), `${file}: orphan page not in navigation`)
   check(!text.includes('/api/v1'), `${file}: obsolete /api/v1 prefix`)
   check(!/\]\(\/(?!zh\/|\)|#)/.test(file.startsWith('zh/') ? text : ''), `${file}: Chinese Markdown link points outside /zh/`)
-  for (const match of text.matchAll(/https:\/\/github\.com\/Orientation-CD\/(wechat_mini_program|YuanZhu-AI)\/(blob|tree)\/([^\s/)]+)\/([^\s)#?]+)/g)) {
-    const key = match[1] === 'YuanZhu-AI' ? 'backend' : 'frontend'
-    const [ref, rawPath] = [match[3], decodeURIComponent(match[4])]
-    check(ref === revisions.repositories[key].commit, `${file}: moving/unverified source ref ${ref}`)
-    check(snapshot.sourcePaths[key].some((name) => name === rawPath || match[2] === 'tree' && name.startsWith(`${rawPath}/`)), `${file}: missing source path ${match[1]}/${rawPath}`)
-    sourceLinks++
+  for (const link of sourceLinks(text)) {
+    const key = link.repository
+    check(link.revision === revisions.repositories[key].commit, `${file}: moving/unverified source ref ${link.revision}`)
+    check(snapshot.sourcePaths[key].some((name) => name === link.path || link.kind === 'tree' && name.startsWith(`${link.path}/`)), `${file}: missing source path ${key}/${link.path}`)
+    const anchorError = checkSourceAnchor(link, snapshot)
+    if (anchorError) errors.push(`${file}: ${anchorError}`)
+    sourceLinkCount++
   }
   if (!['reference/maintenance', 'reference/source-revisions'].includes(route)) check(text.includes('/blob/') || text.includes('/tree/'), `${file}: missing pinned source evidence`)
   for (const match of text.matchAll(/\b(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+(\/v1\/[^\s`<>|,;)"']+|\/health\/(?:live|ready))/g)) {
     const item = `${match[1]} ${normalizeRoute(match[2].split('?')[0])}`
-    check(api.has(item), `${file}: unknown API ${item}`)
+    check(api.has(item) || candidateScope.routes.has(item), `${file}: unknown API ${item}`)
     apiAssertions++
   }
   for (const match of text.matchAll(/\bpnpm(?:@[\d.]+)?\s+((?:docs:|dev:|build:|quality:|test:|check:)[\w:.-]+|type-check(?::test)?)/g)) {
@@ -61,5 +66,15 @@ for (const entry of inventory.pages) {
   check(available.has(entry.path), `Lost historical URL: ${entry.path}`)
   if (entry.action === 'migration') check(/^search:\s*false\s*$/m.test(await readFile(entry.path, 'utf8')), `${entry.path}: migration stub must be excluded from search`)
 }
+const audit = await loadJSON(`sources/audit-${revisions.verifiedAt}.json`)
+check(audit.auditedAt === revisions.verifiedAt && audit.docsBaseCommit === revisions.docsBaseCommit, 'Page audit version differs from source record')
+for (const [key, source] of Object.entries(revisions.repositories)) check(audit.commits[key] === source.commit, `Page audit ${key} commit differs from source record`)
+const auditPages = new Map(audit.pages.map(row => [row.path, row.action]))
+check(auditPages.size === files.length && audit.pages.length === files.length, 'Page audit must cover every page exactly once')
+for (const file of files) {
+  const action = auditPages.get(file)
+  check(['add', 'rewrite', 'refresh', 'review', 'migration'].includes(action), `${file}: missing/invalid audit disposition`)
+  check(action === auditPages.get(file.startsWith('zh/') ? file.slice(3) : `zh/${file}`), `${file}: bilingual audit disposition differs`)
+}
 if (errors.length) throw new Error(`Content validation failed (${errors.length}):\n${[...new Set(errors)].join('\n')}`)
-console.log(`Content verified: ${files.length} pages, ${apiAssertions} API references, ${scriptAssertions} script references, ${sourceLinks} pinned source links; bilingual navigation and historical URLs intact.`)
+console.log(`Content verified: ${files.length} pages, ${apiAssertions} API references, ${scriptAssertions} script references, ${sourceLinkCount} pinned source links; bilingual navigation, page audit and historical URLs intact.`)

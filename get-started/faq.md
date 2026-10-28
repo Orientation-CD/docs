@@ -44,6 +44,17 @@ Projects are compiled in only when `VITE_ENABLE_PRIVATE_PROJECTS=true`. The expl
 
 Record the source revision, build command/mode, platform, owned local port/project, reproducible steps, expected/actual result and safe error/request ID. Do not paste access tokens, signed file URLs, phone codes, `.env` contents or payment signatures. Use the app's diagnostics export when applicable.
 
+## New screens, missing routes and unexpected permissions
+
+| Symptom | First check |
+| --- | --- |
+| Professional floor-plan entry exists but API is missing | [Audited branch mismatch](/reference/integration-status); a candidate fixture is not server main |
+| Upload completed but submission was rejected | [Archive/activation boundary](/reference/flows/asset-upload-flow); wallet, entitlement and member quota still apply |
+| Enterprise has Tokens but a member cannot submit | [Monthly quota](/reference/flows/member-quota-flow); workspace shortage is checked before member limit |
+| Owner can read a member task but sees no inputs/edit actions | Intended [read-only projection](/reference/flows/workflow-history-flow), not a broken editor |
+| Same-style template saves but cannot run | [Prompt/runtime validation](/admin/prompts); save success is not a valid rendered script or configured provider |
+| Performance says incomplete/no comparison | [Coverage and sample requirements](/admin/performance), not zero latency |
+
 ## Source evidence
 
-Documented against frontend `eca0a5f` and backend `b13cc56` (2026-10-20). [Build scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Runtime and feature gates](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/runtime.ts) · [Local mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing_api.py).
+Documented against frontend `21db6d8` and backend `e59716c` (2026-10-28). [Build scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [Runtime and feature gates](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/runtime.ts) · [Local mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing_api.py).

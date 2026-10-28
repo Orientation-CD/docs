@@ -4,45 +4,50 @@ Reference is a source-reading course. Pick an action you can recognize in the mi
 
 ## A concrete first journey {#first-journey}
 
-Use the local real-API path in [the first workflow tutorial](/get-started/quickstart), with mock identity/providers where configured. Frontend Mock mode never reaches FastAPI: it is useful for interface work but cannot demonstrate Redis, workers or PostgreSQL.
+Use [the real local-API tutorial](/get-started/quickstart), with simulated external services where configured. Frontend Mock never reaches SQL, Redis or workers. Check [integration status](/reference/integration-status) first; the new floor-plan client is not a working backend-main exercise.
 
-Choose a single image action, give it a recognizable name, and keep these five values: current user ID, workspace ID, upload Asset ID, action idempotency key and returned public Job ID. These values connect different processes; filenames and an on-screen progress percentage cannot do that.
+Choose one image task and keep user ID, workspace ID, uploaded Asset ID, action key and public Job ID. These identities connect processes; filenames and progress percentages do not.
 
 ```mermaid
 sequenceDiagram
   autonumber
-  participant U as Person and mini program
-  participant API as FastAPI process
-  participant DB as PostgreSQL
+  participant U as Person / mini program
+  participant A as FastAPI
+  participant D as PostgreSQL
   participant O as Object storage
   participant Q as Redis / ARQ
-  participant W as Submit worker
-  participant P as Model service
-  U->>API: Login and discover an available Feature
-  API->>DB: Resolve identity, consent and permissions
-  U->>API: Create upload intent
-  U->>O: Upload actual bytes with signed POST
-  U->>API: Complete Asset and submit action
-  API->>DB: Commit Job, graph, reservation and outbox
-  API->>Q: Dispatch committed Submission
-  Q->>W: Run generation-fenced task
-  W->>P: Compose frozen request and submit/query
-  W->>O: Stage, verify and publish output
-  W->>DB: Complete graph and settle tokens once
-  U->>API: Poll public Job ID
-  API->>DB: Read authorized durable state
-  API-->>U: Typed outputs and expiring URLs
+  participant W as Worker
+  participant P as Provider
+  U->>A: Login and discover Feature
+  A->>D: Resolve identity / permission
+  U->>A: Create upload intent
+  U->>O: Signed multipart POST bytes
+  U->>A: Complete Asset
+  A->>D: Commit verified READY upload
+  U->>A: Submit exact body and action key
+  A->>D: Commit Asset-owned archive claim
+  A->>O: Copy and verify exact version outside SQL transaction
+  A->>D: Publish COMPLETED archive receipt
+  A->>D: Recheck; commit ACTIVE inputs, Job, pins, wallet/quota and outbox
+  A->>Q: Dispatch committed generation
+  Q->>W: Execute fenced submission
+  W->>P: Submit/query frozen provider request
+  W->>O: Stage and publish exact output
+  W->>D: Finalize graph; settle once
+  U->>A: Poll public Job ID
+  A->>D: Check creator or current-owner read access
+  A-->>U: Typed outputs and expiring URLs
 ```
 
-The diagram shows process boundaries, not one Python function running from top to bottom. Messages 6 and 11 are separate database transactions; the HTTP response can return before generation finishes. The Poll worker periodically recovers missing handoffs; it is not the mini program's HTTP polling loop.
+Messages 6, 8, 10, 11 and 16 are distinct SQL checkpoints. Storage I/O at9 cannot hold the final admission transaction open. A completed archive at10 can still be followed by rejected admission at11; it does not prove a Job exists. A202 confirms acceptance, not generation completion. Server Poll workers recover scheduling; they are different from the client's HTTP polling.
 
-| Diagram messages | Read next | Question to answer in the source |
+| Messages | Code-reading chapter | Evidence to identify |
 | --- | --- | --- |
-| 1–2 | [Identity and consent](/reference/flows/wechat-login-flow) · [Feature and prompt discovery](/reference/flows/discovery-prompts-flow) | Which proof does the platform provide, and which permission does our server decide? |
-| 3–5 | [Asset admission](/reference/flows/asset-upload-flow) · [browser audio handoff](/reference/flows/voice-upload-flow) | Where are the bytes, and what turns them into a reusable Asset? |
-| 5–9 | [Workflow admission and execution](/reference/flows/design-job-lifecycle) · [product-specific branches](/reference/flows/workflow-products-flow) | What is committed before a model can be charged? |
-| 10–11 | [Report/HTML/PPTX publication](/reference/flows/report-view-flow) · [runtime diagnosis](/reference/flows/runtime-debugging) | What evidence proves an output exists and belongs to this generation? |
-| 12–14 | [History, polling, retry and deletion](/reference/flows/workflow-history-flow) | How does the UI receive the result after the original screen closes? |
+| 1–2 | [Identity](/reference/flows/wechat-login-flow), [discovery](/reference/flows/discovery-prompts-flow) | Platform proof, current consent and effective Feature |
+| 3–10 | [Asset upload/archive](/reference/flows/asset-upload-flow), [audio handoff](/reference/flows/voice-upload-flow) | Role-bound intent, verified version, receipt and Asset identity |
+| 7–14 | [Admission/workers](/reference/flows/design-job-lifecycle), [member cap](/reference/flows/member-quota-flow), [product branches](/reference/flows/workflow-products-flow) | Exact replay before new work; durable pins, wallet/quota reservation and generation |
+| 15–16 | [Reports/exports](/reference/flows/report-view-flow), [diagnosis](/reference/flows/runtime-debugging) | Publication evidence and one-time settlement |
+| 17–19 | [History/actions](/reference/flows/workflow-history-flow) | Refreshable links, authorized read-only owner detail and creator-only writes |
 
 ## How a source link becomes a learning step {#reading-code}
 
@@ -59,10 +64,10 @@ Read a function in this order:
 
 Example starting points:
 
-- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts#L369)
-- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L1075)
-- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py#L2426)
-- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/worker.py#L203)
+- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/request.ts#L369)
+- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1135)
+- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2939)
+- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/worker.py#L254)
 
 Do not infer the running path from a filename alone. The current API accepts canonical `/v1/workflows`, while some shipped image/audio/video forms still deliberately post to the compatibility `/v1/design-jobs` adapter. The [product route matrix](/reference/flows/workflow-products-flow#frontend-routing) states the actual caller for each branch.
 
@@ -79,6 +84,8 @@ Do not infer the running path from a filename alone. The current API accepts can
 | What survives a timeout, worker crash, retry or page refresh? | [Durable Workflow lifecycle](/reference/flows/design-job-lifecycle) · [history actions](/reference/flows/workflow-history-flow) |
 | How do projects, enterprise seats and referral rewards differ? | [Projects](/reference/flows/project-flow) · [membership](/reference/flows/workspace-membership-flow) · [referrals](/reference/flows/referral-rewards-flow) |
 | What really grants tokens after a payment or removes them after refund? | [Payment](/reference/flows/payment-flow) · [Douyin](/reference/douyin-payment) · [refunds](/reference/flows/refund-flow) |
+| Why can a funded enterprise reject one member? | [Monthly cap and accounting month](/reference/flows/member-quota-flow) |
+| Which new frontend cannot run against this backend main? | [Integration status](/reference/integration-status) · [floor plans](/frontend/floor-plans) |
 
 The [per-API route index](/reference/rest-api#generated-route-index) links every public route declaration to its handler and an endpoint-specific explanation. A webhook has a provider trigger; an operator API may have no mini-program button. Those boundaries are stated explicitly instead of inventing a UI caller. Conditional mock routes and browser Admin routes are explained as separate surfaces, not counted as public mobile APIs.
 

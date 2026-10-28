@@ -168,6 +168,21 @@ npx --yes pnpm@9.15.9 exec uni build -p mp-weixin
 
 继续阅读[前端开发入门](/zh/frontend/getting-started)、[项目](/zh/frontend/projects)、[本地服务栈](/zh/deploy/local-stack)与 [FAQ](/zh/get-started/faq)。
 
+## 核验新的持久化边界
+
+首次仍使用 **AI设计 → AI轻盈设计 → 室内设计** 的图片练习，不选专业户型候选功能验收后端 main。记录实际提交 endpoint：现有图片 UI 可以走受支持的适配接口，新 API 示例则使用 Workflows。
+
+自有输入任务成功后，请本地数据库操作人员在**同一套栈**中只读核验这些记录，将 UUID 换成上传 Asset ID：
+
+```sql
+SELECT id, status, expires_at, object_key
+FROM assets WHERE id = '<upload-asset-uuid>'::uuid;
+SELECT id, asset_id, state, source_object_key, destination_object_key
+FROM asset_input_archives WHERE id = '<upload-asset-uuid>'::uuid;
+```
+
+预期：已接受的自有输入为 ACTIVE、无过期时间；COMPLETED 归档 receipt 与原 Asset 身份相同，locator 对应耐久目标。重新打开客户端仍能看到 Job 和产物。只有 COMPLETED receipt、Asset 仍 READY／会过期，可能只是归档成功后准入被拒绝，不能算通过本检查。不要修改数据库来强行通过，详见[完整链路](/zh/reference/flows/asset-upload-flow)。
+
 ## 源码依据
 
-前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）：[构建命令](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [会话存储](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/stores/session.ts) · [本地启动器](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/create_stack.sh) · [端口派生](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/stack_ports.py) · [模拟结算](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing_api.py)。
+前端 `21db6d8`、后端 `e59716c`（2026-10-28）：[构建命令](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [会话存储](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/stores/session.ts) · [本地启动器](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/create_stack.sh) · [端口派生](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/stack_ports.py) · [模拟结算](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing_api.py)。

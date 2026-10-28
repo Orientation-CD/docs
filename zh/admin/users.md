@@ -1,28 +1,31 @@
-# 用户运营
+# 用户管理与账号边界
 
-`/admin/users` 支持搜索与分页，展示身份/状态、个人余额与可拥有工作空间额度。操作要求活动管理员会话和 CSRF token。
+`/admin/users`搜索、分页展示账号身份/状态、个人余额和可拥有工作区数。所有写操作要求活跃管理员session与CSRF。管理员权限不同于客户的企业owner成员身份。
 
-## 余额与额度
+## 钱、容量与配额不是同一个控制
 
-带符号整数 Token 调整会写入可审计账本。负调整不能使余额低于活动预留。表单响应不确定时，重试前先核对实际账本。
+| 控制 | 在哪里变更 | 效果 |
+| --- | --- | --- |
+| 个人积分调整 | 用户后台 | 有审计的正负钱包delta，不可消耗活跃预留 |
+| 企业充值 | 工作区后台 | 独立企业钱包流水 |
+| 可拥有工作区数 | 合格用户账号 | 永久个人空间加活跃自有企业，范围1..100 |
+| 企业成员月上限 | 当前owner额度API | 限制新增预留，不转余额，不产生财务事件 |
 
-额度范围 1–100，计入永久个人空间及本人拥有的活动企业；加入的企业不占额度。降低额度须满足当前所有权约束，不能借此移除企业。参见[工作空间](/zh/admin/workspaces)。
+加入别人的企业不计拥有数。降低拥有数应满足当前归属约束，不会删除企业。给owner个人钱包充值不能解决企业余额不足。保存全局成员额度会清空单人override；详见[额度链路](/zh/reference/flows/member-quota-flow)，不能虚构本界面没有的管理员控件。
 
-## 不同账号操作
+## 生命周期动作
 
-| 操作 | 含义 |
+| 动作 | 含义 |
 | --- | --- |
-| 停用 | 管理员限制访问，并影响其名下企业/成员 |
-| 重新启用 | 恢复符合条件的停用账号；不重建已退役成员关系 |
-| 协助自愿停用 | 要求用户提出请求并移除活动自有企业；使用普通宽限/恢复规则 |
-| 归档 | 对符合条件的已停用账号进行不可逆身份匿名化 |
+| Suspend | 管理限制，包含自有企业/成员影响 |
+| Reactivate | 恢复合格的停用/注销账号，不恢复已退休成员关系 |
+| 协助自愿注销 | 用户请求的生命周期路径，包含活跃自有企业及宽限/恢复规则 |
+| Archive | 对合格注销账号不可逆匿名化，保留必要审计/财务事实 |
 
-UI 只展示适用操作，服务端仍核查状态、自有企业、活动任务及管理员自操作限制。归档删除身份与恢复数据，保留必要财务/审计记录，不等于可逆停用。
+服务端重新检查当前状态、归属、活跃工作和自操作限制。执行已授权动作前阅读确认中的受影响范围与现有恢复规则。状态改变不取消结果不确定的供应商动作，也不擦除不可变账务归因。额度暂停只影响新成员预留，已接受工作仍可结算/释放。
 
-计划停用/移除可能切断其名下企业成员访问。授权操作前应协调下载期及受影响成员。活动任务仍可能继续执行/结算，账号状态变化不是服务商取消操作。
-
-客户凭据验证恢复 API 见[认证](/zh/backend/authentication)。企业余额在工作空间页面调整，给所有者增加个人 Tokens 不会给企业充值。
+客户认证账号生命周期见[认证](/zh/backend/authentication)。企业当前owner的只读任务详情和额度配置是独立[工作区](/zh/backend/workspaces-orgs)契约。
 
 ---
 
-代码依据 · backend `b13cc566`: [app/admin/users.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/users.py) · [app/identity/account_lifecycle_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/identity/account_lifecycle_api.py) · [app/templates/admin/users.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/templates/admin/users.html).
+源码依据 · backend `e59716c8`: [app/admin/users.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/users.py) · [app/identity/account_lifecycle_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/account_lifecycle_api.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py) · [app/templates/admin/users.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/users.html).

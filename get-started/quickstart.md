@@ -168,6 +168,21 @@ This endpoint is authenticated, checks order ownership and exists only for mock 
 
 Continue with [Frontend getting started](/frontend/getting-started), [Projects](/frontend/projects), [Local stack](/deploy/local-stack) and [FAQ](/get-started/faq).
 
+## Verify the new persistence boundary
+
+Use the original image exercise in **AI设计 → AI轻盈设计 → 室内设计**. Do not choose the professional floor-plan candidate as the first backend-main acceptance task. Record the actual submit endpoint: the current image UI can use the supported adapter even though new API examples use Workflows.
+
+After a successful owned-input task, have the local database operator inspect these **read-only** records in that same stack (replace the UUID with the upload Asset ID):
+
+```sql
+SELECT id, status, expires_at, object_key
+FROM assets WHERE id = '<upload-asset-uuid>'::uuid;
+SELECT id, asset_id, state, source_object_key, destination_object_key
+FROM asset_input_archives WHERE id = '<upload-asset-uuid>'::uuid;
+```
+
+Expected: the accepted owned input is ACTIVE with no expiry; the COMPLETED archive receipt and original Asset share identity, and its locator matches the durable destination. The Job and output still appear after reopening the client. A COMPLETED receipt with a READY/expiring Asset can be a staged archive followed by rejected admission, so it alone does not satisfy this checkpoint. Do not modify database state to force it to pass. See [the detailed chain](/reference/flows/asset-upload-flow).
+
 ## Source evidence
 
-Frontend `eca0a5f`, backend `b13cc56` (2026-10-20): [Build commands](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json) · [Session storage](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/stores/session.ts) · [Local launcher](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/create_stack.sh) · [Port derivation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/scripts/stack_ports.py) · [Mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/billing/billing_api.py).
+Frontend `21db6d8`, backend `e59716c` (2026-10-28): [Build commands](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json) · [Session storage](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/stores/session.ts) · [Local launcher](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/create_stack.sh) · [Port derivation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/stack_ports.py) · [Mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing_api.py).

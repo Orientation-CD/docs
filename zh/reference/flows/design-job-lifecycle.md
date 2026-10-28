@@ -2,59 +2,61 @@
 
 先从一次具体的报告或文案提交开始。本章跟进共享执行引擎；[产品分支](/zh/reference/flows/workflow-products-flow)解释图片、音频、视频差异；[历史操作](/zh/reference/flows/workflow-history-flow)解释读取、重试和删除。公开 Workflow ID 是 Job ID，不是内部 run ID。
 
-## 从表单按钮到受理 {#submit-workflow}
+## 从表单按钮到接受任务 {#submit-workflow}
 
-`POST /v1/workflows` 接收带判别字段的请求：`type` 决定具体 schema。报告表单的 `submit` 冻结一次 attempt，`postWorkflow` 交给 `workflowsRepository.submit`，后者重新核对 owner、workspace、写入权限和当前会话代次，再带 Bearer 与持久保存的 8–128 字符 `Idempotency-Key` 发请求。响应映射为历史项，并使相关项目数量缓存失效。
+`POST /v1/workflows`接收严格的区分联合body，由`type`选择schema。报告表单冻结`WorkflowAttempt`，`postWorkflow`经`workflowsRepository.submit`带上owner/工作区/session保护及持久8–128字符动作key。文案也使用规范路由，部分现有图片/语音/视频表单仍发送已实现的兼容适配器。真实调用见[联调状态](/zh/reference/integration-status)，不能只换文档里的路径。
 
 ```mermaid
 sequenceDiagram
   autonumber
-  participant UI as 表单 / 已准备 attempt
-  participant R as 前端 repository
+  participant UI as 表单和冻结尝试
+  participant R as 前端repository
   participant API as FastAPI
   participant A as 准入服务
   participant DB as PostgreSQL
+  participant S as 精确版本存储
   participant Q as Redis
-  UI->>R: 提交冻结 body 与原动作 key
-  R->>API: POST /v1/workflows
-  API->>A: create_workflow → create_design_job → admit_workflow_job
-  A->>DB: 按用户、空间、key 查现有 Job 与指纹
-  A->>DB: 加锁校验权限、产品、输入与余额
-  A->>DB: 提交 Job、冻结图、预留与 ready outbox
-  API->>Q: 尝试分发已提交 outbox
-  API-->>R: 202 Job 表示，新受理或精确重放
-  R-->>UI: 保存 Job ID，跳转/刷新历史
+  UI->>R: 冻结body与原动作key
+  R->>API: 带Bearer POST /v1/workflows
+  API->>A: create_workflow到create_design_job到admit_workflow_job
+  A->>DB: 查user workspace key指纹 精确重放返回原Job
+  A->>DB: 验证完整直接自有输入清单并提交
+  A->>S: 持久复制凭据下在DB锁外归档
+  A->>DB: 串行化准入 重查访问Feature图pin限制
+  A->>DB: 先可用钱包 再企业成员月额度
+  A->>DB: 提交ACTIVE输入 Job图 冻结价格 预留 outbox
+  API->>Q: 尽力排空已提交outbox
+  API-->>R: 202公开Job 新建或精确重放
+  R-->>UI: 保存Job ID并显示历史或轮询
 ```
 
-| 消息 | 打开具体代码 | 观察什么 |
+| 消息 | 精确源码 | 检查点 |
 | --- | --- | --- |
-| 1 | [src/pkg-features/services/workflowSubmission.ts → postWorkflow](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/services/workflowSubmission.ts#L61) | `WorkflowAttempt` 保存 body、owner、action、key，超时不是新业务动作 |
-| 2 | [src/repositories/workflows.ts → workflowsRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/workflows.ts#L13) | 本地校验、请求与 mapper；它们改善体验，不能代替后端授权 |
-| 3 | [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L1075) → [app/workflows/api.py → create_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L967) | FastAPI 依赖、限流回调、类型分支与领域错误转换 |
-| 4 | [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py#L2426) | 先校验现有空间访问权和请求指纹，再返回原 Job |
-| 5 | [app/workflows/workflow_admission.py → resolve_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py#L392) → [app/workflows/workflow_admission.py → _reserve_feature_workflow_tokens](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py#L1820) | 解析并冻结图和模型配置，核对扣费主体与套餐 |
-| 6 | [app/workflows/workflow_admission.py → _persist_workflow_execution](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py#L2115) | 在准入事务中保存图和输入身份，创建可运行 Submission 与 outbox |
-| 7 | [app/workflows/submissions/workflow_submission_dispatch.py → dispatch_workflow_submission_outbox](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_submission_dispatch.py#L1285) | commit 后才写队列；入队失败记录日志并保留恢复依据 |
-| 8–9 | API 文件的 `job_response`；[src/repositories/workflows.ts → workflowsRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/workflows.ts#L13) | 公开身份、类型化输出、轮询提示和响应身份核对 |
+|1–2|[src/pkg-features/services/workflowSubmission.ts → postWorkflow](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/workflowSubmission.ts#L61)与[src/repositories/workflows.ts → workflowsRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/workflows.ts#L13)|尝试保留body/owner/key，本地保护不代替服务端认证。|
+|3|[app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1135) → [app/workflows/api.py → create_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1014)|FastAPI依赖、严格联合、限流回调与错误映射。|
+|4|[app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2939)|新工作前检查当前工作区和指纹，精确重放不再预留。|
+|5–6|[app/workflows/workflow_admission.py → _archive_request_inputs](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L1995) → [app/assets/asset_input_archival.py → archive_direct_input](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py#L581)|claim/复制/核验/发布以短SQL阶段围绕无锁存储I/O执行。|
+|7|[app/workflows/workflow_admission.py → resolve_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L420)|当前Feature、图/配置和产品契约，准备后再次校验权威。|
+|8|[app/workflows/workflow_admission.py → _reserve_feature_workflow_tokens](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2295) → [app/billing/member_token_quotas.py → member_token_limit_violation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L302)|企业余额不足优先于有限成员额度。|
+|9|[app/workflows/workflow_admission.py → _activate_archived_inputs](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2074)与[app/workflows/workflow_admission.py → _persist_workflow_execution](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2603)|独占ACTIVE无过期输入、不可变pin、图、账务预留和ready outbox原子提交。|
+|10–12|[app/workflows/submissions/workflow_submission_dispatch.py → dispatch_workflow_submission_outbox](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_dispatch.py#L1297)与[app/workflows/api.py → job_response](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L760)|提交后尝试队列与安全类型响应，入队失败可从SQL恢复。|
 
-新受理和精确重放都返回 **202 Accepted**，不表示生成已完成或输出已存在。丢失响应时，应以原 body、原 key 重放。相同 key 换成不同指纹会得到 `IDEMPOTENCY_KEY_REUSED`。空间变化、功能关闭、提示词过时、输入不可用、并发上限、余额不足要按领域错误处理；盲目换 key 可能新建第二次收费动作。
+202也包括精确重放，表示接受而非生成完成或结果已可用。响应丢失保留key/body，语义指纹变化是`IDEMPOTENCY_KEY_REUSED`。后续拒绝可留下准备好的归档凭据，但不能接受新Job/预留/outbox。[资产归档](/zh/reference/flows/asset-upload-flow#input-archive)解释READY、archive COMPLETED和接受Job的不同。
 
-### 准入事务到底冻结什么
+### 最终事务冻结什么
 
-`admit_workflow_job` 解析真实 Project（省略时是调用者的 scratch Project）、活动 Feature、定义版本、编译图、输入绑定、供应商/模型配置、协议激活信息和商业快照。传来的 Asset ID 会转成带版本、哈希、类型、顺序的对象身份，不是以后可任意换掉的 URL。提示词选择会合成冻结 prompt。后台后续修改配置影响新准入，不改写本次已受理执行的历史含义。
+`admit_workflow_job`解析实际Project（省略时为调用者scratch）、活跃Feature、定义revision、编译图、有序输入pin、provider/model/connection配置、开放状态和商业快照。ID转换为精确版本/hash/type/position，不是可替换URL。提示词及同款替换对/scope也冻结。后改后台配置只影响新准入，不改已接受历史。
 
-个人计费先核对有效订阅区间和 allowed Feature，再使用订阅折扣。企业按工作区积分池计费，不套个人订阅折扣。Feature 价格不是各节点/模型单价相加。
+个人准入验证当前套餐/Feature授权并应用套餐折扣；企业使用共享钱包，不套个人折扣。Feature价格不是节点/模型价格之和。
 
-用示例成本 `C = 20`、剩余积分 `R = 100`、已预留 `V = 10` 说明：
+| 价格20、初始remaining100/reserved10 | Remaining | Reserved | 可用 |
+| --- | ---: | ---: | ---: |
+|接受前|100|10|90|
+|预留后|100|30|70|
+|成功结算|80|10|70|
+|或终态释放|100|10|90|
 
-| 检查点 | 剩余 `R` | 预留 `V` | 可用 `R − V` |
-| --- | --- | --- | --- |
-| 准入前 | 100 | 10 | 90 |
-| 为本 Job 预留 | 100 | 30 | 70 |
-| 成功结算后 | 80 | 10 | 70 |
-| 或者终态失败释放 | 100 | 10 | 90 |
-
-准入检查 `R − V >= C`，增加 `reserved_tokens`，写预留账本事件。此时**不**从 `remaining_tokens` 扣 `C`。成功才扣剩余并释放预留，失败只释放预留。唯一账本/事件 key 和状态检查防止重复结算。预留账本 delta 为负，并不表示存储的 remaining 已经扣掉；要结合事件 reason 与 reserved 一起理解。
+reserve事件负delta是审计证据，准入增加reserved而非立刻减remaining。结算扣remaining并消除hold；释放只消除hold。唯一事件身份与事务状态防重复。有限成员额度的`used`已包含待结算预留，应比较`used + required`，不能再加reserved。自然月/代次与显式重试规则见[额度链路](/zh/reference/flows/member-quota-flow)。
 
 ## 为什么队列不是任务数据库 {#durable-records}
 
@@ -84,6 +86,9 @@ erDiagram
 
 Redis ARQ 保存可运行消息，删 Redis 消息不等于删 PostgreSQL Job。分发器按 outbox 去重 key 生成确定的 Redis job ID；worker 还要校验协议、代次和 claim。之所以多层去重，是因为进程可能在入队成功、写确认以前崩溃。
 
+
+输入归档凭据`asset_input_archives`在接受付费Job之前保存精确源/目的版本及claim。它与最终Job提交不是同一个事务；不能拿归档COMPLETED当作已收费或SQL图已接受。成员月额度配置/审计分别在`enterprise_member_token_limits`和`enterprise_member_token_limit_audits`，账务用量仍由不可变Token流水推导。
+
 ## Submit worker、Poll worker 与供应商 I/O {#worker-chain}
 
 ```mermaid
@@ -110,12 +115,12 @@ sequenceDiagram
 
 | 消息 | 源码 | 含义 |
 | --- | --- | --- |
-| 1 | [app/workflows/submissions/workflow_submission_dispatch.py → dispatch_workflow_submission_outbox](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_submission_dispatch.py#L1285) | `arq:admission_queue` 的消息参数是身份，不是模型明文凭据 |
-| 2–3 | [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/worker.py#L203) | 旧代次、协议不符的执行不能发布新代次结果 |
-| 4–5 | [app/workflows/submissions/workflow_provider_submission.py → dispatch_workflow_provider_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_provider_submission.py#L768) → [app/providers/provider_attempt.py → execute_provider_attempt](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/providers/provider_attempt.py#L644) | 按冻结配置选分支，保留请求与受理证据 |
+| 1 | [app/workflows/submissions/workflow_submission_dispatch.py → dispatch_workflow_submission_outbox](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_dispatch.py#L1297) | `arq:admission_queue` 的消息参数是身份，不是模型明文凭据 |
+| 2–3 | [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/worker.py#L254) | 旧代次、协议不符的执行不能发布新代次结果 |
+| 4–5 | [app/workflows/submissions/workflow_provider_submission.py → dispatch_workflow_provider_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_provider_submission.py#L781) → [app/providers/provider_attempt.py → execute_provider_attempt](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_attempt.py#L662) | 按冻结配置选分支，保留请求与受理证据 |
 | 6–7 | [产品分支](/zh/reference/flows/workflow-products-flow)的执行/发布代码 | 有供应商响应还不够，须核验字节与产物身份 |
-| 8–9 | [app/workflows/submissions/workflow_submission_coordinator.py → coordinate_terminal_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_submission_coordinator.py#L139) → [app/workflows/submissions/workflow_submission_scheduler.py → schedule_ready_submissions](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_submission_scheduler.py#L225) | 所有依赖完成后才调度；有序输出成为下游冻结输入 |
-| 10 | [app/workflows/submissions/workflow_submission_finalizer.py → finalize_submission_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_submission_finalizer.py#L33) → [app/workflows/workflow_admission.py → complete_workflow_run_in_transaction](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py#L3044) / [app/workflows/workflow_admission.py → fail_workflow_run_in_transaction](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py#L3124) | 等活动 sibling 排空，绑定有效输出，再一次性结算/释放 |
+| 8–9 | [app/workflows/submissions/workflow_submission_coordinator.py → coordinate_terminal_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_coordinator.py#L147) → [app/workflows/submissions/workflow_submission_scheduler.py → schedule_ready_submissions](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_scheduler.py#L227) | 所有依赖完成后才调度；有序输出成为下游冻结输入 |
+| 10 | [app/workflows/submissions/workflow_submission_finalizer.py → finalize_submission_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_finalizer.py#L33) → [app/workflows/workflow_admission.py → complete_workflow_run_in_transaction](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L3747) / [app/workflows/workflow_admission.py → fail_workflow_run_in_transaction](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L3828) | 等活动 sibling 排空，绑定有效输出，再一次性结算/释放 |
 
 `SubmitWorkerSettings` 注册带代次校验的 provider/PPTX submission 和独立视频入口。`PollWorkerSettings` 在 `arq:poll_queue` 上运行恢复/维护；其中 `reconcile_workflow_submissions` 扫描持久记录、产生后续交接，供应商查询工作交回执行流程。因此“Poll worker”不表示每次 GET 状态都直接查供应商。旧 operation 执行入口还用于兼容恢复；新准入明确传 `submission_backed=True`。
 
@@ -138,18 +143,18 @@ Submission 的 `status` 和 `dispatch_state` 描述不同维度。`PREPARED → 
 
 ## 前端怎样闭环 {#client-loop}
 
-[src/services/pollScheduler.ts → createPollScheduler](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/pollScheduler.ts#L33) 保持一个在途轮询，按服务端提示调度，页面隐藏时暂停，切页面后丢弃旧代次响应。GET 处理函数读持久 Job 状态，生成新的授权产物链接，不让手机查模型供应商。`outputs` 携带 Artifact/Markdown 类型身份，单看 `result_kind` 无法选择所有产物。
+[src/services/pollScheduler.ts → createPollScheduler](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/pollScheduler.ts#L33) 保持一个在途轮询，按服务端提示调度，页面隐藏时暂停，切页面后丢弃旧代次响应。GET 处理函数读持久 Job 状态，生成新的授权产物链接，不让手机查模型供应商。`outputs` 携带 Artifact/Markdown 类型身份，单看 `result_kind` 无法选择所有产物。
 
 端点授权见[详情与历史](/zh/reference/flows/workflow-history-flow)，签名浏览器 URL 见[报告发布](/zh/reference/flows/report-view-flow)。页面估算到 100% 不等于数据库状态 completed。
 
 ## 兼容提交入口 {#submit-compatibility}
 
-`POST /v1/design-jobs` 进入 [app/workflows/api.py → create_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L967)。当前图片、语音、视频表单仍使用这个适配器；新集成使用 `/v1/workflows`。类型化当前请求进入同一个 `admit_workflow_job`；仍支持的旧图片 shape 先经 `admit_legacy_image_compatibility_job`，再进共享引擎，不是第二套数据库/队列执行系统。指纹 kind/version 和可接受 body 由服务端定义，不能只替换 path 却保留不兼容 body。
+`POST /v1/design-jobs` 进入 [app/workflows/api.py → create_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1014)。当前图片、语音、视频表单仍使用这个适配器；新集成使用 `/v1/workflows`。类型化当前请求进入同一个 `admit_workflow_job`；仍支持的旧图片 shape 先经 `admit_legacy_image_compatibility_job`，再进共享引擎，不是第二套数据库/队列执行系统。指纹 kind/version 和可接受 body 由服务端定义，不能只替换 path 却保留不兼容 body。
 
 ## 已退休的报价请求 {#retired-quote}
 
-`POST /v1/design-job-quotes` 到 [app/workflows/api.py → create_design_job_quote](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L954)，在认证/请求校验后返回 `409 WORKFLOW_UPDATED`；不会写报价、预留积分或调用供应商。当前表单无需此往返。应刷新 Feature/提示词发现并构建当前类型请求；重复请求 quote 不会得到有效准入凭据。
+`POST /v1/design-job-quotes` 到 [app/workflows/api.py → create_design_job_quote](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1001)，在认证/请求校验后返回 `409 WORKFLOW_UPDATED`；不会写报价、预留积分或调用供应商。当前表单无需此往返。应刷新 Feature/提示词发现并构建当前类型请求；重复请求 quote 不会得到有效准入凭据。
 
 ## 追踪一个任务的练习 {#exercise}
 
-在本地模拟供应商环境用 UI 创建任务，记下 Job ID。按代码表找到**首次 commit**、**队列 enqueue**、**供应商 I/O**，解释顺序为何重要。用[只读 SQL 关联](/zh/reference/flows/runtime-debugging#sql-trace)找出 run、node、submission，再核对完成产物的 Asset version/hash。最后在不改 SQL 的前提下，解释原动作 key、显式重试代次、全新任务的区别。显式重试由 [app/workflows/submissions/workflow_submission_retry.py → retry_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/submissions/workflow_submission_retry.py#L184) 实现，其受理回执见[历史操作](/zh/reference/flows/workflow-history-flow#retry-workflow)。
+在本地模拟供应商环境用 UI 创建任务，记下 Job ID。按代码表找到**首次 commit**、**队列 enqueue**、**供应商 I/O**，解释顺序为何重要。用[只读 SQL 关联](/zh/reference/flows/runtime-debugging#sql-trace)找出 run、node、submission，再核对完成产物的 Asset version/hash。最后在不改 SQL 的前提下，解释原动作 key、显式重试代次、全新任务的区别。显式重试由 [app/workflows/submissions/workflow_submission_retry.py → retry_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py#L185) 实现，其受理回执见[历史操作](/zh/reference/flows/workflow-history-flow#retry-workflow)。

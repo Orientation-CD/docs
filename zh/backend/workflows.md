@@ -1,30 +1,41 @@
-# 工作流（Workflow）、Feature 与 Operation
+# 统一Workflow与持久化执行
 
-Feature 是请求 `type` 选择的公开产品，拥有自己的价格、开放状态与套餐权限。Workflow 定义可执行图，节点使用可复用的 Operation。节点模型选择归属于具体 Workflow，因此修改一个 Workflow 不会重绑所有使用同一 Operation 的产品。
+Feature是对外商业能力，映射到可执行Workflow定义。Job是公开任务聚合，WorkflowRun是一份持久化图执行，OperationRun是图节点，Submission是一次具体执行尝试。公开Workflow ID仍是Job ID，不是内部WorkflowRun UUID。
 
-## 提交合同
+## 公共契约与实际调用者
 
-1. 通过公开的 `GET /v1/billing/features` 发现可执行产品与价格。
-2. 上传并完成所需 Asset，保持声明角色、不可变版本及对应产品的端口绑定。
-3. 使用 Bearer 认证、`Idempotency-Key`、显式 `workspace_id`、`type` 及产品规定的输入提交 `POST /v1/workflows`。`project_id` 可省略，此时任务进入临时项目；后续移动项目不会改变原始请求身份。
-4. 保存回执，按返回的 `poll_after_seconds`/`Retry-After` 轮询 `status_url`。读取有序、带类型的 `inputs`/`outputs`，不能假定所有结果都是图片。
+新集成使用`POST /v1/workflows`、`GET /v1/workflows/{id}`及Workflow历史/动作路由。现有UI wrapper仍会选择部分已实现的兼容适配器，把按钮对应到URL前先看[联调状态](/zh/reference/integration-status)。适配器共用持久化运行时，不是第二套引擎。剩余服务端别名与退休请求集中在[兼容参考](/zh/reference/compatibility)。
 
-新请求会冻结已接收的图、模型/连接配置、提示词、商业价格及输入身份。后续管理配置只影响新任务。每次执行都有持久化 Operation/Submission、尝试代际与执行围栏，防止旧执行覆盖新尝试的结果。
+先发现活跃Feature价格、结果类型、输入角色和允许模型。个人提交要求当前套餐授予Feature；企业使用独立访问权和共享池规则。个人空grant列表拒绝新工作，已接受Job及精确重放保留原证据。
 
-## 状态与计费
+## 准入不只是入队
 
-公开状态为 `pending` → `running` → `completed` 或 `failed`。进度估计保持单调；100 表示完成，并不保证每个外部阶段按预测时间结束。每用户跨工作空间的活动任务有上限，默认五个。
+```mermaid
+flowchart TD
+  A[严格body与持久动作key] --> B{已接受请求的精确重放?}
+  B -->|是| R[返回现有公开Job]
+  B -->|否| C[验证完整输入清单]
+  C --> D[提交凭据后在DB锁外归档精确版本]
+  D --> E[串行化准入重查访问权Feature pin限制]
+  E --> F[先共享余额 再成员月额度]
+  F --> G[一次提交: ACTIVE输入 图 冻结价格 预留 outbox]
+  G --> H[投递已提交工作]
+```
 
-显式指定的工作空间付款。准入事务原子预留 Tokens，最终成功后消费，失败后释放。包含的子任务不会作为另一个客户产品单独收费。参见[计费](/zh/backend/billing-tokens)。
+READY表示上传并核验；archive COMPLETED表示准备好持久位置；只有最终准入才将自有输入设为无过期ACTIVE并独占绑定Job。后续拒绝可以留下有效的准备输入，不能留下已接受工作或新扣费。[准入深入讲解](/zh/reference/flows/design-job-lifecycle)把各阶段对应到函数与记录。
 
-精确请求重放使用相同键与请求体，返回已接收任务。失败任务重试是在 `/v1/workflows/{design_job_id}/retry` 上的单独显式操作，受服务端重试资格与冻结输入限制。付费服务商是否已接收不明确时，不能安全重发；应按错误与重试元数据处理。
+## 幂等、重试与收费
 
-## 历史与生命周期
+创建请求同key、同body精确重放返回已接受任务，也适用于响应丢失。语义指纹改变则是`IDEMPOTENCY_KEY_REUSED`，不能悄悄换新key。公开状态为pending→running→completed/failed；内部图/尝试状态携带恢复细节。进度只是估计，不是结算证据。
 
-`GET /v1/workflows` 是个人任务历史，`/v1/workspace/workflows` 是受所有者权限约束的工作空间视图。移动后按任务当前项目过滤。移动、删除使用 canonical Workflow 接口，并核查生命周期、保留依赖和权限。存储清理失败时可能已持久接受删除声明；应重试规范操作，不能因此另建任务。
+失败任务重试是`/v1/workflows/{id}/retry`的独立动作，使用自己的持久key并受服务端资格控制。它保留同一Job，推进retry generation，使用冻结价格并重新检查余额/成员容量，不是重新组装创建请求。付费供应商接受状态不明时不能重复调用；由`retry_block_code`及持久化disposition控制恢复。视频超时不意味着可以自动重新付费渲染。
 
-产品差异见[图片及兼容接口](/zh/backend/design-jobs)、[报告](/zh/backend/reports)、[语音](/zh/backend/voice)、[文案](/zh/backend/copywriting)与[视频](/zh/backend/video)。完整结构、错误处理及废弃接口见 [REST API](/zh/reference/rest-api)。
+## 读取、移动与删除
+
+`GET /v1/workflows`是创建者历史，`/v1/workspace/workflows`是owner投影。当前企业owner可读他人可见详情，返回`inputs:[]`和实际`submitted_by`，但不授予写权限。每次读取重新检查访问权并签发新结果能力URL。
+
+移动检查预期源Project、同工作区、终态和创建者归属。删除记录持久化清理意图，只在允许时删除精确保留版本。清理故障可留下已接受的删除claim；应按约定重试/协调，不能直接删SQL。详见[历史动作](/zh/reference/flows/workflow-history-flow)。
 
 ---
 
-代码依据 · backend `b13cc566`: [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py) · [app/workflows/workflow_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_execution.py) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md).
+源码依据 · backend `e59716c8`: [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py).

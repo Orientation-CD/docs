@@ -53,11 +53,17 @@ maintenance 流程证明 API 和两个 worker 均停止/零实例，备份、迁
 
 生命周期响应不明确时，先核对已有 change order 与真实运行状态，再决定是否写入；不要把超时当成功，也不要盲目重跑整个发布。
 
+## 本版本的 schema 与源码证据
+
+当前迁移包含 Video Asset／参考媒体、输入归档 receipt／自有追加文件来源和成员额度配置／审计。记录候选镜像打包的 heads，以及 `alembic current --check-heads`、`alembic check`；仅迁移命令返回零不足以证明 schema 正确。
+
+私有视频构建器读取依赖默认分支并打印实际提交，因此后端 SHA 不能单独标识供应商 wheel。保留供应商 revision 与镜像 digest，再完成适用且已授权的供应商／部署验收。前端新页面或候选夹具不是服务端上线证据。输入修复是[独立定点恢复](/zh/deploy/production#input-recovery)，不是常规迁移步骤。
+
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [完整运维手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [不可变镜像构建](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/build-image.sh)
-- [容器化云测部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/run-deploy-container.sh)
-- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/deploy.sh)
+- [完整运维手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [不可变镜像构建](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/build-image.sh)
+- [容器化云测部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/run-deploy-container.sh)
+- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy.sh)

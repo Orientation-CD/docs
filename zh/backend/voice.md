@@ -27,4 +27,4 @@
 
 ---
 
-代码依据 · backend `b13cc566`: [app/assets/voice_upload_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/voice_upload_api.py) · [app/assets/voice_upload_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/voice_upload_sessions.py) · [app/workflows/operations/summary/workflow_voice_definition.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/summary/workflow_voice_definition.py).
+代码依据 · backend `e59716c8`: [app/assets/voice_upload_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_api.py) · [app/assets/voice_upload_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_sessions.py) · [app/workflows/operations/summary/workflow_voice_definition.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/summary/workflow_voice_definition.py).

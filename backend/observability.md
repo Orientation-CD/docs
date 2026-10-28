@@ -1,31 +1,39 @@
-# Observability and recovery
+# Observe the system without changing it
 
-Use health probes for traffic eligibility, Studio Control for aggregate pressure and the Workflow diagnostic view for a specific execution. These surfaces answer different questions.
+Three evidence surfaces answer different questions: bounded aggregate history finds patterns, current pressure shows the live environment, and a Job's diagnostics connect a specific execution to source code. None is permission to repeat an uncertain paid operation.
 
-## Health and HTTP evidence
+## Signals and retention
 
-`/health/live` only confirms the HTTP process is alive. `/health/ready` checks Redis and PostgreSQL and returns `503 DEPENDENCY_UNAVAILABLE` on failure. It does not validate model credentials, object-storage acceptance or payment settlement.
+| Surface | Evidence | Boundary |
+| --- | --- | --- |
+| HTTP/stage/Job/Operation/provider history | Same-cohort averages, cumulative elapsed and estimated tails | Redis minute buckets48h and daily buckets14d; bounded series and producer coverage |
+| Unique terminal totals | Completed/failed Job throughput | Job-ID deduplication, deletion-safe indexes retained25h; generation samples are not Job counts |
+| Live pressure | Incoming/handled RPS, in-flight/admission waiters, queue depth/age, loop lag, DB lock/transaction pressure | Observed process/environment, missing is not zero |
+| Job diagnostics/chunks | Workflow/Operation/Submission/generation and safe stage evidence | Private authenticated admin access, finite retained chunks; missing/deleted remains unavailable |
 
-The HTTP safety layer propagates request IDs, bounds concurrency/body size, samples traces and aggregates metrics by registered route template. Application errors use `detail.code`, `message` and optional metadata; request-shape 422 errors use a validation array. Sensitive request bodies and credentials are not diagnostic material to paste into reports.
+History compares a complete UTC24h or seven complete UTC days to the immediately prior equal window. Current partial minute/day is provisional and excluded from change. p95 needs20 samples; p99 needs100. Bucket bounds are estimates, and overflow has no finite invented upper bound. Partial/missing/reset/incompatible/capped data can retain measured values while suppressing improvement directions. Set `APP_VERSION` to the release commit to identify builds.
 
-## Performance
+## Measurement semantics
 
-[/admin/performance](/admin/performance) separates incoming/handled traffic, admission wait, handler duration, bounded latency estimates, failures, queue depth/age and job phases. It has authenticated HTML refresh and live JSON endpoints; there is no public Prometheus `/metrics` contract in this application.
+HTTP total includes admission/handler phases; Operation execution excludes dependency waiting. Enqueue/due→worker delay is separate from dependency delay. Provider-related elapsed includes transport and observed polling delay, not pure inference time or guaranteed supplier acceptance. Cumulative observed time is not CPU consumption or recoverable savings. Do not add overlapping phases or percentiles.
 
-Historical reports can be briefly cached. Live pressure has its own bounded collection, so distinguish missing/unavailable data from zero load. A slow response can be admission contention, DB pressure, provider time or finalization; inspect the stage instead of increasing every timeout.
+A fast failure cannot prove successful work became faster. Compare matching route, workflow, configuration, build, execution kind and outcome. Unknown deployment membership is disclosed as observed scope, not all-replica coverage.
 
-## Per-Workflow diagnosis
+## Trace one request
 
-The admin Job detail links to diagnostics, persisted chunks and authorized downloads. Match Workflow/Operation/Submission identity and attempt generation when investigating a retry. Provider failures distinguish proven pre-send failure, explicit rejection and unknown acceptance, with a corresponding replay disposition. An unknown paid outcome is not automatically safe to repeat.
+`request_stages.py::request_stage` records paired platform stages. The `request_id` is linked to Job identity at admission or read. Workers correlate Workflow run, Operation, Submission, invocation and generation. `performance stage=... event=start|end|failure elapsed_ms=...` uses existing safe logging; no new instrumentation flag/profile is required. An unmatched start is the last observed position, not proof an external action never happened.
 
-The workers reconcile durable Operations/Submissions, payment evidence, deletion claims and temporary storage. A reconciliation run is not permission to mutate database state manually or to delete retained object versions.
+High-volume duration observations remain process-local and flush compact replay-safe batches in the background. There is no per-request Redis/SQL telemetry write. `execution_performance.py::observe_on_commit` publishes committed outcomes; rolled-back transitions must not become success samples. Payloads, prompts, signed URLs, credentials and personal data are excluded from telemetry labels/logs.
 
-## Activity trust and deployment recovery
+## Operational reading order
 
-`PROJECT_ACTIVITY_STATE_UNAVAILABLE` means the authoritative activity state needs operator reconciliation; it does not mean no activity occurred. Project activity migration and trust-epoch recovery require the protected stopped-fleet process in the current deployment runbook. Do not clear/seed trust state or downgrade a persistent database to suppress this error.
+1. Open [Performance](/admin/performance), choose a measurement and outcome, then inspect priority candidates and cohort/coverage warnings.
+2. Check live queue age, DB pressure and process CPU/memory; keep infrastructure monitoring alongside the application view.
+3. Open a matching recent Job and align stage evidence with [the runtime tracing guide](/reference/flows/runtime-debugging).
+4. Read the persisted retry disposition before deciding recovery. `UNKNOWN` paid acceptance requires reconciliation, not automatic rerender.
 
-See [admin performance](/admin/performance), [Jobs](/admin/design-jobs), [deployment](/deploy/sae-deployment) and [configuration](/reference/configuration). Keep the initial failure evidence, applied revision and exact affected task IDs when reporting an incident.
+Liveness proves this process responds. Readiness proves bounded DB/Redis access; neither proves worker readiness, supplier credits, storage publication or functional AI output. See [deployment recovery](/deploy/production) for authorized actions.
 
 ---
 
-Source evidence · backend `b13cc566`: [app/core/http_safety.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/http_safety.py) · [app/core/performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/performance.py) · [app/admin/workflow_diagnostics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/admin/workflow_diagnostics.py) · [deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md).
+Source evidence · backend `e59716c8`: [app/core/request_stages.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/request_stages.py) · [app/core/execution_performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/execution_performance.py) · [app/core/performance_history.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/performance_history.py) · [app/core/performance_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/performance_reports.py) · [app/core/terminal_performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/terminal_performance.py) · [app/core/workflow_diagnostics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/workflow_diagnostics.py).

@@ -4,45 +4,50 @@ Reference 是源码学习路径。先选一个你在小程序里认得的操作�
 
 ## 第一条可以亲手追踪的链 {#first-journey}
 
-先按[第一个完整工作流](/zh/get-started/quickstart)跑通本地真实 API，按教程配置模拟身份和供应商。前端 Mock 模式不会请求 FastAPI，适合调页面，但无法演示 Redis、worker 或 PostgreSQL。
+使用[本地真实 API 教程](/zh/get-started/quickstart)，按配置模拟外部服务。前端 Mock 不会到达 SQL、Redis 或 worker。先看[对齐状态](/zh/reference/integration-status)，新户型客户端不是可用于此后端 main 的闭环练习。
 
-选择一次图片生成，取一个容易辨认的任务名，保留五个值：当前用户 ID、workspace ID、上传 Asset ID、动作幂等键、返回的公开 Job ID。这些值把不同进程连接起来；图片文件名和页面百分比做不到这一点。
+选一个图片任务，记录用户 ID、空间 ID、上传 Asset ID、动作 key 和公开 Job ID。用这些身份跨进程连接证据，不能只靠文件名和进度百分比。
 
 ```mermaid
 sequenceDiagram
   autonumber
-  participant U as 用户与小程序
-  participant API as FastAPI 进程
-  participant DB as PostgreSQL
+  participant U as 用户 / 小程序
+  participant A as FastAPI
+  participant D as PostgreSQL
   participant O as 对象存储
   participant Q as Redis / ARQ
-  participant W as Submit worker
-  participant P as 模型供应商
-  U->>API: 登录并发现可用 Feature
-  API->>DB: 核对身份、同意记录与权限
-  U->>API: 创建上传意图
-  U->>O: 按签名 POST 上传真实字节
-  U->>API: 完成 Asset 验证并提交任务
-  API->>DB: 提交 Job、图、积分预留与 outbox
-  API->>Q: 分发已提交的 Submission
-  Q->>W: 执行带代次校验的任务
-  W->>P: 按冻结输入组装请求并提交/查询
-  W->>O: 暂存、核验并发布产物
-  W->>DB: 完成图并结算一次积分
-  U->>API: 按公开 Job ID 轮询
-  API->>DB: 读取有权限的持久状态
-  API-->>U: 类型化输出与限时 URL
+  participant W as Worker
+  participant P as 供应商
+  U->>A: 登录并发现Feature
+  A->>D: 核验身份 / 权限
+  U->>A: 创建上传intent
+  U->>O: 签名multipart POST真实字节
+  U->>A: 完成Asset校验
+  A->>D: 提交已核验READY上传
+  U->>A: 提交精确body和动作key
+  A->>D: 提交Asset自有归档claim
+  A->>O: SQL事务外复制并核验精确版本
+  A->>D: 发布COMPLETED归档receipt
+  A->>D: 复核并提交ACTIVE输入 / Job / pins / 钱包额度 / outbox
+  A->>Q: 分发已提交代次
+  Q->>W: 执行受代次保护的submission
+  W->>P: 提交或查询冻结的供应商请求
+  W->>O: 暂存并发布精确产物
+  W->>D: 完成执行图 / 只结算一次
+  U->>A: 按公开Job ID轮询
+  A->>D: 核验创建者或当前owner只读权限
+  A-->>U: 类型化产物和短期URL
 ```
 
-图中是进程边界，不是一个 Python 函数从头运行到尾。消息 6 和 11 属于不同数据库事务；HTTP 响应可以早于生成完成。Poll worker 定期恢复遗漏的交接，它与小程序发起的 HTTP 轮询是两件事。
+消息6、8、10、11、16是不同 SQL 检查点。9的存储 I/O 不持有最终准入事务。10归档完成后，11仍可能拒绝准入；receipt 不证明 Job 已存在。202仅表示接受，不表示生成完成。服务端 Poll worker 恢复调度，与客户端 HTTP 轮询是两回事。
 
-| 图中消息 | 接下来读哪里 | 在源码中回答的问题 |
+| 消息 | 跟读章节 | 识别的证据 |
 | --- | --- | --- |
-| 1–2 | [身份与同意](/zh/reference/flows/wechat-login-flow) · [Feature 与提示词发现](/zh/reference/flows/discovery-prompts-flow) | 平台证明什么，我们自己的服务器决定什么权限？ |
-| 3–5 | [资产准入](/zh/reference/flows/asset-upload-flow) · [浏览器音频接力](/zh/reference/flows/voice-upload-flow) | 文件字节在哪里，什么时候成为可复用 Asset？ |
-| 5–9 | [Workflow 准入与执行](/zh/reference/flows/design-job-lifecycle) · [各产品执行分支](/zh/reference/flows/workflow-products-flow) | 模型可能收费以前，数据库已经保存了什么？ |
-| 10–11 | [报告、HTML、PPTX 发布](/zh/reference/flows/report-view-flow) · [运行时诊断](/zh/reference/flows/runtime-debugging) | 哪些证据证明产物存在，且属于本次执行代次？ |
-| 12–14 | [历史、轮询、重试与删除](/zh/reference/flows/workflow-history-flow) | 原页面关掉以后，前端怎样重新拿到结果？ |
+| 1–2 | [身份](/zh/reference/flows/wechat-login-flow)、[发现](/zh/reference/flows/discovery-prompts-flow) | 平台证明、当前同意、有效 Feature |
+| 3–10 | [上传／归档](/zh/reference/flows/asset-upload-flow)、[音频接力](/zh/reference/flows/voice-upload-flow) | 绑定用途的 intent、精确版本、receipt、Asset 身份 |
+| 7–14 | [准入／worker](/zh/reference/flows/design-job-lifecycle)、[成员额度](/zh/reference/flows/member-quota-flow)、[产品分支](/zh/reference/flows/workflow-products-flow) | 先精确重放再新执行；持久 pins、钱包／额度预留与代次 |
+| 15–16 | [报告／导出](/zh/reference/flows/report-view-flow)、[诊断](/zh/reference/flows/runtime-debugging) | 发布证据和一次结算 |
+| 17–19 | [历史／操作](/zh/reference/flows/workflow-history-flow) | 新签名链接、owner 只读、创建者写权限 |
 
 ## 怎样把源码链接变成一个学习步骤 {#reading-code}
 
@@ -59,10 +64,10 @@ sequenceDiagram
 
 可以从这些真实入口开始：
 
-- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/request.ts#L369)
-- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py#L1075)
-- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_admission.py#L2426)
-- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/worker.py#L203)
+- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/request.ts#L369)
+- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1135)
+- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2939)
+- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/worker.py#L254)
 
 不能仅凭文件名推测实际路径。当前 API 支持主入口 `/v1/workflows`，但已交付的部分图片、语音、视频表单仍明确走 `/v1/design-jobs` 兼容适配器。[产品路由矩阵](/zh/reference/flows/workflow-products-flow#frontend-routing)逐项列出真实调用者。
 
@@ -79,6 +84,8 @@ sequenceDiagram
 | 超时、worker 崩溃、重试和刷新以后，什么会保留？ | [持久化 Workflow 生命周期](/zh/reference/flows/design-job-lifecycle) · [历史操作](/zh/reference/flows/workflow-history-flow) |
 | 项目隐私、企业席位、推荐奖励有什么不同？ | [项目](/zh/reference/flows/project-flow) · [成员](/zh/reference/flows/workspace-membership-flow) · [推荐奖励](/zh/reference/flows/referral-rewards-flow) |
 | 谁决定付款后发积分、退款后回收积分？ | [支付](/zh/reference/flows/payment-flow) · [抖音支付](/zh/reference/douyin-payment) · [退款](/zh/reference/flows/refund-flow) |
+| 企业有余额，为什么某成员仍不能提交？ | [月额度与记账月份](/zh/reference/flows/member-quota-flow) |
+| 哪个新前端功能尚不能在此后端 main 运行？ | [对齐状态](/zh/reference/integration-status) · [户型](/zh/frontend/floor-plans) |
 
 [逐 API 路由索引](/zh/reference/rest-api#generated-route-index)把每条公开路由声明连到真实处理函数和对应端点的链路解释。Webhook 的触发者是供应商；运维 API 可能没有小程序按钮。文档会说明这一点，不虚构前端入口。条件 Mock 路由、浏览器 Admin 路由另有边界，不冒充手机公开 API。
 

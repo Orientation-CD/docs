@@ -51,10 +51,14 @@ flowchart LR
 
 迁移、API、worker 形成同一个兼容边界。当前 schema 包含 Workflow/Operation、类型化 Asset、私有 Project、项目成败与可信活动状态。回滚应用代码不会恢复已删除的旧 provider/output 表。选择回滚镜像前阅读[生产恢复](/zh/deploy/production)。
 
+## 数据与观测生命周期
+
+对象生命周期策略须保留已准入输入版本和已发布依赖，不能只关注临时上传前缀。SQL 归档 receipt 可在 Asset 删除后继续负责迟到复制回执，不能为省存储批量删除。Redis 性能历史按分钟／日有界保留并归属发布版本；丢失时显示不可用／覆盖不全，不能伪造零历史。资金账本和耐久执行图仍以 SQL 为准。
+
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [SAE 架构契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_ARCHITECTURE.md)
-- [环境与发布手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [不可变镜像部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/deploy/sae/deploy-image.sh)
+- [SAE 架构契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_ARCHITECTURE.md)
+- [环境与发布手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [不可变镜像部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy-image.sh)

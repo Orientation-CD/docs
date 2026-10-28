@@ -214,6 +214,7 @@ Names are extracted from frontend declarations, build configuration and scripts.
 | `VITE_DESIGN_PROMPT_FIELD_MAX_LENGTH` | `4000` |
 | `VITE_ENABLE_PRIVATE_PROJECTS` | — |
 | `VITE_ENABLE_SUBSCRIPTION_SCENARIOS` | — |
+| `VITE_FLOOR_PLAN_WEB_ORIGIN` | `""` |
 | `VITE_MINI_PROGRAM_AUTH_MODE` | — |
 | `VITE_MINI_PROGRAM_PLATFORM` | — |
 | `VITE_PAYMENT_MODE` | `mock` |

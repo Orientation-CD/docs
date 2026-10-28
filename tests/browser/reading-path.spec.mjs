@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+
+const publicRouteCount = JSON.parse(readFileSync(new URL('../../sources/contracts.json', import.meta.url))).api.length
 
 for (const prefix of ['', 'zh/']) {
   test(`${prefix || 'en/'} API index opens its full source-reading chain`, async ({ page }) => {
@@ -7,7 +10,7 @@ for (const prefix of ['', 'zh/']) {
     await page.goto(`${prefix}reference/rest-api`)
     const table = page.locator('.vp-doc table').last()
     const rows = table.locator('tbody tr')
-    await expect(rows).toHaveCount(112)
+    await expect(rows).toHaveCount(publicRouteCount)
     for (const row of await rows.all()) {
       await expect(row.locator('a[href*="github.com"]').first()).toHaveAttribute('href', /\/blob\/[a-f0-9]{40}\/.*#L\d+$/)
       await expect(row.locator(`a[href^="/docs/${prefix}reference/"]`)).toHaveAttribute('href', /#[a-z0-9-]+$/)

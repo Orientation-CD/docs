@@ -100,3 +100,26 @@ When changing the theme, keep these behaviors covered by the responsive layout a
 Pull requests run checks and browser tests. Pushes to `main` and manual runs on `main` can publish the checked artifact to GitHub Pages. Deployment is restricted to `main`; review and merge remain team actions. Full Git history is checked out so page timestamps reflect their own commits.
 
 The per-page timestamp is a prose timestamp; the source record is the application's audit timestamp. Keep those meanings separate when reporting freshness.
+
+## Re-audit a refactor as a coherent version
+
+Save the old version record **before** extracting the new snapshot:
+
+```bash
+git show HEAD:sources/revisions.json > /tmp/yuanzhu-docs-previous-revisions.json
+```
+
+Audit the requested frontend/backend branches as one explicit pair. Read implementation, public contract and tests together; neither a matching symbol name nor a frontend fixture proves the current behavior. Rebuild a heavily changed chapter around the final architecture, preserving historical heading anchors where an API index links to them. Update both languages, the capability matrix and page audit inventory in the same change.
+
+After updating source snapshots, rebase old source links with evidence rather than replacing SHA text blindly:
+
+```bash
+pnpm docs:links --from /tmp/yuanzhu-docs-previous-revisions.json --report /tmp/yuanzhu-docs-links.json
+pnpm docs:links --from /tmp/yuanzhu-docs-previous-revisions.json --report /tmp/yuanzhu-docs-links.json --write
+```
+
+The first command is read-only. The second updates only proven revision/path/line mappings, including visible path:line labels. Uncertain anchors remain unchanged, appear in the report and produce a nonzero exit; inspect their old/new code and choose the correct symbol manually. Run after all document writers stop; the tool refuses a concurrent overwrite.
+
+Normal CI validates committed source line bounds and trace-linked symbol anchors. It also restricts `apiScope: frontend-candidate` to the bilingual floor-plan guide: only method/path pairs extracted from pinned frontend fixtures are allowed there, while the main API inventory stays the actual backend routes. A candidate schema must never silently enlarge the claimed main implementation.
+
+Keep obsolete setup instructions out of the learning path. Actual still-exposed adapters remain explicitly scoped in [compatibility](/reference/compatibility); removed pages keep only short non-searchable migration links. This cleans guidance without concealing code that the current UI still uses.

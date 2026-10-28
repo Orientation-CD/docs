@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test'
 
 const cases = [
-  { prefix: '', title: 'Workflows', queries: ['workflow', 'PowerPoint', '/v1/workflows', 'PROJECT_OUTCOMES_ENABLED'] },
-  { prefix: 'zh/', title: '工作流', queries: ['工作流', '设计报告', '文案', '抖音支付', '/v1/workflows', 'PROJECT_OUTCOMES_ENABLED'] },
+  { prefix: '', title: 'Workflows', queries: ['workflow', 'PowerPoint', 'same-style', 'quota', '/v1/workflows', 'PROJECT_OUTCOMES_ENABLED'] },
+  { prefix: 'zh/', title: '工作流', queries: ['工作流', '设计报告', '文案', '抖音支付', '同款视频', '成员额度', '输入归档', '户型', '/v1/workflows', 'PROJECT_OUTCOMES_ENABLED'] },
 ]
 for (const { prefix, title, queries } of cases) {
   test(`${prefix || 'en/'} search, keyboard, results and deep-link reload`, async ({ page }) => {

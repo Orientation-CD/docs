@@ -37,11 +37,17 @@ Production reads cloud-owned settings; do not overwrite a complete SAE Envs arra
 
 Use a stable configuration-encryption key across roles and retained data. Rotating it without a reviewed re-encryption/recovery plan can make existing provider/payment snapshots unreadable. Use ignored files or Secret mounts for private PEMs and credentials; source snapshots and generated documentation inventories must not contain secret material.
 
+## Configuration is not feature deployment evidence
+
+`VITE_FLOOR_PLAN_WEB_ORIGIN` is an exact trusted frontend H5 origin (API origin fallback), not a switch that adds missing backend floor-plan routes. Theme selection also follows its declared selectable catalog; the current settings switch is hidden. See [integration status](/reference/integration-status).
+
+Member monthly caps are persisted enterprise/member configuration, not an environment flag. Performance windows and release attribution follow [observability](/backend/observability); retain `APP_VERSION` per running process/image. Source defaults in the generated table are distinct from an actual deployment's values.
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions).
 
-- [Settings and validation](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/config.py)
-- [Committed local example](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/.env.example)
-- [Database provider configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/providers/provider_configuration.py)
-- [Build modes and scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/package.json)
+- [Settings and validation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/config.py)
+- [Committed local example](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.env.example)
+- [Database provider configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_configuration.py)
+- [Build modes and scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/package.json)

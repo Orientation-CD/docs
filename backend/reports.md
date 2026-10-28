@@ -24,8 +24,12 @@ A customer PPTX can be uploaded as private `DOCUMENT`, `DESIGN_JOB_INPUT`, role 
 
 Configure report node models in [Workflows](/admin/workflows), editable generation templates in [Prompts](/admin/prompts), and Feature prices/access in [Billing](/admin/billing). Workspace/default Logos and private gallery objects have separate storage rules described in the deployment runbook.
 
-The old `html_report`, `/v1/report-items`, quote-based assembly, report-section configuration and `/admin/report-templates` editor are retired. Historical compatible outputs remain readable, but new admissions use the Blueprint products. See [compatibility](/backend/design-jobs) and [deployment](/deploy/sae-deployment).
+The old `html_report`, `/v1/report-items`, quote-based assembly, report-section configuration and `/admin/report-templates` editor are retired. Historical compatible outputs remain readable, but new admissions use the Blueprint products. See [compatibility](/reference/compatibility) and [deployment](/deploy/sae-deployment).
+
+## Append-input durability
+
+A directly owned appended PPTX is archived before admission and activated with the accepted Job and its physical input pins. It is not safe to rely on the temporary upload path for a later conversion. Inputs already pinned to executed operations are not rewritten by archival or a repair. [Asset archival](/reference/flows/asset-upload-flow) and [targeted recovery](/deploy/production#input-recovery) describe the distinction. Whole-report completion still waits for the required export; a completed archive is neither a finished report nor another purchase.
 
 ---
 
-Source evidence · backend `b13cc566`: [app/workflows/operations/design_report/design_report_products.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/design_report_products.py) · [app/workflows/operations/design_report/workflow_report_publication.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/operations/design_report/workflow_report_publication.py) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md).
+Source evidence · backend `e59716c8`: [app/workflows/operations/design_report/design_report_products.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/design_report_products.py) · [app/workflows/operations/design_report/workflow_report_publication.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/workflow_report_publication.py) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md).

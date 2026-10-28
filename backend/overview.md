@@ -24,6 +24,12 @@ Every submission specifies a workspace. Personal work spends the personal wallet
 
 Start with [local setup](/backend/getting-started), then [architecture](/backend/architecture) and [Workflow lifecycle](/backend/workflows). Product-specific guides cover [reports](/backend/reports), [voice](/backend/voice), [copywriting](/backend/copywriting) and [video](/backend/video).
 
+## Current durability and authorization boundaries
+
+Owned Workflow inputs are archived before the final admission transaction; accepted inputs become ACTIVE with no expiry and immutable pins. Enterprise work also checks the submitting member's monthly cap, independently of the shared wallet. An owner can read another member's visible task detail with private inputs withheld, while write actions remain creator-only. Read [assets](/backend/assets-storage), [quotas](/reference/flows/member-quota-flow) and [history authorization](/reference/flows/workflow-history-flow).
+
+Video now has script, managed same-style and uploaded-reference paths; not every video is a script plus required scene photo. Performance uses versioned bounded history and complete-window comparison. The [integration map](/reference/integration-status) also records the frontend floor-plan capability missing from this server main.
+
 ---
 
-Source evidence · backend `b13cc566`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/main.py) · [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/api/__init__.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/workflow_configuration.py).
+Source evidence · backend `e59716c8`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/api/__init__.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_configuration.py).

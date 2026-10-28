@@ -1,23 +1,94 @@
-# Features, Workflows and Result Contracts
+# Frontend Workflow Payloads and Product Paths
 
-The frontend supports both canonical `/v1/workflows` and compatible `/v1/design-jobs` requests. Choose the schema for the specific product; `assets`, explicit `inputs`, prompt fields and report blueprints are not interchangeable.
+A Feature is a discoverable business capability; a Workflow is the backend execution graph; a public Job ID identifies what the UI reads. The current mini program uses two transport families. This page records what its code actually sends; it does not disguise retained client adapters as a completed migration.
 
-## Current frontend submissions
+## Actual routes selected by this frontend
 
-| Product | UI submission route | Important payload |
+| Product | Current creation transport | Body shape and code |
 | --- | --- | --- |
-| Standard images / furniture / customized design | `/v1/design-jobs` | `workspace_id`, `type`, `name`, `prompts`, verified `assets`; project/client data when applicable |
-| Recording summary | `/v1/design-jobs` | `type: voice_summary`, verified recording `assets`; no image prompt requirement |
-| Video | `/v1/design-jobs` | `type: video_generation`, `script`, explicit role/port `inputs`, optional advertised model |
-| Eight copywriting/Q&A products | `/v1/workflows` | Exact `copywriting_*` type, template selection and fields, `inputs: []` |
-| New design report | `/v1/workflows` | `design_report_9/13/17`, JSON blueprint, optional PPTX attachment |
-| Historical HTML report | Legacy design-job compatibility | `html_report`; do not use it as the schema for new design reports |
+| Standard images, furniture, customized design | `POST /v1/design-jobs` | `assets`, selected prompts and optional project/client snapshot; feature-specific submit service |
+| Recording summary | `POST /v1/design-jobs` | `type:voice_summary`, ordered verified audio Assets |
+| All three AI video modes | `POST /v1/design-jobs` | `type:video_generation`, explicit `inputs`, script **or** prompts |
+| Eight copywriting/Q&A products | `POST /v1/workflows` | Exact product key, prompts and `inputs:[]`; `prepareCopywriting` then shared submit repository |
+| New design reports | `POST /v1/workflows` | `design_report_9/13/17` and structured inputs; `prepareProjectWorkflow` → `postWorkflow` |
 
-The backend also exposes canonical schemas for other supported Workflows. This table records what this frontend version actually sends, not the entire public API. Every submission must preserve the accepted workspace/project and a stable `Idempotency-Key`; a `202` is admission only.
+`postPrepared` chooses the route for the first four rows; report creation uses `workflowsRepository.submit`. New API consumers should start with [canonical Workflows](/backend/workflows). Existing HTML-report code is not the schema or recommended entry for new reports. Professional floor-plan screens have [a separate candidate-contract boundary](/frontend/floor-plans), rather than an implemented backend path in this audited pair.
 
-## Copywriting and AI Q&A
+## Shared preparation and acceptance
 
-| Product key | UI title | Group |
+1. Validate local fields and inspect the latest profile/catalog/template data.
+2. Confirm workspace, subscription/Feature access and displayed Token balance. These are prechecks; backend admission is final authority, including current member quotas.
+3. Bind the project before freezing the request. Stage needed Assets with upload intent → signed form → completion.
+4. Keep one logical action's exact body and `Idempotency-Key` while acceptance is uncertain. Changing content creates a new action only through the supported UI path.
+5. Accept a validated pending task from 202, then read status/output through its public identity. Retry eligibility and charging follow server evidence, not a local clock.
+
+The backend's durable input archival is separate from local media saving and Asset upload completion. Read [Admission and workers](/reference/flows/design-job-lifecycle) for that transaction/queue chain.
+
+## Video has three modes
+
+| UI mode | Script/template selection | Reference video | Required voice/materials |
+| --- | --- | --- | --- |
+| Write/import script | `script`, UI max 1000 characters | None | One character composite and exactly one scene image; recording optional |
+| System same-style example | One `prompts` selection from `purpose=same_style_video` | Bound to the backend template; preview URL refreshed from catalog | Character composite, recording strictly>5 seconds; scene optional |
+| Upload reference for same-style | Reserved prompt name `__user_reference__` | One completed VIDEO Asset with `reference_video` port/role | Character composite, recording strictly>5 seconds; scene optional |
+
+`script` and `prompts` are mutually exclusive. Same-style template fields must be **exactly `称呼`**, with the page enforcing its 24-character limit. The reserved custom name is not a template for a user to create in the admin editor. A system selection carries the actual template name, not its display label or preview URL.
+
+The page requests authenticated `GET /v1/prompt-templates?purpose=same_style_video`. `mapEditablePromptTemplates` validates names, field metadata, display name and optional preview/poster URLs. Preview URLs are ephemeral; fetching a fresh catalog renews access without changing a submitted task's frozen template/reference identity.
+
+### Keep four kinds of limit separate
+
+| Concern | Current mini-program form | Public schema / admitted mode |
+| --- | --- | --- |
+| Character image | Exactly one composite | Exactly one `character_image/primary` |
+| Scene images | Script: exactly 1; same-style:0–1 | General schema:0–12; same-style admission further caps 0–1 |
+| Script text | Script path 1–1000 characters | Public request model max 20000; not sent with same-style prompts |
+| Recording | Same-style required; UI recorder captures up to 120 seconds | At most 1; same-style requires audio/mpeg with duration_ms>5000 |
+| Custom reference video | One MP4, at most 100 MiB (104857600 bytes) | Validated VIDEO/reference_video Asset and mode-specific admission |
+| Dialogue replacement list | At most 10 pairs, each side at most 200 characters | Same-style only; forwarded as instructions to rendering |
+
+An accepted generic schema inventory is not proof that the integrated supplier supports every combination. Script creation currently needs a scene for its upstream background path. Same-style uses the remake path and allows an empty scene list. Do not “fix” UI validation by copying the general API maximum.
+
+### Trace one custom same-style submit
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant P as Video page
+  participant S as submitVideoGeneration
+  participant A as Asset repositories
+  participant API as Backend API
+  P->>P: Choose uploaded reference and fill salutation
+  P->>S: Character + optional scene + recording + local MP4
+  S->>S: Validate mode, replacements, scope and model
+  S->>API: Recheck profile and Feature catalog
+  S->>A: Stage image, recording and reference-video Assets
+  A->>API: Upload-intent / direct bytes / complete
+  S->>S: Build prompts and explicit port/role inputs
+  S->>API: POST prepared job with stable action key
+  API-->>P: 202 with accepted public Job
+  P->>API: Read task until typed VIDEO output or failure
+```
+
+`stageVideoImageAssets` maps task role `primary/reference` to upload role `image/reference_image`. `stageReferenceVideoAsset` sets `type:VIDEO`, upload role `reference_video`, and returns a typed input with matching port/role. A display URL, a local path and an Asset UUID cannot be substituted for one another.
+
+The same-style selection fragment below is inserted into the otherwise complete prepared body; staging supplies the Asset IDs:
+
+```json
+{
+  "prompts": {"prompts": [{"name": "__user_reference__", "fields": [{"name": "称呼", "value": "设计顾问"}]}]},
+  "replacements": [{"from": "原台词", "to": "新台词"}],
+  "replace_scope": "dialogue"
+}
+```
+
+`replacements` and `replace_scope` are top-level peers of `prompts`. With no nonempty replacement pairs the client omits both; it does not send an empty scope or null. `dialogue` requests shot-plan dialogue replacement; absent scope follows backend `all`. The backend freezes and forwards the instruction; it does not locally rewrite the script. Identical or half-filled pairs are invalid.
+
+Model choices/prices come from the catalog when enabled. The frontend's model whitelist and baseline display are not server pricing authority. Importing a completed copywriting short-video script only fills the script form, asks before replacing differing text, and never submits a new video automatically.
+
+## Copywriting and AI Q&A remain eight products
+
+| Product key | Current title | Group |
 | --- | --- | --- |
 | `copywriting_short_video` | 短视频脚本 | Creative |
 | `copywriting_xiaohongshu` | 小红书笔记 | Creative |
@@ -28,41 +99,18 @@ The backend also exposes canonical schemas for other supported Workflows. This t
 | `copywriting_pitfalls` | 避坑指南 | Q&A |
 | `copywriting_operations_experience` | 运营经验 | Q&A |
 
-Each product maps to its exact `feature_copywriting_*` prompt template. Form controls are versioned in the frontend; authenticated template metadata must advertise the expected complete field set. Every field is sent once. UI-optional blanks become the literal `未提供`; required text is trimmed/nonempty and the current copywriting field limit is 4000 Unicode characters. The dependent short-video subtype resets when its parent category changes.
+`prepareCopywriting` validates the complete advertised `feature_copywriting_*` template field set, sends every field once in its declared order, uses literal `未提供` for UI-optional blanks and caps field text at 4000 characters. Required text is trimmed/nonempty. There is no generic `ai_copywriting` request or media upload for these products. Shooting suggestions produce text, not footage. Safe Markdown rendering supports inline text even if optional file metadata is absent.
 
-Execution prices come from discovered Features. Personal entitlement uses the advertised `allowed_features`; a visual group is not a permission wildcard. There is no generic `ai_copywriting` request type, media upload or browser-side model-provider call. Shooting suggestions produce text, not generated footage.
+## New report preparation follows the blueprint
 
-Completed Markdown uses inline output even when optional file metadata is absent. The result page formats safe Markdown/HTML, offers the applicable copy action and preserves unsupported markup as visible text. Server retry eligibility and current write access determine the retry action.
+The form's 8/12/16 content pages produce 9/13/17 total pages and exact product keys `design_report_9/13/17`. `buildReportWorkflowRequest` builds the request from project/client data, completed recording summaries, original/generated colored-floor-plan Assets and interior results from distinct spaces.
 
-## Short-video script to AI video
+Blueprint source declarations can refer to existing Assets, selected generated child content or configured Gallery content. These are distinct shapes; do not copy a preview URL into an Asset field or create extra frontend child submissions/charges. The current interior page limit is three images. Changing report size may require reselecting sources.
 
-A completed short-video script can be handed to AI video creation. Replacing a nonempty different draft script asks for confirmation and keeps other materials/settings. The receiving page still requires its own materials, entitlement and confirmation; importing text never submits or pays for a video automatically.
+An optional attachment is `.pptx`, at most 100 MiB/104857600 bytes, staged and verified before the request. A saved draft rechecks attachment availability. `prepareProjectWorkflow` binds project, deep-freezes the body and creates its action/key; `restoreWorkflowAttempt` recovers the original body/key instead of regenerating one. `postWorkflow` uses the canonical route.
 
-| Input | Current mini-program UI | Public backend schema |
-| --- | --- | --- |
-| Character composite image | Exactly one | Exactly one |
-| Scene reference images | **Exactly one** | **Zero to twelve** |
-| Script | Maximum 1000 characters | Maximum 20000 characters |
-| Recording | Optional, at most one | Optional, at most one |
-
-The UI's narrower scene limit follows the currently integrated supplier path; accepting a larger API inventory does not establish end-to-end multi-scene capability. Do not increase the UI limit by copying the API maximum. Upload-intent roles (`image`, `reference_image`) are mapped separately from task roles (`primary`, `reference`).
-
-Video model choices and prices come from the catalog when the server enables selection. Otherwise the baseline is Doubao-Seedance-2.0-mini; the static frontend list is a validation/display aid, not pricing authority.
-
-## New design reports
-
-The form selects **8, 12 or 16 content pages**, producing **9, 13 or 17 total pages** and product keys `design_report_9`, `_13`, `_17`. It assembles a structured blueprint from project/customer information, a completed recording summary, a colored floor plan's original/result Assets and completed interior results from distinct spaces.
-
-Source Assets must be valid and readable in the current scope. The blueprint maps them to page templates, can request style/material and lighting generation, and can reference configured gallery content. Current UI limits each interior result page to three images. Changing report size can require reselecting sources.
-
-An optional attachment must be a `.pptx`, at most 104857600 bytes (100 MiB), uploaded and verified before submission. It is not a PDF/PPT input. A recovered draft revalidates attachment availability and permits replacement/removal. HTML results open only with fresh authorized access. The result viewer also recognizes supported PPTX task artifacts; public export capability and actual UI entry points must be distinguished.
-
-## Failure and recovery
-
-Keep input and the exact logical action after an uncertain POST response. Resolve authentication, subscription, balance, template changes or workspace/project loss through the corresponding UI action. Refresh expired result capabilities. Do not silently create a replacement task, change the payment workspace or infer completion from a native callback.
-
-Read [Key flows](/frontend/key-flows), [Projects](/frontend/projects) and [API reference](/reference/rest-api) for surrounding behavior.
+The HTML viewer requires fresh authorized access. Supported PPTX artifacts are consumed as typed outputs; a backend artifact does not imply every page has a separate export action. For child execution, durable state and output publication, continue with [the report chain](/reference/flows/report-view-flow).
 
 ## Source evidence
 
-Frontend `eca0a5f`, backend `b13cc56` (2026-10-20): [Actual route selection](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/repositories/designJobSubmit.ts) · [Copywriting controls](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/copywriting.ts) · [Report blueprint](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/services/reportBlueprint.ts) · [UI video validation](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-features/repositories/videoAssets.ts) · [Public video schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py).
+Verified 2026-10-28: [Actual route choice](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/designJobSubmit.ts#L182) · [Video orchestration](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/videoGenerationSubmit.ts#L69) · [Same-style fields](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/sameStyleVideo.ts#L10) · [Video staging/limits](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/videoAssets.ts#L25) · [Catalog selection](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/repositories/promptCatalog.ts#L198) · [Report builder](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/reportBlueprint.ts#L65) · [Report action freezing](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/workflowSubmission.ts) · [Backend video mode limits](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L1279).

@@ -1,39 +1,38 @@
-# 项目介绍
+# 从哪里开始学习和运行
 
-YuanZhu AI（装易装AI）帮助装修团队把客户需求、空间照片和设计成果变成图片、文字、视频与设计报告。同一套 uni-app 前端分别构建**微信和抖音小程序**。部署环境实际开放哪些能力由服务端配置决定；源码里存在页面，不代表该环境已经启用。
+圆筑 AI / 装易装AI 帮助装修团队把客户需求与设计素材转成图片、文案、视频和演示报告。uni-app 前端构建微信、抖音小程序；FastAPI 与 worker 负责身份、执行、存储和计费。
 
-## 用户能做什么
+先看[前后端对齐状态](/zh/reference/integration-status)。本文档核验的是独立演进的分支：写好的页面、OpenAPI 测试夹具、后端 `main` 真正提供的能力，是不同证据。
 
-| 领域 | 能力 |
+## 对应当前界面
+
+| 入口 | 阅读源码时寻找什么 |
 | --- | --- |
-| AI设计 | 室内设计、家居试搭、彩平图、录音总结、自定义设计、设计报告 |
-| 旧房改造 | 局部、厨房、卫生间改造，位于 AI设计的下级分组 |
-| AI创作 | AI视频，以及短视频脚本、小红书笔记、朋友圈文案、标题金句、拍摄建议五项文案表单 |
-| AI问答 | 装修知识、避坑指南、运营经验，从“我的”进入 |
-| 项目与协作 | 个人/企业空间、项目和方案列表、企业成员总览、成员项目只读下钻与动态 |
-| 账号与计费 | 注册、协议同意、会员订阅、Token包、订单、流水、席位和邀请 |
+| 首页 → AI设计 | 轻盈／专业设计落地页、`featureGroups` 与 Feature 启动器 |
+| AI轻盈设计 | 室内／家具／彩平图、语音总结、自定义设计、报告与旧房改造 |
+| AI专业设计 | 户型编辑、渲染、作品管理和全景前端；**本次后端 main 没有其专用接口** |
+| AI创作 | 剧本视频、做同款视频、文案及已配置的创作入口 |
+| 项目 | 个人项目、企业成员看板；所有者只读视图有独立权限边界 |
+| 账户与会员 | 登录／同意、工作区、套餐、积分、订单和邀请 |
 
-首页功能区使用 **AI设计**、**AI创作**两张分组入口。能力可用性、套餐权限和价格依然由后端下发。旧 `html_report` 保留历史兼容；新的**设计报告**属于 Workflow 产品，总页数为 9、13 或 17 页。
+名称、卡片与主题属于前端展示。实际提交仍由服务端功能发现、有效模板、权益和钱包检查决定能否运行。路由存在也不表示模型或付费供应商已配置好。
 
-## 三个代码仓库
+## 选择学习路径
 
-| 仓库 | 工作分支 | 职责 |
+- **第一次接触源码：**[macOS 准备](/zh/get-started/macos-setup) → [首个本地工作流](/zh/get-started/quickstart)。先运行前端 Mock，再连接使用模拟外部服务的本地真实 API。
+- **读懂一个按钮：**[源码跟读总览](/zh/reference/system-walkthrough) → 业务链路 → 固定版本函数。用 Job、Asset 身份跨进程跟踪。
+- **前端开发：**[代码地图](/zh/frontend/overview)、[设计系统](/zh/frontend/design-system)、[户型边界](/zh/frontend/floor-plans)。
+- **后端开发：**[架构](/zh/backend/architecture)、[准入](/zh/reference/flows/design-job-lifecycle)、[输入归档](/zh/reference/flows/asset-upload-flow)、[成员额度](/zh/reference/flows/member-quota-flow)。
+- **后台与运维：**[管理后台](/zh/admin/overview)、[性能证据](/zh/admin/performance)、[发布恢复](/zh/deploy/production)。
+
+## 仓库分工
+
+| 仓库 | 分支 | 职责 |
 | --- | --- | --- |
-| [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | Vue 3、TypeScript、uni-app、uview-plus 前端 |
-| [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | FastAPI、后台任务、存储、账号、计费和 Admin |
-| [docs](https://github.com/Orientation-CD/docs) | `main` | 当前阅读的双语 VitePress 文档站 |
+| `Orientation-CD/wechat_mini_program` | `ui-integration` | 界面、本地状态、平台适配与 API repository |
+| `Orientation-CD/YuanZhu-AI` | `main` | FastAPI、worker、数据库、私有存储和管理后台 |
+| `Orientation-CD/docs` | `main` | 双语指南、源码地图和校验 |
 
-仓库是保存历史版本的源码文件夹；分支是仓库中的一条工作线。三个仓库独立演进。每页末尾的源码依据指向本文核对的固定提交。
+[来源记录](/zh/reference/source-revisions)固定完整提交。示例描述这组版本，不代表任意部署或未合并分支。仍暴露的适配接口集中在[兼容参考](/zh/reference/compatibility)；新集成沿规范 Workflow 契约学习。
 
-## 从哪里开始
-
-- **没有编程、终端经验：**先读 [macOS 环境准备](/zh/get-started/macos-setup)，再按[快速开始](/zh/get-started/quickstart)操作。首次预览不需要启动后端。
-- **做前端：**阅读[前端总览](/zh/frontend/overview)和[数据源与构建模式](/zh/frontend/data-source-modes)。
-- **做后端：**从[系统架构](/zh/get-started/architecture)和[后端总览](/zh/backend/overview)进入。
-- **产品运营：**使用[管理控制台](/zh/admin/overview)；本地部署和发布见[部署](/zh/deploy/local-stack)。
-
-快速开始先运行前端 **Mock**，再让 **API** 构建连接真实本地服务。该本地服务可以使用模拟登录、支付和模型提供商。这两阶段各自有验收标准；Mock 页面演示成功不能证明前后端已经联通。
-
-## 源码依据
-
-核对版本：前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）。[前端功能分组](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/featureGroups.ts) · [Workflow请求类型](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)。
+源码：[src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/featureGroups.ts) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)

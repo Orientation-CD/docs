@@ -1,47 +1,80 @@
-# 项目与企业协作
+# 项目、成员看板与只读结果
 
-项目在工作空间内组织用户客户资料和方案。客户端仅在 `VITE_ENABLE_PRIVATE_PROJECTS=true` 编译此体验；所有权、成员关系、容量和状态迁移依然以服务端为准。
+项目体验通过 `VITE_ENABLE_PRIVATE_PROJECTS=true` 编入。成员关系、项目容量、状态转换和写权限由服务端负责；前端守卫阻止过时 UI 操作，但不能授予权限。本文区分当前小程序 UI 与后端新增的独立管理能力。
 
-## 空间、当前项目与默认项目
+## 工作区 → 当前选择 → 已接受绑定
 
-每账号有个人空间，也可拥有/加入企业。切换空间会改变项目列表、余额与权限。临时（`scratch`）项目是稳定兜底入口；普通项目保存可编辑客户/项目字段。
+账户拥有个人工作区，也可拥有/加入企业。**当前项目**是 UI 的活动选择，**默认项目**是已保存偏好，**阶段**是项目生命周期值，三者不能混用。临时 `scratch` 项目是稳定回退，不是可任意删除的普通客户项目。
 
-**当前项目**是本次 UI 选择，**默认项目**是持久偏好，都不是生命周期阶段。进入/重返空间、切换项目和设置默认项目是独立动作；旧响应不得覆盖较新的选择。
+`projectContextRepository` 按用户/工作区保存选择，首页、项目页和提交 service 共用。任务准备前，绑定操作确定接受的项目和客户资料快照；之后切换选择器不能改写被冻结或结果未知的请求。提交、重试、移动、删除都会让相关项目计数失效。
 
-首页、项目页和提交流程共享带作用域的选择。项目切换和方案数按账号/空间缓存；计数不阻塞弹窗，新增、重试、删除、移动会使相关缓存失效。普通项目筛选不移除临时项目入口。
+| 动作 | 追踪源码 | 保留的状态 |
+| --- | --- | --- |
+| 选择/设为默认项目 | `repositories/projectContext.ts` | 用户、工作区、当前/默认项目 |
+| 提交到项目 | 功能包内 `services/designProjectBinding.ts` | 已接受项目、客户快照、冻结动作 |
+| 查看项目成果 | `ProjectResults.vue` | 当前作用域操作与列表筛选 |
+| 移动方案 | `PlansJobMove.vue` | 源/目标作用域，刷新两侧计数 |
+| 删除项目 | `ProjectDeleteSheet.vue` | 支持的服务端模式与异步接受状态 |
 
-## 阶段与结果
+## 阶段、结果与容量
 
-认证 `GET /v1/project-statuses` 下发有版本的阶段分组、状态、顺序、可选择标志、结果类别、流失原因与停滞天数规则。客户端使用五分钟作用域缓存和最小三阶段兜底；新状态由服务端目录提供，不写死为 TypeScript 枚举。
+认证的 `GET /v1/project-statuses` 提供阶段、状态、可选标记、结果、流失原因与停滞天数规则。客户端使用五分钟作用域缓存和最小回退，不能把写死的 enum 当作完整当前目录。
 
-UI 将主跟进阶段与服务端声明的成交/流失等终态结果分开。撤回阶段不抹掉历史最远进度；结果保留来源阶段和关闭元信息。流失可能要求原因，OTHER备注最多100个 Unicode 字符，最终仍由后端验证。
+UI 区分主阶段、旁路状态和成交/流失终态；历史最远进度独立于当前阶段。流失资料可要求原因及最多100个 Unicode 字符的 OTHER 说明。恢复跟进可能占用容量，应由服务端决定接受或拒绝。
 
-普通项目额度计算**20个进行中项目**，排除临时项目和已关闭结果。当前契约下关闭项目仍可作为当前、默认和方案绑定目标；恢复跟进可能占用进行中额度，达到上限时由服务端拒绝。
+普通项目上限统计20个进行中项目，排除临时项目和关闭结果；本轮契约允许关闭项目继续被选择/绑定。后端 `PROJECT_OUTCOMES_ENABLED` 及其迁移/发布决定结果写入是否可用，构建前端不能启用服务端行为。
 
-后端 `PROJECT_OUTCOMES_ENABLED` 涉及部署/迁移；前端项目开关不会启用它。开启结果前遵循后端发布流程，不混用不兼容实例，不把构建通过当成结果写入已开放的证据。
+删除项目支持服务端的“任务转入临时项目”或“删除任务”模式，202表示接受，不是清理完成；临时项目不能作为普通项目删除。
 
-## 方案与删除
+## 当前成员看板实际计算什么
 
-提交绑定已确认项目和客户资料快照。已准备/受理不确定的请求，不能因当前项目改变而静默改目标。方案支持项目筛选和授权移动，同时使源/目标计数失效。
+所有者打开企业概览，`loadProjectOverview` 校验 `GET /v1/workspaces/{workspace_id}/overview`，看板消费的是**当前成员**。服务端契约可能保留历史成员记录，但当前组件有意隐藏该区域。
 
-普通项目删除支持服务端的两种模式：方案移至临时项目，或连同方案删除。`202` 表示删除已受理，须刷新权威状态，不能声称立即完成。临时项目不是可按普通项目删除的对象。
+| 展示 | 实际计算或守卫 |
+| --- | --- |
+| 搜索与筛选 | 当前成员名，以及服务端派生的阶段/phase/结果；未知状态归“其他”保持可见 |
+| 关注项 | 按服务端状态目录停滞规则统计项目；仅支持活跃数据且北京时间日期差大于7时提示未活跃 |
+| 阶段分布 | 非终态项目；主状态超过4个时按 phase 分组 |
+| 成交与转化 | 成功结果总数、成功/已关闭比例；无分母时显示横线 |
+| 本月成交 | 有效关闭日期与当前同属北京时间月份的成功项目 |
+| 排序 | 关注项、筛选后项目数、成交数或最后活跃，再用姓名/ID稳定排序 |
+| 打开成员项目 | 必须存在所需方案计数能力，字段缺失不等于零 |
 
-## 企业所有者总览
+`memberProjectDashboard.ts` 提供复用计算，`EnterpriseProjectOverview.vue` 组合响应式筛选和交互守卫。北京时间是展示/分组规则，不会额外写服务端，也不会为每个项目单独轮询。
 
-后端提供字段时，所有者可看当前成员、成员项目、方案数与活跃信息。活跃排序依据能力字段是否存在，不能把 null 当成支持证据。项目卡区分当前阶段、历史最远进度与独立结果。
+## 从成员卡片追到结果
 
-选择成员项目后进入**只读**详情/结果和动态。作用域包含所有者会话、空间、项目；进入/恢复页面重新确认成员关系，结果轮询仍校验当前所有者/空间访问。图片、文字、视频、报告只读查看不暴露提交、重试、移动、删除。
+```mermaid
+sequenceDiagram
+  autonumber
+  participant UI as 所有者看板
+  participant G as memberProjectRead
+  participant P as 资料 / 概览 repository
+  participant D as Job 详情 repository
+  participant API as 后端
+  UI->>G: 以只读作用域打开成员项目
+  G->>P: 确认最新账户 / 工作区 / owner角色
+  P->>API: 经过授权的资料与概览读取
+  G->>G: 确认当前成员项目并保留作用域证明
+  UI->>D: 读取/轮询所选任务
+  D->>G: 验证当前作用域和所有者身份
+  D->>API: 经过授权的任务详情
+  API-->>D: 隐藏受保护输入的结果投影
+  D-->>UI: 校验后的只读结果
+```
 
-失权、账号/空间变化、项目被移除会使旧视图失效，并返回安全项目入口。完整动态列表使用有边界的原生滚动区，提供返回顶部。日期按北京时间自然日显示，在可见时更新标签，不为每个项目反复发请求。
+`createMemberReadView` 记录会话代次、工作区和项目。`verifyMemberReadAccess` 在读取时刷新账户/owner上下文，成员证明仅随当前 scope 对象存活。恢复页面、会话改变、成员/项目事件都会使证明失效，晚到响应不能将其恢复。
 
-## 企业成员关系
+Repository 首先调用任务详情；当前后端 `main` 已明确支持经过授权的 owner 只读投影。前端只针对特定404未找到响应保留有限的企业列表回退，不是通用绕权；它不会改用任意成员私有接口或缓存签名 URL。
 
-角色仅**所有者、成员**。所有者管理企业名称、席位、邀请、移除成员，不提供成员角色编辑；成员可按支持动作自行退出。席位包含所有者，待接受邀请不预占席位。
+成员结果页支持图片、Markdown 总结（隐藏原录音）、视频、报告读取，不提供提交、继续生成、复制输入、重试、删除或移动。账户/工作区/owner身份丢失时清空视图并返回合法入口，仅凭 URL 标记不能授予权限。
 
-邀请通过平台原生分享面板发送，路径携带单次邀请。接受时服务端重新检查成员关系与容量。已移除/离开成员的历史结果通过支持的历史视图处理，旧成员关系不授予当前写权限。
+## 成员管理与后端独立的额度控制
 
-邀请剪贴板/隐私设置见[平台接入](/zh/frontend/platforms)，服务端行为见[空间成员流程](/zh/reference/flows/workspace-membership-flow)。
+所有者管理企业名称、席位、邀请和移除，成员可自行退出；席位包含所有者，未接受邀请不预占席位，也没有任意成员角色编辑器。原生邀请携带一次性邀请码，接受时由后端重查成员关系和容量。
+
+最新后端还会实施成员月度 Token 额度，但当前前端没有成员额度编辑器。文档解释这些 API，不代表小程序已提供相应管理 UI。服务端额度/权限规则见[工作区链路](/zh/reference/flows/workspace-membership-flow)，准入被拒时应保留用户输入。
 
 ## 源码依据
 
-前端 `eca0a5f`、后端 `b13cc56`（2026-10-20）：[上下文与删除](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/projectContext.ts) · [状态目录](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/projectStatusCatalog.ts) · [成员访问](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/memberProjectRead.ts) · [动态时间线](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-projects/services/projectActivityTimeline.ts)。
+核验日期 2026-10-28：[项目上下文](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/projectContext.ts) · [概览](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/projectOverview.ts#L88) · [看板计算](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/memberProjectDashboard.ts#L9) · [看板 UI](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/components/projects/EnterpriseProjectOverview.vue) · [只读作用域](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/memberProjectRead.ts#L52) · [详情投影](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/designJobDetail.ts#L190) · [后端工作区授权](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py)。

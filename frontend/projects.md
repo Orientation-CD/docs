@@ -1,47 +1,80 @@
-# Projects and Enterprise Collaboration
+# Projects, Member Dashboards and Read-only Results
 
-Projects organize a user's customer information and plans inside a workspace. The client compiles this experience only with `VITE_ENABLE_PRIVATE_PROJECTS=true`; the server remains the authority for ownership, membership, capacity and permitted transitions.
+The Project experience is compiled with `VITE_ENABLE_PRIVATE_PROJECTS=true`. The server owns membership, project capacity, transitions and write permissions; frontend guards prevent stale UI actions but do not grant access. This page describes the current mini-program UI separately from newer server-only administration capabilities.
 
-## Workspace, current project and default project
+## Workspace → selection → accepted binding
 
-Each account has a personal workspace and may own/join enterprises. Switching workspace changes the available project list, balance and permissions. The temporary (`scratch`) project provides a stable fallback; ordinary projects carry editable customer/project fields.
+An account has a personal workspace and can own/join enterprises. The **current project** is the UI's active selection; the **default project** is a saved preference; the **stage** is a project lifecycle value. None substitutes for another. The temporary `scratch` project is a stable fallback rather than an ordinary deletable customer project.
 
-The **current project** is the active UI selection. The **default project** is a saved preference. Neither is a lifecycle stage. Entering/re-entering a workspace, selecting a project and explicitly changing the default are separate actions; stale responses cannot overwrite a newer choice.
+`projectContextRepository` scopes selection to account/workspace. Home, project pages and submission services share that context. Before preparing a task, binding resolves the accepted project and customer-information snapshot. Changing the picker later must not retarget a frozen/uncertain request. Submission, retry, move and delete invalidate affected project counts.
 
-Home, project pages and submission flows use shared scoped selection. Project switches and plan counts are keyed by account/workspace. Count caches load without blocking the picker and are invalidated by submissions, retries, deletion and movement. The temporary entry stays available independently of ordinary-project filters.
+| Action | Source to follow | State to retain |
+| --- | --- | --- |
+| Choose/default a project | `repositories/projectContext.ts` | Owner + workspace + selected/default project |
+| Submit into it | `services/designProjectBinding.ts` in the feature package | Accepted project + client snapshot + frozen action |
+| View project results | `ProjectResults.vue` | Current scoped operation and list filter |
+| Move a plan | `PlansJobMove.vue` | Source/target scope; refresh both counts |
+| Delete a project | `ProjectDeleteSheet.vue` | Supported server mode and accepted asynchronous state |
 
-## Stages and outcomes
+## Stages, outcomes and capacity
 
-Authenticated `GET /v1/project-statuses` provides the versioned phases, statuses, ordering, selectable flags, outcome types, lost reasons and stale-day rules. The client keeps a five-minute scoped cache and a minimal three-stage fallback; new status codes come from the server rather than a hardcoded TypeScript enum.
+Authenticated `GET /v1/project-statuses` supplies phases, statuses, selectable flags, outcomes, lost reasons and stale-day rules. The client has a five-minute scoped cache and minimal fallback, rather than treating a hardcoded enum as the complete current catalog.
 
-The UI separates the main progress stages from terminal outcomes such as won/lost when the server advertises them. Reverting a stage does not erase historical furthest progress. Outcomes retain their originating stage and closure metadata. A lost outcome can require a reason and an OTHER note of at most 100 Unicode characters; server validation remains authoritative.
+The UI separates main stages, side states and terminal won/lost outcomes. Historical furthest progress is independent of current stage. Lost metadata can include a required reason and an OTHER note capped at 100 Unicode characters. Restoring follow-up can consume capacity; let the server accept or reject it.
 
-The ordinary-project limit counts **20 in-progress projects**, excluding the temporary project and closed outcomes. Closed projects remain eligible for selection/default/binding under the current contract. Restoring follow-up can consume an in-progress slot and may be rejected at capacity; the UI uses the server response.
+The ordinary-project limit counts 20 in-progress projects, excluding scratch and closed outcomes. Closed projects remain selectable/bindable under the audited contract. Backend `PROJECT_OUTCOMES_ENABLED` and its migration/rollout determine whether outcome writes exist; compiling the frontend does not enable that server behavior.
 
-The backend's `PROJECT_OUTCOMES_ENABLED` is a deployment/migration concern. This frontend flag does not enable it. Follow the backend rollout procedure before turning on outcomes; do not mix incompatible reads across instances or treat a build as proof that outcome writes are enabled.
+Project deletion supports the server's move-jobs-to-scratch or delete-jobs mode. A 202 is acceptance, not completed cleanup. The temporary project cannot be deleted as an ordinary project.
 
-## Plans and deletion
+## What the current member dashboard computes
 
-Submission binds its accepted project and client-information snapshot. Changing the current project while a prepared/uncertain request exists must not silently retarget it. Plans can filter by project and move through the authorized action, invalidating both source and target counts.
+Owners open the enterprise overview. `loadProjectOverview` validates `GET /v1/workspaces/{workspace_id}/overview`; the dashboard consumes **current members**. Former-member records may exist in server contracts, but the current component intentionally hides that section.
 
-Ordinary-project deletion offers the supported server modes: move its jobs to the temporary project or delete its jobs. A `202` deletion response is acceptance; refresh authoritative state rather than claiming immediate completion. The temporary project itself is not an ordinary deletable project.
+| Display | Actual computation / guard |
+| --- | --- |
+| Search and filters | Current member names, server-derived stage/phase/outcome codes; unknown statuses stay visible as other |
+| Attention | Count of projects matching server catalog stale-day rules; inactivity only when activity data is supported and Beijing-day difference is greater than 7 |
+| Stage distribution | Nonterminal projects; group main statuses by phase when the catalog has more than 4 main statuses |
+| Won and conversion | Successful outcome totals and successful/closed ratio; no denominator displays a dash |
+| This month's wins | Successful projects with valid closure date in the same Beijing calendar month |
+| Sorting | Attention, filtered project count, won count or last activity, with stable name/ID tie-breaks |
+| Open member project | Enabled only with the required plan-count capability present; missing is not zero |
 
-## Enterprise owner overview
+`memberProjectDashboard.ts` supplies reusable computations; `EnterpriseProjectOverview.vue` combines them with reactive filters and interaction guards. Beijing time is a display/grouping choice, not a second server write or a polling request per project.
 
-Owners can inspect current members, their projects, plan counts and activity when the backend supplies those fields. Activity sorting is gated on capability presence, not guessed from null values. Project cards distinguish stage progress, historical reach and independent outcomes.
+## Follow an owner read from card to output
 
-Selecting a member project enters **read-only** detail/results and activity. The scope includes owner session, workspace and project; entry/resume reconfirms membership. Result polling still verifies current owner/workspace access. Read-only viewers cover image, text, video and reports without exposing submit, retry, move or delete controls.
+```mermaid
+sequenceDiagram
+  autonumber
+  participant UI as Owner dashboard
+  participant G as memberProjectRead
+  participant P as Profile / overview repositories
+  participant D as Job detail repository
+  participant API as Backend
+  UI->>G: Open member project in read-only scope
+  G->>P: Fresh account / workspace / owner role
+  P->>API: Authorized profile and overview reads
+  G->>G: Confirm current-member project; retain scoped proof
+  UI->>D: Read/poll selected task
+  D->>G: Verify current scope and owner identity
+  D->>API: Authorized task detail
+  API-->>D: Output projection with protected inputs withheld
+  D-->>UI: Validated read-only result
+```
 
-Permission loss, account/workspace changes or a removed project invalidate the old view and return to a safe project entry. Full activity lists use a bounded native scroll container and provide back-to-top. Time labels use Beijing day boundaries and refresh while visible without fetching each project repeatedly.
+`createMemberReadView` records session generation, workspace and project. `verifyMemberReadAccess` refreshes profile/owner context on reads and uses a proof whose lifetime is the current scope object. Resume, session changes and membership/project events invalidate that proof; late responses cannot restore it.
 
-## Enterprise membership
+The repository first uses the task-detail route. Current backend `main` explicitly supports the authorized owner read-only projection. The frontend retains a narrowly gated workspace-list fallback for specific 404 not-found responses, not a general permission bypass. It never substitutes arbitrary member-private endpoints or cached signed URLs.
 
-Roles are **owner** and **member**. Owners manage enterprise name, seats, invitations and member removal; there is no member-role editor. Members can leave using their supported self-leave action. Seat capacity includes the owner, and pending invitations do not reserve seats.
+The member result pages cover image, Markdown summaries (original recordings withheld), video and report reads without submit, continuation, input-source copy, retry, delete or move. Account/workspace/owner-role loss clears the view and returns to an authorized entry. URL query markers alone are not authority.
 
-Invitation shares use the platform's native sharing surface with a single-use invite in the path. Acceptance rechecks membership and seats on the server. Removed or departed members' historical results are handled through the supported history views; their old membership does not grant current write access.
+## Membership and server-only quota controls
 
-Use [Platforms](/frontend/platforms) for invitation clipboard/privacy setup and [Workspace flow](/reference/flows/workspace-membership-flow) for server-side details.
+Owners manage enterprise name, seats, invitations and removal; members can leave. Seat capacity includes the owner, pending invites do not reserve seats, and there is no arbitrary member-role editor. Native invitations carry a single-use invite; acceptance rechecks seats and membership on the server.
+
+The latest backend also enforces member monthly Token limits, but this frontend has no member quota editor. Documenting those APIs does not imply the mini program already exposes their administration. Read the [workspace chain](/reference/flows/workspace-membership-flow) for the server's quota/permission rules and preserve inputs when it rejects admission.
 
 ## Source evidence
 
-Frontend `eca0a5f`, backend `b13cc56` (2026-10-20): [Context and deletion](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/projectContext.ts) · [Status catalog](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/repositories/projectStatusCatalog.ts) · [Member access](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/services/memberProjectRead.ts) · [Activity timeline](https://github.com/Orientation-CD/wechat_mini_program/blob/eca0a5f9e0a2aa1cb3fd4f9714114bb3db7fae5f/src/pkg-projects/services/projectActivityTimeline.ts).
+Verified 2026-10-28: [Project context](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/projectContext.ts) · [Overview](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/projectOverview.ts#L88) · [Dashboard calculations](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/memberProjectDashboard.ts#L9) · [Dashboard UI](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/components/projects/EnterpriseProjectOverview.vue) · [Read scope](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/services/memberProjectRead.ts#L52) · [Detail projection](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/repositories/designJobDetail.ts#L190) · [Backend workspace authorization](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py).

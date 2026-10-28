@@ -2,7 +2,7 @@
 
 先读[源码跟读路径](/zh/reference/system-walkthrough)。本页把**每条公开路由**连到真实 FastAPI 处理函数与专门的全链路解释：界面/repository 或外部触发、授权、业务调用、数据库/Redis/存储变化、响应和失败恢复。
 
-本页按业务领域组织联调入口。[完整固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md) 是精确字段、成功/重放状态和可达业务错误的规范。Admin 内部接口与条件 mock 有各自边界。
+本页按业务领域组织联调入口。[完整固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md) 是精确字段、成功/重放状态和可达业务错误的规范。Admin 内部接口与条件 mock 有各自边界。
 
 ## 约定与错误
 
@@ -72,6 +72,16 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 
 `12345` 仅示意，必须填写真实字节数。把二进制 file 和全部 `upload.fields` POST 到 `upload.url`，不带 API Bearer。再 complete 并要求 `READY`，见[上传调用链](/zh/reference/flows/asset-upload-flow)。
 
+## 成员月额度
+
+| 方法／路径 | 授权与行为 |
+| --- | --- |
+| `GET /v1/workspaces/{workspace_id}/me/token-quota` | 当前成员／owner 自读；owner 不限额但用量仍计入 |
+| `PUT /v1/workspaces/{workspace_id}/member-token-limit` | 当前 owner；null 或1..10,000,000；每次保存清空成员 override |
+| `PUT /v1/workspaces/{workspace_id}/members/{user_id}/token-limit` | 当前 owner；null 或0..10,000,000；零暂停成员 |
+
+按 Asia/Shanghai 预留月份记账，reserved 是 used 子集。[额度链路](/zh/reference/flows/member-quota-flow)解释校验、授权、审计、准入和结算。此前端快照没有额度编辑 UI。
+
 ## Workflow 与兼容 Job
 
 | 方法/路径 | 含义 |
@@ -88,6 +98,8 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 
 图片请求示例，所有 UUID 都需替换为真实可访问身份：
 
+当前任务详情允许创建者或活动企业当前 owner 读取；owner 查看他人时隐藏输入且无写权限。见[历史授权](/zh/reference/flows/workflow-history-flow)。
+
 ```json
 {
   "workspace_id": "22222222-2222-2222-2222-222222222222",
@@ -100,7 +112,7 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 
 实际 Feature、模板、必需角色以发现为准，示例不保证所有环境都配置该 Feature。canonical role 为 `primary`、`mask`、`reference`，服务端核对不可变上传角色。`/v1/design-jobs` 仍是进程内兼容适配器，并保留适用历史/状态/重试/产物操作；新客户端使用 Workflow，退休字段可能要求重新提交。
 
-文本摘要/文案、有序语音、Design Report/PPTX 和视频各有独立 discriminator body。视频 API 允许一个人物图、0–12 场景、可选录音和最多 20,000 字非空脚本；当前小程序只允许一个场景/1,000 字，供应商包还可能更严格。schema 接受不等于供应商接受。
+文字／文案、有序语音、Blueprint／PPTX、视频使用不同 discriminator body。脚本视频 API 接受一张人物图、0–12 场景、可选录音、最多20,000字脚本；此 UI 要求恰好一张场景图且脚本最多1,000字。同款系统／自传分支使用 prompts、必须超过5秒的录音、0–1场景、系统或上传的参考 Video；替换项及可选 replace_scope 另有冻结契约。见[视频](/zh/backend/video)，API 接受永远不代表供应商验收。
 
 ## 支付与平台事件
 
@@ -132,7 +144,7 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 
 已按[记录的源码版本](/zh/reference/source-revisions)核对。
 
-- [方法/路径/认证/状态规范与错误表](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/documents/REST_API_INTERFACE.md)
-- [公开请求响应 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/core/models.py)
-- [Asset 准入路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/assets/asset_api.py)
-- [Workflow 与兼容路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/b13cc5668920620a274cb91a3393ed9fadac72ae/app/workflows/api.py)
+- [方法/路径/认证/状态规范与错误表](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md)
+- [公开请求响应 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
+- [Asset 准入路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py)
+- [Workflow 与兼容路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py)
