@@ -2,6 +2,30 @@
 
 Update both languages against the same application commits. Use the [source version record](/reference/source-revisions) to establish what was last audited before changing content.
 
+## Use the documentation update skill
+
+The repository maintains the `update-yuanzhu-docs` skill in `.agents/skills/update-yuanzhu-docs/`, with a short entry point in the root `AGENTS.md`. These files are versioned for the team and excluded from the published site. In a Codex conversation opened inside this repository, requests such as “更新 docs” or “同步文档” can select the skill implicitly. Use `$update-yuanzhu-docs` to select it explicitly.
+
+To make the same skill available when starting a conversation in the parent directory containing all three repositories, run this once **from the docs repository root**. It creates a user-level link to the repository's single maintained copy:
+
+```bash
+yuanzhu_skill_source="$(pwd -P)/.agents/skills/update-yuanzhu-docs"
+yuanzhu_skill_entry="$HOME/.agents/skills/update-yuanzhu-docs"
+if [ ! -f "$yuanzhu_skill_source/SKILL.md" ]; then
+  printf '%s\n' 'Run this from the docs repository root after obtaining the skill.'
+elif [ -e "$yuanzhu_skill_entry" ] || [ -L "$yuanzhu_skill_entry" ]; then
+  printf '%s\n' 'The entry already exists. Inspect it with the following command before deciding whether to replace it:'
+  ls -ld "$yuanzhu_skill_entry"
+else
+  mkdir -p "$HOME/.agents/skills"
+  ln -s "$yuanzhu_skill_source" "$yuanzhu_skill_entry"
+fi
+```
+
+Existing files, directories and links are left untouched. Keep the checkout at the linked location; if you move it, inspect and update the link. If Codex does not show the new skill, restart it. The request must concern this YuanZhu AI project; the skill is not a general replacement for other projects' documentation workflows. Source synchronization requires access to the docs, frontend and backend repositories.
+
+By default, the skill audits the latest frontend `ui-integration` and backend `main`, records full commit SHAs, and updates both languages with source-guided call chains and diagrams. It reuses the maintenance and validation commands below and delivers the reviewed changes, validation results, preview and a pull request. Merge and publication follow an explicit user instruction.
+
 ## Run the site
 
 Use Node.js 22.6 or newer and this repository's pinned **pnpm 10.28.2**. The mini program has its own pnpm version; run commands from the intended repository.
