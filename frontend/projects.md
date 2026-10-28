@@ -55,7 +55,7 @@ sequenceDiagram
   UI->>G: Open member project in read-only scope
   G->>P: Fresh account / workspace / owner role
   P->>API: Authorized profile and overview reads
-  G->>G: Confirm current-member project; retain scoped proof
+  G->>G: Confirm current-member project, retain scoped proof
   UI->>D: Read/poll selected task
   D->>G: Verify current scope and owner identity
   D->>API: Authorized task detail

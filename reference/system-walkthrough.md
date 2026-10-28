@@ -28,12 +28,12 @@ sequenceDiagram
   A->>D: Commit Asset-owned archive claim
   A->>O: Copy and verify exact version outside SQL transaction
   A->>D: Publish COMPLETED archive receipt
-  A->>D: Recheck; commit ACTIVE inputs, Job, pins, wallet/quota and outbox
+  A->>D: Recheck, commit ACTIVE inputs, Job, pins, wallet/quota and outbox
   A->>Q: Dispatch committed generation
   Q->>W: Execute fenced submission
   W->>P: Submit/query frozen provider request
   W->>O: Stage and publish exact output
-  W->>D: Finalize graph; settle once
+  W->>D: Finalize graph, settle once
   U->>A: Poll public Job ID
   A->>D: Check creator or current-owner read access
   A-->>U: Typed outputs and expiring URLs

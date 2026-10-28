@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 
-const publicRouteCount = JSON.parse(readFileSync(new URL('../../sources/contracts.json', import.meta.url))).api.length
+const auditedSources = JSON.parse(readFileSync(new URL('../../sources/contracts.json', import.meta.url)))
+const publicRouteCount = auditedSources.api.length
 
 for (const prefix of ['', 'zh/']) {
   test(`${prefix || 'en/'} API index opens its full source-reading chain`, async ({ page }) => {
@@ -23,7 +24,7 @@ for (const prefix of ['', 'zh/']) {
     await expect(page.locator('.mermaid svg').first()).toBeVisible({ timeout: 20_000 })
     await expect(page.locator('.VPSidebar')).toContainText(prefix ? '执行与产物' : 'Execution and results')
     const source = page.locator('.vp-doc a[href*="workflow_admission.py#L"]').first()
-    await expect(source).toHaveAttribute('href', /b13cc5668920620a274cb91a3393ed9fadac72ae/)
+    await expect(source).toHaveAttribute('href', new RegExp(`/blob/${auditedSources.commits.backend}/`))
     expect(errors).toEqual([])
   })
 }

@@ -27,13 +27,13 @@ sequenceDiagram
 
 ## Save the enterprise default {#workspace-token-limit}
 
-**Endpoint:** `PUT /v1/workspaces/{workspace_id}/member-token-limit`. Bearer authentication and current OWNER membership of an active enterprise are required. Body is exactly `{"limit":50000}`, or null for unlimited. Accepted finite values are strict integers1..10,000,000; zero, missing, string, boolean, float and unknown fields fail422.
+**Endpoint:** `PUT /v1/workspaces/{workspace_id}/member-token-limit`. Bearer authentication and current OWNER membership of an active enterprise are required. The body is an object: `{"limit":50000}` for a finite cap or `{"limit":null}` for unlimited; bare JSON null is invalid. Accepted finite values are strict integers1..10,000,000; zero, missing, string, boolean, float and unknown fields fail422.
 
 1. [app/workspaces/workspace_api.py → update_member_token_default](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py#L208) passes the authenticated actor and explicit workspace UUID to `set_enterprise_member_token_limit`; saved selection is not permission.
 2. [app/billing/member_token_quotas.py → set_enterprise_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L198) calls `_locked_owner_enterprise`, checks accessible active Enterprise/current OWNER and locks enterprise authority before override rows.
 3. It counts current nonowners, writes `Enterprise.member_monthly_token_limit`, stamps configured-at and **deletes every override**, including departed members' retained overrides. This happens even for the same value or null.
 4. It appends `EnterpriseMemberTokenLimitAudit` with old/new/source, affected count and cleared override count. The route commits configuration+audit together; no financial ledger event is created.
-5.200 returns `{"limit":50000,"affected_members":3}`. This count means current nonowners, not deleted override rows. Refresh owner overview after success.
+5. Returns **200** with `{"limit":50000,"affected_members":3}`. This count means current nonowners, not deleted override rows. Refresh owner overview after success.
 
 A global save is not a patch that preserves individual exceptions. Integrators must disclose that clearing effect before issuing it. If the response is lost, first read current owner overview; blindly repeating a global save later could clear a newly created override. This PUT does not have the paid-workflow action-key receipt protocol.
 

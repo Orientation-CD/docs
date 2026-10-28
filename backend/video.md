@@ -35,7 +35,7 @@ sequenceDiagram
   participant P as Packaged pipeline
   UI->>API: Completed Asset IDs and script OR prompts
   API->>S: Archive owned direct input versions
-  API->>DB: Freeze mode/pins/edits; reserve; persist graph/outbox
+  API->>DB: Freeze mode/pins/edits, reserve, persist graph/outbox
   W->>DB: Claim render attempt under generation fence
   W->>S: Download exact frozen versions
   W->>P: Script config OR remake config with reference clip

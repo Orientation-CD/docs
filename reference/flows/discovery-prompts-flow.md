@@ -29,7 +29,7 @@ sequenceDiagram
   Repo->>API: Authenticated GET template catalog
   API->>DB: Active rows filtered by exact purpose or NULL + variables
   DB-->>API: Server-authored definitions
-  API-->>Repo: name, fields, prompt-presence flags; scoped short-lived reference previews
+  API-->>Repo: name, fields, prompt-presence flags, scoped short-lived reference previews
   Repo-->>UI: Validate known keys, show choices or unavailable state
 ```
 

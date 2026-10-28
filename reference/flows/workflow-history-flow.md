@@ -14,7 +14,7 @@ sequenceDiagram
   participant O as Storage signing
   P->>R: Page visible / refresh
   R->>A: GET Job by ID with Bearer
-  A->>DB: Load visible Job; authorize creator or current enterprise owner
+  A->>DB: Load visible Job, authorize creator or current enterprise owner
   A->>O: Generate authorized current artifact links
   A-->>R: Job, typed outputs, retry metadata, polling hint
   R-->>P: Validate/map response, replace reactive state

@@ -27,13 +27,13 @@ sequenceDiagram
 
 ## 保存企业默认额度 {#workspace-token-limit}
 
-**接口：** `PUT /v1/workspaces/{workspace_id}/member-token-limit`，要求Bearer及活跃企业当前OWNER。body精确为`{"limit":50000}`，null表示无限。有限值必须严格整数1..10,000,000；零、缺字段、字符串、布尔、小数和未知字段都422。
+**接口：** `PUT /v1/workspaces/{workspace_id}/member-token-limit`，要求Bearer及活跃企业当前OWNER。body 是对象：有限额用`{"limit":50000}`，不限额用`{"limit":null}`；不能发送裸 JSON null。有限值必须严格整数1..10,000,000；零、缺字段、字符串、布尔、小数和未知字段都422。
 
 1. [app/workspaces/workspace_api.py → update_member_token_default](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py#L208)把当前认证actor及显式workspace UUID传给`set_enterprise_member_token_limit`；保存的空间选择不是权限。
 2. [app/billing/member_token_quotas.py → set_enterprise_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L198)调用`_locked_owner_enterprise`，验证可访问活跃Enterprise及当前OWNER，先锁企业权威再锁override行。
 3. 统计当前非owner成员，写`Enterprise.member_monthly_token_limit`、配置时间，并**删除每一条override**，包括已离开成员的保留设置。保存相同值或null也执行清除。
 4. 追加`EnterpriseMemberTokenLimitAudit`，记录旧/新值、来源、受影响成员数及清除override数。路由共同提交配置与审计，不写财务流水。
-5.200返回`{"limit":50000,"affected_members":3}`，数量是当前非owner，不是删除行数。成功后刷新owner总览。
+5. 返回 **200**：`{"limit":50000,"affected_members":3}`，数量是当前非owner，不是删除行数。成功后刷新owner总览。
 
 全局保存不是保留单人例外的patch。集成应在执行前说明清除效果。响应丢失先读当前owner总览；过后盲目重复全局保存可能清除刚新增的override。该PUT没有付费Workflow动作key的持久回执协议。
 

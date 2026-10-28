@@ -1,4 +1,4 @@
-# 统一Workflow与持久化执行
+# 统一工作流与持久化执行
 
 Feature是对外商业能力，映射到可执行Workflow定义。Job是公开任务聚合，WorkflowRun是一份持久化图执行，OperationRun是图节点，Submission是一次具体执行尝试。公开Workflow ID仍是Job ID，不是内部WorkflowRun UUID。
 

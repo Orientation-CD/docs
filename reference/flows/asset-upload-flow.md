@@ -108,8 +108,8 @@ sequenceDiagram
   API->>DB: Lock Asset then receipt, commit fenced COPYING claim
   API->>S: Inspect destination or copy exact source version
   API->>S: Verify destination version ETag bytes hash type
-  API->>DB: Recheck claim and source; publish locator and COMPLETED receipt
-  Note over DB: Asset still READY with expiry; no accepted paid Job yet
+  API->>DB: Recheck claim and source, publish locator and COMPLETED receipt
+  Note over DB: Asset still READY with expiry, no accepted paid Job yet
   API->>DB: Final admission locks, revalidate receipt and access
   API->>DB: One commit: ACTIVE/no expiry + exclusive Job + pins + reserve + outbox
 ```

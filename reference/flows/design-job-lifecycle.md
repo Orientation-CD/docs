@@ -19,7 +19,7 @@ sequenceDiagram
   UI->>R: Frozen body and original action key
   R->>API: POST /v1/workflows with Bearer
   API->>A: create_workflow then create_design_job then admit_workflow_job
-  A->>DB: Look up user workspace key fingerprint; exact replay returns existing Job
+  A->>DB: Look up user workspace key fingerprint, exact replay returns existing Job
   A->>DB: Validate complete direct owned inventory and commit
   A->>S: Archive under durable copy receipt outside DB locks
   A->>DB: Serialize admission and recheck access Feature graph pins limits

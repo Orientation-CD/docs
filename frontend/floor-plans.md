@@ -39,7 +39,7 @@ sequenceDiagram
   U->>F: New / continue editor
   F->>C: Request bootstrap editor capability
   C-->>F: Expected URL + independent auth pair + version
-  F->>F: Validate origin, URL and expiry; make memory-only fragment
+  F->>F: Validate origin, URL and expiry, make memory-only fragment
   F->>W: Bind web-view source
 ```
 
