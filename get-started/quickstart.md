@@ -36,7 +36,7 @@ VITE_ENABLE_PRIVATE_PROJECTS=false npx --yes pnpm@9.15.9 build:mp-weixin:mock
 
 Open WeChat DevTools → **Import project**. Select `~/MyPrj/zyz/wechat_mini_program/dist/build/mp-weixin`, use AppID `wxec0d577de41255aa`, and compile. Your WeChat account needs developer access to that AppID. Do not import the source repository root or `src/`.
 
-After the startup screens, open **AI设计 → 室内设计**, choose a test room image and complete a simulated submission. Mock login and purchasing use the frontend's simulated data. No local server is involved. This starter build deliberately excludes the project tab.
+After the startup screens, open **AI设计 → AI轻盈设计 → 室内设计**, choose a test room image and complete a simulated submission. Mock login and purchasing use the frontend's simulated data. No local server is involved. This starter build deliberately excludes the project tab.
 
 **Checkpoint:** home, a design form and a simulated result open. A successful Mock preview proves the frontend environment, not the backend connection.
 
@@ -150,7 +150,7 @@ A new personal account still needs an active subscription that permits the selec
 This endpoint is authenticated, checks order ownership and exists only for mock WeChat settlement. It is not a real payment or a replacement for signed production notifications. If it returns 401, re-enter the account page to refresh your session; if the order is no longer pending, inspect the order before attempting another purchase.
 
 4. Return to **支付记录** and **权益管理**. Confirm the server order is `paid` and the subscription is active. If needed, buy and settle a local Token package the same way; use the ID from `/v1/token-purchases`.
-5. Open **AI设计 → 室内设计**, upload a small JPEG/PNG, complete the options and submit once. Observe upload/completion, an accepted task, polling and a completed result through the local mock provider.
+5. Open **AI设计 → AI轻盈设计 → 室内设计**, upload a small JPEG/PNG, complete the options and submit once. Observe upload/completion, an accepted task, polling and a completed result through the local mock provider.
 6. Open **我的方案**, then recompile/reopen the app without clearing storage. The task and purchased entitlement must still be present. Check Token detail for the corresponding reservation/settlement entries.
 
 **Checkpoint:** one paid server order, an active eligible entitlement, one completed server task and a retrievable result survive a frontend restart. Keep the selected port/project and source revision with your result. Stop only your own Compose group through Docker Desktop when finished; retain its volumes.

@@ -29,8 +29,8 @@ The backend's durable input archival is separate from local media saving and Ass
 | UI mode | Script/template selection | Reference video | Required voice/materials |
 | --- | --- | --- | --- |
 | Write/import script | `script`, UI max 1000 characters | None | One character composite and exactly one scene image; recording optional |
-| System same-style example | One `prompts` selection from `purpose=same_style_video` | Bound to the backend template; preview URL refreshed from catalog | Character composite, recording strictly>5 seconds; scene optional |
-| Upload reference for same-style | Reserved prompt name `__user_reference__` | One completed VIDEO Asset with `reference_video` port/role | Character composite, recording strictly>5 seconds; scene optional |
+| System same-style example | One `prompts` selection from `purpose=same_style_video` | Bound to the backend template; preview URL refreshed from catalog | One portrait photo, recording strictly>5 seconds; scene optional |
+| Upload reference for same-style | Reserved prompt name `__user_reference__` | One completed VIDEO Asset with `reference_video` port/role | One portrait photo, recording strictly>5 seconds; scene optional |
 
 `script` and `prompts` are mutually exclusive. Same-style template fields must be **exactly `称呼`**, with the page enforcing its 24-character limit. The reserved custom name is not a template for a user to create in the admin editor. A system selection carries the actual template name, not its display label or preview URL.
 
@@ -40,7 +40,7 @@ The page requests authenticated `GET /v1/prompt-templates?purpose=same_style_vid
 
 | Concern | Current mini-program form | Public schema / admitted mode |
 | --- | --- | --- |
-| Character image | Exactly one composite | Exactly one `character_image/primary` |
+| Character image | Script: one three-view composite; same-style: one portrait photo | Exactly one `character_image/primary` |
 | Scene images | Script: exactly 1; same-style:0–1 | General schema:0–12; same-style admission further caps 0–1 |
 | Script text | Script path 1–1000 characters | Public request model max 20000; not sent with same-style prompts |
 | Recording | Same-style required; UI recorder captures up to 120 seconds | At most 1; same-style requires audio/mpeg with duration_ms>5000 |

@@ -59,3 +59,26 @@ test('anchor maintenance preserves unchanged text but leaves changed or removed 
   assert.match(rows[2].reason, /missing or ambiguous/)
   assert.equal(rows[2].line, undefined)
 })
+
+test('anchor maintenance refuses repeated equal blocks in either source revision', () => {
+  const block = 'HEADER\nvalue = keep\nFOOTER\n'
+  const rows = rebase([
+    { path: 'config.txt', old: block, new: block + block, anchors: [{ id: 1, line: 2 }] },
+    { path: 'config.txt', old: block + block, new: block, anchors: [{ id: 2, line: 2 }] },
+  ])
+  for (const row of rows) {
+    assert.equal(row.line, undefined)
+    assert.match(row.reason, /no unique unchanged context/)
+  }
+})
+
+test('anchor maintenance refuses repeated isolated lines without unique surrounding context', () => {
+  const rows = rebase([
+    { path: 'config.txt', old: 'old first\nvalue = keep\nold last\n', new: 'new first\nvalue = keep\nnew middle\nvalue = keep\nnew last\n', anchors: [{ id: 1, line: 2 }] },
+    { path: 'config.txt', old: 'old first\nvalue = keep\nold middle\nvalue = keep\nold last\n', new: 'new first\nvalue = keep\nnew last\n', anchors: [{ id: 2, line: 2 }] },
+  ])
+  for (const row of rows) {
+    assert.equal(row.line, undefined)
+    assert.match(row.reason, /no unique unchanged context/)
+  }
+})

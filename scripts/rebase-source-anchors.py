@@ -34,6 +34,20 @@ def map_file(item):
     old_defs, new_defs = definitions(old, item['path']), definitions(new, item['path'])
     blocks = difflib.SequenceMatcher(None, old_lines, new_lines, autojunk=False).get_matching_blocks()
 
+    def unique_match(lines, context):
+        """Return the only exact occurrence, rejecting repeats in either source."""
+
+        if not context:
+            return None
+        found = None
+        for index, value in enumerate(lines):
+            if value != context[0] or lines[index:index + len(context)] != context:
+                continue
+            if found is not None:
+                return None
+            found = index
+        return found
+
     def text_line(number):
         if not 1 <= number <= len(old_lines):
             return None
@@ -42,13 +56,17 @@ def map_file(item):
         for block in blocks:
             if block.a <= number - 1 < block.a + block.size:
                 if block.size >= 3 or len(content) >= 4 and not re.fullmatch(r'[{}()\[\],;]+', content):
-                    return (block.b + number - block.a, 'unchanged-block')
+                    context = old_lines[block.a:block.a + block.size]
+                    if unique_match(old_lines, context) == block.a and unique_match(new_lines, context) == block.b:
+                        return (block.b + number - block.a, 'unchanged-block')
         start, end = max(0, number - 3), min(len(old_lines), number + 2)
         context = old_lines[start:end]
         if len(context) < 3:
             return None
-        found = [index for index in range(len(new_lines) - len(context) + 1) if new_lines[index:index + len(context)] == context]
-        return (found[0] + number - start, 'unique-context') if len(found) == 1 else None
+        if unique_match(old_lines, context) != start:
+            return None
+        found = unique_match(new_lines, context)
+        return (found + number - start, 'unique-context') if found is not None else None
 
     result = []
     for anchor in item['anchors']:

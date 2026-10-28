@@ -40,7 +40,7 @@ flowchart LR
 
 ## 月额度不是第二个钱包
 
-企业 `remaining_tokens - reserved_tokens` 是共享可用余额。成员 `used_tokens` 对已提交预留和消耗只计一次，`reserved_tokens` 是其中待结算子集，二者相加会重复计数。释放计零。按 Asia/Shanghai 的预留月份记账，跨月结算仍归原月；没有预留历史的消耗才按结算月归属。
+企业 `remaining_tokens - reserved_tokens` 是共享可用余额。成员额度字段 `used` 对已提交预留和消耗只计一次，额度字段 `reserved` 是其中待结算子集，二者相加会重复计数。释放计零。按 Asia/Shanghai 的预留月份记账，跨月结算仍归原月；没有预留历史的消耗才按结算月归属。
 
 没有 override 表示继承企业默认值；保存 null override 表示明确不限额；保存零表示暂停该成员。企业全局默认值不能是零。配置审计不产生财务流水。owner 豁免、离职历史及全局保存清空 override 见[成员额度](/zh/reference/flows/member-quota-flow)。
 

@@ -40,7 +40,7 @@ Archive `id` is stable; its nullable Asset FK can become null after deletion. Th
 
 ## Monthly quota is not a second wallet
 
-The enterprise's `remaining_tokens - reserved_tokens` is spendable shared balance. Per-member `used_tokens` includes committed reservations and consumption once; `reserved_tokens` is its pending subset, so adding them double-counts. Release contributes zero. A reservation's Asia/Shanghai month remains its accounting month even if settlement crosses a month boundary. Consumption with no reservation history uses settlement month.
+The enterprise's `remaining_tokens - reserved_tokens` is spendable shared balance. Per-member quota field `used` includes committed reservations and consumption once; quota field `reserved` is its pending subset, so adding them double-counts. Release contributes zero. A reservation's Asia/Shanghai month remains its accounting month even if settlement crosses a month boundary. Consumption with no reservation history uses settlement month.
 
 A missing override inherits the enterprise default; a stored null override is explicitly unlimited; a stored zero pauses that member. Global defaults cannot be zero. Configuration audit rows do not create financial ledger entries. Owner exemption, former-member history and global-save override reset are explained in [quota](/reference/flows/member-quota-flow).
 

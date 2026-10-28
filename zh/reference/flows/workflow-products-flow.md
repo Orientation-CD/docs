@@ -100,7 +100,7 @@ sequenceDiagram
 | 公共API | 脚本≤20,000字符，场景0..12，录音0..1 | prompts恰好一个选择，无script，场景0..1，MP3>5秒 |
 | 已安装执行器 | 镜像内脚本解析/媒体/模型能力 | 参考片驱动remake，省略场景可丢弃自动抽取场景 |
 
-所有模式都需一张人物合成图。自定义参考片是已完成Video Asset，最大100 MiB、120秒。UI与服务端参考片字节上限均为100×1024×1024（104857600），实际字节/内容仍由服务端核验。[src/pkg-features/services/sameStyleVideo.ts → buildCustomReferenceSelection](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/sameStyleVideo.ts#L69)提交`__user_reference__`和唯一`称呼`字段，不查后台模板，不建script pin。系统选择走`buildSameStyleSelection`，按`purpose=same_style_video`发现模板，得到短期参考片/封面预览URL。播放到期刷新发现，不预留积分。
+所有模式都需一张 `character_image/primary` Image；剧本 UI 要求角色三视图合成图，同款 UI 要求一张本人照片，用于替换参考视频中的角色。自定义参考片是已完成Video Asset，最大100 MiB、120秒。UI与服务端参考片字节上限均为100×1024×1024（104857600），实际字节/内容仍由服务端核验。[src/pkg-features/services/sameStyleVideo.ts → buildCustomReferenceSelection](https://github.com/Orientation-CD/wechat_mini_program/blob/21db6d824a7b32417bda88e7e31d3f0b91dfa51c/src/pkg-features/services/sameStyleVideo.ts#L69)提交`__user_reference__`和唯一`称呼`字段，不查后台模板，不建script pin。系统选择走`buildSameStyleSelection`，按`purpose=same_style_video`发现模板，得到短期参考片/封面预览URL。播放到期刷新发现，不预留积分。
 
 ```mermaid
 sequenceDiagram
