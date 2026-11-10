@@ -56,7 +56,7 @@ pnpm check:design-system
 
 `refreshAdAssetVersions` 会合并并发刷新。省略 `homeHeroBanners` 会保留上一次有效列表，明确提供有效空数组才会清空。请求失败保留缓存并输出诊断警告。JSON 请求需要将 CDN 注册为 **request 合法域名**，不能只配置图片相关域名。
 
-生产包装脚本使用 `cdn.yuanzhushuzhi.com`，测试包装脚本与 `.env.example` 使用 `static.yuanzhushuzhi.com`。应按所选构建配置区分，而不是把所有环境替换成同一主机。完整配置形状与操作步骤见固定版本的[首页轮播指南](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/HOME_BANNERS.md)。
+生产包装脚本使用 `cdn.yuanzhushuzhi.com`，测试包装脚本与 `.env.example` 使用 `static.yuanzhushuzhi.com`。应按所选构建配置区分，而不是把所有环境替换成同一主机。完整配置形状与操作步骤见固定版本的[首页轮播指南](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/documents/HOME_BANNERS.md)。
 
 ## 共享组件与原生验证
 
@@ -66,6 +66,14 @@ pnpm check:design-system
 
 Markdown 结果渲染会净化输入 HTML，并给 rich-text 子节点明确样式，不支持的标记保留为文本。不能为了匹配设计稿而替换成不受限的 HTML 注入。
 
+## 最近使用是本地导航历史
+
+首页三张最近使用卡使用最多 200 条成功使用事件，时间窗为 30 天，按次数、最近时间、稳定功能顺序排序。`same_style_video` 归一为 `video_generation`。空位回退到语音/报告/视频；不可用功能被排除，未知可用性仍保留区别。本地排序不能开通后端 Feature。
+
+`createFeatureUsageRecorder` 捕获访客/账号存储作用域及会话代次，最多记录一次，身份切换后的迟到成功不写入。账号与访客历史不互相迁移，存储失败不影响已经成功的操作。类别选择只改变最近使用卡背景。真机审查应分别检查这些卡、三张编辑入口卡、图片失败以及专业设计异步加载。
+
+源码：[rankRecentFeatures](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/recentFeatures.ts#L39) · [createFeatureUsageRecorder](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureUsage.ts#L28)。
+
 ## 源码依据
 
-核验日期 2026-10-28：[主题状态](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/stores/theme.ts#L4) · [页面主题绑定](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/composables/usePageTheme.ts) · [生成器](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/generate-design-system.mjs) · [设计门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-design-system.mjs) · [首页生命周期](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [清单解析](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/adAssetVersions.ts#L136) · [Markdown 渲染](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-plans/services/markdownSummary.ts)。
+核验日期 2026-11-10：[主题状态](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/stores/theme.ts#L4) · [页面主题绑定](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/composables/usePageTheme.ts) · [生成器](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/generate-design-system.mjs) · [设计门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-design-system.mjs) · [首页生命周期](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pages/home/index.vue) · [清单解析](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/adAssetVersions.ts#L136) · [Markdown 渲染](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-plans/services/markdownSummary.ts)。

@@ -22,8 +22,8 @@ flowchart LR
 
 | 边界/角色 | 用途 |
 | --- | --- |
-| `yuanzhu-test` | 云测/联调；测试前仍需确认当前模型和支付模式 |
-| `yuanzhu-prod` | 生产；变更需要受保护发布证据 |
+| `yuanzhu-test` / `test-api.yuanzhushuzhi.com` | 服务已发布用户，必须使用受保护的 `--stage=production` |
+| `yuanzhu-prod` / `api.yuanzhushuzhi.com` | 所有者确认的测试/开发边界，使用 `--stage=test` |
 | `--stage=test` / `--stage=production` | 独立于 namespace 名称的风险分类，不改写 `ENVIRONMENT` |
 | `yuanzhu-ai-api` | HTTP API 与 Admin |
 | `yuanzhu-ai-submit-worker` | Workflow/Operation 调度、provider 派发、本地转换 |
@@ -55,10 +55,18 @@ flowchart LR
 
 对象生命周期策略须保留已准入输入版本和已发布依赖，不能只关注临时上传前缀。SQL 归档 receipt 可在 Asset 删除后继续负责迟到复制回执，不能为省存储批量删除。Redis 性能历史按分钟／日有界保留并归属发布版本；丢失时显示不可用／覆盖不全，不能伪造零历史。资金账本和耐久执行图仍以 SQL 为准。
 
+## 先确认实际用户群体，再选择保护级别
+
+上表是当前所有者确认的映射，覆盖历史命名：带 `test-api` 的域名实际服务生产用户。不能为让名称看起来符合惯例而交换 DNS、RDS 或命名空间。按实际用户选择发布保护，保留云端 `ENVIRONMENT`，遇到运行环境冲突应核对而非绕过。固定版本 runbook 较新的销售阶段激活章节明确记录了此映射。
+
+三维家增加不可变 H5 release 根和独立数据库 SDK 配置。API/H5 的发布/API origin 与 release 摘要须一致；更新 `versions.json` 不等于数据库激活。单一维护实例通过同一实际文件锁负责发布/GC。Redis 账号协调状态可由当前数据库凭据重建；恢复旧 Redis 快照后，放流前必须清除本 SDK 命名空间的旧状态，不能信任旧 ready token。
+
+源码：[deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md) · [app/three_vjia/account_credentials.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/account_credentials.py) · [app/three_vjia/maintenance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/maintenance.py)。
+
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [SAE 架构契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_ARCHITECTURE.md)
-- [环境与发布手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [不可变镜像部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy-image.sh)
+- [SAE 架构契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_ARCHITECTURE.md)
+- [环境与发布手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [不可变镜像部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy-image.sh)

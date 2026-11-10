@@ -28,7 +28,7 @@ pnpm check:design-system
 
 路由源码门禁只有证明局部 const 为查询串或空串，才移除相应尾部，这避免误删动态路由段；构建赋值中的静态素材 origin 与禁止的远端 API origin 分开识别。
 
-户型 fixture 来自候选后端分支。门禁证明前端符合这些 fixture，**不能**证明本轮后端 `main` 或线上部署已提供功能，见[户型契约范围](/zh/frontend/floor-plans)。不要对恰好占用熟悉端口的任意栈重新生成无关 fixture。
+户型 fixture 保留各自记录的来源身份。门禁证明前端符合这些 fixture；本轮另外核验了后端 main 的实际路由，但 fixture 通过仍不能证明部署已具备正确 release/配置，见[户型契约范围](/zh/frontend/floor-plans)。不要对恰好占用熟悉端口的任意栈重新生成无关 fixture。
 
 ## 实际小程序包体门禁
 
@@ -43,7 +43,7 @@ pnpm quality:mp-toutiao:mock
 | 门禁 | 本轮产品规则 |
 | --- | --- |
 | 主包及每个分包 | 各不超过1.5MiB，这是仓库自身预算 |
-| 包间引用 | 检查 JS import/require、JSON 组件、模板 include、样式 import，拒绝主包→分包及跨分包引用 |
+| 包间引用 | 检查 JS import/require、JSON 组件、模板 include、样式 import，拒绝普通同步跨包引用，仅放行逐项列明且有正确 placeholder/产物目标的微信异步边界 |
 | 微信主包余量 | 开启项目且**不是 API 生产档**时至少64KiB |
 | 抖音主包余量 | 共用检查器 minimum 为0，仍执行1.5MiB预算 |
 | 微信随包媒体 | 硬上限200KiB，超过180KiB警告 |
@@ -71,6 +71,14 @@ pnpm quality:mp-toutiao:mock
 
 记录提交、命令、平台/构建档、API origin、本地栈归属与结果。排除凭据、私钥、签名 URL、完整编辑器接力片段和邀请码 bearer。分别报告产物、模拟 UI、本地 API、真实供应商证据。
 
+## 回归新的准备与加载边界
+
+`test:package-budget` 也运行 `weixinSubpackageSources.test.mjs`。异步企业与作品组件应检查下载失败/重试、`onShow` 后首次挂载、离页和作用域切换。保留同步宿主生命周期；happy-dom 挂载通过不能证明原生分包加载。包体报告会列出主包大文件与目录，便于把预算变化追到真实产物。
+
+视频应覆盖参考视频 15 秒下限、权威费用预览、用户取消、价格变化重新确认，以及回执丢失后的准备正文原样重放。加入模型变化、成员额度拒绝，以及无私有输入权限的受保护详情。当前重点包括 `videoBillingPreview.test.ts`、`videoGenerationSubmit.test.ts`、`recentFeatures.test.ts` 等实际测试；组合门禁以 package.json 为准，不另造命令链。
+
+源码：[package.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [scripts/check-code-quality.mjs](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-code-quality.mjs) · [scripts/weixin-subpackage-sources.mjs](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/weixin-subpackage-sources.mjs)。
+
 ## 源码依据
 
-核验日期 2026-10-28：[当前命令链](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [包体检查器](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/mini-program-package-budget.mjs#L3) · [微信余量条件](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs#L189) · [抖音门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-douyin-quality.mjs) · [路由源码分析](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/api-contract-source.mjs) · [真实 UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/MINIPROGRAM_REAL_UI_TESTING.md)。
+核验日期 2026-11-10：[当前命令链](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [包体检查器](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/mini-program-package-budget.mjs#L3) · [微信余量条件](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-code-quality.mjs#L200) · [抖音门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-douyin-quality.mjs) · [路由源码分析](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/api-contract-source.mjs) · [真实 UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/documents/MINIPROGRAM_REAL_UI_TESTING.md)。

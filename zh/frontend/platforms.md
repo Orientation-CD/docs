@@ -63,6 +63,14 @@
 
 后端渠道模式、商户及回调配置必须与前端档位一致。模拟服务端订单与真实原生支付桥是两层机制，见[抖音支付](/zh/reference/douyin-payment)和[快速开始](/zh/get-started/quickstart)。
 
+## 在实际平台检查异步加载与诊断分享
+
+微信使用明确放行的企业/作品/专业设计异步分包、`view` placeholder 与可重试 loader；其他构建选用各自普通源码。应在真实产物检查首次加载、返回页面及分包下载失败。包体门禁通过不能证明原生组件到达时序。
+
+微信诊断在私有文件系统准备有限 JSON 文件，支持时用原生文件分享；不支持或失败时保留复制兜底。代次/离页守卫防止作用域改变后分享旧账号导出。声明真实剪贴板/分享 API 并验证真机行为，开发者工具支持可能不同。
+
+源码：[src/composables/useWeixinPackage.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/composables/useWeixinPackage.ts) · [src/services/diagnosticExport.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/diagnosticExport.ts)。
+
 ## 源码依据
 
-核验日期 2026-10-28：[构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/config/build-targets.mjs) · [平台运行时](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/runtime.ts) · [真机地址守卫](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/require-device-api-url.mjs) · [微信 LAN 脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/build_mp-weixin-local-test.sh) · [平台 helper](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/platform.ts) · [编辑器接力](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/floorPlanHandoff.ts#L8) · [支付桥](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-account/services/payment.ts) · [后端本地 runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)。
+核验日期 2026-11-10：[构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/config/build-targets.mjs) · [平台运行时](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/runtime.ts) · [真机地址守卫](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/require-device-api-url.mjs) · [微信 LAN 脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/build_mp-weixin-local-test.sh) · [平台 helper](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/platform.ts) · [编辑器接力](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/floorPlanHandoff.ts#L8) · [支付桥](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/services/payment.ts) · [后端本地 runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)。

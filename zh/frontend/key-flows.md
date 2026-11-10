@@ -15,7 +15,7 @@
 
 成功目录缺少某产品，才表示不可用；网络错误表示发现失败，应保留重试，不能变成“成功获取空目录”。分组卡片可以是编辑定义的导航，不代表任何 Feature 权益。
 
-专业设计有自己的页面级可用性加载器，并存在[后端版本尚未对齐的边界](/zh/frontend/floor-plans)，不能通过硬编码启用卡片绕过。
+专业设计有自己的页面级可用性加载器，后端已有[SDK/编辑器集成](/zh/frontend/floor-plans)，仍需分别核验 release 与产品就绪，不能硬编码启用卡片。
 
 ## 注册属于具体动作
 
@@ -67,6 +67,14 @@ flowchart LR
 
 当前有效套餐展示手动续费说明，不承诺自动扣费或提前续费。本地微信 mock 结算见[快速开始](/zh/get-started/quickstart)，选择 mock 配置不会自动替换原生支付调用。
 
+## 跟读最近使用入口与删除中的任务
+
+首页最近使用来自本地成功使用历史，在一次可见周期内等待目录刷新后固定顺序。返回首页重新计算；迟到的刷新票据不能重排隐藏页面。从最近使用进入视频，仍运行普通入口的可用性、费用与确认守卫。
+
+清理不可用时，删除可能返回带 `deletion_pending` 的终态任务。`observeJobDeletion` 将进程内占位同步到列表/详情，`redactDeletingJob` 移除结果 URL 与可播放/下载内容。`withJobDeletion` 串行化重试，遵守有限 Retry-After 冷却，并拒绝旧会话的迟到回调。收到 503 清理响应不代表删除被取消；应保留占位并沿受支持路径继续重试。
+
+源码：[useRecentFeatures](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/composables/useRecentFeatures.ts#L9) · [withJobDeletion](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/jobDeletionState.ts#L52)。
+
 ## 源码依据
 
-核验日期 2026-10-28：[首页](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [入口守卫](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/homeEntryGuard.ts#L9) · [图片提交](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/standardDesignSubmit.ts) · [Asset 暂存](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L156) · [提交](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L204) · [媒体缓存](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/localMediaStore.ts) · [音频验证](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/voiceAudioFiles.ts) · [支付桥](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-account/services/payment.ts)。
+核验日期 2026-11-10：[首页](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pages/home/index.vue) · [入口守卫](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/homeEntryGuard.ts#L9) · [图片提交](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/standardDesignSubmit.ts) · [Asset 暂存](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/designAssets.ts#L177) · [提交](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/designJobSubmit.ts#L206) · [媒体缓存](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/localMediaStore.ts) · [音频验证](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/voiceAudioFiles.ts) · [支付桥](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/services/payment.ts)。

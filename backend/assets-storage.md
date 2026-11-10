@@ -45,8 +45,14 @@ Use the target environment's existing credentials/settings. The command neither 
 
 ## Storage deployment boundary
 
-`S3_ENDPOINT` is the server endpoint; `S3_PRESIGN_ENDPOINT` must be reachable from the phone/browser. MinIO uses `s3v4`; the verified OSS compatibility path uses `s3`. Buckets stay private except explicitly published legal content. Versioning, CORS, HEAD/GET/copy/delete permissions and exact version retention must support the full archive lifecycle, not just successful direct upload.
+`S3_ENDPOINT` is the server endpoint; `S3_PRESIGN_ENDPOINT` must be reachable from the phone/browser. MinIO uses `s3v4`; the verified OSS compatibility path uses `s3`. Business objects stay private; legal documents and owned H5 files have explicitly scoped publication rules. Versioning, CORS, HEAD/GET/copy/delete permissions and exact version retention must support the full archive lifecycle, not just successful direct upload.
+
+## Published H5 files and storage diagnostics
+
+Business Asset inputs/results stay private. The owned ThreeVjia H5 publication uses the same configured ObjectStorage bucket under the explicit `3vjia/h5/` prefix and an aligned public root/CDN. Versioned release files retain immutable caching; stable bootstrap/index/catalog files use an explicit `no-cache` override. This is publication of owned application files, not public exposure of business Assets. Retirement deletes only validated manifest keys/versions; follow [deployment](/deploy/sae-deployment).
+
+[_log_storage_failure](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/storage.py) adds bounded `object_storage_failure` records with request ID, operation, reason, allowlisted error codes/status and exception-class chain. It does not log raw SDK bodies, object keys, signed URLs or credentials. Use request correlation to distinguish signing, exact-version read/copy and deletion failures; do not weaken version checks to make an upload pass.
 
 ---
 
-Source evidence · backend `e59716c8`: [app/assets/asset_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py) · [app/assets/asset_completion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_completion.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py) · [documents/ASSET_STORAGE_OPERATIONS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/ASSET_STORAGE_OPERATIONS.md).
+Source evidence · backend `749e82df`: [app/assets/asset_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_api.py) · [app/assets/asset_completion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_completion.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py) · [documents/ASSET_STORAGE_OPERATIONS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/ASSET_STORAGE_OPERATIONS.md).

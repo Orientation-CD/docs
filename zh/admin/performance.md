@@ -49,6 +49,12 @@
 
 导出/解读前先读[观测语义](/zh/backend/observability)。任何付费恢复操作前先核对持久化重试分类。
 
+## 关联视频运行版本与客户端证据
+
+视频诊断在可取得时保留 `runtime_version`，配置开始后的失败路径也可带版本。结合后端 `APP_VERSION`、任务/代际、镜像摘要与私有供应商源码判断差异；缺失是未知。客户端导出有限请求/响应证据，移除凭据和签名 URL，并对受保护的项目读取额外移除客户字段。用户分享的诊断文件不能代替持久化账本或供应商接纳回执。
+
+源码：[runtime_version](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/conversion/video_jinqiu_adapter.py#L46) · [diagnosticPayload](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/diagnosticPayload.ts#L25) · [src/services/diagnosticExport.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/diagnosticExport.ts)。
+
 ---
 
-源码依据 · backend `e59716c8`: [app/admin/performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/performance.py) · [app/core/performance_history.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/performance_history.py) · [app/core/performance_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/performance_reports.py) · [app/templates/admin/performance.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/performance.html).
+源码依据 · backend `749e82df`: [app/admin/performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/performance.py) · [app/core/performance_history.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/performance_history.py) · [app/core/performance_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/performance_reports.py) · [app/templates/admin/performance.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/performance.html).

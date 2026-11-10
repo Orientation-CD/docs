@@ -2,7 +2,7 @@
 
 先读[源码跟读路径](/zh/reference/system-walkthrough)。本页把**每条公开路由**连到真实 FastAPI 处理函数与专门的全链路解释：界面/repository 或外部触发、授权、业务调用、数据库/Redis/存储变化、响应和失败恢复。
 
-本页按业务领域组织联调入口。[完整固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md) 是精确字段、成功/重放状态和可达业务错误的规范。Admin 内部接口与条件 mock 有各自边界。
+本页按业务领域组织联调入口。[完整固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md) 是精确字段、成功/重放状态和可达业务错误的规范。Admin 内部接口与条件 mock 有各自边界。
 
 ## 约定与错误
 
@@ -80,7 +80,7 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 | `PUT /v1/workspaces/{workspace_id}/member-token-limit` | 当前 owner；null 或1..10,000,000；每次保存清空成员 override |
 | `PUT /v1/workspaces/{workspace_id}/members/{user_id}/token-limit` | 当前 owner；null 或0..10,000,000；零暂停成员 |
 
-按 Asia/Shanghai 预留月份记账，reserved 是 used 子集。[额度链路](/zh/reference/flows/member-quota-flow)解释校验、授权、审计、准入和结算。此前端快照没有额度编辑 UI。
+按 Asia/Shanghai 预留月份记账，reserved 是 used 子集。当前小程序已有成员自读与 owner 额度编辑。[额度链路](/zh/reference/flows/member-quota-flow)解释校验、授权、审计、准入和结算。
 
 ## Workflow 与兼容 Job
 
@@ -98,7 +98,7 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 
 图片请求示例，所有 UUID 都需替换为真实可访问身份：
 
-当前任务详情允许创建者或活动企业当前 owner 读取；owner 查看他人时隐藏输入且无写权限。见[历史授权](/zh/reference/flows/workflow-history-flow)。
+任务按 ID 详情允许原提交者或当前经过授权的企业 owner／负责人，可返回类型化输入；集合中的他人任务隐藏输入。写操作以当前服务端权限及具体责任检查为准，见[历史授权](/zh/reference/flows/workflow-history-flow)。
 
 ```json
 {
@@ -113,6 +113,8 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 实际 Feature、模板、必需角色以发现为准，示例不保证所有环境都配置该 Feature。canonical role 为 `primary`、`mask`、`reference`，服务端核对不可变上传角色。`/v1/design-jobs` 仍是进程内兼容适配器，并保留适用历史/状态/重试/产物操作；新客户端使用 Workflow，退休字段可能要求重新提交。
 
 文字／文案、有序语音、Blueprint／PPTX、视频使用不同 discriminator body。脚本视频 API 接受一张人物图、0–12 场景、可选录音、最多20,000字脚本；此 UI 要求恰好一张场景图且脚本最多1,000字。同款系统／自传分支使用 prompts、必须超过5秒的录音、0–1场景、系统或上传的参考 Video；替换项及可选 replace_scope 另有冻结契约。见[视频](/zh/backend/video)，API 接受永远不代表供应商验收。
+
+参考视频须为 15–120 秒（含边界）、不超过 100 MB 的 MP4。时长／模型计费先只读预览并确认金额／模型，再冻结已接受商业快照；费用变化在预留前返回 VIDEO_PRICE_CHANGED，见[视频费用确认](/zh/reference/flows/video-billing-flow)。
 
 ## 支付与平台事件
 
@@ -134,6 +136,16 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 
 `/admin/*` 使用浏览器会话/CSRF，排除公开 OpenAPI；条件 `/mock/*` 和独立 mock provider 是测试接口。实现动作前阅读 [OpenAPI 边界](/zh/reference/openapi)与完整契约的逐端点错误表。
 
+## 新增业务链路
+
+| API 领域 | 逐接口深入讲解 |
+| --- | --- |
+| 户型编辑器、原始 H5 网关、作品／全景 | [上下文、输入、转发、归属、整组管理及恢复](/zh/reference/flows/floor-plan-flow) |
+| 三维家图片与发现 | [七种 Feature 的 SDK 准入与发现接力](/zh/reference/flows/three-vjia-image-flow) |
+| 视频费用预览 | [只读预览、费用变化确认、冻结计费与重试](/zh/reference/flows/video-billing-flow) |
+| 项目指派与销售阶段 | [交接](/zh/reference/flows/project-assignment-flow)、[独立来源／自动完成／转化统计](/zh/reference/flows/project-stages-flow) |
+| 企业日报 | [成员保存、历史、owner 已读与批注](/zh/reference/flows/daily-report-flow)；当前前端无调用者 |
+
 ## 逐 API 全链路索引 {#generated-route-index}
 
 此清单记录声明的默认成功状态与 deprecated 元数据，不声明授权，也不穷举运行/重放响应。相关语义以上方人工说明和固定 REST 契约为准。
@@ -144,7 +156,7 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 
 已按[记录的源码版本](/zh/reference/source-revisions)核对。
 
-- [方法/路径/认证/状态规范与错误表](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md)
-- [公开请求响应 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
-- [Asset 准入路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py)
-- [Workflow 与兼容路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py)
+- [方法/路径/认证/状态规范与错误表](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md)
+- [公开请求响应 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)
+- [Asset 准入路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_api.py)
+- [Workflow 与兼容路由](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py)

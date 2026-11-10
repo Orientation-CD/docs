@@ -32,10 +32,42 @@ A failed-task retry is a separate action at `/v1/workflows/{id}/retry`, using it
 
 ## Read, move and delete
 
-`GET /v1/workflows` is creator history; `/v1/workspace/workflows` is the owner projection. A current enterprise owner may read another creator's visible detail with `inputs:[]` and the actual `submitted_by`; this does not grant write authority. Each read rechecks access and returns fresh result capabilities.
+`GET /v1/workflows` without a project is original-author history. With a readable project filter it can return previous authors' tasks in that project; `/v1/workspace/workflows` remains a selected-workspace owner projection. Collection rows hide other authors' inputs, while authorized by-ID detail deliberately exposes input Assets to the author, current project assignee or enterprise owner. `submitted_by` stays original; `project_assignee` and `permissions` describe current responsibility. Fresh SQL rechecks access after capability signing. None of these read paths grants another author's write or input-reuse rights.
 
-Move checks expected source Project, same workspace, terminal lifecycle and creator ownership. Delete records durable cleanup intent and removes exact retained versions only when allowed. A cleanup outage can leave an accepted deletion claim; use its documented retry/reconciliation rather than manual SQL deletion. See [history actions](/reference/flows/workflow-history-flow).
+New move/retry/continue actions require original authorship and current responsibility, with each action's current scope/lifecycle rules. Move checks expected source and terminal state; a linked floor-plan execution delegates to whole-Group move. A new deletion claim requires original author/current assignee, while already durable cleanup continues without treating later assignment as cancellation. Retained author deletion need not acquire new membership, although frontend write preflight can be stricter. A cleanup outage leaves `deletion_pending`, empty media projection and a visible retryable placeholder. See [history actions](/reference/flows/workflow-history-flow).
+
+Sources: [readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py#L79) · [finalize_workflow_reads](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py#L117) · [move_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_jobs.py#L185) · [delete_terminal_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/design_job.py#L487).
+
+## Recover UNKNOWN without another paid POST {#unknown-recovery}
+
+A timeout after dispatch cannot prove that the supplier rejected the task. The existing attempt retains its immutable encrypted request envelope, provider attempt key, generation and acceptance uncertainty. `ensure_unknown_deadline` initializes durable `provider_unknown_started_at`/`provider_unknown_deadline_at` once: the window is 120 seconds, and requeue/restart does not reset it. An explicitly recorded UNKNOWN starts from its recorded ambiguity; a recovered lost lease can derive the clock from original send evidence. This is separate from a known accepted job's normal result polling.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant E as Attempt executor
+  participant DB as Durable attempt and outbox
+  participant R as Recovery worker
+  participant P as Provider read-only recovery
+  E->>DB: Retain possibly sent attempt and initialize deadline
+  R->>DB: Claim due confirmation with generation and lease fence
+  R->>P: Confirm original key request and send evidence
+  P-->>R: Exact receipt or no new evidence
+  R->>DB: Accept fenced receipt or schedule next read
+  R->>DB: At deadline retain UNKNOWN and fail AMBIGUOUS NEVER
+```
+
+| Steps | Source | Evidence and boundary |
+| --- | --- | --- |
+| 1 | [finish_provider_attempt](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_attempt.py#L586) · [ensure_unknown_deadline](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/provider_unknown.py#L11) | UNKNOWN retains original request evidence; another reservation must not open a new paid send |
+| 2 | [reconcile_unknown_provider_handoffs](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_submission_dispatch.py#L525) | Outbox uses recovery_only, protocol/generation and recovery-epoch deduplication; Redis wake is not a new provider attempt |
+| 3–5 | [recover_unknown_provider_attempt](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_attempt.py#L773) · [unknown_query_due](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/provider_unknown.py#L40) | At most eight confirmations, each at most three seconds and bounded by remaining time; network time never extends the deadline |
+| 6 | [preserve_unknown_failure](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_attempt.py#L324) | Terminal failure keeps acceptance UNKNOWN, failure_class AMBIGUOUS and retry disposition NEVER; it does not assert the supplier did nothing |
+
+Only a provider implementing `AmbiguityRecoverableProvider` can perform these confirmations. Recovery decodes the exact envelope and invokes `recover_unknown`, never `submit`; unavailable/malformed evidence or an unsupported provider waits for expiry. Follow-up delays are 1, 2, 4, 8, 16, 30 and 30 seconds, clipped to the original deadline; hitting eight queries schedules no ninth query. Leases, query count, envelope, request count and generation are checked again before a receipt changes state. Late or stale responses cannot revive an expired/new-generation execution. A read error does not establish acceptance or rejection.
+
+If a trustworthy original receipt is recovered before expiry, existing finish/finalization logic resumes that attempt and its normal result path. If not, the graph reaches the existing terminal ambiguous failure; same-ID explicit retry stays blocked by its retained uncertainty. Operator investigation uses the same Job/submission/attempt evidence. Changing URL, key, generation or manually replaying supplier POST is not a recovery operation. [Runtime tracing](/reference/flows/runtime-debugging) explains how to locate that evidence.
 
 ---
 
-Source evidence · backend `e59716c8`: [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py).
+Source evidence · backend `749e82df`: [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_submission_retry.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py).

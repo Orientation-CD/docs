@@ -2,7 +2,20 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { sourceLinks, checkSourceAnchor, candidateApiForPage, validateCandidateApi, candidateContractFiles } from '../scripts/source-links.mjs'
+import { sourceLinks, checkSourceAnchor, candidateApiForPage, validateCandidateApi, candidateContractFiles, frontendOnlyCandidateOperations } from '../scripts/source-links.mjs'
+
+test('promoted fixture operations leave candidate scope even when path parameter names/converters differ', () => {
+  const contract = { paths: {
+    '/v1/floor-plan-works/{group_id}': { get: {}, patch: {}, parameters: [] },
+    '/v1/floor-plan-render': { post: {} },
+  } }
+  const backend = [{ method: 'PATCH', path: '/v1/floor-plan-works/{group_id:path}' }]
+  assert.deepEqual(frontendOnlyCandidateOperations(contract, backend), [
+    { method: 'GET', path: '/v1/floor-plan-works/{group_id}' },
+    { method: 'POST', path: '/v1/floor-plan-render' },
+  ])
+  assert.deepEqual(frontendOnlyCandidateOperations({}, backend), [])
+})
 
 test('source checks reject stale definition anchors even when the new line is in bounds', () => {
   const sha = 'a'.repeat(40)

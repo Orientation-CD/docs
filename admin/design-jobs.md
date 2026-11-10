@@ -16,6 +16,10 @@ The detail view can offer a generation-bound **mark failed** action for eligible
 
 Before intervention, preserve the current error, generation, diagnostics and affected IDs. Use [Performance](/admin/performance) to distinguish a live backlog from a stuck attempt. Configuration fixes belong in [Workflows](/admin/workflows) or [Models](/admin/providers), and do not rewrite an accepted run's frozen inputs.
 
+## Recognize SDK-backed task families
+
+The Workflow node administration projection now accepts `render_floor_plan` alongside its existing supported operation families. ThreeVjia tasks carry SDK configuration/release/attempt evidence; configure their active release under [SDK administration](/admin/providers), rather than recreating a retired provider connection. The same rule still applies to intervention: a local status or an unknown supplier outcome is not proof that a new external submission is safe.
+
 ---
 
-Source evidence · backend `e59716c8`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/workflows.py) · [app/admin/workflow_diagnostics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/workflow_diagnostics.py) · [app/templates/admin/design_jobs.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/design_jobs.html).
+Source evidence · backend `749e82df`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/workflows.py) · [app/admin/workflow_diagnostics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/workflow_diagnostics.py) · [app/templates/admin/design_jobs.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/design_jobs.html).

@@ -16,6 +16,10 @@
 
 干预前保留错误、代际、诊断及受影响 ID。使用[性能](/zh/admin/performance)区分正常积压与卡住的尝试。配置修复在 [Workflows](/zh/admin/workflows)或[模型](/zh/admin/providers)中完成，不改写已接受任务的冻结输入。
 
+## 识别 SDK 任务家族
+
+Workflow 节点后台投影现已把 `render_floor_plan` 纳入受支持的操作家族。三维家任务带 SDK 配置／发布／尝试证据，应在 [SDK 管理](/zh/admin/providers)配置有效发布，不能重新创建已退出的服务商连接替代它。运维干预仍遵守同一边界：本地状态或未知供应商结果不能证明可以安全地再提交一次外部请求。
+
 ---
 
-代码依据 · backend `e59716c8`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/workflows.py) · [app/admin/workflow_diagnostics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/workflow_diagnostics.py) · [app/templates/admin/design_jobs.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/design_jobs.html).
+代码依据 · backend `749e82df`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/workflows.py) · [app/admin/workflow_diagnostics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/workflow_diagnostics.py) · [app/templates/admin/design_jobs.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/design_jobs.html).

@@ -1,0 +1,347 @@
+[
+  {
+    "method": "PUT",
+    "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/assignment",
+    "page": "reference/flows/project-assignment-flow",
+    "anchor": "assign-project",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "assign_project"
+      },
+      {
+        "path": "app/workspaces/project_jobs.py",
+        "symbol": "active_task_project"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/services/projectAssignment.ts",
+        "symbol": "assignProject"
+      }
+    ],
+    "trigger": {
+      "en": "Project assignment confirmation or the new assignee opens the assigned detail.",
+      "zh": "项目指派确认，或新负责人打开交接详情。"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/assignment/seen",
+    "page": "reference/flows/project-assignment-flow",
+    "anchor": "assignment-seen",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "acknowledge_assignment"
+      },
+      {
+        "path": "app/workspaces/project_jobs.py",
+        "symbol": "require_assignee_project"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/services/projectAssignment.ts",
+        "symbol": "acknowledgeAssignment"
+      }
+    ],
+    "trigger": {
+      "en": "Project assignment confirmation or the new assignee opens the assigned detail.",
+      "zh": "项目指派确认，或新负责人打开交接详情。"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/stages/{stage}",
+    "page": "reference/flows/project-stages-flow",
+    "anchor": "put-project-stage",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "put_project_stage"
+      },
+      {
+        "path": "app/workspaces/project_stages.py",
+        "symbol": "add_manual_stage"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/services/projectSalesStages.ts",
+        "symbol": "writeSalesStage"
+      }
+    ],
+    "trigger": {
+      "en": "Project detail sales-stage controls or event timeline.",
+      "zh": "项目详情销售阶段控件或阶段时间线。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/stages/{stage}",
+    "page": "reference/flows/project-stages-flow",
+    "anchor": "delete-project-stage",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "delete_project_stage"
+      },
+      {
+        "path": "app/workspaces/project_stages.py",
+        "symbol": "cancel_stage"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/services/projectSalesStages.ts",
+        "symbol": "writeSalesStage"
+      }
+    ],
+    "trigger": {
+      "en": "Project detail sales-stage controls or event timeline.",
+      "zh": "项目详情销售阶段控件或阶段时间线。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/projects/{project_id}/stage-events",
+    "page": "reference/flows/project-stages-flow",
+    "anchor": "project-stage-events",
+    "backend": [
+      {
+        "path": "app/workspaces/project_api.py",
+        "symbol": "get_project_stage_events"
+      },
+      {
+        "path": "app/workspaces/project_stage_views.py",
+        "symbol": "stage_event_responses"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/services/projectSalesStages.ts",
+        "symbol": "readSalesEvents"
+      }
+    ],
+    "trigger": {
+      "en": "Project detail sales-stage controls or event timeline.",
+      "zh": "项目详情销售阶段控件或阶段时间线。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/sales-metrics",
+    "page": "reference/flows/project-stages-flow",
+    "anchor": "enterprise-sales-metrics",
+    "backend": [
+      {
+        "path": "app/workspaces/workspace_api.py",
+        "symbol": "get_enterprise_sales_metrics"
+      },
+      {
+        "path": "app/admin/enterprise_sales_metrics.py",
+        "symbol": "enterprise_sales_metrics"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/projectSalesMetrics.ts",
+        "symbol": "loadSalesMetrics"
+      }
+    ],
+    "trigger": {
+      "en": "Owner dashboard sales conversion period selection.",
+      "zh": "所有者看板选择销售转化统计周期。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports/me/status",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-status",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "status"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "member_status"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports/me",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-calendar",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "history"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "calendar"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports/me/{date}",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-own-detail",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "get_report"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "read_detail"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports/me/{date}",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-save",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "put_report"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "save_report"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports/me/{date}/comment-seen",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-comment-seen",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "see_comment"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "see_comment"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-owner-day",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "get_owner_day"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "owner_day"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports/{user_id}/{date}",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-owner-detail",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "get_owner_detail"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "owner_detail"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports/{user_id}/{date}/read",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-read",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "read_owner_report"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "mark_read"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/v1/workspaces/{workspace_id}/daily-reports/{user_id}/{date}/comment",
+    "page": "reference/flows/daily-report-flow",
+    "anchor": "daily-report-comment",
+    "backend": [
+      {
+        "path": "app/workspaces/daily_report_api.py",
+        "symbol": "comment_owner_report"
+      },
+      {
+        "path": "app/workspaces/daily_reports.py",
+        "symbol": "save_comment"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
+      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+    }
+  }
+]

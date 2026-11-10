@@ -18,6 +18,10 @@ Lists use bounded server-side pagination/search. Partial updates must preserve f
 
 The backend exposes `/admin/configuration/export` for an authorized deployment snapshot. Configuration import/export is broader than prompt archive replacement and must preserve secrets/compatibility boundaries. Keep the canonical tooling documentation in the backend; the docs site itself is a separate VitePress project.
 
+## SDK activation has a prepare/commit boundary
+
+[admin_activate_three_vjia_sdk](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/three_vjia_sdk.py) first authenticates and checks CSRF, then prepares the release contract and account installation without retaining a database session checkout across catalog/storage/Redis work. It checks displayed configuration generation and credential revision, takes the release/configuration locks for short database activation, rechecks admin and commits. `SDK_CONFIGURATION_CHANGED` requires reload/reconciliation. The post-commit process notification is a prewarm hint: its failure cannot turn a committed activation into a failed save. Keep browser controls and backend generation checks together when changing this UI.
+
 ---
 
-Source evidence · backend `e59716c8`: [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/__init__.py) · [app/admin/dependencies.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/dependencies.py) · [app/core/configuration/config_export.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/configuration/config_export.py).
+Source evidence · backend `749e82df`: [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/__init__.py) · [app/admin/dependencies.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/dependencies.py) · [app/core/configuration/config_export.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/configuration/config_export.py).

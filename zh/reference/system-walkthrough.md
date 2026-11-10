@@ -4,7 +4,7 @@ Reference 是源码学习路径。先选一个你在小程序里认得的操作�
 
 ## 第一条可以亲手追踪的链 {#first-journey}
 
-使用[本地真实 API 教程](/zh/get-started/quickstart)，按配置模拟外部服务。前端 Mock 不会到达 SQL、Redis 或 worker。先看[对齐状态](/zh/reference/integration-status)，新户型客户端不是可用于此后端 main 的闭环练习。
+使用[真实本地 API 教程](/zh/get-started/quickstart)，按配置模拟外部服务。前端 Mock 不经过 SQL、Redis 或 worker。先做普通图片，配置 SDK／H5 后再学[户型链路](/zh/reference/flows/floor-plan-flow)。[对齐状态](/zh/reference/integration-status)区分当前客户端调用与仅后端日报。
 
 选一个图片任务，记录用户 ID、空间 ID、上传 Asset ID、动作 key 和公开 Job ID。用这些身份跨进程连接证据，不能只靠文件名和进度百分比。
 
@@ -64,10 +64,10 @@ sequenceDiagram
 
 可以从这些真实入口开始：
 
-- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts#L369)
-- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1135)
-- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2939)
-- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/worker.py#L254)
+- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/request.ts#L370)
+- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py#L1229)
+- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L3291)
+- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/worker.py#L269)
 
 不能仅凭文件名推测实际路径。当前 API 支持主入口 `/v1/workflows`，但已交付的部分图片、语音、视频表单仍明确走 `/v1/design-jobs` 兼容适配器。[产品路由矩阵](/zh/reference/flows/workflow-products-flow#frontend-routing)逐项列出真实调用者。
 
@@ -85,7 +85,7 @@ sequenceDiagram
 | 项目隐私、企业席位、推荐奖励有什么不同？ | [项目](/zh/reference/flows/project-flow) · [成员](/zh/reference/flows/workspace-membership-flow) · [推荐奖励](/zh/reference/flows/referral-rewards-flow) |
 | 谁决定付款后发积分、退款后回收积分？ | [支付](/zh/reference/flows/payment-flow) · [抖音支付](/zh/reference/douyin-payment) · [退款](/zh/reference/flows/refund-flow) |
 | 企业有余额，为什么某成员仍不能提交？ | [月额度与记账月份](/zh/reference/flows/member-quota-flow) |
-| 哪个新前端功能尚不能在此后端 main 运行？ | [对齐状态](/zh/reference/integration-status) · [户型](/zh/frontend/floor-plans) |
+| 哪些能力需要 SDK 配置，哪些还没有客户端？ | [对齐状态](/zh/reference/integration-status) · [户型](/zh/frontend/floor-plans) |
 
 [逐 API 路由索引](/zh/reference/rest-api#generated-route-index)把每条公开路由声明连到真实处理函数和对应端点的链路解释。Webhook 的触发者是供应商；运维 API 可能没有小程序按钮。文档会说明这一点，不虚构前端入口。条件 Mock 路由、浏览器 Admin 路由另有边界，不冒充手机公开 API。
 
@@ -116,3 +116,7 @@ erDiagram
 5. 关闭再打开详情页，用 GET 请求和前端轮询器解释结果为什么能跨页面保留。
 
 某一步说不出具体函数或存储身份，就回到那一章的代码导航表。无需按字母顺序通读整个仓库。
+
+## 继续跨越新的边界
+
+继续追[SDK 编辑器／作品／全景](/zh/reference/flows/floor-plan-flow)、[三维家图片／发现](/zh/reference/flows/three-vjia-image-flow)、[视频费用确认](/zh/reference/flows/video-billing-flow)、[项目交接](/zh/reference/flows/project-assignment-flow)、[阶段证据](/zh/reference/flows/project-stages-flow)与[日报](/zh/reference/flows/daily-report-flow)。始终保留真实身份：Group 是不透明供应商身份，负责人代表当前责任，提交者是不可变历史，日报成员身份属于具体成员期间。H5 保存成功、平台 Job 接受、产物完成、钱包结算是不同检查点。

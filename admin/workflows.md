@@ -21,4 +21,8 @@ The old `/admin/operations` GET remains an alias of this view, while global Oper
 
 ---
 
-Source evidence · backend `e59716c8`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/workflows.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_configuration.py) · [app/templates/admin/workflow_views.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/workflow_views.html).
+Source evidence · backend `749e82df`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/workflows.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_configuration.py) · [app/templates/admin/workflow_views.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/workflow_views.html).
+
+## ThreeVjia SDK nodes
+
+SDK execution is configured through dedicated ThreeVjia administration and release capability, not an arbitrary ordinary provider-model picker. Its accepted binding freezes configuration generation and release evidence. Workflow product activation, SDK readiness and customer entitlement remain distinct. Follow [SDK configuration](/backend/floor-plans) and [providers](/admin/providers).

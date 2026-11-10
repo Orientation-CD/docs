@@ -9,10 +9,10 @@
 | 入口 | 阅读源码时寻找什么 |
 | --- | --- |
 | 首页 → AI设计 | 轻盈／专业设计落地页、`featureGroups` 与 Feature 启动器 |
-| AI轻盈设计 | 室内／家具／彩平图、语音总结、自定义设计、报告与旧房改造 |
-| AI专业设计 | 户型编辑、渲染、作品管理和全景前端；**本次后端 main 没有其专用接口** |
+| AI轻盈设计 | 室内／家具／彩平图、自定义设计及内联旧房改造；语音／报告另有快捷入口 |
+| AI专业设计 | 户型编辑、作品、图片／全景渲染及共享 SDK 执行；跟读原始 H5 接力 |
 | AI创作 | 剧本视频、做同款视频、文案及已配置的创作入口 |
-| 项目 | 个人项目、企业成员看板；所有者只读视图有独立权限边界 |
+| 项目 | 当前负责人项目、成员额度、指派交接及独立销售阶段；区分读取与写入权限 |
 | 账户与会员 | 登录／同意、工作区、套餐、积分、订单和邀请 |
 
 名称、卡片与主题属于前端展示。实际提交仍由服务端功能发现、有效模板、权益和钱包检查决定能否运行。路由存在也不表示模型或付费供应商已配置好。
@@ -35,4 +35,4 @@
 
 [来源记录](/zh/reference/source-revisions)固定完整提交。示例描述这组版本，不代表任意部署或未合并分支。仍暴露的适配接口集中在[兼容参考](/zh/reference/compatibility)；新集成沿规范 Workflow 契约学习。
 
-源码：[src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
+源码：[src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)

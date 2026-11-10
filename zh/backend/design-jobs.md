@@ -20,4 +20,8 @@
 
 ---
 
-代码依据 · backend `e59716c8`: [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/api/__init__.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_configuration.py).
+代码依据 · backend `749e82df`: [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/api/__init__.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_configuration.py).
+
+## 普通图片模型与 SDK 图片家族
+
+上方模型节点步骤适用于普通图片生成。七个三维家 Feature 共用 `three_vjia_image` SDK 执行家族，使用原始 H5 请求准备、冻结渲染文档／主图 pin 及特定发布版绑定，不是新增普通供应商模型行。见[SDK 架构](/zh/backend/floor-plans)和[图片调用链](/zh/reference/flows/three-vjia-image-flow)。

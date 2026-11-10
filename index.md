@@ -53,16 +53,16 @@ YuanZhu AI (装易装AI) supports design/renovation images, recording summaries,
 
 | Repository | Working branch | Documented source |
 | --- | --- | --- |
-| [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | `3662578` |
-| [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | `e59716c` |
+| [wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program) | `ui-integration` | `88c75c1f` |
+| [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | `749e82df` |
 | [docs](https://github.com/Orientation-CD/docs) | `main` | This bilingual documentation site |
 
-The content was checked on **2026-10-28**. Implementation in a branch does not prove a feature is enabled or has passed device/production acceptance. Current public product API paths begin with `/v1`; source evidence distinguishes client UI limits from wider backend contracts.
+The content was checked on **2026-11-10**. Implementation in a branch does not prove a feature is enabled or has passed device/production acceptance. Current public product API paths begin with `/v1`; source evidence distinguishes client UI limits from wider backend contracts.
 
 ## Source evidence
 
-[Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts) · [Frontend commands](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Backend contracts](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py) · [Local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md).
+[Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [Frontend commands](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [Backend contracts](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py) · [Local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md).
 
 ## Audited integration boundary
 
-The frontend has new design/theme/dashboard work and candidate floor-plan APIs; backend main adds same-style video, input archival, member quotas and performance history. Read [what is actually aligned](/reference/integration-status) before choosing a full-stack exercise.
+This source pair adds professional floor-plan/ThreeVjia SDK execution, member-quota UI, project assignment and independent sales stages, time/model video billing and backend daily reports. Start with [actual integration boundaries](/reference/integration-status).

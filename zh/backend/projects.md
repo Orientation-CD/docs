@@ -1,37 +1,27 @@
-# 项目、成交结果与企业活跃度
+# 项目、负责关系与销售证据
 
-项目在显式工作空间内归组同一创建者的 Workflows。即使在企业中，项目管理仍然私有；当前所有者的企业概览只披露单独规定的子集。
+Project 在空间内组织内容，分别保存不可变创建者和当前负责人。交接时，工作流和户型作品保留各自原作者；当前负责关系控制新提交与管理，企业共享池仍是付款方。具体处理函数和失败分支见[项目增改查与清理](/zh/reference/flows/project-flow)、[指派](/zh/reference/flows/project-assignment-flow)、[销售阶段](/zh/reference/flows/project-stages-flow)。
 
-## 项目生命周期
+## 身份、选择与容量
 
-每个用户/工作空间都有临时项目（scratch）、普通项目和持久默认选择。设备当前选择保存在设备上。普通字段包含名称、客户、地址、描述、面积与户型；scratch 不能像普通客户项目一样编辑。
+每位用户在每个空间有永久临时项目和服务端默认偏好，设备当前选择保存在本地。项目字段包括客户／地址／名称、面积和户型。列表按当前负责人过滤；所有者详情可查看企业普通项目。响应给出创建者／负责人、指派版本和逐操作权限。所有者代创建初始化交接信息，交接把前任默认修复为临时项目。名称唯一性和 20 项目容量按负责人／空间计算；启用成交流失后已关闭项目不占容量，清理中的项目仍可占位。
 
-使用 `/v1/workspaces/{workspace_id}/projects` 列表/创建，对应详情/PATCH 更新，通过 `/default` 设置持久默认。删除需显式选择 `delete_jobs` 或 `move_to_scratch`，可能异步完成。活动任务或保留依赖可能阻止操作。移动 Workflow 保留原请求身份和计费来源。
+## 两种进度模式
 
-## 状态目录与结果
+`PROJECT_OUTCOMES_ENABLED` 保留旧的线性阶段／成交流失行为；`PROJECT_SALES_STAGES_ENABLED` 选择新的独立证据模式，并同时启用成交流失。两者默认关闭。通过登录后的目录判断能力，不能从前端代码或数据库字段存在就推断生产开关。
 
-认证的 `GET /v1/project-statuses` 返回有序标签、稳定 code 与停滞阈值。基础阶段为 `NEW`、`REQUIREMENTS_CAPTURED`、`REPORT_PRODUCED`。完成语音总结或报告可按既有阶段规则推进主阶段。
+销售模式中，`ProjectStageSource` 保存七个可独立点亮阶段的人工、自动及迁移来源，`ProjectStageEvent` 保留变更审计。未关闭时当前阶段取最高已点亮来源；签单要求量房或到店证据。自动任务证据不能手动移除，也不能撤销最后一个签单资格。恢复跟进保留证据并重新检查负责人容量。专门阶段 PUT／DELETE 与事件流共享项目权限，阶段投影和活动同事务提交。旧版最远阶段／周期说明只适用于旧模式。
 
-`PROJECT_OUTCOMES_ENABLED` 默认 false。开启后目录加入 `WON`、`LOST` 和流失原因；关闭项目保留原主阶段，重新打开则以所选主阶段开始新周期。PATCH 只接受已发布、可选的 code。关闭开关时最多 20 个普通项目加 scratch；开启后仅进行中普通项目占用该额度，因此已关闭项目可使可见列表更长。
+## 作者、只读权限与已受理执行
 
-首次开启需要文档要求的前端采纳和保护式 API 停机窗口。不能混合开关状态服务，也不能在已有结果数据后关闭开关。见[发布控制](/zh/deploy/sae-deployment)。
+[readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py#L79) 检查原任务作者、当前所有者或当前项目负责人，`readable_project` 另查导航权。`finalize_workflow_reads` 在签名后重新读取 SQL 权限并计算变更能力。查看前任结果不转移输入来源所有权或任务写权限；原作者变更也需要当前负责关系。已受理执行使用 [active_task_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_jobs.py#L138)，因此交接不取消任务，也不改变已冻结账务归因。
 
-## 进度与活跃度不同
+整项目清理锁定全部内容作者，包含没有任务的户型作品。混合作者内容要求所有者权限，移至临时项目按各作者自己的临时目标处理。异步删除先提交持久化认领再返回 202，通过恢复机制继续派发／清理；从有效列表消失并不代表物理清理已经完成。
 
-`furthest_status` / `furthest_reached_at` 一起表示当前周期到达过的最高主阶段。回退阶段保留最高值，重新打开重置周期。未知/不可信的 pair 投影为两个 null。
+## 活动、销售统计与日报
 
-已接受的项目修改及根 Workflow 操作记录活跃度。根任务最终成功/失败计入项目活跃度，但不是成员人工操作。读取、默认选择、幂等重放、自动重试与子任务不会增加人工活跃事件。只更新时间戳不会改写项目 `updated_at`。
+真实项目操作和符合条件的根任务完成更新可信活动。读取、设默认和交接已读不制造成员活动。活动可信状态故障必须报错，不能被投影成不活跃或零。
 
-## 企业概览
+所有者销售统计使用当前成员／当前负责人和最早有效证据日期，按所选北京周期分组。团队比例累加原始计数，零分母为 null，区别于概览筛选后的阶段分布。[日报](/zh/reference/flows/daily-report-flow) 在提交时按北京自然日及当前任期冻结实际创建者／操作者／作者活动，不以当前谁负责项目推断当天谁做了工作。
 
-成员收到共享余额/消费；仅所有者收到成员数组、私有项目摘要、`last_active_at`、项目 `last_activity_at`、`plan_count` 与缩略图。`plan_count` 是当前项目的根历史任务总数，不是已完成方案或图片数；字段存在（包括 0）才是能力信号。
-
-活跃度可信边界由部署状态管理。状态缺失/损坏时相关操作返回 `503 PROJECT_ACTIVITY_STATE_UNAVAILABLE`；不能把 null 理解为不活跃，也不能通过初始化/清空可信状态绕过错误。停滞按北京时间日历日及目录阈值计算，只有**超过**阈值才提示。缩略图选择、前成员隐私及恢复规则见完整 [REST 合同](/zh/reference/rest-api)。
-
-## 所有者详情与成员看板
-
-当前服务端共享任务详情加载器允许创建者，或活动企业的当前 owner 读取。owner 查看他人任务保留真实提交者并返回 `inputs: []`；重试、移动、删除、源素材复制仍属于创建者操作。前端成员只读视图在轮询生命周期重新核对账号／空间与成员／项目证据。当前看板展示在职成员，没有“离职成员”分区；后端保留历史不代表现有 UI 也展示。见[前端项目](/zh/frontend/projects)和[详情链路](/zh/reference/flows/workflow-history-flow)。
-
----
-
-代码依据 · backend `e59716c8`: [app/workspaces/project_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_api.py) · [app/workspaces/project_statuses.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_statuses.py) · [app/admin/enterprise_overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/enterprise_overview.py).
+源码地图：[app/workspaces/project_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py) · [app/workspaces/project_jobs.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_jobs.py) · [app/workspaces/project_stages.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_stages.py) · [app/workspaces/project_deletion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_deletion.py) · [app/admin/enterprise_sales_metrics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/enterprise_sales_metrics.py) · [app/workspaces/daily_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/daily_reports.py)。

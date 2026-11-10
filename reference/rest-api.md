@@ -2,7 +2,7 @@
 
 Start with [the source-reading course](/reference/system-walkthrough). This index links **every public route** to its actual FastAPI handler and a dedicated full-chain explanation: UI/repository or external trigger, authorization, service calls, database/Redis/storage changes, response and failure recovery.
 
-This page is a domain-oriented integration map. The [complete pinned REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md) is normative for exact fields, successful/replay statuses and every reachable domain error. Internal Admin and conditional mocks have different boundaries.
+This page is a domain-oriented integration map. The [complete pinned REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md) is normative for exact fields, successful/replay statuses and every reachable domain error. Internal Admin and conditional mocks have different boundaries.
 
 ## Conventions
 
@@ -82,7 +82,7 @@ curl --fail --request POST "$API_BASE_URL/v1/assets/upload-intents" \
 | `PUT /v1/workspaces/{workspace_id}/member-token-limit` | Current owner; null or1..10,000,000; every save clears member overrides |
 | `PUT /v1/workspaces/{workspace_id}/members/{user_id}/token-limit` | Current owner; null or0..10,000,000; zero pauses the member |
 
-Usage follows reservation month in Asia/Shanghai; reserved is a subset of used. [Quota chain](/reference/flows/member-quota-flow) explains validation, authorization, audit, admission and settlement. No quota editor exists in this frontend snapshot.
+Usage follows reservation month in Asia/Shanghai; reserved is a subset of used. The current mini program has member self-read and owner quota editing. [Quota chain](/reference/flows/member-quota-flow) explains validation, authorization, audit, admission and settlement.
 
 ## Workflows and read-only owner detail
 
@@ -100,7 +100,7 @@ Usage follows reservation month in Asia/Shanghai; reserved is a subset of used. 
 
 Example canonical image request (replace all UUIDs with accessible returned identities):
 
-Current task detail permits its creator or current active-enterprise owner; owner-other views hide inputs and grant no write actions. See [history authorization](/reference/flows/workflow-history-flow).
+Task by-ID detail permits the original submitter or a currently authorized enterprise owner/assignee, and can expose typed inputs. Other authors' collection entries hide inputs. Current server permissions and action-specific responsibility checks govern writes. See [history authorization](/reference/flows/workflow-history-flow).
 
 ```json
 {
@@ -115,6 +115,8 @@ Current task detail permits its creator or current active-enterprise owner; owne
 Choose the actual active Feature/template and required role set from discovery; the example does not promise the Feature is configured in every environment. Canonical roles are `primary`, `mask`, `reference`, validated against immutable upload roles. `/v1/design-jobs` remains an in-process compatibility adapter, including supported history/status/retry/result operations; new clients use Workflows. Retired request fields may explicitly require resubmission.
 
 Text/copywriting, ordered voice, Blueprint/PPTX and video use distinct discriminated bodies. Script video API accepts one character image, 0–12 scenes, optional recording and script up to 20,000 characters; its current UI requires exactly one scene and limits script to1,000. Same-style managed/custom branches use prompts, required recording over5seconds,0–1 scene, and the configured/uploaded reference Video. Replacements and optional replace_scope have a separate frozen contract. See [video](/backend/video); API acceptance never proves provider acceptance.
+
+Reference video must be an MP4 of 15–120 seconds inclusive within 100 MB. Time/model pricing uses a stateless preview and confirmed amount/model, then freezes the accepted commercial snapshot; a changed price returns VIDEO_PRICE_CHANGED before reservation. See [video fee confirmation](/reference/flows/video-billing-flow).
 
 ## Billing and platform events
 
@@ -134,7 +136,17 @@ The explicit payment/refund `/reconcile` endpoints use the Douyin gateway; they 
 
 `POST /v1/voice-upload-sessions` requires owner Bearer + key (`201`/`200` replay); owner status is `GET /v1/voice-upload-sessions/{session_id}`. Browser `/voice-upload/exchange` consumes a one-time code and issues a restricted cookie. `/voice-upload/session` and `/voice-upload/files/{slot}/upload-intent`/`complete` require that cookie; writes additionally require exact Origin and CSRF. They do not expose a general API session.
 
-`/admin/*` uses browser sessions/CSRF and is excluded from public OpenAPI. Conditional `/mock/*` payment helpers and standalone mock provider servers are test interfaces. Read [OpenAPI boundaries](/reference/openapi), the [full REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md), and its per-endpoint error tables before implementing a new action.
+`/admin/*` uses browser sessions/CSRF and is excluded from public OpenAPI. Conditional `/mock/*` payment helpers and standalone mock provider servers are test interfaces. Read [OpenAPI boundaries](/reference/openapi), the [full REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md), and its per-endpoint error tables before implementing a new action.
+
+## Added business chains
+
+| API domain | Endpoint-specific reading |
+| --- | --- |
+| Editor, original H5 gateway, Works/panorama | [Context, inputs, forwarding, ownership, management and recovery](/reference/flows/floor-plan-flow) |
+| ThreeVjia images and discovery | [Seven Features, SDK admission and discovery handoff](/reference/flows/three-vjia-image-flow) |
+| Video fee preview | [Read-only preview, changed-price confirmation, frozen billing and retry](/reference/flows/video-billing-flow) |
+| Project assignment and stages | [Handoff](/reference/flows/project-assignment-flow), [stage sources and conversion metrics](/reference/flows/project-stages-flow) |
+| Daily reports | [Member save/history, owner read and comments](/reference/flows/daily-report-flow); no current frontend caller |
 
 ## Every API and its call chain {#generated-route-index}
 
@@ -146,7 +158,7 @@ This inventory records declared default success statuses and deprecation metadat
 
 Verified against the [documented source revisions](/reference/source-revisions).
 
-- [Normative method/path/auth/status and error contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md)
-- [Public request/response schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
-- [Asset signing/admission routes](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py)
-- [Workflow routes and compatibility](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py)
+- [Normative method/path/auth/status and error contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md)
+- [Public request/response schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)
+- [Asset signing/admission routes](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_api.py)
+- [Workflow routes and compatibility](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py)

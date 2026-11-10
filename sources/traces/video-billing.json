@@ -1,0 +1,44 @@
+[
+  {
+    "method": "POST",
+    "path": "/v1/video-billing/preview",
+    "page": "reference/flows/video-billing-flow",
+    "anchor": "video-price-preview",
+    "backend": [
+      {
+        "path": "app/billing/video_billing_api.py",
+        "symbol": "preview_video_billing"
+      },
+      {
+        "path": "app/billing/video_billing_api.py",
+        "symbol": "preview_source"
+      },
+      {
+        "path": "app/billing/video_billing_api.py",
+        "symbol": "preview_discount"
+      },
+      {
+        "path": "app/billing/video_pricing.py",
+        "symbol": "load_video_pricing"
+      },
+      {
+        "path": "app/billing/video_pricing.py",
+        "symbol": "calculate_video_price"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/pkg-features/repositories/videoBilling.ts",
+        "symbol": "previewVideoBilling"
+      },
+      {
+        "path": "src/pkg-features/services/videoGenerationSubmit.ts",
+        "symbol": "submitVideoGeneration"
+      }
+    ],
+    "trigger": {
+      "en": "The video form refreshes its fee and the submit service requests a current price before confirmation.",
+      "zh": "视频表单刷新费用，提交服务在确认前重新取得当前费用。"
+    }
+  }
+]

@@ -43,17 +43,25 @@ Use the selected `ui-integration` snapshot's package scripts for type, design-sy
 
 ## New validation boundaries
 
-Frontend `pnpm test` now includes `test:package-budget`; WeChat quality gates include artifact/Babel checks. Package budgets are project policy, not a quoted platform maximum. The candidate floor-plan fixture gate proves its recorded source contract, not compatibility with backend main.
+Frontend `pnpm test` now includes `test:package-budget`; WeChat quality gates include artifact/Babel checks. Package budgets are project policy, not a quoted platform maximum. The floor-plan fixture gate proves its recorded source contract; this audit separately follows actual backend main implementation, and neither proves a configured deployment.
 
-For an authorized backend deployed-baseline upgrade, `run_deployed_upgrade_gate.sh` preserves one ownership-verified disposable database through migration and selected MinIO/OSS gates. After that stack's product configuration was prepared, pass `--preconfigured` to affected smoke/E2E runners to avoid replacing it with an older cloud snapshot. This is distinct from docs validation. See [test/storage policy](/testing/storage-environments) and the [source runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md).
+For an authorized backend deployed-baseline upgrade, `run_deployed_upgrade_gate.sh` preserves one ownership-verified disposable database through migration and selected MinIO/OSS gates. After that stack's product configuration was prepared, pass `--preconfigured` to affected smoke/E2E runners to avoid replacing it with an older cloud snapshot. This is distinct from docs validation. See [test/storage policy](/testing/storage-environments) and the [source runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md).
 
 A video image rebuild fetches private upstream default-branch code. Record the actual supplier commit and image digest even when the backend commit is unchanged; do not describe every rebuild as supplier-reproducible from the backend SHA alone.
+
+## Bounded backend regression runs after upgrade validation
+
+The normative production sequence is retained focused/risk/exact-candidate review → one migrated deployed replica → affected MinIO smoke → OSS coverage/endurance → full portable/resource regression. Use the current policy rather than older deployment-intro summaries when their gate order differs.
+
+`python3.12 scripts/run_regression_groups.py --with-integration --port "$DEV_TEST_PORT"` uses four local lanes: each portable group runs two pytest workers, then its paired resource shard starts in that lane with serial files. The whole run keeps an actual-worker budget of eight; it does not launch every shard at once. Fixture-owned resources, collection plans, cleanup receipts and performance observations stay source-bound. Missing, cancelled or uncollected work cannot become PASS. A full-regression pass does not absorb separate browser/SDK or real-provider obligations.
+
+Read [tests/documents/TEST_STRATEGY.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md) · [scripts/run_regression_groups.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/run_regression_groups.py) for the current native-platform boundary and report semantics. No product stack or gate is required merely to update these docs.
 
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Backend documentation workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.github/workflows/sdd-docs.yml)
-- [Daily runtime workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.github/workflows/daily-endurance.yml)
-- [Normative test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
-- [Frontend scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)
+- [Backend documentation workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/.github/workflows/sdd-docs.yml)
+- [Daily runtime workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/.github/workflows/daily-endurance.yml)
+- [Normative test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md)
+- [Frontend scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)

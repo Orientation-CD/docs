@@ -13,6 +13,7 @@ Studio Control 位于 API origin 的 `/admin`，使用服务端渲染页面管�
 | [性能](/zh/admin/performance) / [任务](/zh/admin/design-jobs) | 运行压力、任务家族、诊断与受限干预 |
 | [素材](/zh/admin/assets) / [法律文档](/zh/admin/legal-documents) | 授权文件查找与不可变法律发布 |
 | [提示词](/zh/admin/prompts) | 可编辑指令、变量及完整库导入导出 |
+| [三维家 SDK](/zh/admin/providers) | 不可变 SDK 发布、账户凭据及激活代次 |
 | [模型服务商](/zh/admin/providers) / [Workflows](/zh/admin/workflows) | 协议连接、模型模态与 Workflow 节点选择 |
 
 ## 开放一个产品
@@ -23,6 +24,10 @@ Studio Control 位于 API origin 的 `/admin`，使用服务端渲染页面管�
 
 中英文选择使用浏览器 `admin_language` cookie。当前已无 Report Templates 编辑器，见[迁移说明](/zh/admin/report-templates)。首次使用见[管理员启动](/zh/admin/getting-started)。
 
+## 先区分执行配置体系
+
+普通模型工作流使用服务商连接和节点模型选择；户型渲染及三维家共享图片功能使用独立 `/admin/three-vjia-sdk` 页面与 SDK 配置 ID。先激活已上传且核验的发布版本及绑定供应商账户，再开放 Feature；旧三维家服务商记录不能激活当前 SDK 路径。视频使用独立计费配置，不以普通 Feature 固定价计算。见 [SDK 配置](/zh/admin/providers)与[计费](/zh/admin/billing)。
+
 ---
 
-代码依据 · backend `e59716c8`: [app/templates/admin/base.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/base.html) · [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/__init__.py).
+代码依据 · backend `749e82df`: [app/templates/admin/base.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/base.html) · [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/__init__.py).

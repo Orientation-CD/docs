@@ -100,6 +100,10 @@
       "action": "rewrite"
     },
     {
+      "path": "backend/floor-plans.md",
+      "action": "add"
+    },
+    {
       "path": "backend/getting-started.md",
       "action": "rewrite"
     },
@@ -248,11 +252,19 @@
       "action": "rewrite"
     },
     {
+      "path": "reference/flows/daily-report-flow.md",
+      "action": "add"
+    },
+    {
       "path": "reference/flows/design-job-lifecycle.md",
       "action": "rewrite"
     },
     {
       "path": "reference/flows/discovery-prompts-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/floor-plan-flow.md",
       "action": "add"
     },
     {
@@ -264,7 +276,15 @@
       "action": "rewrite"
     },
     {
+      "path": "reference/flows/project-assignment-flow.md",
+      "action": "add"
+    },
+    {
       "path": "reference/flows/project-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/project-stages-flow.md",
       "action": "add"
     },
     {
@@ -281,6 +301,14 @@
     },
     {
       "path": "reference/flows/runtime-debugging.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/three-vjia-image-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/video-billing-flow.md",
       "action": "add"
     },
     {
@@ -427,6 +455,10 @@
     {
       "path": "zh/backend/design-jobs.md",
       "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/floor-plans.md",
+      "action": "add"
     },
     {
       "path": "zh/backend/getting-started.md",
@@ -577,11 +609,19 @@
       "action": "rewrite"
     },
     {
+      "path": "zh/reference/flows/daily-report-flow.md",
+      "action": "add"
+    },
+    {
       "path": "zh/reference/flows/design-job-lifecycle.md",
       "action": "rewrite"
     },
     {
       "path": "zh/reference/flows/discovery-prompts-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/floor-plan-flow.md",
       "action": "add"
     },
     {
@@ -593,7 +633,15 @@
       "action": "rewrite"
     },
     {
+      "path": "zh/reference/flows/project-assignment-flow.md",
+      "action": "add"
+    },
+    {
       "path": "zh/reference/flows/project-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/project-stages-flow.md",
       "action": "add"
     },
     {
@@ -610,6 +658,14 @@
     },
     {
       "path": "zh/reference/flows/runtime-debugging.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/three-vjia-image-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/video-billing-flow.md",
       "action": "add"
     },
     {

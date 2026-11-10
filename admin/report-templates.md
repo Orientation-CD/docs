@@ -6,4 +6,4 @@ search: false
 
 Use [current report Workflows](/backend/reports) and [Workflow nodes](/admin/workflows).
 
-[Source](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/__init__.py)
+[Source](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/__init__.py)

@@ -13,6 +13,7 @@ Studio Control is the server-rendered administration website at the API origin's
 | [Performance](/admin/performance) / [Jobs](/admin/design-jobs) | Runtime pressure, task families, diagnostics and bounded interventions |
 | [Assets](/admin/assets) / [Legal Documents](/admin/legal-documents) | Authorized file discovery and immutable legal publication |
 | [Prompts](/admin/prompts) | Editable instructions, variables and complete-library import/export |
+| [ThreeVjia SDK](/admin/providers) | Immutable SDK releases, account credentials and activation generations |
 | [Model Providers](/admin/providers) / [Workflows](/admin/workflows) | Protocol connections, model modalities and per-Workflow node selection |
 
 ## Bring a product online
@@ -23,6 +24,10 @@ Most forms update the affected portion of the page and report success/conflict w
 
 English/Chinese selection uses the `admin_language` browser cookie. There is no current Report Templates editor; see the [migration note](/admin/report-templates). Start with [administrator setup](/admin/getting-started).
 
+## Choose the execution configuration family
+
+Ordinary model-backed Workflows use provider connections and node model selection. Floor-plan rendering and shared ThreeVjia image features instead use the separate `/admin/three-vjia-sdk` page and SDK configuration IDs. Activate a verified uploaded release and the bound supplier account before enabling these Features; a legacy ThreeVjia provider row does not activate the current SDK path. Video uses its dedicated billing configuration, not an ordinary fixed Feature price. See [SDK configuration](/admin/providers) and [billing](/admin/billing).
+
 ---
 
-Source evidence · backend `e59716c8`: [app/templates/admin/base.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/base.html) · [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/__init__.py).
+Source evidence · backend `749e82df`: [app/templates/admin/base.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/base.html) · [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/__init__.py).

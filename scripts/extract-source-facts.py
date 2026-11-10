@@ -4,7 +4,7 @@ import json
 import re
 import sys
 
-payload = json.load(sys.stdin)
+payload = json.loads(sys.stdin.buffer.read())
 files = payload['files']
 routes = []
 settings = []
@@ -56,7 +56,17 @@ for path, source in sorted(files.items()):
             symbols.append({'source': path, 'symbol': name, 'qualifiedSymbol': '.'.join(qualified),
                             'line': node.lineno, 'startLine': start, 'endLine': node.end_lineno})
     prefixes = {}
+    route_constants = {}
     for node in tree.body:
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            try:
+                value = literal(node.value, route_constants)
+                for target in targets:
+                    if isinstance(target, ast.Name):
+                        route_constants[target.id] = value
+            except (ValueError, TypeError):
+                pass
         if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'APIRouter':
             prefix = next((k.value.value for k in node.value.keywords if k.arg == 'prefix' and isinstance(k.value, ast.Constant)), '')
             for target in node.targets:
@@ -66,12 +76,20 @@ for path, source in sorted(files.items()):
         if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute) or not isinstance(node.func.value, ast.Name):
             continue
         name, method = node.func.value.id, node.func.attr
-        if name not in prefixes or method not in {'get', 'post', 'put', 'patch', 'delete', 'head', 'options'} or not node.args or not isinstance(node.args[0], ast.Constant):
+        if name not in prefixes or method not in {'get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace', 'connect', 'api_route'} or not node.args or not isinstance(node.args[0], ast.Constant):
             continue
         route = prefixes[name] + node.args[0].value
         if not route.startswith(('/v1/', '/health/', '/voice-upload')):
             continue
         kwargs = {kw.arg: kw.value for kw in node.keywords}
+        methods = [method.upper()]
+        if method == 'api_route':
+            try:
+                methods = literal(kwargs['methods'], route_constants) if 'methods' in kwargs else ['GET']
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f'{path}:{node.lineno}: public api_route methods must be statically resolvable') from exc
+            if not isinstance(methods, (list, tuple)) or not methods or any(item not in {'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT'} for item in methods):
+                raise ValueError(f'{path}:{node.lineno}: invalid public api_route methods')
         code = ast.unparse(kwargs['status_code']) if 'status_code' in kwargs else '200'
         code = re.search(r'HTTP_(\d+)', code).group(1) if re.search(r'HTTP_(\d+)', code) else code
         parent = parents.get(id(node))
@@ -81,10 +99,11 @@ for path, source in sorted(files.items()):
         elif isinstance(parent, ast.Call) and parent.func is node and parent.args and isinstance(parent.args[0], ast.Name):
             handler_name = parent.args[0].id
         handler_source, handler_symbol = imports.get(handler_name, (path, handler_name))
-        routes.append({'method': method.upper(), 'path': route, 'status': int(code) if code.isdigit() else code,
-                       'deprecated': isinstance(kwargs.get('deprecated'), ast.Constant) and kwargs['deprecated'].value is True,
-                       'source': path, 'line': node.lineno,
-                       'handler': {'source': handler_source, 'symbol': handler_symbol}})
+        for declared_method in dict.fromkeys(methods):
+            routes.append({'method': declared_method, 'path': route, 'status': int(code) if code.isdigit() else code,
+                           'deprecated': isinstance(kwargs.get('deprecated'), ast.Constant) and kwargs['deprecated'].value is True,
+                           'source': path, 'line': node.lineno,
+                           'handler': {'source': handler_source, 'symbol': handler_symbol}})
     if path != 'app/core/config.py':
         continue
     constants = {}
@@ -122,4 +141,4 @@ for route in routes:
     match = next((item for item in symbols if item['source'] == route['handler']['source'] and item['symbol'] == route['handler']['symbol']), None)
     if match:
         route['handler']['line'] = match['line']
-print(json.dumps({'api': sorted(routes, key=lambda row: (row['path'], row['method'])), 'settings': settings, 'symbols': symbols}, ensure_ascii=False))
+print(json.dumps({'api': sorted(routes, key=lambda row: (row['path'], row['method'])), 'settings': settings, 'symbols': symbols}, ensure_ascii=True))

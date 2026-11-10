@@ -147,3 +147,9 @@ pnpm docs:links --from /tmp/yuanzhu-docs-previous-revisions.json --report /tmp/y
 普通 CI 检查已提交源码行范围及 trace 关联符号锚点。`apiScope: frontend-candidate` 仅允许用于户型双语指南，并只能引用固定前端夹具提取出的 method／path；主 API 清单仍只列后端真实路由。不能用候选 schema 悄悄扩充“主线已经实现”的范围。
 
 旧安装配置说明退出学习主线；真正仍暴露的适配入口集中在[兼容参考](/zh/reference/compatibility)，已移除页面仅留短迁移链接并排除搜索。这样清理旧指导，同时不隐瞒当前 UI 仍使用的代码。
+
+## 候选契约进入主线与网关抽取
+
+旧夹具中的操作进入固定后端后，抽取器按参数名／转换器归一化，将其移出候选范围。审读正文并把真实 handler trace 加入主 API 清单。剩余历史夹具只是候选证据，不是服务端承诺；当前户型指南不再需要候选 scope。
+
+语法抽取器展开 `api_route` 的字面量方法列表／模块常量，覆盖 H5 网关九种方法。具体操作限制另行解释，路由声明不授予转发权限。公开方法表达式无法静态解析时抽取失败。被引用的测试／源码文件会记录行数与 hash，但不执行，也不作为运行时路由权威。Windows 与 Unix 均显式按 UTF-8 解码 JSON 管道。

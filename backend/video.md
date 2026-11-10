@@ -10,7 +10,7 @@
 | System same-style | One named `prompts` selection, no `script` | Template's reference clip | Active `purpose=same_style_video`, field exactly `称呼`, scene images0..1, required MP3 recording>5s |
 | Custom same-style | `prompts` name `__user_reference__`, uploaded `reference_video`, no `script` | User's version-pinned clip | Same field/recording/scene limits; no template lookup/render and no script pin |
 
-All paths require exactly one `character_image`/`primary` Image. An uploaded reference clip is a completed Video Asset, at most100 MiB and120s. Port/role must both be `reference_video`; repeated Asset IDs fail. The structural request caps inputs at14, which can reject an oversized inventory before mode-specific rules. UI requirements can be narrower than the public schema; check [integration status](/reference/integration-status).
+All paths require exactly one `character_image`/`primary` Image. An uploaded reference clip is a completed Video Asset, at most100 MiB and15–120s inclusive. Port/role must both be `reference_video`; repeated Asset IDs fail. The structural request caps inputs at14, which can reject an oversized inventory before mode-specific rules. UI requirements can be narrower than the public schema; check [integration status](/reference/integration-status).
 
 A script is at most20,000 characters. Current txt dialect uses one `【场景N】` heading per scene and structured labels; accepted historical markdown dialect is isolated in [compatibility](/reference/compatibility). Sending script+prompts or script+reference clip is `VIDEO_SCRIPT_CONFLICT`; neither body is `VIDEO_SCRIPT_REQUIRED`.
 
@@ -46,7 +46,7 @@ sequenceDiagram
   API-->>UI: Typed VIDEO output with fresh signed URL
 ```
 
-Read [`_build_render_request`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_local_video_submission.py#L552), then [`build_config`](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/conversion/video_jinqiu_adapter.py#L224). A reference clip selects `_remake_config`, leaving script_path unset; otherwise `_script_config` uses staged script/maps. Outputs are verified `video/mp4` Assets, not arbitrary supplier URLs.
+Read [`_build_render_request`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_local_video_submission.py#L587), then [`build_config`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/conversion/video_jinqiu_adapter.py#L237). A reference clip selects `_remake_config`, leaving script_path unset; otherwise `_script_config` uses staged script/maps. Outputs are verified `video/mp4` Assets, not arbitrary supplier URLs.
 
 ## Models, recovery and proof limits
 
@@ -54,6 +54,14 @@ Read [`_build_render_request`](https://github.com/Orientation-CD/YuanZhu-AI/blob
 
 Rendering has bounded leases, wall-clock/stage budgets, spool and upload limits and can take hours. An API health check does not prove supplier capacity. Failed local video renders are terminal with no automatic rerender; support owns any manual paid rerun decision. Stale attempts cannot publish over the current generation. Record the packaged private supplier revision with release evidence, and distinguish simulated tests from deferred real-provider/long-duration validation. The [product full chain](/reference/flows/workflow-products-flow#video-branch) lists failure codes and code navigation.
 
+## Preview and accepted commercial state
+
+The current video form obtains and confirms `POST /v1/video-billing/preview` before submission. Video uses the selected model's stored rate and mode rule rather than a single Feature flat price. References require measured duration of 15–120 seconds; script per-second pricing counts UTF-16 units, while per-task pricing uses configured fixed seconds. Personal discounts apply once, with the shared 10-Token floor.
+
+Admission recalculates before reservation and rejects changed amount/model acknowledgements as `VIDEO_PRICE_CHANGED`. It freezes `video_time_v1` source identity, model, configuration and price; accepted replay and an eligible explicit retry retain those facts after live configuration changes. Ordinary failed local rendering remains terminal and is never automatically repurchased. Read the [fee chain](/reference/flows/video-billing-flow) for source navigation, reconfirmation versus unknown-receipt replay, and accounting examples.
+
+The subprocess reports its installed `jinqiu_e2e` `runtime_version` when knowable. Keep absent values unknown and correlate with image/private-source provenance; backend commit alone cannot identify every rebuilt private pipeline. Source: [runtime_version](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/conversion/video_jinqiu_adapter.py#L46).
+
 ---
 
-Source evidence · backend `e59716c8`: [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py) · [app/workflows/video_template_rules.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/video_template_rules.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_local_video_submission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_local_video_submission.py) · [app/conversion/video_jinqiu_adapter.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/conversion/video_jinqiu_adapter.py).
+Source evidence · backend `749e82df`: [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py) · [app/workflows/video_template_rules.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/video_template_rules.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_local_video_submission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_local_video_submission.py) · [app/conversion/video_jinqiu_adapter.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/conversion/video_jinqiu_adapter.py).

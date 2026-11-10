@@ -1,35 +1,29 @@
 # Backend overview
 
-YuanZhu runs a FastAPI service for identity, workspaces, private customer Projects, AI Workflows and payments. The same service serves the Studio Control administration website at `/admin`.
+FastAPI owns identity, workspaces, customer Projects, AI Workflows, private Assets and payments. It also serves the authenticated Studio Control website at `/admin`. Public product routes use `/v1`; `/health/live`, `/health/ready`, `/openapi.json` and Swagger `/docs` have separate purposes.
 
-The public API uses `/v1`; health probes use `/health/live` and `/health/ready`. The running service exposes Swagger UI at `/docs` and its schema at `/openapi.json`. Read [REST API](/reference/rest-api) for contracts and compatibility routes.
-
-## What the system delivers
+## Products and execution
 
 | Capability | Execution and result |
 | --- | --- |
-| Image design | Role-bound images and selected prompts → immutable image Assets |
-| Requirements collection | 1–3 recordings → Markdown summary Document |
-| AI copywriting | Eight text Features → Markdown, with optional private knowledge documents |
-| Design reports | 9-, 13- or 17-page Blueprint → HTML preview and editable PowerPoint |
-| Video generation | Script, character and optional references/recording → MP4 |
+| Standard image design | Role-bound images and prompts produce immutable image Assets |
+| Voice and copywriting | Ordered recordings or text/knowledge inputs produce Markdown Documents |
+| Reports | Frozen 9-, 13- or 17-page Blueprint produces HTML and supported editable PowerPoint |
+| Video | Script or same-style inputs use time/model fee snapshots and local MP4 execution |
+| Floor-plan image/panorama | Owned supplier Group, frozen render document and primary image use SDK execution |
+| ThreeVjia image design | Seven customer Features share one SDK Workflow and original H5 integration |
+| Enterprise collaboration | Current-assignee Projects, assignment history, stages, sales metrics and member daily reports |
 
-A **Feature** is a priced customer product. It points at a code-defined **Workflow**, whose nodes run **Operations**. Administrators select execution models on individual Workflow nodes. Active Features and subscription grants determine customer access; a provider connection alone does not open a product.
+A **Feature** is a priced customer capability; a **Workflow** defines its graph; an **Operation** is one node. Ordinary model nodes bind provider/model configuration. ThreeVjia nodes bind versioned SDK configuration and releases through their dedicated administration. A configured connection alone grants neither product access nor supplier acceptance.
 
-## Durable boundaries
+## Persistent boundaries
 
-PostgreSQL owns accounts, permissions, balances, task state and execution receipts. Redis carries ARQ queues, rate limits, sessions and bounded performance data. Private object storage holds verified inputs, results and exact versions. API and workers share one application image.
+PostgreSQL owns permissions, balances, Job state, frozen execution and recovery evidence. Redis carries queues, rate limits, handoff caches and bounded performance observations. Object storage owns verified bytes at exact versions. API, Submit worker and Poll worker share an image but run as separate processes.
 
-Every submission specifies a workspace. Personal work spends the personal wallet; enterprise work spends that enterprise's wallet. Project management is creator-private even inside an enterprise; owner-only enterprise overview has an explicit separate disclosure contract.
+Input preparation commits recoverable storage receipts before final admission; accepted owned inputs become ACTIVE without expiry. Final admission atomically creates execution pins, frozen commercial evidence, reservation and outbox. Enterprise work checks the shared wallet and then the submitting member's monthly cap. Video preview performs no reservation.
 
-Start with [local setup](/backend/getting-started), then [architecture](/backend/architecture) and [Workflow lifecycle](/backend/workflows). Product-specific guides cover [reports](/backend/reports), [voice](/backend/voice), [copywriting](/backend/copywriting) and [video](/backend/video).
+Project creator, current assignee and Job submitter are different identities. Read predicates allow bounded owner/assignee access; writes retain action-specific checks. Other authors' inputs are hidden in lists but can be returned in authorized detail. See [projects](/backend/projects), [history](/reference/flows/workflow-history-flow) and [data model](/reference/data-model).
 
-## Current durability and authorization boundaries
+Begin with [local setup](/backend/getting-started), [architecture](/backend/architecture) and [Workflow lifecycle](/backend/workflows). Continue with [floor plans](/backend/floor-plans), [video billing](/reference/flows/video-billing-flow) or [daily reports](/reference/flows/daily-report-flow). The [integration map](/reference/integration-status) distinguishes source support, client callers and deployment acceptance.
 
-Owned Workflow inputs are archived before the final admission transaction; accepted inputs become ACTIVE with no expiry and immutable pins. Enterprise work also checks the submitting member's monthly cap, independently of the shared wallet. An owner can read another member's visible task detail with private inputs withheld, while write actions remain creator-only. Read [assets](/backend/assets-storage), [quotas](/reference/flows/member-quota-flow) and [history authorization](/reference/flows/workflow-history-flow).
-
-Video now has script, managed same-style and uploaded-reference paths; not every video is a script plus required scene photo. Performance uses versioned bounded history and complete-window comparison. The [integration map](/reference/integration-status) also records the frontend floor-plan capability missing from this server main.
-
----
-
-Source evidence · backend `e59716c8`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/api/__init__.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_configuration.py).
+Sources: [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/api/__init__.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py) · [app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py)

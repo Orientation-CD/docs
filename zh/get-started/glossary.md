@@ -67,7 +67,7 @@
 | --- | --- |
 | 归档 receipt／激活 | 精确自有对象已迁移的证据／最终事务赋予已接受 Job、ACTIVE 生命周期与执行 pins。receipt 完成不等于任务接受。 |
 | 成员额度／共享钱包 | 归属于成员的按月准入上限／企业实际资金。`used` 已包含 `reserved`。 |
-| 所有者只读详情 | 查看他人可见企业任务的授权投影；`inputs: []`，没有创建者写权限。 |
+| owner／负责人只读详情 | 授权按 ID 详情可含类型化输入，集合隐藏他人输入；写操作仍由服务端动作权限控制。 |
 | 同款参考 | 作为故事来源的系统或自传 Video；模板字段、替换项、录音是不同输入。 |
 | 候选契约 | 功能分支的源码 schema 快照，不证明后端 main 或部署已实现。 |
 | 性能覆盖 | 真正贡献证据的进程／版本／时间桶；缺失不能当作零。 |
@@ -76,4 +76,4 @@
 
 ## 源码依据
 
-核对版本：前端 `3662578`、后端 `e59716c`（2026-10-28）。[前端功能分组](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts) · [Workflow请求类型](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)。
+核对版本：前端 `88c75c1f`、后端 `749e82df`（2026-11-10）。[前端功能分组](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [Workflow请求类型](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)。

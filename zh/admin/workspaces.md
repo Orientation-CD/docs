@@ -18,7 +18,7 @@
 
 当前owner的`member-token-limit`和单成员`token-limit` API独立限制新预留，不是管理员余额调整。每次全局保存都会清空全部override，单人0为持续暂停。当前UI集成和仅API边界见[联调状态](/zh/reference/integration-status)。
 
-owner总览仅向当前owner提供额度配置及当前成员quota。owner只读Workflow详情可检查可见企业Job，包括离职成员任务，但隐藏私有输入，不授予创建者写权限。管理员Job诊断又是独立认证的运维界面。精确角色/错误见[工作区访问](/zh/backend/workspaces-orgs)与[额度链路](/zh/reference/flows/member-quota-flow)。
+owner总览仅向当前owner提供额度配置及当前成员quota。owner只读Workflow详情可检查可见企业Job，包括离职成员任务，详情可返回获授权的类型化输入，但非作者列表仍隐藏输入；不授予创建者写权限。管理员Job诊断又是独立认证的运维界面。精确角色/错误见[工作区访问](/zh/backend/workspaces-orgs)与[额度链路](/zh/reference/flows/member-quota-flow)。
 
 ## 移除与保留归属
 
@@ -26,4 +26,4 @@ owner总览仅向当前owner提供额度配置及当前成员quota。owner只读
 
 ---
 
-源码依据 · backend `e59716c8`: [app/admin/users.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/users.py) · [app/workspaces/workspace_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py) · [app/templates/admin/enterprises.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/enterprises.html).
+源码依据 · backend `749e82df`: [app/admin/users.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/users.py) · [app/workspaces/workspace_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py) · [app/templates/admin/enterprises.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/enterprises.html).

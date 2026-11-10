@@ -30,6 +30,12 @@ Workflow 输出 HTML 预览和可编辑 PPTX。HTML 与图片引用经过校验�
 
 直接自有的追加 PPTX 先归档，再随已接受 Job 和物理输入 pins 激活。后续转换不能依赖临时上传路径。已执行操作的输入 pins 不因归档或修复而重写。[输入归档](/zh/reference/flows/asset-upload-flow)与[定点恢复](/zh/deploy/production#input-recovery)解释该区别。整份报告仍须等待必要导出完成；归档成功既不是报告完成，也不是另一笔购买。
 
+## 交接不转移来源权限
+
+当前项目负责人或企业所有者可读取获授权的前任报告，但能读不等于可以把其 Asset 选作新报告输入。最终准入检查来源任务作者、目标空间和当前来源项目负责关系（`require_assignee_project`）；归属或负责关系变化会以输入／指派错误拒绝，不受理新报告。已受理报告／子任务执行使用有效任务项目检查，交接时保留原作者、输入 pin 和计费。
+
+结果查看页在隐藏或权限变化时清除旧成员能力。PPTX 下载之后、调用原生打开之前，重新核对删除状态及成员／交接权限。见[报告查看](/zh/reference/flows/report-view-flow)和[项目交接](/zh/reference/flows/project-assignment-flow)。
+
 ---
 
-代码依据 · backend `e59716c8`: [app/workflows/operations/design_report/design_report_products.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/design_report_products.py) · [app/workflows/operations/design_report/workflow_report_publication.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/design_report/workflow_report_publication.py) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md).
+代码依据 · backend `749e82df`: [app/workflows/operations/design_report/design_report_products.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/operations/design_report/design_report_products.py) · [app/workflows/operations/design_report/workflow_report_publication.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/operations/design_report/workflow_report_publication.py) · [documents/REST_API_INTERFACE.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md).

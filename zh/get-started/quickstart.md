@@ -170,7 +170,7 @@ npx --yes pnpm@9.15.9 exec uni build -p mp-weixin
 
 ## 核验新的持久化边界
 
-首次仍使用 **AI设计 → AI轻盈设计 → 室内设计** 的图片练习，不选专业户型候选功能验收后端 main。记录实际提交 endpoint：现有图片 UI 可以走受支持的适配接口，新 API 示例则使用 Workflows。
+首次仍使用普通室内图片练习。专业户型已实现，但额外需要已发布的 SDK／H5 release 与供应商凭据，按其[独立配置](/zh/backend/floor-plans)验收。记录实际 endpoint：现有图片 UI 可以使用受支持的适配器，新 API 示例使用 Workflows。
 
 自有输入任务成功后，请本地数据库操作人员在**同一套栈**中只读核验这些记录，将 UUID 换成上传 Asset ID：
 
@@ -185,4 +185,4 @@ FROM asset_input_archives WHERE id = '<upload-asset-uuid>'::uuid;
 
 ## 源码依据
 
-前端 `3662578`、后端 `e59716c`（2026-10-28）：[构建命令](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [会话存储](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/stores/session.ts) · [本地启动器](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/create_stack.sh) · [端口派生](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/stack_ports.py) · [模拟结算](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing_api.py)。
+前端 `88c75c1f`、后端 `749e82df`（2026-11-10）：[构建命令](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [会话存储](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/stores/session.ts) · [本地启动器](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/create_stack.sh) · [端口派生](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/stack_ports.py) · [模拟结算](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py)。

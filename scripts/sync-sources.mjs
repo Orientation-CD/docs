@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { settingsWithExamples, markdownCodeCell } from './source-utils.mjs'
 import { loadTraces, evidenceKey, frontendSymbolLine, traceKey } from './trace-utils.mjs'
-import { candidateContractFiles } from './source-links.mjs'
+import { candidateContractFiles, frontendOnlyCandidateOperations, sourceLinks } from './source-links.mjs'
+import { pages } from './content-lib.mjs'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const args = process.argv.slice(2)
@@ -17,6 +18,14 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] !== '--check' && (!args[++i] || args[i].startsWith('--'))) throw new Error('Option requires a value')
 }
 const previous = JSON.parse(await readFile(path.join(root, 'sources/revisions.json'), 'utf8'))
+// Verify line anchors in cited tests and other source evidence as well as the
+// runtime inventory, without importing or executing those files.
+const citedPaths = { frontend: new Set(), backend: new Set() }
+for (const file of await pages()) {
+  for (const link of sourceLinks(await readFile(path.join(root, file), 'utf8'))) {
+    if (link.kind === 'blob') citedPaths[link.repository].add(link.path)
+  }
+}
 const git = (dir, ...argv) => execFileSync('git', ['-C', path.resolve(dir), ...argv], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
 const repos = {}
 for (const [key, repo] of Object.entries(previous.repositories)) {
@@ -24,9 +33,9 @@ for (const [key, repo] of Object.entries(previous.repositories)) {
   const ref = option(`--${key}-ref`, repo.commit)
   const commit = git(dir, 'rev-parse', '--verify', `${ref}^{commit}`).trim()
   const names = git(dir, 'ls-tree', '-r', '--name-only', commit).trim().split('\n')
-  const selected = names.filter((name) => key === 'backend'
+  const selected = names.filter((name) => citedPaths[key].has(name) || (key === 'backend'
     ? ['.env.example', 'pyproject.toml', 'README.md', 'Dockerfile', 'docker-compose.yml', 'tests/documents/TEST_STRATEGY.md'].includes(name) || name.startsWith('app/') && /\.(py|js|css|html|json)$/.test(name) && !name.startsWith('app/vendor/') || name.startsWith('documents/') && name.endsWith('.md') || name.startsWith('scripts/') && /\.(sh|py|md)$/.test(name) || name.startsWith('deploy/sae/') && /\.(sh|md)$/.test(name) || name.startsWith('migrations/versions/') && name.endsWith('.py') || name.startsWith('.github/workflows/') && /\.ya?ml$/.test(name)
-    : ['package.json', '.env.example', 'README.md', 'vite.config.ts'].includes(name) || name.startsWith('src/') && /\.(ts|vue|json|scss|css|svg)$/.test(name) || name.startsWith('config/') && name.endsWith('.mjs') || name.startsWith('scripts/') && /\.(mjs|sh|py)$/.test(name) || candidateContractFiles.includes(name))
+    : ['package.json', '.env.example', 'README.md', 'vite.config.ts'].includes(name) || name.startsWith('src/') && /\.(ts|vue|json|scss|css|svg)$/.test(name) || name.startsWith('config/') && name.endsWith('.mjs') || name.startsWith('scripts/') && /\.(mjs|sh|py)$/.test(name) || candidateContractFiles.includes(name)))
   const files = Object.fromEntries(selected.map((name) => [name, git(dir, 'show', `${commit}:${name}`)]))
   repos[key] = { ...repo, commit, files, allPaths: names }
 }
@@ -34,7 +43,7 @@ const python = process.env.DOCS_PYTHON || 'python3'
 const version = execFileSync(python, ['-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'], { encoding: 'utf8' }).trim().split('.').map(Number)
 if (version[0] < 3 || version[0] === 3 && version[1] < 12) throw new Error('Source extraction requires Python 3.12+. Set DOCS_PYTHON=python3.12 if needed.')
 const facts = JSON.parse(execFileSync(python, [path.join(root, 'scripts/extract-source-facts.py')], {
-  input: JSON.stringify({ files: repos.backend.files }), encoding: 'utf8', maxBuffer: 32 * 1024 * 1024,
+  input: JSON.stringify({ files: Object.fromEntries(Object.entries(repos.backend.files).filter(([name]) => name.startsWith('app/'))) }), encoding: 'utf8', maxBuffer: 32 * 1024 * 1024,
 }))
 const traces = await loadTraces(root)
 const traceEvidence = new Map()
@@ -62,23 +71,16 @@ const backendExamples = parseEnv(repos.backend.files['.env.example'])
 const settings = settingsWithExamples(facts.settings, backendExamples)
 const frontendScripts = JSON.parse(repos.frontend.files['package.json']).scripts
 const frontendEnv = [...new Set(['src/env.d.ts', '.env.example', 'config/build-targets.mjs'].map(name => repos.frontend.files[name]).flatMap((text) => text.match(/\bVITE_[A-Z0-9_]+\b/g) || []))].sort()
-const normalizedOperation = row => `${row.method} ${row.path.replace(/\{[^}]+\}/g, '{}')}`
-const mainOperations = new Set(facts.api.map(normalizedOperation))
 const candidateApi = new Map()
 for (const file of candidateContractFiles) {
   const source = repos.frontend.files[file]
   if (!source) throw new Error(`Missing frontend candidate contract ${file}`)
   const contract = JSON.parse(source)
   const evidence = { path: file, commit: repos.frontend.commit, sha256: createHash('sha256').update(source).digest('hex') }
-  for (const [route, operations] of Object.entries(contract.paths || {})) {
-    for (const method of Object.keys(operations)) {
-      if (!['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].includes(method)) continue
-      const entry = { method: method.toUpperCase(), path: route }
-      if (mainOperations.has(normalizedOperation(entry))) throw new Error(`Candidate route is now on backend main; review its documentation scope: ${traceKey(entry)}`)
-      const row = candidateApi.get(traceKey(entry)) || { ...entry, status: 'frontend-candidate-only', sources: [] }
-      row.sources.push(evidence)
-      candidateApi.set(traceKey(entry), row)
-    }
+  for (const entry of frontendOnlyCandidateOperations(contract, facts.api)) {
+    const row = candidateApi.get(traceKey(entry)) || { ...entry, status: 'frontend-candidate-only', sources: [] }
+    row.sources.push(evidence)
+    candidateApi.set(traceKey(entry), row)
   }
 }
 const snapshot = {
@@ -93,7 +95,7 @@ const snapshot = {
 }
 const authorityPaths = {
   frontend: ['package.json', '.env.example', 'src/env.d.ts', 'config/build-targets.mjs', 'src/stores/theme.ts', 'src/styles/design-tokens.json', 'src/styles/themes/minimal.json', 'src/styles/themes/modern.json', 'src/api/dto/floorPlan.ts', 'scripts/api-contract-source.mjs', ...candidateContractFiles],
-  backend: ['app/api/__init__.py', 'app/core/models.py', 'app/core/config.py', 'app/persistence/db_models.py', 'app/workflows/workflow_admission.py', 'app/assets/asset_input_archival.py', 'app/billing/member_token_quotas.py', 'app/core/performance_history.py', 'documents/REST_API_INTERFACE.md', 'documents/ASSET_STORAGE_OPERATIONS.md', 'README.md', 'tests/documents/TEST_STRATEGY.md', 'scripts/runbook.md', 'deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md', 'documents/DOUYIN_PAYMENT.md', 'documents/ai_copywriting_setup.md'],
+  backend: ['app/api/__init__.py', 'app/core/models.py', 'app/core/config.py', 'app/persistence/db_models.py', 'app/workflows/workflow_admission.py', 'app/assets/asset_input_archival.py', 'app/billing/member_token_quotas.py', 'app/core/performance_history.py', 'app/floor_plans/api.py', 'app/floor_plans/gateway.py', 'app/three_vjia/sdk.py', 'app/three_vjia/account_credentials.py', 'app/workspaces/project_stages.py', 'app/workspaces/daily_report_api.py', 'app/billing/video_pricing.py', 'documents/REST_API_INTERFACE.md', 'documents/ASSET_STORAGE_OPERATIONS.md', 'README.md', 'tests/documents/TEST_STRATEGY.md', 'scripts/runbook.md', 'deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md', 'documents/DOUYIN_PAYMENT.md', 'documents/ai_copywriting_setup.md'],
 }
 const revisions = { schemaVersion: 1, verifiedAt: previous.verifiedAt, docsBaseCommit: previous.docsBaseCommit, repositories: Object.fromEntries(Object.entries(repos).map(([key, value]) => [key, {
   repository: value.repository, branch: value.branch, commit: value.commit,

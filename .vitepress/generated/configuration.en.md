@@ -24,6 +24,7 @@ Extracted from pinned Settings and `.env.example`. Code defaults and example env
 | `VIDEO_RENDER_LEASE_BUFFER_SECONDS` | `int` | `900` | `900` |
 | `VIDEO_MODEL_SELECTION_ENABLED` | `bool` | `false` | `false` |
 | `PROJECT_OUTCOMES_ENABLED` | `bool` | `false` | `false` |
+| `PROJECT_SALES_STAGES_ENABLED` | `bool` | `false` | — |
 | `DATABASE_AUTO_CREATE` | `bool` | `false` | `false` |
 | `DATABASE_POOL_SIZE` | `int` | `10` | `10` |
 | `DATABASE_MAX_OVERFLOW` | `int` | `20` | `5` |
@@ -93,6 +94,10 @@ Extracted from pinned Settings and `.env.example`. Code defaults and example env
 | `LEGAL_DOCUMENTS_REQUIRED` | `bool` | `true` | `true` |
 | `LEGAL_DOCUMENTS_PUBLIC_BASE_URL` | `AnyHttpUrl \| None` | `null` | — |
 | `PUBLIC_API_BASE_URL` | `AnyHttpUrl \| None` | `null` | — |
+| `H5_3VJIA_BASE_URL` | `AnyHttpUrl \| None` | `null` | — |
+| `THREE_VJIA_MAINTENANCE_ENABLED` | `bool` | `false` | — |
+| `THREE_VJIA_REFRESH_MARGIN_SECONDS` | `int` | `60` | — |
+| `THREE_VJIA_MAINTENANCE_LOCK_PATH` | `Path` | `Path('/tmp/yuanzhu-3vjia-maintenance.lock')` | — |
 | `VOICE_UPLOAD_ENABLED` | `bool` | `true` | `true` |
 | `VOICE_UPLOAD_SESSION_SECONDS` | `int` | `1800` | `1800` |
 | `VOICE_UPLOAD_RETRIEVAL_SECONDS` | `int` | `86400` | `86400` |

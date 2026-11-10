@@ -50,11 +50,27 @@ flowchart LR
 | `app/workflows` | `api.py`、`workflow_admission.py` | 公共投影、原子接受、冻结图和账务 |
 | `app/workflows/submissions` | coordinator、scheduler、finalizer及本地执行器 | 持久化执行转换和受约束的供应商/本地执行 |
 | `app/billing` | `billing.py`、`member_token_quotas.py` | 钱包流水与独立的成员月容量限制 |
-| `app/workspaces` | `workspace_api.py`、`projects.py` | 成员关系、创建者私有 Project、owner只读投影 |
+| `app/workspaces` | `project_api.py`、`project_jobs.py`、`daily_reports.py` | 当前责任、成员关系、阶段证据与日报事务 |
 | `app/core` | `request_stages.py`、`performance_history.py`、`performance_reports.py` | 安全关联日志与有界运维观测 |
 
 生产数据库变更在切换前执行，应用启动不是迁移执行器。沿用[部署与恢复](/zh/deploy/production)控制。现有 UI 的真实请求路径与兼容边界见[联调状态](/zh/reference/integration-status)，不能从推荐的公共路由名称推断前端已经完成切换。
 
 ---
 
-源码依据 · backend `e59716c8`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [app/worker.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/worker.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py).
+源码依据 · backend `749e82df`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py) · [app/worker.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/worker.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py).
+
+## SDK 执行有独立绑定
+
+三维家能力以 `execution_kind=sdk` 进入同一套 Job／Workflow／outbox 运行时。冻结绑定包含 SDK 配置／generation、release、契约摘要与超时，不是普通供应商模型连接。原始 H5 通过带范围、受白名单约束的平台网关请求；付费渲染转为规范 Workflow，元数据读取仍同步返回，见[户型执行](/zh/backend/floor-plans)。
+
+项目责任可以转移，但历史 Job 提交者和钱包归属不变。授权响应签名在初始加载事务外执行，随后 `finalize_workflow_reads` 用新标量查询复核权限，防止交接后继续沿用旧授权。追踪写操作前先读[项目指派](/zh/reference/flows/project-assignment-flow)。
+
+[app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py)
+
+## SDK 执行有独立绑定
+
+三维家能力以 `execution_kind=sdk` 进入同一套 Job／Workflow／outbox 运行时。冻结绑定包含 SDK 配置／generation、release、契约摘要与超时，不是普通供应商模型连接。原始 H5 通过有范围且限于固定服务源站的平台网关请求；已知付费／历史／管理操作被接管或拒绝。付费渲染转为规范 Workflow，元数据读取仍同步返回，见[户型执行](/zh/backend/floor-plans)。
+
+项目责任可以转移，但历史 Job 提交者和钱包归属不变。授权响应签名在初始加载事务外执行，随后 `finalize_workflow_reads` 用新标量查询复核权限，防止交接后继续沿用旧授权。追踪写操作前先读[项目指派](/zh/reference/flows/project-assignment-flow)。
+
+[app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py)

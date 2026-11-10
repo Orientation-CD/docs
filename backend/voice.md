@@ -25,6 +25,10 @@ The optional flow requires `VOICE_UPLOAD_ENABLED`, an appropriate public HTTPS o
 
 A successful summary can advance an ordinary Project to requirements captured through the standard completion rule. See [Projects](/backend/projects), [Assets](/backend/assets-storage) and [configuration](/reference/configuration).
 
+## Completion evidence in sales mode
+
+With sales stages enabled, a successful eligible root voice summary contributes an automatic `REQUIREMENTS_CAPTURED` source to the currently bound ordinary Project, through `completed_job_stage` and `record_completed_job_stage`. It does not require or light every earlier stage, and users cannot manually cancel a stage backed by automatic evidence. Existing accepted work keeps its original author/billing after project handoff. See [sales evidence](/reference/flows/project-stages-flow).
+
 ---
 
-Source evidence · backend `e59716c8`: [app/assets/voice_upload_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_api.py) · [app/assets/voice_upload_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_sessions.py) · [app/workflows/operations/summary/workflow_voice_definition.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/summary/workflow_voice_definition.py).
+Source evidence · backend `749e82df`: [app/assets/voice_upload_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/voice_upload_api.py) · [app/assets/voice_upload_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/voice_upload_sessions.py) · [app/workflows/operations/summary/workflow_voice_definition.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/operations/summary/workflow_voice_definition.py).

@@ -22,8 +22,8 @@ flowchart LR
 
 | Boundary | Purpose |
 | --- | --- |
-| `yuanzhu-test` | Cloud-test/integration boundary; verify its current provider and payment modes before testing |
-| `yuanzhu-prod` | Production boundary; changes require protected release evidence |
+| `yuanzhu-prod` / `api.yuanzhushuzhi.com` | Owner-confirmed test/development boundary; use `--stage=test` |
+| `yuanzhu-test` / `test-api.yuanzhushuzhi.com` | Serves released users; use protected `--stage=production` |
 | `--stage=test` / `--stage=production` | Risk classification independent of namespace naming; never rewrites `ENVIRONMENT` |
 | `yuanzhu-ai-api` | HTTP API and Admin console |
 | `yuanzhu-ai-submit-worker` | Workflow/Operation scheduling, provider dispatch and local conversion work |
@@ -55,10 +55,18 @@ Migrations, API and workers form one compatibility boundary. Current schema incl
 
 Object lifecycle rules must retain admitted input versions and published dependencies, not merely temporary upload prefixes. SQL archive receipts can outlive an Asset and still own a late copy acknowledgement. Never bulk-delete them to reduce storage. Redis performance history has bounded minute/day retention and release attribution; its loss must show unavailable/incomplete coverage, not fabricated zero history. The financial ledger and durable execution graph remain SQL authorities.
 
+## Verify the actual user population before choosing a stage
+
+The current owner-confirmed mapping above supersedes historical namespace labels: the host containing `test-api` serves production users. Do not swap DNS, RDS or namespace resources to make their names look conventional. Choose release protection from actual users, preserve cloud-owned `ENVIRONMENT`, and resolve any runtime-environment conflict instead of bypassing it. The pinned runbook's newer sales-stage activation section records this mapping explicitly.
+
+ThreeVjia adds an immutable H5 release root and an independent database SDK configuration. API/H5 must agree on publication/API origins and release hashes; updating `versions.json` is not database activation. One designated maintenance instance owns H5 publication/GC under a shared real file lock. Redis account-coordination state is rebuildable from current DB credentials; a restored old Redis snapshot must be purged for this SDK namespace before traffic so old ready tokens are not trusted.
+
+Source: [deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md) · [app/three_vjia/account_credentials.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/account_credentials.py) · [app/three_vjia/maintenance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/maintenance.py).
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Canonical SAE architecture](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_ARCHITECTURE.md)
-- [Namespace and release runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [SAE artifact deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy-image.sh)
+- [Canonical SAE architecture](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_ARCHITECTURE.md)
+- [Namespace and release runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [SAE artifact deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy-image.sh)

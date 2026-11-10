@@ -1,0 +1,628 @@
+[
+  {
+    "method": "GET",
+    "path": "/v1/floor-plan-editor/context",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "editor-context",
+    "backend": [
+      {
+        "path": "app/floor_plans/api.py",
+        "symbol": "editor_context"
+      },
+      {
+        "path": "app/floor_plans/works.py",
+        "symbol": "authenticate_editor_context"
+      },
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "resolve_entry_work"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/floorPlan.ts",
+        "symbol": "floorPlanRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Check editor availability",
+      "zh": "检查编辑器可用性"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/floor-plan-editor/editor-url",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "editor-url",
+    "backend": [
+      {
+        "path": "app/floor_plans/api.py",
+        "symbol": "refresh_editor_url"
+      },
+      {
+        "path": "app/floor_plans/editor_entry.py",
+        "symbol": "prepare_editor_entry"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/floorPlanHandoff.ts",
+        "symbol": "prepareFloorPlanEditor"
+      }
+    ],
+    "trigger": {
+      "en": "Open or continue the editor",
+      "zh": "打开或继续编辑器"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/floor-plan-works",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "list-works",
+    "backend": [
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "list_works"
+      },
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "finalize_work_views"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/composables/useFloorPlanWorks.ts",
+        "symbol": "useFloorPlanWorks"
+      }
+    ],
+    "trigger": {
+      "en": "List locally registered Works",
+      "zh": "列出本地登记作品"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/floor-plan-works/detail",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "work-detail",
+    "backend": [
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "get_work"
+      },
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "readable_work"
+      },
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "finalize_work_views"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/floorPlanManagement.ts",
+        "symbol": "floorPlanManagement"
+      }
+    ],
+    "trigger": {
+      "en": "Read a Work detail",
+      "zh": "读取作品详情"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/v1/floor-plan-works/{group_id:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "rename-work",
+    "backend": [
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "rename_work"
+      },
+      {
+        "path": "app/floor_plans/group_deletion.py",
+        "symbol": "register_management_write"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/floorPlanManagement.ts",
+        "symbol": "floorPlanManagement"
+      }
+    ],
+    "trigger": {
+      "en": "Rename and confirm supplier metadata",
+      "zh": "重命名并确认供应商元数据"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/floor-plan-works/workflows",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "work-workflows",
+    "backend": [
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "work_workflows"
+      },
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "readable_work"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/floorPlan.ts",
+        "symbol": "floorPlanRepository"
+      }
+    ],
+    "trigger": {
+      "en": "Expand a Work into standard executions",
+      "zh": "展开作品的标准执行"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/floor-plan-works/{group_id:path}/move",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "move-work",
+    "backend": [
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "move_work"
+      },
+      {
+        "path": "app/floor_plans/group_move.py",
+        "symbol": "move_group"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/floorPlanMove.ts",
+        "symbol": "moveFloorPlanWork"
+      }
+    ],
+    "trigger": {
+      "en": "Move one Work and its executions atomically",
+      "zh": "原子移动作品及其执行"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/floor-plan-works/{group_id:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "delete-work",
+    "backend": [
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "delete_work"
+      },
+      {
+        "path": "app/floor_plans/group_deletion.py",
+        "symbol": "claim_group_deletion"
+      },
+      {
+        "path": "app/floor_plans/group_recovery.py",
+        "symbol": "enqueue_group_deletion"
+      },
+      {
+        "path": "app/floor_plans/group_recovery.py",
+        "symbol": "resume_group_deletion"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/floorPlanManagement.ts",
+        "symbol": "floorPlanManagement"
+      }
+    ],
+    "trigger": {
+      "en": "Delete through a durable recovery claim",
+      "zh": "通过持久恢复声明删除"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/floor-plan-works/{group_id:path}/deletion",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "deletion-status",
+    "backend": [
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "work_deletion_status"
+      },
+      {
+        "path": "app/floor_plans/group_works.py",
+        "symbol": "deletion_view"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/floorPlanManagement.ts",
+        "symbol": "floorPlanManagement"
+      }
+    ],
+    "trigger": {
+      "en": "Read deletion progress without dispatch",
+      "zh": "只读删除进度"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/floor-plan-editor/panorama-viewer-url",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "panorama-viewer",
+    "backend": [
+      {
+        "path": "app/floor_plans/panorama.py",
+        "symbol": "panorama_viewer_url"
+      },
+      {
+        "path": "app/workflows/read_access.py",
+        "symbol": "require_design_job_read_access"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/services/floorPlanHandoff.ts",
+        "symbol": "prepareFloorPlanPanorama"
+      }
+    ],
+    "trigger": {
+      "en": "Open a read-only panorama result",
+      "zh": "打开只读全景结果"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/floor-plan-editor/before-assets",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "floor-before-image",
+    "backend": [
+      {
+        "path": "app/floor_plans/api.py",
+        "symbol": "import_before_image"
+      },
+      {
+        "path": "app/floor_plans/before_assets.py",
+        "symbol": "import_before_asset"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Import the render before image",
+      "zh": "导入渲染原图"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/floor-plan-editor/uploads/{upload_id}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "supplier-upload",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "upload"
+      },
+      {
+        "path": "app/floor_plans/works.py",
+        "symbol": "authenticate_editor_context"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Redeem an aliased supplier upload grant",
+      "zh": "兑现供应商上传别名"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-get",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses GET; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 GET；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-post",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses POST; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 POST；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-put",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses PUT; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 PUT；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-patch",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses PATCH; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 PATCH；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-delete",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses DELETE; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 DELETE；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "HEAD",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-head",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses HEAD; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 HEAD；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "OPTIONS",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-options",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses OPTIONS; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 OPTIONS；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "TRACE",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-trace",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses TRACE; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 TRACE；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "CONNECT",
+    "path": "/v1/floor-plan-editor/gateway/{target}/{path:path}",
+    "page": "reference/flows/floor-plan-flow",
+    "anchor": "gateway-connect",
+    "backend": [
+      {
+        "path": "app/floor_plans/gateway.py",
+        "symbol": "relay"
+      },
+      {
+        "path": "app/floor_plans/sdk_binding.py",
+        "symbol": "selected_contract"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Original H5 supplier transport uses CONNECT; declaration is not blanket operation authorization.",
+      "zh": "原 H5 供应商传输使用 CONNECT；方法声明不等于所有操作均被授权。"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/3vjia-image/context",
+    "page": "reference/flows/three-vjia-image-flow",
+    "anchor": "image-context",
+    "backend": [
+      {
+        "path": "app/scheme_images/api.py",
+        "symbol": "image_context"
+      },
+      {
+        "path": "app/floor_plans/works.py",
+        "symbol": "authenticate_editor_context"
+      },
+      {
+        "path": "app/floor_plans/editor_entry.py",
+        "symbol": "current_editor_model"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Bootstrap ordinary-image context",
+      "zh": "初始化普通生图上下文"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/3vjia-image/editor-url",
+    "page": "reference/flows/three-vjia-image-flow",
+    "anchor": "image-entry",
+    "backend": [
+      {
+        "path": "app/scheme_images/api.py",
+        "symbol": "image_editor_url"
+      },
+      {
+        "path": "app/floor_plans/editor_entry.py",
+        "symbol": "prepare_editor_entry"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/threeVjiaImage.ts",
+        "symbol": "prepareThreeVjiaImage"
+      }
+    ],
+    "trigger": {
+      "en": "Enter one image Feature",
+      "zh": "进入一个生图 Feature"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/3vjia-image/before-assets",
+    "page": "reference/flows/three-vjia-image-flow",
+    "anchor": "image-before",
+    "backend": [
+      {
+        "path": "app/floor_plans/api.py",
+        "symbol": "import_before_image"
+      },
+      {
+        "path": "app/floor_plans/before_assets.py",
+        "symbol": "import_before_asset"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Import the ordinary-image primary input",
+      "zh": "导入普通生图主输入"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/v1/3vjia-discovery/context",
+    "page": "reference/flows/three-vjia-image-flow",
+    "anchor": "discovery-context",
+    "backend": [
+      {
+        "path": "app/discovery/api.py",
+        "symbol": "discovery_context"
+      },
+      {
+        "path": "app/floor_plans/works.py",
+        "symbol": "authenticate_editor_context"
+      }
+    ],
+    "frontend": [],
+    "trigger": {
+      "en": "Read discovery context",
+      "zh": "读取发现上下文"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/v1/3vjia-discovery/entry-url",
+    "page": "reference/flows/three-vjia-image-flow",
+    "anchor": "discovery-entry",
+    "backend": [
+      {
+        "path": "app/discovery/api.py",
+        "symbol": "discovery_entry"
+      },
+      {
+        "path": "app/floor_plans/editor_entry.py",
+        "symbol": "prepare_editor_entry"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "src/repositories/threeVjiaDiscovery.ts",
+        "symbol": "prepareThreeVjiaDiscovery"
+      }
+    ],
+    "trigger": {
+      "en": "Open inspiration or shopping",
+      "zh": "打开灵感或购物"
+    }
+  }
+]

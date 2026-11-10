@@ -1,34 +1,38 @@
-# 工作区、成员关系与owner可见范围
+# 工作区、成员关系与当前负责关系
 
-每个普通账号有一个永久个人工作区。企业是独立的共享钱包，带owner/member关系。`current_workspace_id`只是保存的UI选择；每次创建仍显式指定扣费工作区并重新校验成员关系。
+账号有一个永久个人空间，也可拥有／加入企业。企业是独立共享付款方，由当前所有者／成员权限控制。`current_workspace_id` 是保存的 UI 选择，不是权限；每个任务仍显式指定空间／项目并重新授权。
 
 ## 权限地图
 
-| 身份 | 读 | 写 |
+| 身份 | 读取边界 | 变更边界 |
 | --- | --- | --- |
-| 创建者 | 自己可见的任务/历史及获授权的私有输入/结果 | 在当前访问权和生命周期允许下操作自己的任务/Project |
-| 当前企业成员 | 共享余额、自己的额度及允许访问的自身资源 | 在企业容量内提交并操作自身合格资源 |
-| 当前企业owner | 共享余额、成员/Project总览、可见企业任务详情 | 企业设置、邀请、成员、成员额度；写自己的资源 |
-| 已退出成员 | 企业仍可用时的窄范围创建者历史 | 无新企业提交/Project管理权；仅明确允许的历史操作 |
+| 原任务作者 | 自己符合条件的可见历史 | 同时满足原作者、当前项目负责关系和生命周期 |
+| 当前负责人 | 所负责项目及获授权的前任结果 | 自己的新任务和允许的项目字段，不能修改前任任务或复用其输入 |
+| 当前企业所有者 | 共享池、有边界的成员／项目／任务详情 | 企业／成员／额度配置和指派；销售模式阶段／成交流失；明确授权的混合作者清理 |
+| 已退出成员 | 企业仍可用时有限的原作者历史 | 无新企业提交或当前项目管理权 |
 
-owner详情例外是**只读**，可包含已退出成员的可见Job。`GET /v1/workflows/{id}`每次重新检查当前owner身份、企业和Project可见性；`submitted_by`是真实创建者，读取他人任务时`inputs`恒为`[]`。这不授予删除、移动、重试或提交权。无权、隐藏、不存在的ID统一404。只切换当前工作区不会获得访问权。
+[readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py#L79) 与 `readable_project` 分别检查任务读取和项目导航。获授权任务详情可以返回文本／图片／音频类型化输入；非作者列表投影仍返回 `inputs:[]`。`job_response` 和 `finalize_workflow_reads` 保留真实提交者，并在拿到签名 URL 后重新检查当前 SQL 权限。能看详情不授予新 Asset 复用、继续编辑、重试、移动或删除权；这些仍有当前负责关系和作者检查。无权／隐藏／不存在的任务 ID 统一 404。
 
-## 企业容量与邀请
+## 容量与邀请
 
-可拥有工作区数包含永久个人空间加活跃自有企业，不计加入别人的企业。`INITIAL_USER_ALLOWED_WORKSPACES`运行时默认1，开发示例可选其他值；管理员可对合格账号调整至100。企业`member_limit`包含owner；待接受邀请不预占席位，因此创建和接受都检查实时容量。
+可拥有空间数计永久个人空间加有效自有企业，不计加入别人的成员关系。`INITIAL_USER_ALLOWED_WORKSPACES` 默认 1，管理员可对符合条件账号调整至 100。企业 `member_limit` 包含所有者，待接受邀请不占席位，创建和接受都检查当前容量。
 
-当前分享卡邀请是七天有效的bearer能力。公开预览只返回安全展示元数据；登录后接受时原子重查企业、席位、已有成员关系和邀请状态。预览不会加入。列表/撤销不能恢复邀请bearer秘密。详见[成员链路](/zh/reference/flows/workspace-membership-flow)，历史手机定向协议集中在[兼容边界](/zh/reference/compatibility)。
+分享卡邀请是七天有效的 bearer 能力。安全预览不会加入企业，登录后接受时原子重查企业、席位、成员关系和邀请状态。列表／撤销不能恢复 bearer 秘密。见[成员关系](/zh/reference/flows/workspace-membership-flow)；旧手机号定向／当前企业协议仍在[兼容边界](/zh/reference/compatibility)中说明。
 
-## owner总览与额度
+## 概览、额度与专门销售统计
 
-普通成员收到共享可用/预留余额及消耗，私有成员/历史段保持null。只有当前owner收到成员数组、Project详情、额度配置状态及成员`token_quota`。已退出成员的总览行不带当前额度。三个[额度接口](/zh/reference/flows/member-quota-flow)限制新增预留容量，不改变钱包余额或创建者归属。
+成员得到共享剩余／预留／可用余额及消耗，私有成员／历史数组保持 null。当前所有者额外得到有边界的成员／项目投影和额度元数据。项目按当前负责人分组，不按历史创建者。概览签名完成后重新核对所有者权限，所以存储操作期间被降权的人不能保留所有者投影。
 
-全局成员额度每次保存都会清空全部专属override，包括离职成员。单人override在退出/重新加入后保留，除非已被全局保存清空。成员额度不是可以转账的第二个钱包，企业工作始终扣共享池。
+当前小程序已有独立所有者成员管理页、全局／单人额度编辑和本人额度展示。[额度配置](/zh/reference/flows/member-quota-flow) 限制新增成员预留，不转积分或所有权。全局保存清空所有个人例外，包括离开成员保留的设置；同值保存也清空。单人例外退出／重进后保留，除非全局重置。零暂停单人、null 不限额，`reserved` 是 `used` 子集。准入先查企业可支付余额，再查成员额度。
 
-## 离开与移除
+销售转化是[销售阶段](/zh/reference/flows/project-stages-flow#enterprise-sales-metrics)中的独立所有者接口，按所选北京日期分组和当前成员／负责人快照计算，不能从筛选后的概览推导分母。概览日报摘要不能证明前端日报编辑页存在。
 
-离开或被移除会结束实时成员关系，同时保留创建者来源、账务归因及明确的历史读取。移除企业会阻断对保留Project/交付物的新访问，已发出的短期能力URL按原期限失效。账号/企业变化不等于取消供应商工作。当前UI和权限边界见[Project](/zh/backend/projects)、[后台工作区](/zh/admin/workspaces)与[联调状态](/zh/reference/integration-status)。
+## 日报与成员任期
 
----
+[日报](/zh/reference/flows/daily-report-flow) 在本前端版本中属于后端已实现的认证集成 API。当前非所有者填自己的日期，所有者读／批注当前成员。持久化 `(空间,用户,joined_at,日期)` 防止旧任期内容在重新加入后出现。起始日取迁移的 `DailyReportState`，不是客户端配置。提交冻结业务活动；普通读取不标记正文或批注已读。截止窗口、正文版本和批注版本分别校验。
 
-源码依据 · backend `e59716c8`: [app/workspaces/workspace_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py) · [app/workspaces/workspaces.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspaces.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py) · [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py).
+## 离开、交接与移除
+
+离开或被移除结束当前成员关系，不重写历史作者或账务归因。所有者可把已离开负责人的普通项目交给有效成员。已受理任务按冻结的原权限继续，账号／空间变化不是供应商取消。移除企业阻止新的保护读取，已发短期 URL 按其自身期限失效。交接后结果／清理权限见[项目指派](/zh/reference/flows/project-assignment-flow)。
+
+源码地图：[app/workspaces/workspace_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py) · [app/workspaces/workspaces.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py) · [app/workspaces/daily_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/daily_reports.py) · [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py)。

@@ -7,6 +7,18 @@ export const candidateContractFiles = [
   'tests/fixtures/backend-floor-plan-workflows-t45-source.json',
 ]
 
+// A historical frontend fixture may outlive the backend implementation it
+// anticipated. Public routes belong only to the main inventory; retain fixture
+// evidence solely for operations still absent at the pinned backend revision.
+export function frontendOnlyCandidateOperations(contract, backendApi) {
+  const key = row => `${row.method} ${row.path.replace(/\{[^}]+\}/g, '{}')}`
+  const implemented = new Set(backendApi.map(key))
+  return Object.entries(contract.paths || {}).flatMap(([path, operations]) => Object.keys(operations)
+    .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].includes(method))
+    .map(method => ({ method: method.toUpperCase(), path }))
+    .filter(row => !implemented.has(key(row))))
+}
+
 export function sourceLinks(text) {
   const pattern = /https:\/\/github\.com\/Orientation-CD\/(wechat_mini_program|YuanZhu-AI)\/(blob|tree)\/([^\s/)]+)\/([^\s)#?]+)(?:#L(\d+)(?:-L(\d+))?)?/g
   return [...text.matchAll(pattern)].map(match => {

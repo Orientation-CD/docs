@@ -147,3 +147,9 @@ The first command is read-only. The second updates only proven revision/path/lin
 Normal CI validates committed source line bounds and trace-linked symbol anchors. It also restricts `apiScope: frontend-candidate` to the bilingual floor-plan guide: only method/path pairs extracted from pinned frontend fixtures are allowed there, while the main API inventory stays the actual backend routes. A candidate schema must never silently enlarge the claimed main implementation.
 
 Keep obsolete setup instructions out of the learning path. Actual still-exposed adapters remain explicitly scoped in [compatibility](/reference/compatibility); removed pages keep only short non-searchable migration links. This cleans guidance without concealing code that the current UI still uses.
+
+## Promoted contracts and gateway extraction
+
+When an old fixture operation enters the pinned backend, extraction removes it from candidate scope, normalizing parameter names/converters. Review its prose and add the real handler trace to the main inventory. Remaining historical fixtures are candidate evidence, not server promises. The current floor-plan guide no longer needs candidate scope.
+
+The syntax extractor expands literal `api_route` method lists/module constants, including all nine H5 gateway methods. Document concrete operation restrictions separately; a declaration does not grant forwarding authority. Unresolved public method expressions fail extraction. Cited tests/source files receive line/hash metadata without execution or use as runtime route authority. UTF-8 JSON pipes are decoded explicitly on Windows as well as Unix.
