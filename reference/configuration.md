@@ -39,15 +39,21 @@ Use a stable configuration-encryption key across roles and retained data. Rotati
 
 ## Configuration is not feature deployment evidence
 
-`VITE_FLOOR_PLAN_WEB_ORIGIN` is an exact trusted frontend H5 origin (API origin fallback), not a switch that adds missing backend floor-plan routes. Theme selection also follows its declared selectable catalog; the current settings switch is hidden. See [integration status](/reference/integration-status).
+`VITE_FLOOR_PLAN_WEB_ORIGIN` is the exact trusted client H5 origin (API-origin fallback). Backend `H5_3VJIA_BASE_URL`, published releases and database-owned SDK configuration govern the original ThreeVjia H5. Supplier account credentials and renewal are server responsibilities; neither a trusted origin nor an enabled Feature proves a release is runnable. See [floor plans](/backend/floor-plans).
 
 Member monthly caps are persisted enterprise/member configuration, not an environment flag. Performance windows and release attribution follow [observability](/backend/observability); retain `APP_VERSION` per running process/image. Source defaults in the generated table are distinct from an actual deployment's values.
+
+## SDK and sales-stage configuration
+
+ThreeVjia uses dedicated SDK configuration/release management, not a new ordinary ProviderConnection. Its binding freezes configuration identity/generation, release and contract digest into accepted execution. Account token renewal and release maintenance have separate locks and settings (`THREE_VJIA_REFRESH_MARGIN_SECONDS`, `THREE_VJIA_MAINTENANCE_ENABLED`, `THREE_VJIA_MAINTENANCE_LOCK_PATH`). Do not copy supplier secrets into frontend configuration.
+
+`PROJECT_SALES_STAGES_ENABLED` is a protected first-activation boundary backed by durable activation state, rather than a routine toggle to reverse written stage evidence. Stage activation and the earlier outcome boundary must follow the [release procedure](/deploy/production). Video rates are database configuration with a version, not a browser price or sum of graph-node costs; see [fee confirmation](/reference/flows/video-billing-flow).
 
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions).
 
-- [Settings and validation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/config.py)
-- [Committed local example](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.env.example)
-- [Database provider configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_configuration.py)
-- [Build modes and scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)
+- [Settings and validation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/config.py)
+- [Committed local example](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/.env.example)
+- [Database provider configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_configuration.py)
+- [Build modes and scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)

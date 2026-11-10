@@ -12,7 +12,7 @@ This is a relationship guide to the current ORM, not replacement DDL. Follow the
 | Input archival | `asset_input_archives` | Asset-owned relocation receipt, exact source/destination versions, copy lease and acknowledgement survive recovery |
 | Workspaces | `workspaces`, `personal_workspaces`, `enterprises`, membership/history | Wallet owner and current permission differ from past membership |
 | Member quotas | `enterprise_member_token_limits`, `enterprise_member_token_limit_audits`, enterprise default columns | Durable custom configuration and immutable configuration audit; financial usage comes from the ledger |
-| Projects | `projects`, `project_preferences`, `project_activity_state` | Creator-private management, durable default and trusted activity epoch |
+| Projects | `projects`, `project_preferences`, `project_activity_state` | Immutable creator, current `assignee_user_id`, assignment generation and defaults tied to responsibility |
 | Runtime | `design_jobs`, `workflow_runs`, `operation_runs`, input/dependency/output rows | Frozen execution graph and physical input pins |
 | Attempts/scheduling | `design_job_submissions`, `operation_provider_calls`, retry receipts, `workflow_outbox_events` | Generation-fenced attempts and transactional handoff |
 | Publication | `design_job_outputs`, `workflow_generated_sources` | Typed immutable outputs, retained dependencies and exact publication identity |
@@ -46,10 +46,37 @@ A missing override inherits the enterprise default; a stored null override is ex
 
 ## Permission and state are separate dimensions
 
-Project management remains creator-private. A current enterprise owner has explicitly scoped read-only task/project projections; another member's task detail returns `inputs: []` and does not grant retry, move, deletion or source-copy rights.
+Project creator, current assignee and original Job submitter are distinct. Ordinary project navigation follows current responsibility, with bounded enterprise-owner reads. Authorized by-ID detail exposes typed inputs; collections suppress other authors' inputs. Mutation requires action-specific author/responsibility checks, while transfer preserves historical submitter and financial attribution. See [assignment](/reference/flows/project-assignment-flow).
 
 Job status (`pending/running/completed/failed`), financial status (`unreserved/reserved/settled/released`), submission certainty, Asset state and archive receipt state are different state machines. An expiring URL is a capability, not durable Asset identity. Performance histories in Redis are bounded observations, not replacements for the SQL financial/runtime record.
 
 Read [recovery](/deploy/production) before selecting a rollback image: application rollback preserves forward schema and cannot recreate removed tables or reverse compatibility boundaries.
 
-Source: [app/persistence/db_models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/persistence/db_models.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
+
+## Collaboration, SDK and uncertain execution records
+
+| Records | Relationship and recovery meaning |
+| --- | --- |
+| `project_stage_sources`, `project_stage_events`, `project_sales_stage_state` | Current independent stage evidence, immutable event snapshots and durable activation; Job deletion does not erase historical stage evidence |
+| Daily-report records and membership identity | A report belongs to an enterprise membership period and Beijing date; saved revisions, owner read/comment and member comment-seen state are distinct |
+| `floor_plan_works` | Local ownership keyed by SDK configuration plus opaque supplier Group; live title/cover/layout remain supplier metadata |
+| `three_vjia_releases`, `three_vjia_sdk_configurations` | Published contract/H5 identity versus selected execution configuration; no persisted editor-session table |
+| `video_billing_config` and accepted commercial snapshots | Current versioned rate rules versus immutable accepted model/duration/charge |
+| Submission/provider UNKNOWN fields | Persistent start/deadline/next query/count; restarting a worker does not restart the recovery clock |
+
+```mermaid
+erDiagram
+  PROJECT ||--o{ DESIGN_JOB : groups
+  PROJECT ||--o{ PROJECT_STAGE_SOURCE : evidences
+  PROJECT ||--o{ PROJECT_STAGE_EVENT : audits
+  USER ||--o{ PROJECT : currently_assigned
+  USER ||--o{ DESIGN_JOB : originally_submitted
+  SDK_CONFIGURATION ||--o{ FLOOR_PLAN_WORK : owns_namespace
+  FLOOR_PLAN_WORK ||--o{ DESIGN_JOB : related_group
+  DESIGN_JOB ||--|| WORKFLOW_RUN : public_identity
+  WORKFLOW_RUN ||--o{ SUBMISSION : attempts
+```
+
+The diagram shows logical relationships, not extra SQL foreign keys. A Work may exist before any Job; its related Workflow count does not equal its supplier identity. Read [floor-plan ownership](/reference/flows/floor-plan-flow), [stages](/reference/flows/project-stages-flow) and [daily reports](/reference/flows/daily-report-flow) for their separate transaction boundaries.
+
+Source: [app/persistence/db_models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/persistence/db_models.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)

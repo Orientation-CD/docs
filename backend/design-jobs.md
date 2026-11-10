@@ -21,4 +21,8 @@ The current UI still uses some adapters. Their exact supported/rejected behavior
 
 ---
 
-Source evidence · backend `e59716c8`: [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/api/__init__.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_configuration.py).
+Source evidence · backend `749e82df`: [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/api/__init__.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_configuration.py).
+
+## Standard image models and the SDK image family
+
+The model-node instructions above apply to ordinary image generation. The seven ThreeVjia Features share `three_vjia_image`, an SDK execution family with original H5 request preparation, frozen render-document/primary-image pins and release-specific bindings. They do not use a new ordinary provider-model row. See [the SDK architecture](/backend/floor-plans) and [image call chain](/reference/flows/three-vjia-image-flow).

@@ -7,6 +7,89 @@ import unittest
 
 
 class SourceExtractionTest(unittest.TestCase):
+    def test_gateway_method_constants_use_the_binding_at_registration(self):
+        source = '''
+router = APIRouter()
+METHODS = ["GET"]
+@router.api_route("/v1/first", methods=METHODS)
+async def first(): pass
+METHODS = ["POST"]
+@router.api_route("/v1/second", methods=METHODS)
+async def second(): pass
+'''
+        script = Path(__file__).resolve().parents[1] / 'scripts/extract-source-facts.py'
+        output = subprocess.run([sys.executable, str(script)], input=json.dumps({'files': {'app/routes.py': source}}), text=True, check=True, capture_output=True)
+        self.assertEqual([(row['method'], row['path']) for row in json.loads(output.stdout)['api']], [('GET', '/v1/first'), ('POST', '/v1/second')])
+
+    def test_dynamic_rebinding_invalidates_older_method_constants(self):
+        for assignment in ['METHODS = runtime_methods()', 'METHODS: list[str] = runtime_methods()', 'METHODS += runtime_methods()']:
+            with self.subTest(assignment=assignment):
+                source = f'''router = APIRouter()
+METHODS = ["GET"]
+{assignment}
+@router.api_route("/v1/gateway", methods=METHODS)
+async def relay(): pass
+'''
+                script = Path(__file__).resolve().parents[1] / 'scripts/extract-source-facts.py'
+                output = subprocess.run([sys.executable, str(script)], input=json.dumps({'files': {'app/routes.py': source}}), text=True, capture_output=True)
+                self.assertNotEqual(output.returncode, 0)
+                self.assertIn('public api_route methods must be statically resolvable', output.stderr)
+
+    def test_method_rebinding_on_the_registration_line_respects_statement_order(self):
+        source = '''router = APIRouter()
+METHODS = ["GET"]
+METHODS = ["POST"]; router.api_route("/v1/first", methods=METHODS)(first)
+router.api_route("/v1/second", methods=METHODS)(second); METHODS = ["DELETE"]
+'''
+        script = Path(__file__).resolve().parents[1] / 'scripts/extract-source-facts.py'
+        output = subprocess.run([sys.executable, str(script)], input=json.dumps({'files': {'app/routes.py': source}}), text=True, check=True, capture_output=True)
+        self.assertEqual([(row['method'], row['path']) for row in json.loads(output.stdout)['api']], [('POST', '/v1/first'), ('POST', '/v1/second')])
+
+    def test_gateway_method_case_is_normalized_like_fastapi(self):
+        source = '''router = APIRouter()
+@router.api_route("/v1/gateway", methods=["get", "Post", "GET", "trace", "connect"])
+async def relay(): pass
+'''
+        script = Path(__file__).resolve().parents[1] / 'scripts/extract-source-facts.py'
+        output = subprocess.run([sys.executable, str(script)], input=json.dumps({'files': {'app/routes.py': source}}), text=True, check=True, capture_output=True)
+        self.assertEqual([row['method'] for row in json.loads(output.stdout)['api']], ['CONNECT', 'GET', 'POST', 'TRACE'])
+
+    def test_utf8_source_payload_is_independent_of_windows_pipe_encoding(self):
+        source = 'router = APIRouter(prefix="/v1")\n@router.get("/中文")\ndef read(): pass\n'
+        script = Path(__file__).resolve().parents[1] / 'scripts/extract-source-facts.py'
+        payload = json.dumps({'files': {'app/unicode.py': source}}, ensure_ascii=False).encode('utf-8')
+        output = subprocess.run([sys.executable, str(script)], input=payload, check=True, capture_output=True)
+        self.assertEqual(json.loads(output.stdout)['api'][0]['path'], '/v1/中文')
+
+    def test_gateway_methods_are_resolved_without_importing_application(self):
+        source = '''
+raise RuntimeError("never execute")
+router = APIRouter()
+HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "TRACE", "CONNECT"]
+@router.api_route("/v1/gateway/{target}/{path:path}", methods=HTTP_METHODS)
+async def relay(): pass
+@router.api_route("/v1/default")
+async def default_read(): pass
+'''
+        script = Path(__file__).resolve().parents[1] / 'scripts/extract-source-facts.py'
+        output = subprocess.run([sys.executable, str(script)], input=json.dumps({'files': {'app/gateway.py': source}}), text=True, check=True, capture_output=True)
+        routes = json.loads(output.stdout)['api']
+        gateway = [row for row in routes if row['handler']['symbol'] == 'relay']
+        self.assertEqual({row['method'] for row in gateway}, {'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT'})
+        self.assertTrue(all(row['path'] == '/v1/gateway/{target}/{path:path}' for row in gateway))
+        self.assertEqual(next(row['method'] for row in routes if row['handler']['symbol'] == 'default_read'), 'GET')
+
+    def test_unresolved_public_gateway_methods_fail_instead_of_disappearing(self):
+        source = '''
+router = APIRouter()
+@router.api_route("/v1/gateway", methods=runtime_methods())
+async def relay(): pass
+'''
+        script = Path(__file__).resolve().parents[1] / 'scripts/extract-source-facts.py'
+        output = subprocess.run([sys.executable, str(script)], input=json.dumps({'files': {'app/gateway.py': source}}), text=True, capture_output=True)
+        self.assertNotEqual(output.returncode, 0)
+        self.assertIn('public api_route methods must be statically resolvable', output.stderr)
+
     def test_routes_defaults_and_secrets_without_executing_source(self):
         source = {
             'app/core/config.py': '''

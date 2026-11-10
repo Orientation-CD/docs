@@ -2,7 +2,40 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { sourceLinks, checkSourceAnchor, candidateApiForPage, validateCandidateApi, candidateContractFiles } from '../scripts/source-links.mjs'
+import { sourceLinks, checkSourceAnchor, candidateApiForPage, validateCandidateApi, candidateContractFiles, frontendOnlyCandidateOperations } from '../scripts/source-links.mjs'
+
+test('promoted fixture operations leave candidate scope even when path parameter names/converters differ', () => {
+  const contract = { paths: {
+    '/v1/floor-plan-works/{group_id}': { get: {}, patch: {}, parameters: [] },
+    '/v1/floor-plan-render': { post: {} },
+  } }
+  const backend = [{ method: 'PATCH', path: '/v1/floor-plan-works/{group_id:path}' }]
+  assert.deepEqual(frontendOnlyCandidateOperations(contract, backend), [
+    { method: 'GET', path: '/v1/floor-plan-works/{group_id}' },
+    { method: 'POST', path: '/v1/floor-plan-render' },
+  ])
+  assert.deepEqual(frontendOnlyCandidateOperations({}, backend), [])
+})
+
+test('promotion reporting preserves exact fixture operations while excluding them from candidate scope', () => {
+  const promoted = []
+  const candidates = frontendOnlyCandidateOperations({ paths: {
+    '/v1/floor-plan-works/{group_id}': { patch: {}, trace: {}, connect: {}, parameters: [] },
+  } }, [{ method: 'PATCH', path: '/v1/floor-plan-works/{id:path}' }], { onPromoted: row => promoted.push(row) })
+  assert.deepEqual(promoted, [{ method: 'PATCH', path: '/v1/floor-plan-works/{group_id}' }])
+  assert.deepEqual(candidates, [
+    { method: 'TRACE', path: '/v1/floor-plan-works/{group_id}' },
+    { method: 'CONNECT', path: '/v1/floor-plan-works/{group_id}' },
+  ])
+})
+
+test('candidate evidence validates TRACE and CONNECT with the same method scope as route extraction', () => {
+  const candidates = ['TRACE', 'CONNECT'].map(method => ({ method, path: '/v1/floor-plan-editor/gateway/{target}/{path:path}', status: 'frontend-candidate-only', sources: [{ path: candidateContractFiles[0], commit: 'a'.repeat(40), sha256: 'b'.repeat(64) }] }))
+  const snapshot = { commits: { frontend: 'a'.repeat(40) }, api: [], frontend: { candidateApi: candidates }, sourceFiles: { frontend: { [candidateContractFiles[0]]: { sha256: 'b'.repeat(64) } } } }
+  const revisions = { repositories: { frontend: { authorities: [{ path: candidateContractFiles[0], sha256: 'b'.repeat(64) }] } } }
+  assert.deepEqual(validateCandidateApi(snapshot, revisions), [])
+  assert.match(validateCandidateApi({ ...snapshot, frontend: { candidateApi: [{ ...candidates[0], method: 'BOGUS' }] } }, revisions).join('\n'), /Invalid candidate operation/)
+})
 
 test('source checks reject stale definition anchors even when the new line is in bounds', () => {
   const sha = 'a'.repeat(40)

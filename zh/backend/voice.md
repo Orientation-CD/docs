@@ -25,6 +25,10 @@
 
 成功总结可按标准完成规则将普通项目推进到已采集需求。参见[项目](/zh/backend/projects)、[Asset](/zh/backend/assets-storage)与[配置](/zh/reference/configuration)。
 
+## 销售模式中的完成证据
+
+启用销售阶段时，符合条件的根语音总结成功后，经 `completed_job_stage` 和 `record_completed_job_stage`，向当前绑定的普通项目增加自动 `REQUIREMENTS_CAPTURED` 来源；不要求或自动点亮所有此前阶段。具有自动证据的阶段不能由用户手动撤销。已受理工作在交接后保持原作者与计费。见[销售证据](/zh/reference/flows/project-stages-flow)。
+
 ---
 
-代码依据 · backend `e59716c8`: [app/assets/voice_upload_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_api.py) · [app/assets/voice_upload_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/voice_upload_sessions.py) · [app/workflows/operations/summary/workflow_voice_definition.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/operations/summary/workflow_voice_definition.py).
+代码依据 · backend `749e82df`: [app/assets/voice_upload_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/voice_upload_api.py) · [app/assets/voice_upload_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/voice_upload_sessions.py) · [app/workflows/operations/summary/workflow_voice_definition.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/operations/summary/workflow_voice_definition.py).

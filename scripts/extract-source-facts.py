@@ -4,7 +4,7 @@ import json
 import re
 import sys
 
-payload = json.load(sys.stdin)
+payload = json.loads(sys.stdin.buffer.read())
 files = payload['files']
 routes = []
 settings = []
@@ -30,6 +30,39 @@ def literal(node, constants=None):
     if isinstance(node, (ast.List, ast.Tuple)):
         return [literal(item, constants) for item in node.elts]
     raise ValueError('nonliteral')
+
+
+def route_constants_before(tree, registration):
+    """Resolve direct module bindings before a registration, without executing code."""
+    constants = {}
+    for statement in tree.body:
+        if (statement.end_lineno, statement.end_col_offset) > (registration.lineno, registration.col_offset):
+            break
+        if isinstance(statement, (ast.Assign, ast.AnnAssign)):
+            if statement.value is None:  # A bare annotation does not rebind a value.
+                continue
+            targets = statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+            try:
+                value = literal(statement.value, constants)
+            except (ValueError, TypeError):
+                value = None
+                resolved = False
+            else:
+                resolved = True
+            for target in targets:
+                if isinstance(target, ast.Name) and resolved:
+                    constants[target.id] = value
+                else:
+                    for name in ast.walk(target):
+                        if isinstance(name, ast.Name):
+                            constants.pop(name.id, None)
+        elif isinstance(statement, (ast.AugAssign, ast.Delete)):
+            targets = statement.targets if isinstance(statement, ast.Delete) else [statement.target]
+            for target in targets:
+                for name in ast.walk(target):
+                    if isinstance(name, ast.Name):
+                        constants.pop(name.id, None)
+    return constants
 
 
 for path, source in sorted(files.items()):
@@ -66,12 +99,23 @@ for path, source in sorted(files.items()):
         if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute) or not isinstance(node.func.value, ast.Name):
             continue
         name, method = node.func.value.id, node.func.attr
-        if name not in prefixes or method not in {'get', 'post', 'put', 'patch', 'delete', 'head', 'options'} or not node.args or not isinstance(node.args[0], ast.Constant):
+        if name not in prefixes or method not in {'get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace', 'connect', 'api_route'} or not node.args or not isinstance(node.args[0], ast.Constant):
             continue
         route = prefixes[name] + node.args[0].value
         if not route.startswith(('/v1/', '/health/', '/voice-upload')):
             continue
         kwargs = {kw.arg: kw.value for kw in node.keywords}
+        methods = [method.upper()]
+        if method == 'api_route':
+            try:
+                methods = literal(kwargs['methods'], route_constants_before(tree, node)) if 'methods' in kwargs else ['GET']
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f'{path}:{node.lineno}: public api_route methods must be statically resolvable') from exc
+            if not isinstance(methods, (list, tuple)) or not methods or any(not isinstance(item, str) for item in methods):
+                raise ValueError(f'{path}:{node.lineno}: invalid public api_route methods')
+            methods = [item.upper() for item in methods]
+            if any(item not in {'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT'} for item in methods):
+                raise ValueError(f'{path}:{node.lineno}: invalid public api_route methods')
         code = ast.unparse(kwargs['status_code']) if 'status_code' in kwargs else '200'
         code = re.search(r'HTTP_(\d+)', code).group(1) if re.search(r'HTTP_(\d+)', code) else code
         parent = parents.get(id(node))
@@ -81,10 +125,11 @@ for path, source in sorted(files.items()):
         elif isinstance(parent, ast.Call) and parent.func is node and parent.args and isinstance(parent.args[0], ast.Name):
             handler_name = parent.args[0].id
         handler_source, handler_symbol = imports.get(handler_name, (path, handler_name))
-        routes.append({'method': method.upper(), 'path': route, 'status': int(code) if code.isdigit() else code,
-                       'deprecated': isinstance(kwargs.get('deprecated'), ast.Constant) and kwargs['deprecated'].value is True,
-                       'source': path, 'line': node.lineno,
-                       'handler': {'source': handler_source, 'symbol': handler_symbol}})
+        for declared_method in dict.fromkeys(methods):
+            routes.append({'method': declared_method, 'path': route, 'status': int(code) if code.isdigit() else code,
+                           'deprecated': isinstance(kwargs.get('deprecated'), ast.Constant) and kwargs['deprecated'].value is True,
+                           'source': path, 'line': node.lineno,
+                           'handler': {'source': handler_source, 'symbol': handler_symbol}})
     if path != 'app/core/config.py':
         continue
     constants = {}
@@ -122,4 +167,4 @@ for route in routes:
     match = next((item for item in symbols if item['source'] == route['handler']['source'] and item['symbol'] == route['handler']['symbol']), None)
     if match:
         route['handler']['line'] = match['line']
-print(json.dumps({'api': sorted(routes, key=lambda row: (row['path'], row['method'])), 'settings': settings, 'symbols': symbols}, ensure_ascii=False))
+print(json.dumps({'api': sorted(routes, key=lambda row: (row['path'], row['method'])), 'settings': settings, 'symbols': symbols}, ensure_ascii=True))

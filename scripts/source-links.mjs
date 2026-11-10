@@ -6,6 +6,23 @@ export const candidateContractFiles = [
   'tests/fixtures/backend-floor-plan-panorama-6060-87737599.json',
   'tests/fixtures/backend-floor-plan-workflows-t45-source.json',
 ]
+const httpMethods = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT'])
+
+// A historical frontend fixture may outlive the backend implementation it
+// anticipated. Public routes belong only to the main inventory; retain fixture
+// evidence solely for operations still absent at the pinned backend revision.
+export function frontendOnlyCandidateOperations(contract, backendApi, { onPromoted } = {}) {
+  const key = row => `${row.method} ${row.path.replace(/\{[^}]+\}/g, '{}')}`
+  const implemented = new Set(backendApi.map(key))
+  return Object.entries(contract.paths || {}).flatMap(([path, operations]) => Object.keys(operations)
+    .filter(method => httpMethods.has(method.toUpperCase()))
+    .map(method => ({ method: method.toUpperCase(), path }))
+    .filter(row => {
+      if (!implemented.has(key(row))) return true
+      onPromoted?.(row)
+      return false
+    }))
+}
 
 export function sourceLinks(text) {
   const pattern = /https:\/\/github\.com\/Orientation-CD\/(wechat_mini_program|YuanZhu-AI)\/(blob|tree)\/([^\s/)]+)\/([^\s)#?]+)(?:#L(\d+)(?:-L(\d+))?)?/g
@@ -62,7 +79,7 @@ export function validateCandidateApi(snapshot, revisions) {
     const key = `${row.method} ${row.path.replace(/\{[^}]+\}/g, '{}')}`
     if (main.has(key) || seen.has(key)) errors.push(`Candidate operation duplicates main/another candidate: ${key}`)
     seen.add(key)
-    if (row.status !== 'frontend-candidate-only' || !row.path.startsWith('/v1/floor-plan-') || !['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].includes(row.method)) errors.push(`Invalid candidate operation: ${key}`)
+    if (row.status !== 'frontend-candidate-only' || !row.path.startsWith('/v1/floor-plan-') || !httpMethods.has(row.method)) errors.push(`Invalid candidate operation: ${key}`)
     if (!Array.isArray(row.sources) || !row.sources.length) errors.push(`Candidate operation has no fixture evidence: ${key}`)
     for (const source of row.sources || []) {
       if (!candidateContractFiles.includes(source.path) || source.commit !== snapshot.commits.frontend || !/^[a-f0-9]{64}$/.test(source.sha256) || authorities.get(source.path) !== source.sha256 || snapshot.sourceFiles?.frontend?.[source.path]?.sha256 !== source.sha256) errors.push(`Unverified candidate fixture: ${key} ${source.path}`)

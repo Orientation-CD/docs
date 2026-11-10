@@ -12,7 +12,7 @@ Feature 是可发现的业务能力，Workflow 是后端执行图，公开 Job I
 | 八项文案/问答 | `POST /v1/workflows` | 精确产品键、prompts、`inputs:[]`；`prepareCopywriting` 后进入共用提交 repository |
 | 新版设计报告 | `POST /v1/workflows` | `design_report_9/13/17` 和结构化输入；`prepareProjectWorkflow` → `postWorkflow` |
 
-前四行由 `postPrepared` 选路由，报告通过 `workflowsRepository.submit`。新 API 调用方应从[规范 Workflow](/zh/backend/workflows)开始。现有 HTML报告代码不是新报告的 schema 或推荐入口。专业户型页面则属于[独立候选契约边界](/zh/frontend/floor-plans)，不能当成本轮前后端已接通的执行路径。
+前四行由 `postPrepared` 选路由，报告通过 `workflowsRepository.submit`。新 API 调用方应从[规范 Workflow](/zh/backend/workflows)开始。现有 HTML报告代码不是新报告的 schema 或推荐入口。专业户型和普通方案生图已有[实际 SDK 与 Workflow 路径](/zh/frontend/floor-plans)，其不可变 release、激活和部署核验独立于上表。
 
 ## 共用准备与接受流程
 
@@ -44,7 +44,7 @@ Feature 是可发现的业务能力，Workflow 是后端执行图，公开 Job I
 | 场景图 | 剧本恰好1张，同款0–1张 | 通用 schema 为0–12，同款准入进一步限0–1 |
 | 剧本 | 剧本路径1–1000字 | 公开模型最多20000字，同款不发送script |
 | 录音 | 同款必填，界面录制最长120秒 | 最多1份，同款必须 audio/mpeg 且 duration_ms>5000 |
-| 自传参考视频 | 一份 MP4，最多100MiB（104857600字节） | 已验证 VIDEO/reference_video Asset 及对应模式准入 |
+| 自传参考视频 | 一份 MP4，15–120秒（含边界），最多100MiB（104857600字节） | 已验证 VIDEO/reference_video Asset 及对应模式准入 |
 | 台词替换 | 最多10对，每端最多200字 | 仅同款，作为指令转交渲染环节 |
 
 通用 schema 接受某种素材数量，不等于当前供应商支持全部组合。剧本管线当前需要场景作为上游 background，同款走重制管线并允许空场景。不要照抄通用 API 最大值去“修复”UI 限制。
@@ -62,8 +62,12 @@ sequenceDiagram
   P->>S: 角色 / 可选场景 / 录音 / 本地MP4
   S->>S: 校验模式、替换、作用域、模型
   S->>API: 重查资料与 Feature 目录
-  S->>A: 暂存图片、录音、参考视频 Asset
+  S->>A: 先暂存参考视频 Asset
   A->>API: 上传意图 / 直传字节 / 完成
+  S->>API: 权威费用预览
+  API-->>S: 当前有效模型与最终积分
+  S->>P: 确认费用
+  S->>A: 暂存剩余图片和录音
   S->>S: 组装 prompts 与显式 port/role 输入
   S->>API: 带稳定动作键提交任务
   API-->>P: 202 与已接受公开 Job
@@ -111,6 +115,14 @@ Blueprint 来源声明可以引用既有 Asset、所选生成子内容或配置�
 
 HTML查看器需要新的授权访问。支持的 PPTX artifact 按有类型产物消费，后端有某种 artifact 并不等于每个页面都有单独导出按钮。子执行、耐久状态和发布产物见[报告链路](/zh/reference/flows/report-view-flow)。
 
+## 确认视频费用，同时保留回执未知的动作
+
+`submitVideoGeneration` 在预览前上传自传参考视频，因为服务端需要实测时长。取得并确认 `previewVideoBilling` 后再暂存剩余素材，将带 `expected_token_cost`、`expected_effective_model` 的准备正文/key 持久化后才发送。表单防抖更新显示预览，看到金额不等于已经取得确认回执。
+
+明确的 409 `VIDEO_PRICE_CHANGED` 进入 `reconfirmVideoGeneration`：重新取得并确认费用，更新确认字段、保存，再按同一逻辑动作发送。超时或接纳未知则由 `replayVideoGeneration` 原样重放准备请求，账号/工作区还必须匹配。不能把重放变成重新上传、重新定价或新任务 key。见[费用全链路](/zh/reference/flows/video-billing-flow)。
+
+源码：[reconfirmVideoGeneration](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/videoGenerationSubmit.ts#L214) · [replayVideoGeneration](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/videoGenerationSubmit.ts#L209)。
+
 ## 源码依据
 
-核验日期 2026-10-28：[真实路由选择](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [视频编排](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/videoGenerationSubmit.ts#L69) · [同款字段](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/sameStyleVideo.ts#L10) · [视频暂存/限制](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/videoAssets.ts#L25) · [目录选择](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/promptCatalog.ts#L198) · [报告构建器](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/reportBlueprint.ts#L65) · [报告动作冻结](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/workflowSubmission.ts) · [后端视频模式限制](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L1279)。
+核验日期 2026-11-10：[真实路由选择](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/designJobSubmit.ts#L184) · [视频编排](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/videoGenerationSubmit.ts#L76) · [同款字段](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/sameStyleVideo.ts#L10) · [视频暂存/限制](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/videoAssets.ts#L26) · [目录选择](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/promptCatalog.ts#L198) · [报告构建器](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/reportBlueprint.ts#L65) · [报告动作冻结](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/workflowSubmission.ts) · [后端视频模式限制](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L1550)。

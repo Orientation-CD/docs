@@ -57,11 +57,29 @@ docker compose --env-file .env -p "$DEV_TEST_PROJECT" logs --tail 100 api
 
 普通启动、smoke/E2E 都保留数据库、Redis、MinIO 命名卷。不要把 `down -v` 当作常规清理。宿主机 PostgreSQL 映射与 API 端口分开，smoke/E2E 会关闭该映射。配置优先级与 MinIO/OSS 选择见[存储与测试环境](/zh/testing/storage-environments)。
 
+## 单独准备共享三维家 H5 根
+
+`H5_3VJIA_BASE_URL` 是编辑器、户型选择、普通生图、发现和全景共用的当前发布根。`FLOOR_PLAN_H5_BASE_URL` 仅兼容读取，同时存在时新名优先。API/H5 配置须属于同一环境。仅在 `ENVIRONMENT=development` 时允许回环/私有局域网 HTTP；手机预览必须能访问 API、H5 和图片签名 origin。Docker 内回环地址指当前容器，不是宿主机。
+
+在后端根目录用固定版本 builder 准备本会话包，将示例 origin/版本替换为当前会话值：
+
+```bash
+python scripts/build_3vjia_h5.py \
+  --source .local/3vjia-original-10001115 --download-source \
+  --output .local/3vjia-release --api-base https://api.example.com \
+  --publication-base https://h5.example.com/3vjia/h5/ \
+  --model-id floorplan-doc-example
+```
+
+源码缓存用于验证固定供应商输入；自有发布包包含 bridge、适配和明确获准的运行资源，不是任意供应商站点镜像。核对 `manifest.json`、契约字节和 release 身份。API 健康或包构建成功不代表 SDK 已激活、凭据已可用。若本机 MinIO 公开根匿名读取返回 403，按 runbook 对已核验的单一静态前缀导出，不能把业务 bucket 改成公开。
+
+源码：[scripts/build_3vjia_h5.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/build_3vjia_h5.py) · [scripts/runbook.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)。
+
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)
-- [启动器及冲突行为](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/create_stack.sh)
-- [会话与测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
-- [镜像与私有供应商依赖](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/Dockerfile)
+- [本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)
+- [启动器及冲突行为](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/create_stack.sh)
+- [会话与测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md)
+- [镜像与私有供应商依赖](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/Dockerfile)

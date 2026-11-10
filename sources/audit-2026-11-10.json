@@ -1,0 +1,724 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-11-10",
+  "docsBaseCommit": "d98a81732946899663b97ad3356be23504350c94",
+  "commits": {
+    "frontend": "88c75c1f15cd65f45c7fb09d560df80430ddc198",
+    "backend": "749e82df3a51c441335ba6a4db607a98bacbcf97"
+  },
+  "method": "Pinned source diff and domain implementation/contract/test review; bilingual call-chain review; proven source-link rebasing and documentation validation. No application stack, device or real supplier acceptance was run.",
+  "pages": [
+    {
+      "path": "admin/assets.md",
+      "action": "review"
+    },
+    {
+      "path": "admin/billing.md",
+      "action": "refresh"
+    },
+    {
+      "path": "admin/campaigns.md",
+      "action": "review"
+    },
+    {
+      "path": "admin/dashboard.md",
+      "action": "review"
+    },
+    {
+      "path": "admin/design-jobs.md",
+      "action": "refresh"
+    },
+    {
+      "path": "admin/finance.md",
+      "action": "review"
+    },
+    {
+      "path": "admin/getting-started.md",
+      "action": "refresh"
+    },
+    {
+      "path": "admin/legal-documents.md",
+      "action": "review"
+    },
+    {
+      "path": "admin/marketing.md",
+      "action": "review"
+    },
+    {
+      "path": "admin/overview.md",
+      "action": "refresh"
+    },
+    {
+      "path": "admin/performance.md",
+      "action": "refresh"
+    },
+    {
+      "path": "admin/prompts.md",
+      "action": "review"
+    },
+    {
+      "path": "admin/providers.md",
+      "action": "refresh"
+    },
+    {
+      "path": "admin/report-templates.md",
+      "action": "migration"
+    },
+    {
+      "path": "admin/tech-stack.md",
+      "action": "refresh"
+    },
+    {
+      "path": "admin/users.md",
+      "action": "review"
+    },
+    {
+      "path": "admin/workflows.md",
+      "action": "refresh"
+    },
+    {
+      "path": "admin/workspaces.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/architecture.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/assets-storage.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/authentication.md",
+      "action": "review"
+    },
+    {
+      "path": "backend/billing-tokens.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/copywriting.md",
+      "action": "review"
+    },
+    {
+      "path": "backend/design-jobs.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/floor-plans.md",
+      "action": "add"
+    },
+    {
+      "path": "backend/getting-started.md",
+      "action": "review"
+    },
+    {
+      "path": "backend/observability.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/projects.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/reports.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/video.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/voice.md",
+      "action": "refresh"
+    },
+    {
+      "path": "backend/workflows.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "backend/workspaces-orgs.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "deploy/ci-cd.md",
+      "action": "refresh"
+    },
+    {
+      "path": "deploy/cloud-architecture.md",
+      "action": "refresh"
+    },
+    {
+      "path": "deploy/local-stack.md",
+      "action": "refresh"
+    },
+    {
+      "path": "deploy/production.md",
+      "action": "refresh"
+    },
+    {
+      "path": "deploy/sae-deployment.md",
+      "action": "refresh"
+    },
+    {
+      "path": "frontend/architecture.md",
+      "action": "refresh"
+    },
+    {
+      "path": "frontend/data-source-modes.md",
+      "action": "refresh"
+    },
+    {
+      "path": "frontend/design-system.md",
+      "action": "refresh"
+    },
+    {
+      "path": "frontend/floor-plans.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/getting-started.md",
+      "action": "refresh"
+    },
+    {
+      "path": "frontend/key-flows.md",
+      "action": "refresh"
+    },
+    {
+      "path": "frontend/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/platforms.md",
+      "action": "refresh"
+    },
+    {
+      "path": "frontend/projects.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "frontend/testing.md",
+      "action": "refresh"
+    },
+    {
+      "path": "frontend/workflows.md",
+      "action": "refresh"
+    },
+    {
+      "path": "get-started/architecture.md",
+      "action": "refresh"
+    },
+    {
+      "path": "get-started/faq.md",
+      "action": "refresh"
+    },
+    {
+      "path": "get-started/glossary.md",
+      "action": "refresh"
+    },
+    {
+      "path": "get-started/introduction.md",
+      "action": "refresh"
+    },
+    {
+      "path": "get-started/macos-setup.md",
+      "action": "review"
+    },
+    {
+      "path": "get-started/quickstart.md",
+      "action": "refresh"
+    },
+    {
+      "path": "index.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/compatibility.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/configuration.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/data-model.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/douyin-payment.md",
+      "action": "review"
+    },
+    {
+      "path": "reference/flows/asset-upload-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/flows/daily-report-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/design-job-lifecycle.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/flows/discovery-prompts-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "reference/flows/floor-plan-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/member-quota-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/flows/payment-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/flows/project-assignment-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/project-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/flows/project-stages-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/referral-rewards-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "reference/flows/refund-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "reference/flows/report-view-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/flows/runtime-debugging.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/flows/three-vjia-image-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/video-billing-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "reference/flows/voice-upload-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "reference/flows/wechat-login-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "reference/flows/workflow-history-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/flows/workflow-products-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/flows/workspace-membership-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/integration-status.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/maintenance.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/openapi.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/rest-api.md",
+      "action": "refresh"
+    },
+    {
+      "path": "reference/source-revisions.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "reference/system-walkthrough.md",
+      "action": "refresh"
+    },
+    {
+      "path": "testing/storage-environments.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/assets.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/admin/billing.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/campaigns.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/admin/dashboard.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/admin/design-jobs.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/finance.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/admin/getting-started.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/legal-documents.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/admin/marketing.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/admin/overview.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/performance.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/prompts.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/admin/providers.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/report-templates.md",
+      "action": "migration"
+    },
+    {
+      "path": "zh/admin/tech-stack.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/users.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/admin/workflows.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/admin/workspaces.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/architecture.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/assets-storage.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/authentication.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/backend/billing-tokens.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/copywriting.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/backend/design-jobs.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/floor-plans.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/backend/getting-started.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/backend/observability.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/projects.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/reports.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/video.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/voice.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/backend/workflows.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/backend/workspaces-orgs.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/deploy/ci-cd.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/deploy/cloud-architecture.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/deploy/local-stack.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/deploy/production.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/deploy/sae-deployment.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/frontend/architecture.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/frontend/data-source-modes.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/frontend/design-system.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/frontend/floor-plans.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/getting-started.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/frontend/key-flows.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/frontend/overview.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/platforms.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/frontend/projects.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/frontend/testing.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/frontend/workflows.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/get-started/architecture.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/get-started/faq.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/get-started/glossary.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/get-started/introduction.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/get-started/macos-setup.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/get-started/quickstart.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/index.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/compatibility.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/configuration.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/data-model.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/douyin-payment.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/reference/flows/asset-upload-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/flows/daily-report-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/design-job-lifecycle.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/flows/discovery-prompts-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/reference/flows/floor-plan-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/member-quota-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/flows/payment-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/flows/project-assignment-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/project-flow.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/flows/project-stages-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/referral-rewards-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/reference/flows/refund-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/reference/flows/report-view-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/flows/runtime-debugging.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/flows/three-vjia-image-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/video-billing-flow.md",
+      "action": "add"
+    },
+    {
+      "path": "zh/reference/flows/voice-upload-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/reference/flows/wechat-login-flow.md",
+      "action": "review"
+    },
+    {
+      "path": "zh/reference/flows/workflow-history-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/flows/workflow-products-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/flows/workspace-membership-flow.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/integration-status.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/maintenance.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/openapi.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/rest-api.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/reference/source-revisions.md",
+      "action": "rewrite"
+    },
+    {
+      "path": "zh/reference/system-walkthrough.md",
+      "action": "refresh"
+    },
+    {
+      "path": "zh/testing/storage-environments.md",
+      "action": "refresh"
+    }
+  ]
+}

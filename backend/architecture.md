@@ -50,11 +50,27 @@ A storage copy and the final SQL transaction are separate recoverable phases. A 
 | `app/workflows` | `api.py`, `workflow_admission.py` | Public projection, atomic acceptance, frozen graph and billing |
 | `app/workflows/submissions` | coordinator, scheduler, finalizer and local executors | Durable operation transitions and bounded provider/local execution |
 | `app/billing` | `billing.py`, `member_token_quotas.py` | Wallet ledger and independent member monthly capacity |
-| `app/workspaces` | `workspace_api.py`, `projects.py` | Membership, creator-private Projects and owner read projections |
+| `app/workspaces` | `project_api.py`, `project_jobs.py`, `daily_reports.py` | Current responsibility, membership, stage evidence and daily-report transactions |
 | `app/core` | `request_stages.py`, `performance_history.py`, `performance_reports.py` | Safe correlation and bounded operational observations |
 
 Production schema changes run before cutover; application startup is not a migration runner. Preserve the application's [deployment and recovery](/deploy/production) controls. Current UI callers and API compatibility are recorded in [integration status](/reference/integration-status), rather than inferred from the public route's preferred name.
 
 ---
 
-Source evidence · backend `e59716c8`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [app/worker.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/worker.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py).
+Source evidence · backend `749e82df`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py) · [app/worker.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/worker.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py).
+
+## SDK execution is a separate binding
+
+ThreeVjia capabilities enter the same Job/Workflow/outbox runtime with `execution_kind=sdk`. Their frozen binding identifies the SDK configuration/generation, release, contract digest and timeout; it is not an ordinary provider-model connection. The original H5 talks to a scoped, allowlisted platform gateway. Its paid render action becomes a canonical Workflow, while metadata reads remain synchronous. See [floor-plan execution](/backend/floor-plans).
+
+Project responsibility can move without changing historical Job submitters or wallet attribution. Authorized response signing occurs outside the initial load transaction; `finalize_workflow_reads` then rechecks fresh scalar authority so a transfer cannot silently preserve stale permissions. Read [assignment](/reference/flows/project-assignment-flow) before tracing mutations.
+
+[app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py)
+
+## SDK execution is a separate binding
+
+ThreeVjia capabilities enter the same Job/Workflow/outbox runtime with `execution_kind=sdk`. Their frozen binding identifies the SDK configuration/generation, release, contract digest and timeout; it is not an ordinary provider-model connection. The original H5 talks to a scoped gateway limited to pinned service origins, with known paid/history/managed operations intercepted or blocked. Its paid render action becomes a canonical Workflow, while metadata reads remain synchronous. See [floor-plan execution](/backend/floor-plans).
+
+Project responsibility can move without changing historical Job submitters or wallet attribution. Authorized response signing occurs outside the initial load transaction; `finalize_workflow_reads` then rechecks fresh scalar authority so a transfer cannot silently preserve stale permissions. Read [assignment](/reference/flows/project-assignment-flow) before tracing mutations.
+
+[app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py)

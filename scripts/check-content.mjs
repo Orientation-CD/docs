@@ -48,7 +48,7 @@ for (const file of files) {
     sourceLinkCount++
   }
   if (!['reference/maintenance', 'reference/source-revisions'].includes(route)) check(text.includes('/blob/') || text.includes('/tree/'), `${file}: missing pinned source evidence`)
-  for (const match of text.matchAll(/\b(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+(\/v1\/[^\s`<>|,;)"']+|\/health\/(?:live|ready))/g)) {
+  for (const match of text.matchAll(/\b(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|TRACE|CONNECT)\s+(\/v1\/[^\s`<>|,;)"']+|\/health\/(?:live|ready))/g)) {
     const item = `${match[1]} ${normalizeRoute(match[2].split('?')[0])}`
     check(api.has(item) || candidateScope.routes.has(item), `${file}: unknown API ${item}`)
     apiAssertions++

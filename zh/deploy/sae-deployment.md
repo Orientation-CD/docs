@@ -16,7 +16,7 @@
 revision="$(git rev-parse HEAD)"
 image_ref="$(./deploy/sae/build-image.sh --revision="$revision" --dry-run)"
 ./deploy/sae/run-deploy-container.sh \
-  --namespace=yuanzhu-test --stage=test \
+  --namespace=yuanzhu-prod --stage=test \
   --image="$image_ref" --revision="$revision" --dry-run
 ```
 
@@ -35,7 +35,7 @@ image_ref="$(./deploy/sae/build-image.sh --revision="$revision" --dry-run)"
 部分当前迁移必须**停整套写入服务**。项目活动迁移 `c8d5f1a2e730` 需要宿主机的 `deploy.sh --maintenance-mode`，不能假设每个候选都适用常规滚动路径。获准云测时，上游命令形态为：
 
 ```bash
-./deploy/sae/deploy.sh --namespace=yuanzhu-test --stage=test \
+./deploy/sae/deploy.sh --namespace=yuanzhu-prod --stage=test \
   --branch=main --commit="$RELEASE_SHA" --maintenance-mode --interactive
 ```
 
@@ -59,11 +59,29 @@ maintenance 流程证明 API 和两个 worker 均停止/零实例，备份、迁
 
 私有视频构建器读取依赖默认分支并打印实际提交，因此后端 SHA 不能单独标识供应商 wheel。保留供应商 revision 与镜像 digest，再完成适用且已授权的供应商／部署验收。前端新页面或候选夹具不是服务端上线证据。输入修复是[独立定点恢复](/zh/deploy/production#input-recovery)，不是常规迁移步骤。
 
+## 发布并激活不可变三维家 SDK release
+
+使用本页云测试命令前先核对实际 API/用户：当前测试目标是 `api.yuanzhushuzhi.com` / `yuanzhu-prod`；`test-api.yuanzhushuzhi.com` / `yuanzhu-test` 必须走生产保护。历史命名不能决定风险。
+
+1. 使用新的不可变 H5 `model_id`，构建匹配的 API/发布 origin，审查产物字节、`manifest.json` 与 SDK 契约摘要。
+2. 在指定维护实例不带 `--apply` 预演发布。工具仅操作配置存储 bucket 的 `3vjia/h5/`；H5/CDN 必须映射同一前缀。
+3. 经批准发布后，通过 `/admin/three-vjia-sdk` 激活准确的 AVAILABLE release/契约。索引 latest 与数据库激活是两个权威。
+4. 从浏览器与 API 两侧核验公开字节、SDK 账号就绪、产品激活及获准的完整业务链路。将不可变 release 摘要与应用镜像证据一起保留。
+
+```bash
+python -m scripts.maintain_3vjia_h5 publish   --package .local/3vjia-release/3vjia/h5 --model-id floorplan-doc-example
+python -m scripts.maintain_3vjia_h5 gc
+```
+
+两条命令默认仅预演。写入要求 `--apply`，且指定实例 `THREE_VJIA_MAINTENANCE_ENABLED=true`。CLI 与周期任务的 `THREE_VJIA_MAINTENANCE_LOCK_PATH` 必须指向同一实际挂载锁文件；不同宿主机上字符串相同不代表互斥。GC 保护 latest、激活配置、未完成执行和供应商删除中的引用，再按 RETIRING/DELETED 状态恢复 manifest 范围清理，不删除任意 Asset，也不把发布变成激活。
+
+源码：[maintain](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/maintain_3vjia_h5.py#L16) · [reconcile_releases](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/maintenance.py#L297) · [activate_sdk_configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/three_vjia_sdk.py#L70)。
+
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [完整运维手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [不可变镜像构建](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/build-image.sh)
-- [容器化云测部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/run-deploy-container.sh)
-- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy.sh)
+- [完整运维手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [不可变镜像构建](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/build-image.sh)
+- [容器化云测部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/run-deploy-container.sh)
+- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy.sh)

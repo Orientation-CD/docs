@@ -26,7 +26,7 @@ flowchart TB
 | 成员结果读取 | `MemberProjectReadRuntime` | 项目启用时才编入成员只读视图 |
 | 户型作品移动 | `FloorPlanMoveRuntime` | 关闭项目的构建不能获得项目移动行为 |
 
-`PRIVATE_PROJECTS` 预处理还会改变页面注册和 Tab。[包体门禁](/zh/frontend/testing)检查真实 JS、JSON、模板和样式依赖：主包不能引用功能分包，兄弟分包不能直接互引。为维持此边界而保留一份很小的接力适配器，是有意设计。
+`PRIVATE_PROJECTS` 预处理还会改变页面注册和 Tab。[包体门禁](/zh/frontend/testing)检查真实 JS、JSON、模板和样式依赖：拒绝普通同步主包→分包与兄弟分包引用，仅放行下述明确列出的微信异步模块/组件边界。为维持此边界而保留一份很小的接力适配器，是有意设计。
 
 ## 会话代次与晚到响应
 
@@ -80,6 +80,14 @@ sequenceDiagram
 
 `main.ts` 安装 `themePageMixin`。主题 store 同步恢复状态，页面通过 `usePageTheme` 绑定 `page-meta` 与根节点，每次 `onShow` 重新应用原生 Tab、导航和背景 API。这样保留实例的 Tab 页面不用重建也能同步主题，见[设计系统](/zh/frontend/design-system)。
 
+## 微信异步分包保留同步宿主页
+
+当前微信构建将企业概览、户型作品与专业设计展示移到对应分包产物。`vite.config.ts` 选择源码/runtime alias，源码变换将专业设计图片复制到 `pkg-design-pro`，重写七处图片路径和箭头引用。这些是明确的构建规则，不是新增后端服务。
+
+`pages.json` 为异步组件声明 `componentPlaceholder: view`。主包小型 loader 先对普通模块调用 `require.async`，在挂载组件前观察下载失败。`useWeixinPackage` 提供 idle/loading/failed/ready，15 秒超时并支持重试。宿主页保留页面生命周期，将当前可见性/作用域传给子组件；`inspectAsyncPageHooks` 拒绝迁移后异步组件源码中的页面 hook，避免组件下载晚于页面 `onShow` 而漏掉首次加载。离页与作用域守卫阻止迟到结果写入已离开的页面。
+
+产物门禁逐项核验允许的调用者、目标、placeholder 和输出文件，不允许任意分包互引。其他平台保留各自选定的普通实现。跟读 [useWeixinPackage](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/composables/useWeixinPackage.ts#L13) · [inspectAsyncPageHooks](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/weixin-subpackage-sources.mjs#L7) · [scripts/mini-program-package-budget.mjs](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/mini-program-package-budget.mjs)。
+
 ## 源码依据
 
-核验日期 2026-10-28：[构建别名](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/vite.config.ts) · [传输](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts) · [会话](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/stores/session.ts) · [提交路由](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [上传](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designAssets.ts#L156) · [本地媒体生命周期](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/localMediaStore.ts#L280) · [成员作用域](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/memberProjectRead.ts#L25)。
+核验日期 2026-11-10：[构建别名](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/vite.config.ts) · [传输](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/request.ts) · [会话](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/stores/session.ts) · [提交路由](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/designJobSubmit.ts#L184) · [上传](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/designAssets.ts#L177) · [本地媒体生命周期](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/localMediaStore.ts#L280) · [成员作用域](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/memberProjectRead.ts#L26)。

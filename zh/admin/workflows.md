@@ -21,4 +21,8 @@ Feature 开放状态及订阅授权与节点选择独立。只有配置好的 Wo
 
 ---
 
-代码依据 · backend `e59716c8`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/workflows.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_configuration.py) · [app/templates/admin/workflow_views.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/workflow_views.html).
+代码依据 · backend `749e82df`: [app/admin/workflows.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/workflows.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_configuration.py) · [app/templates/admin/workflow_views.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/workflow_views.html).
+
+## 三维家 SDK 节点
+
+SDK 执行通过专用三维家管理和发布能力配置，不是任意普通供应商模型选择器。接受时冻结配置 generation 与 release 证据。Workflow 产品启用、SDK 就绪及客户权益仍分别判断，见[SDK 配置](/zh/backend/floor-plans)与[服务商](/zh/admin/providers)。

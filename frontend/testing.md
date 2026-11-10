@@ -28,7 +28,7 @@ Use `pnpm test:unit` or affected test files for focused feedback. `test:coverage
 
 The source contract gate understands a query suffix only when its local const binding is proven to contain a query or empty string. This avoids accidentally dropping dynamic route segments. Static-asset origins in build assignments are distinguished from forbidden remote API origins.
 
-Floor-plan fixtures come from a candidate backend branch. Their gate proves the frontend matches those fixtures; it does **not** prove audited backend `main` or a deployment supplies the feature. See [Floor-plan contract scope](/frontend/floor-plans). Do not regenerate unrelated contract fixtures against whichever stack happens to occupy a familiar port.
+Floor-plan fixtures retain their recorded source identities. Their gate proves frontend compatibility with those fixtures; this audit separately confirms implemented backend main routes, but fixture success alone still does not prove a deployment has the required release/configuration. See [Floor-plan contract scope](/frontend/floor-plans). Do not regenerate unrelated contract fixtures against whichever stack happens to occupy a familiar port.
 
 ## Actual mini-program package gates
 
@@ -43,7 +43,7 @@ WeChat quality chains include `test:weixin-babel` before contract/design, build 
 | Gate | Audited product rule |
 | --- | --- |
 | Main package and every subpackage | At most 1.5 MiB each, as this repository's budget |
-| Package references | Inspect JS imports/requires, JSON components, template includes and style imports; reject main→subpackage and cross-subpackage edges |
+| Package references | Inspect JS imports/requires, JSON components, template includes and style imports; reject ordinary synchronous cross-package edges; permit only exact enumerated WeChat async edges with their placeholders and emitted targets |
 | WeChat main headroom | At least 64 KiB when projects are enabled **and the artifact is not API production** |
 | Douyin main headroom | Common package inspector called with minimum 0; 1.5 MiB budget still applies |
 | Bundled media in WeChat | Hard 200 KiB, warning above 180 KiB |
@@ -71,6 +71,14 @@ A source fixture or simulated rendering is not final owner visual/device accepta
 
 Record commit, command, platform/profile, API origin, local stack ownership and result. Exclude tokens, private keys, signed URLs, full editor handoff fragments and invite bearers. Separate artifact, simulated UI, local API and live-provider evidence.
 
+## Regress the new preparation and loading boundaries
+
+`test:package-budget` now also exercises `weixinSubpackageSources.test.mjs`. Inspect failed download/retry, first mount after `onShow`, page disposal and scope switching for async enterprise and works components. Preserve the synchronous host lifecycle; a happy-dom mount alone cannot prove native package loading. Package gate reports retain main-package largest files/directories so budget changes can be traced to actual emitted content.
+
+For video, cover 15-second reference minimum, canonical fee preview, user cancellation, stale-price reconfirmation and exact prepared-request replay after a lost receipt. Include model changes, member quota rejection and protected result detail without private-input access. Current focused suites include `videoBillingPreview.test.ts`, `videoGenerationSubmit.test.ts`, `recentFeatures.test.ts` and the actual matching files discovered under tests; use package.json for the combined gate rather than inventing a second command chain.
+
+Source: [package.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [scripts/check-code-quality.mjs](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-code-quality.mjs) · [scripts/weixin-subpackage-sources.mjs](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/weixin-subpackage-sources.mjs).
+
 ## Source evidence
 
-Verified 2026-10-28: [Current command chain](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Package inspector](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/mini-program-package-budget.mjs#L3) · [WeChat headroom condition](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs#L189) · [Douyin gate](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-douyin-quality.mjs) · [Route source analysis](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/api-contract-source.mjs) · [Real UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/MINIPROGRAM_REAL_UI_TESTING.md).
+Verified 2026-11-10: [Current command chain](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [Package inspector](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/mini-program-package-budget.mjs#L3) · [WeChat headroom condition](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-code-quality.mjs#L200) · [Douyin gate](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-douyin-quality.mjs) · [Route source analysis](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/api-contract-source.mjs) · [Real UI runbook](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/documents/MINIPROGRAM_REAL_UI_TESTING.md).

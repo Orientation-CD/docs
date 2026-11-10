@@ -20,6 +20,14 @@ Token 套餐区分购买与赠送数量，总赠送量由服务端计算。停�
 
 当前保留服务端全额退款、回调与补偿，小程序申请退款入口仍关闭。后台展示抖音退款异常，但**没有普通人工审批队列或异常解决按钮**。微信退款查询恢复及关联订阅回收存在已记录缺口，不能把异常展示或 mock 成功描述为完整退款运营闭环。完整限制见页末退款合同及 [REST API](/zh/reference/rest-api)。
 
+## 配置视频模型单价与三种模式规则
+
+视频计费区独立于通用 Feature 积分字段。配置正整数模型单价、剧本每秒字符数，以及 `script`、`reference_template`、`reference_upload` 三种规则。每种选择按秒 `per_second` 或按次 `per_task`：按次必须有正整数 `fixed_seconds`，按秒必须为空。基础模型不能停用；它的“默认”是已发布基准 8 积分/秒，自定义值必须带自定义标记。其他启用且非自定义模型由服务端按“基础单价 × 模型倍率”向上取整；自定义价格使用明确整数。其他模型被省略/禁用后，从可用价格表移除。
+
+保存携带显示的 `configuration_version`。`admin_save_video_billing` 校验整套规则，取得视频 Feature 权威锁，原子替换单价/规则并增加版本。旧表单返回 409 `VIDEO_BILLING_CONFIGURATION_STALE`，应重新读取；无效规则返回 422 `VIDEO_BILLING_CONFIGURATION_INVALID`。已接纳快照保留原模型/金额，旧客户预览必须重新确认。
+
+对照 [build_video_rates](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/video_billing.py#L110)、[admin_save_video_billing](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/video_billing.py#L150) 与[用户费用链路](/zh/reference/flows/video-billing-flow)。平台积分和供应商余额不是同一种计量。
+
 ---
 
-代码依据 · backend `e59716c8`: [app/admin/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/billing.py) · [app/templates/admin/billing.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/billing.html) · [documents/PAYMENT_REFUNDS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/PAYMENT_REFUNDS.md).
+代码依据 · backend `749e82df`: [app/admin/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/billing.py) · [app/templates/admin/billing.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/billing.html) · [documents/PAYMENT_REFUNDS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/PAYMENT_REFUNDS.md).

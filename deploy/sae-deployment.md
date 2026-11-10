@@ -16,7 +16,7 @@ From the backend checkout, validate the handoff without publishing or mutating c
 revision="$(git rev-parse HEAD)"
 image_ref="$(./deploy/sae/build-image.sh --revision="$revision" --dry-run)"
 ./deploy/sae/run-deploy-container.sh \
-  --namespace=yuanzhu-test --stage=test \
+  --namespace=yuanzhu-prod --stage=test \
   --image="$image_ref" --revision="$revision" --dry-run
 ```
 
@@ -35,7 +35,7 @@ The deployment-tools container uses pinned deployment tooling, a read-only sourc
 Several current migrations require a **stopped-fleet maintenance window**. In particular, Project activity revision `c8d5f1a2e730` uses the host-side `deploy.sh --maintenance-mode` path; do not assume a standard two-phase rolling deployment is valid for every candidate. For approved cloud test, the upstream form is:
 
 ```bash
-./deploy/sae/deploy.sh --namespace=yuanzhu-test --stage=test \
+./deploy/sae/deploy.sh --namespace=yuanzhu-prod --stage=test \
   --branch=main --commit="$RELEASE_SHA" --maintenance-mode --interactive
 ```
 
@@ -59,11 +59,29 @@ The current migration path includes Video Assets/reference media, input archive 
 
 The private video builder consumes the dependency's default branch and prints its resolved commit. Backend source SHA alone therefore does not identify that supplier wheel. Retain the supplier revision and built image digest, then run the relevant authorized supplier/deployed acceptance gates. A new frontend screen or candidate fixture is not deployed server evidence. Input repair is [separate targeted recovery](/deploy/production#input-recovery), not a routine migration step.
 
+## Publish and activate an immutable ThreeVjia SDK release
+
+Before using this page's cloud-test commands, verify actual API/users: the current test target is `api.yuanzhushuzhi.com` in `yuanzhu-prod`; `test-api.yuanzhushuzhi.com` in `yuanzhu-test` requires production protection. Historical namespace names do not define risk.
+
+1. Build one new immutable H5 `model_id` with matching API/publication origins. Review emitted bytes, `manifest.json` and SDK contract digest.
+2. On the designated maintenance instance, run publication without `--apply` and inspect its dry-run. The tool operates only `3vjia/h5/` inside the configured storage bucket; H5/CDN must map that same prefix.
+3. After the release's approved publication, activate its exact AVAILABLE release/contract through `/admin/three-vjia-sdk`. Index latest and active database configuration are independent.
+4. Verify the configured public bytes from both browser and API, SDK account readiness, product activation and a scoped authorized end-to-end flow. Preserve immutable release hashes with the application image evidence.
+
+```bash
+python -m scripts.maintain_3vjia_h5 publish   --package .local/3vjia-release/3vjia/h5 --model-id floorplan-doc-example
+python -m scripts.maintain_3vjia_h5 gc
+```
+
+Both are dry-run by default. Write mode requires `--apply` and `THREE_VJIA_MAINTENANCE_ENABLED=true` on the designated instance. Its `THREE_VJIA_MAINTENANCE_LOCK_PATH` must be the same actual mounted lock file for CLI and periodic work; identical path strings on different hosts do not coordinate. GC protects latest, active configurations, unfinished executions and in-progress supplier deletions, then resumes manifest-scoped cleanup via RETIRING/DELETED states. It never removes arbitrary Assets or turns publication into activation.
+
+Source: [maintain](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/maintain_3vjia_h5.py#L16) · [reconcile_releases](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/maintenance.py#L297) · [activate_sdk_configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/three_vjia_sdk.py#L70).
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Complete operational runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [Immutable image build](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/build-image.sh)
-- [Containerized test deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/run-deploy-container.sh)
-- [Protected deployment implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy.sh)
+- [Complete operational runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [Immutable image build](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/build-image.sh)
+- [Containerized test deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/run-deploy-container.sh)
+- [Protected deployment implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy.sh)

@@ -1,62 +1,44 @@
-# 前端总览
+# 前端概览
 
-本轮核验前端 `ui-integration@3662578`、后端 `main@e59716c8`。本文描述这两个源码版本，完整提交见[源码版本记录](/zh/reference/source-revisions)。前端出现页面或提交了接口 fixture，并不能证明本轮核验的后端已实现对应契约。
+uni-app 应用使用 Vue 3 和 TypeScript 构建微信与抖音小程序。应用使用 **Node 22、pnpm 9.15.9**；文档仓库有独立的 pnpm 版本。会话／主题由 Vue 模块维护，应用不依赖 Pinia 或 uView。
 
-小程序使用 uni-app、Vue 3 和 TypeScript，界面由项目共享组件与 uni-app 原生控件组成，工具链为 **Node 22、pnpm 9.15.9**。会话和主题通过共享模块及 Vue 状态管理，没有 Pinia 依赖。真实 API、前端 Mock、平台适配和项目能力由构建配置在产物生成前选定。
-
-## 从真实导航找到功能
+## 从实际操作开始
 
 ```mermaid
 flowchart TB
   H[首页] --> D[AI设计]
-  D --> L[AI轻盈设计]
-  D --> P[AI专业设计]
-  L --> I[效果图 / 家居试搭 / 彩平图]
-  L --> R[录音总结 / 自定义设计 / 设计报告]
-  L --> O[旧房改造]
-  O --> K[局部 / 厨房 / 卫生间]
-  P --> F[户型编辑器与作品]
-  H --> C[AI创作]
-  C --> V[AI视频]
-  C --> T[AI文案]
-  A[我的] --> Q[AI问答]
+  D --> L[轻盈设计与内联旧房改造]
+  D --> P[专业户型编辑器]
+  H --> C[AI创作: 视频与文案]
+  H --> R[最近使用与快捷入口]
+  H --> I[灵感与发现H5]
+  A[我的] --> Q[AI问答与会员权益]
+  W[项目] --> M[成员 额度 指派 销售阶段]
 ```
 
-首页还组合了轮播图、快捷入口、常用功能和门店卡片。`homeEntries.ts` 提供展示信息，`featureGroups.ts` 提供分组树与面包屑，`useFeatureLauncher` 再根据功能发现和资格判断决定可用性。卡片可见、显示价格、有权提交，是三件不同的事。
+`featureGroups.ts` 定义设计／创作成员树与面包屑。语音总结、报告属于快捷／最近入口，不在轻盈设计成员树内。`useFeatureLauncher` 检查发现与权益，卡片可见不等于有执行权限。最近使用保留有界的本地 30 天记录，按次数、最近时间排序，最多展示三项；它不是服务端项目活动。
 
-**专业户型功能需要单独确认集成状态：** 当前前端已有页面和 repository，但本轮核验的后端 `main` 没有相应路由。进入此路径前先阅读[户型功能集成边界](/zh/frontend/floor-plans)。它与已存在的彩平图图片生成功能相互独立。
+专业设计现在已有对应后端实现。从[户型客户端](/zh/frontend/floor-plans)继续追到 H5 网关与 SDK 执行。彩平图图片 Feature 是独立的普通图片动作。灵感／创建设计 H5 使用具有空间范围的服务端准备 URL，不是打开任意供应商网页。
 
-| 产品 | 建议开始阅读的位置 | 结果或边界 |
-| --- | --- | --- |
-| 标准图片与改造 | `pkg-features/components/StandardFeaturePage.vue` | 图片任务、按角色上传与提示词选择 |
-| 家居试搭、自定义设计 | 对应页面与 `*DesignSubmit.ts` service | 蒙版/参考图或可编辑模板字段 |
-| 录音总结 | `pages/voice_summary`、`voiceSummarySubmit.ts` | Markdown 与原始录音 |
-| AI视频 | `pages/video_generation`、`videoGenerationSubmit.ts` | 剧本、系统同款、自传参考视频同款 |
-| AI文案、AI问答 | `services/copywriting.ts`、`copywritingSubmit.ts` | 八项独立的纯文本 Workflow 产品 |
-| 设计报告 | `reportBlueprint.ts`、`workflowSubmission.ts` | Blueprint 驱动的 HTML 和受支持的 PPTX 输出 |
-| 专业户型 | `useFloorPlanAvailability`、`floorPlanRepository` | 前端已实现，本轮后端尚未接通 |
+## 代码地图
 
-## 主包、分包与共享模块
+| 源码区域 | 先问什么 |
+| --- | --- |
+| `src/pages` | 哪个首页、方案、项目或账号事件触发导航？ |
+| `src/pkg-features` | 图片／语音／视频怎样准备输入并冻结动作 body？ |
+| `src/pkg-features/pages/floor_plan_editor`、`floor_plan_works` | 打开哪个原始 H5／编辑器接力或原生作品页面？ |
+| `src/pkg-plans` | 图片、音频／Markdown、视频、报告、全景结果怎样刷新？ |
+| `src/pkg-projects` | 当前负责人是谁，哪些成员／额度／阶段操作被允许？ |
+| `src/pkg-account` | 执行哪项认证、成员、邀请、订单或协议动作？ |
+| `src/repositories`、`src/api/dto` | 请求哪个接口，运行时接受什么响应形状？ |
+| `src/services`、`src/stores` | 哪些会话、范围、结果不确定动作或删除保护需要跨页面保留？ |
 
-| 位置 | 负责什么 | 初次阅读时要问的问题 |
-| --- | --- | --- |
-| `src/pages` | 启动、首页、联系、项目/方案/我的 Tab、诊断 | 哪个按钮打开下一页？ |
-| `src/pkg-features` | 功能表单、上传与提交编排 | 什么内容会变成请求体？ |
-| `src/pkg-plans` | 图片、Markdown/音频、视频、报告与全景查看 | 进度怎样更新，结果怎样呈现？ |
-| `src/pkg-projects` | 项目编辑、当前成员只读视图、活动 | 正在读取谁的工作区和项目？ |
-| `src/pkg-account` | 登录、法律同意、订单、套餐、企业、草稿 | 哪个账户操作授予或确认权限？ |
-| `src/repositories`、`src/api/dto` | 请求和运行时响应校验 | 调哪个接口，接受什么 JSON？ |
-| `src/services`、`src/stores`、`src/domain` | 编排、凭据/主题、守卫与纯规则 | 哪些状态要保留、过期或失效？ |
-| `config`、`scripts`、`tests` | 构建档、生成资产、契约和产物门禁 | 真正生成的小程序里有什么？ |
+源码目录不等于产物分包：`vite.config.ts` 生成虚拟户型／专业设计组件和服务源文件，微信构建则将其页面合入功能分包，保留包体余量。查看目标产物与[包体门禁](/zh/frontend/testing)，不能假设每个产物分包都有同名源码目录。`VITE_ENABLE_PRIVATE_PROJECTS` 在构建时选择项目实现；开发 wrapper 各有显式赋值。
 
-`VITE_ENABLE_PRIVATE_PROJECTS=true` 才编入项目 Tab、项目分包和相关实现；关闭时保留首页、联系、方案、我的。显式微信 Mock 构建会强制关闭项目，其他命令有各自的环境赋值，见[构建模式](/zh/frontend/data-source-modes)。
+## 跟读一笔完整任务
 
-## 沿一次操作读完整链路
+室内图片从表单进入 `standardDesignSubmit.ts`、角色化上传和 `submitDesignJob`。当前 wrapper 请求 `POST /v1/design-jobs`，后端适配到统一运行时。轮询和结果读取始终保留动作 key／body、空间／项目与已接受 Job ID。新集成使用规范 [Workflows](/zh/backend/workflows)。
 
-先选一次室内效果图操作，从页面提交处理函数读到 `standardDesignSubmit.ts`，继续到 `stageDesignImages`、`submitDesignJob` 和请求客户端。追踪结果页时，保留动作幂等键、返回的 Job ID、工作区和项目。当前前端的这类操作实际经过 `POST /v1/design-jobs`，后端再适配到统一执行引擎。新的 API 集成应使用规范的 [Workflow 契约](/zh/backend/workflows)。
+企业只读详情可以返回经过授权的输入，同时拒绝写操作。以响应权限与当前指派为准。删除中结果是清空媒体的占位，晚到响应不能恢复旧预览，见[历史操作](/zh/reference/flows/workflow-history-flow)与[项目](/zh/frontend/projects)。
 
-[架构](/zh/frontend/architecture)讲共享边界；[工作流](/zh/frontend/workflows)记录实际请求族和视频模式；[项目](/zh/frontend/projects)解释成员看板及只读权限；[全链路参考](/zh/reference/system-walkthrough)接着追到数据库、对象存储、队列和 worker。
-
-## 源码依据
-
-核验日期 2026-10-28：[导航树](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts#L23) · [首页组合](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [实际提交路由](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [工具链](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)。
+源码: [src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [src/services/recentFeatures.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/recentFeatures.ts) · [src/services/jobDeletionState.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/jobDeletionState.ts) · [src/pages.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pages.json) · [package.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)

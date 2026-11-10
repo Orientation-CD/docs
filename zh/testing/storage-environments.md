@@ -45,23 +45,25 @@ MinIO 模式派生容器内 endpoint 与浏览器可达 host/port。OSS 需要 b
 
 ./scripts/run_e2e_tests.sh --local localhost \
   --port "$DEV_TEST_PORT" --project "$DEV_TEST_PROJECT" \
-  --wechat mock --storage minio --secret .env.minio-test --mode coverage
+  --wechat mock --storage oss --secret .env.oss-test --mode coverage
 ```
 
 OSS 边界修改按上游策略增加获准的 OSS profile/变体。本地 runner 会重建所选栈并保留卷，不是只读探测。云模式显式传 `--cloud https://...` 使用已有服务；云 E2E 还需独立协调 Redis 和只读监控 PostgreSQL 凭据，不能指向生产/客户数据。
 
 ## 生产候选升级验证
 
-当前后端使用**一个部署基线副本**，不再额外跑全新栈 E2E：
+规范测试策略使用**一份部署基线副本**，不再额外执行 fresh-stack E2E：
 
-1. focused 测试、覆盖率/风险审阅、保留审阅者、全量回归后，将获准只读云数据库 dump 恢复到归本会话所有的临时 PostgreSQL 卷。
-2. 候选代码迁移同一卷，本地化 provider/法律正文；不启动旧 API/worker，不写云源库。
-3. 在该迁移卷上依次执行 E2E coverage、300 秒 endurance、受影响 smoke，按需增加 OSS。
-4. 中断后保留归属已验证的卷和证据；通过 `--preconfigured` 及升级重用参数避免导入旧配置或重复成功迁移。
+1. focused 测试、变更行/分支覆盖、风险审阅及两位保留审阅者对准确候选版本通过后，将获准只读云数据库 dump 恢复到本会话临时 PostgreSQL 卷。
+2. 候选迁移同一卷，本地化 provider 与当前法律正文；不启动旧 API/worker、不写云源库。
+3. 先对 MinIO 跑受影响 smoke，再在同一迁移数据库对真实 OSS 跑 E2E coverage，随后跑 300 秒 OSS endurance。阶段间不导入旧云配置、不重复成功迁移。
+4. E2E 成功后停 writer，按 receipt 清理所属 OSS；清理失败单独重试。所有要求的 E2E 通过后才跑完整、有并发边界的 portable/resource 回归；浏览器与 SDK 清单仍独立要求。
 
-coverage 拓扑为两个用户容器、每容器两个手机用户，加一个管理员；endurance 为十个用户容器、每容器七个手机用户，加一个管理员。诊断覆盖参数不能替代规范门禁。升级 runner 在 worktree 被忽略的 `.local/upgrade-gates/` 保留私有证据，只清理验证属于自己的资源。
+coverage 为两个用户容器、每容器两个手机用户，加一个管理员；endurance 为十个用户容器、每容器十个手机用户，加一个管理员。诊断覆盖参数不能替代规范门禁。runner 在 ignored `.local/upgrade-gates/` 保留私有恢复材料，仅清理核验属于自己的资源。
 
-纯文档工作只需文档验证。具体产品测试由上游规范与实时 runbook 决定；本页不授权付费模型、真实支付、云写入或破坏性清理。
+规范另记录了 #918/#925 有时限、仅此交付适用的 endurance 延期，不是通用豁免或负载通过结果。复用该证据前核对实际范围与到期条件；源码审计不能证明部署已经通过这些门禁。
+
+纯文档工作只需文档验证。实际产品门禁由当前上游规范与 runbook 决定；本页不授权付费供应商、真实支付、云写入或破坏性清理。
 
 ## 复用已升级夹具而不覆盖配置
 
@@ -73,7 +75,7 @@ coverage 拓扑为两个用户容器、每容器两个手机用户，加一个�
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [环境与门禁规范](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
-- [实时运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)
-- [Compose 优先级和拓扑](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/docker-compose.yml)
-- [部署基线升级 runner](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/run_deployed_upgrade_gate.sh)
+- [环境与门禁规范](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md)
+- [实时运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)
+- [Compose 优先级和拓扑](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/docker-compose.yml)
+- [部署基线升级 runner](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/run_deployed_upgrade_gate.sh)

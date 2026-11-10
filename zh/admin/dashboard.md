@@ -23,4 +23,4 @@
 
 ---
 
-代码依据 · backend `e59716c8`: [app/admin/dashboard.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/dashboard.py) · [app/admin/overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/overview.py) · [app/templates/admin/dashboard.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/dashboard.html).
+代码依据 · backend `749e82df`: [app/admin/dashboard.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/dashboard.py) · [app/admin/overview.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/overview.py) · [app/templates/admin/dashboard.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/dashboard.html).

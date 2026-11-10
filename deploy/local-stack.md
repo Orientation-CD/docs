@@ -61,11 +61,29 @@ docker compose --env-file .env -p "$DEV_TEST_PROJECT" logs --tail 100 api
 
 Ordinary launch and smoke/E2E commands preserve named database, Redis and MinIO volumes. Do not append `down -v` as routine cleanup. Optional host PostgreSQL publishing is separate from the API port; smoke/E2E disable that mapping. See [storage and test environments](/testing/storage-environments) for precedence, MinIO versus OSS and runner behavior.
 
+## Prepare the shared ThreeVjia H5 root separately
+
+`H5_3VJIA_BASE_URL` is the current shared publication root for editor, house selector, ordinary image creation, discovery and panorama. `FLOOR_PLAN_H5_BASE_URL` is a compatibility read alias; the new name wins when both exist. Configure one matching API/H5 environment. A development root may use loopback/private-LAN HTTP only in `ENVIRONMENT=development`; phone previews need reachable API, H5 and signed-image origins. Inside Docker, loopback means that container, not the host.
+
+From the backend root, prepare an owned local package using the pinned builder, replacing example origins/version with this session's values:
+
+```bash
+python scripts/build_3vjia_h5.py \
+  --source .local/3vjia-original-10001115 --download-source \
+  --output .local/3vjia-release --api-base https://api.example.com \
+  --publication-base https://h5.example.com/3vjia/h5/ \
+  --model-id floorplan-doc-example
+```
+
+The source cache validates pinned supplier input; the owned published package contains bridge/adaptations and explicit approved runtime resources rather than a general vendor-site mirror. Inspect `manifest.json`, contract bytes and release identity. An API health response or successful package build does not activate SDK configuration or prove supplier credentials. For a local MinIO root returning anonymous 403, follow the runbook's narrowly scoped verified static-prefix export; do not make the business bucket public.
+
+Source: [scripts/build_3vjia_h5.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/build_3vjia_h5.py) · [scripts/runbook.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md).
+
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Local stack/runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)
-- [Launcher and ownership-sensitive behavior](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/create_stack.sh)
-- [Session and storage test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
-- [Image build and private supplier dependency](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/Dockerfile)
+- [Local stack/runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)
+- [Launcher and ownership-sensitive behavior](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/create_stack.sh)
+- [Session and storage test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md)
+- [Image build and private supplier dependency](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/Dockerfile)

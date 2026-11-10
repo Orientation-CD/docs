@@ -1,101 +1,70 @@
----
-apiScope: frontend-candidate
----
-# Professional Floor Plans: Frontend Contract and Integration Boundary
+# Floor plans, professional design and native H5 entry
 
-**The audited pair does not yet connect this feature end to end.** Frontend `ui-integration@3662578` has professional-design pages, repositories and source-derived contract fixtures. Backend `main@e59716c8` has no floor-plan editor/Works/panorama routes or corresponding feature runtime. The following API table is the frontend's **candidate contract**, not the public-route inventory of that backend or proof of an active deployment.
+The audited frontend and backend now contain the floor-plan editor, Works, panorama viewer and ThreeVjia image/discovery integration. Availability still depends on the selected SDK release, enabled Features, current account and project authority. A source implementation does not establish that a particular environment or device has passed supplier acceptance. Follow [the server model](/backend/floor-plans) and [each endpoint's execution chain](/reference/flows/floor-plan-flow).
 
-The [frontend contract notes](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/REST_API_INTERFACE.md) explicitly distinguish candidate source fragments from live evidence. The [audited backend router](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/api/__init__.py) and [REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md) establish the other side of the boundary. When backend support lands, update both source pins, trace the real implementations and validate against the intended environment before promoting this guide to an integrated feature.
+## Start from the user's choice
 
-## Separate four identities
+The professional-design entry uses `useFloorPlanAvailability`: frontend Mock is unavailable, an account without credentials is a guest, and API mode loads the current profile followed by editor context. Only enabled render modes **and** an available release produce an available entry. A context failure produces an error, rather than an empty list of Works.
 
-| Name | Meaning in frontend code |
-| --- | --- |
-| `colored_floor_plan` | Existing image-generation product; separate from professional modeling |
-| `floor_plan_render` / `floor_plan_panorama` | Professional image/panorama Feature or result metadata expected by this frontend |
-| Work / `group_id` | A professional Work grouping; opaque text, preserved and URL-encoded without UUID coercion |
-| Workflow / Job ID | Standard result identity of a related execution; not interchangeable with the Work group |
-
-Home → AI design → AI professional design uses `useFloorPlanAvailability`. A feature entry leads to the Works view/new-editor path; Profile can open Works without the same new-card behavior. Related results also appear in their supported Plans/project result surfaces.
-
-## Read the implemented frontend chain
+The user can upload a plan or select one from the house catalog. Catalog entry prepares the capability before native navigation. `useFloorPlanEntry` captures account, workspace, project and session generation, optionally asks for location/privacy consent, requests the URL, then checks the profile again. Location failure permits manual city selection. It sends the prepared source to the destination through the navigation event channel; route parameters carry `prepared=1`, never the bearer fragment.
 
 ```mermaid
 sequenceDiagram
   autonumber
-  participant U as Professional-design page
-  participant A as Availability / Works composable
-  participant P as Profile repository
-  participant F as Floor-plan repository
-  participant C as Candidate backend contract
+  participant U as Native entry
+  participant E as Entry composable
+  participant A as Platform API
+  participant S as SDK release and supplier
   participant W as Native web-view
-  Note over C: Required routes are absent from audited backend main
-  U->>A: Enter or resume page
-  A->>P: Confirm current owner/workspace/session
-  A->>F: Ask context or list Works
-  F->>C: Authenticated expected-contract request
-  C-->>F: Expected scoped response (when supported)
-  F-->>A: Runtime-validated context or Work list
-  U->>F: New / continue editor
-  F->>C: Request bootstrap editor capability
-  C-->>F: Expected URL + independent auth pair + version
-  F->>F: Validate origin, URL and expiry, make memory-only fragment
-  F->>W: Bind web-view source
+  U->>E: Choose catalog or image feature
+  E->>A: Confirm profile and scoped entry
+  A->>A: Read configuration and authority
+  A->>S: Load exact contract and probe editor
+  A->>A: Recheck authority and configuration
+  A-->>E: URL plus independent platform auth
+  E->>E: Validate origin expiry and generation
+  E->>W: Event-channel memory handoff
 ```
 
-This is an executable frontend reading map with an explicit missing producer, not a fabricated database/supplier chain. On the audited backend the request cannot establish availability. A context error is not a successfully empty Works list, and no release flag in the frontend repairs the missing routes.
-
-| Number | Implementation to open | What to verify |
+| Steps | Source to read | What has become true |
 | --- | --- | --- |
-| 1–3 | `useFloorPlanAvailability.ts`, `useFloorPlanWorks.ts` | API-only/guest state, owner/workspace and generation/lifetime guards |
-| 4–6 | `repositories/floorPlan.ts` | Scope matches response; enabled Feature and release availability; bounded list/count validation |
-| 7–9 | `floorPlanHandoff.ts`, editor/panorama page | Independent expiring auth, exact origin, no credential query, safe web-view binding |
-| Return/resume | Editor page and Works composable | Loaded editor is not reopened automatically; unknown completion returns to authoritative Works |
+| 1–2 | [useFloorPlanAvailability](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/composables/useFloorPlanAvailability.ts#L13) · [useFloorPlanEntry](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/composables/useFloorPlanEntry.ts#L24) | Entry still belongs to the captured account; location is optional context |
+| 3–6 | [refresh_editor_url](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/api.py#L156) · [prepare_editor_entry](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/editor_entry.py#L182) | Supplier probe succeeded and final platform authority/configuration still match |
+| 7–8 | [floorPlanHandoff](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/floorPlanHandoff.ts#L8) | A trusted, unexpired URL can be bound to this web-view; no paid render has been submitted |
 
-## Candidate API surface consumed by the frontend
+## Four identifiers with different owners
 
-These are authenticated expected operations extracted from the pinned frontend source fixtures. Do not add them to the backend-main API index without an actual backend implementation.
-
-| Operation | Frontend expectation |
+| Identifier | Owner and use |
 | --- | --- |
-| `GET /v1/floor-plan-editor/context` | Scoped owner/workspace, optional project/group, Feature/release availability; optional dual image/panorama capability |
-| `POST /v1/floor-plan-editor/editor-url` | New/continue editor with `bootstrap_auth:true`; URL, version and independent auth pair |
-| `POST /v1/floor-plan-editor/panorama-viewer-url` | Workflow/workspace-scoped panorama viewer capability |
-| `GET /v1/floor-plan-works` | Page/page_size (1–100), optional project; items/total with actual Work scope |
-| `GET /v1/floor-plan-works/detail` | Actual Work detail by workspace and opaque group |
-| `PATCH /v1/floor-plan-works/{group_id}` | Rename with workspace/name, validated returned Work |
-| `POST /v1/floor-plan-works/{group_id}/move` | Expected source project plus target project; validated resulting scope |
-| `DELETE /v1/floor-plan-works/{group_id}` | 204 complete or 202 with group/project and cleanup phase |
-| `GET /v1/floor-plan-works/{group_id}/deletion` | Continue checking accepted deletion, including supplier-unknown/waiting/cleanup phases |
-| `GET /v1/floor-plan-works/workflows` | Bounded limit 1–100/offset, related standard Workflow rows and explicit has_more |
+| `group_id` | Opaque supplier Work grouping; preserve it as text and URL-encode it |
+| `layout_scheme_id` / supplier scheme ID | Supplier layout/render association; backend resolves it from the registered Work |
+| Workflow ID | Platform execution, with its own inputs, reservations, status and persisted output Assets |
+| SDK configuration ID + release ID/digest | Shared integration identity and immutable protocol/assets selected for the request |
 
-A Work's optional `workflow_count` describes all visible related executions, not just the currently fetched page. When absent, the UI does not invent zero or enable unsupported expansion. Response normalization checks count type, response group/project and each embedded standard Workflow's identity/workspace. It does not scan all history or fan out detail reads to reconstruct a missing server count.
+`colored_floor_plan` remains an ordinary image Feature. `floor_plan_render` and `floor_plan_panorama` are separate professional Features sharing a Workflow. The seven ThreeVjia ordinary-image Features use another Workflow; see [image and discovery handoff](/reference/flows/three-vjia-image-flow). Old frontend schema fixtures are historical/candidate evidence, not an alternative authoritative API specification. New integrations follow the actual backend index.
 
-## Availability, ownership and authentication
+## Read Works without inventing permissions
 
-`useFloorPlanAvailability` returns unavailable in frontend Mock and guest when no access credential exists. API context is considered available only when its Feature is enabled **and** release_available is true. Optional `features.image`, `features.panorama` and render_modes are validated and intersected; they are not inferred from the displayed card.
+`floorPlanRepository.works` validates page/page_size, item identity, permission/assignment fields and optional `workflow_count`. It does not scan all job history to manufacture a missing count. `useFloorPlanWorks` expands related executions only when a positive server count and Work state permit it; the related endpoint has its own bounded limit, offset and `has_more`.
 
-The page captures account, workspace, session generation and operation revision. Leaving/hiding or switching sessions invalidates pending work. A late capability cannot open an editor for a new owner. Existing Works continue with their actual project; a new Work follows its explicitly accepted current binding.
+The server stores local ownership and project association, then obtains title, cover and layout metadata from the supplier. It applies readable-project/Workflow rules and revalidates after external reads. An enterprise owner or assignee who may read a Work does not thereby receive author-only editor/rename/delete permission. Respect returned permission fields and read-only result routing. Project reassignment changes current access without rewriting the original submitter identity.
 
-`floorPlanHandoff` requires:
+Sources: [floorPlanRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/floorPlan.ts#L78) · [useFloorPlanWorks](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/composables/useFloorPlanWorks.ts#L35) · [finalize_work_views](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/group_works.py#L401).
 
-- Exact `VITE_FLOOR_PLAN_WEB_ORIGIN`, or the API origin when omitted; HTTPS except expressly allowed local development HTTP.
-- No URL credentials, preexisting fragment, or auth/access/refresh token query parameters.
-- Separate nonempty access/refresh credentials with valid future expiry timestamps.
-- A source formed only in memory as `editor_url#auth=<encoded-auth-pair>`.
+## Trusted handoff and return behavior
 
-Do not copy that full source into route parameters, logs, diagnostics, persistent drafts or screenshots. The feature and plans packages keep their own small handoff adapters so one subpackage does not import its sibling. The platform business-domain allow-list remains an additional requirement.
+`floorPlanHandoff` requires an exact configured web origin (or API origin), HTTPS except explicitly allowed local development HTTP, no URL credentials, no pre-existing fragment or credential query, and nonempty independent access/refresh credentials with future expiries. It creates `editor_url#auth=<encoded-pair>` only in memory. Do not persist this source in drafts, route parameters, diagnostics or logs. Platform business-domain configuration is an additional deployment requirement.
 
-## Management and result behavior
+Late callbacks are discarded after account/workspace/session changes. Native hide during successful navigation preserves the one intended handoff; unmount and session changes invalidate other attempts. Resuming an already loaded editor is different from requesting a new capability. For panoramas, obtain a fresh viewer URL for the Workflow/workspace; an output image URL is not an interactive panorama capability.
 
-`floorPlanManagement` supports detail, rename, move, deletion and deletion status. Movement is selected through `FloorPlanMoveRuntime`, so a build without project capability cannot acquire project-moving behavior. Delete phases distinguish accepted cleanup from a finished 204; a supplier-unknown result is not permission to delete local records unconditionally.
+## Management, uncertainty and recovery
 
-`floorPlanResults.ts` recognizes professional image/panorama metadata and preserves group identity. A panorama result obtains a fresh viewer capability rather than treating an output image as an interactive panorama URL. General image/copywriting/report paths keep their own result routing.
+`floorPlanManagement` supports detail, rename, move, delete and deletion status. The build-selected `FloorPlanMoveRuntime` prevents builds without project support from importing project-moving behavior. Move sends the expected source project, so a stale selection cannot silently move a Work from a newly changed project.
 
-## What is required to close the integration gap
+Delete is complete only on 204. A 202 keeps a visible deleting item and phase; `supplier_unknown` means the original removal may have been sent, while `supplier_unconfirmed` stops automatic polling after its deadline. Manual confirmation reuses that claim and performs a read; it is not a fresh supplier removal. A timeout is not permission to drop the item locally or replay a remote write. See [the deletion chain](/reference/flows/floor-plan-flow#delete-work).
 
-Use this guide to find frontend code today. Before claiming full availability, verify actual backend routes/Feature definitions, editor release selection, object/Workflow persistence and permission/cleanup behavior against the newly audited backend. Then perform the owned-stack and device checks, including scope switches, expired capabilities, Work continuation, image/panorama results and asynchronous deletion. Committed source fixtures alone cannot close those checks.
+Sources: [floorPlanManagement](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/floorPlanManagement.ts#L34) · [moveFloorPlanWork](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/floorPlanMove.ts#L3) · [deletion_view](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/group_works.py#L760).
 
-## Source evidence
+## Verify a real environment
 
-Verified 2026-10-28: [Frontend contract notes](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/documents/REST_API_INTERFACE.md) · [Repository](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/floorPlan.ts) · [Availability](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/composables/useFloorPlanAvailability.ts) · [Works lifecycle](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/composables/useFloorPlanWorks.ts#L31) · [Management](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/floorPlanManagement.ts) · [Handoff](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/floorPlanHandoff.ts#L8) · [Editor page](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/pages/floor_plan_editor/index.vue) · [Panorama page](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-plans/pages/panorama/index.vue) · [Candidate contract fixture](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/tests/fixtures/backend-floor-plan-group-6060-4bd4094c.json).
+Use an API-mode build and an environment with an available release and enabled Feature. Verify catalog entry and upload separately, session/workspace changes during preparation, original save registration, a successful persisted image/panorama result, read-only enterprise access, expected-source move and accepted asynchronous deletion. The code audit and documentation browser checks do not substitute for these device/supplier checks.

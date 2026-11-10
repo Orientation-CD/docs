@@ -13,7 +13,7 @@ pnpm --version
 pnpm install --frozen-lockfile
 ```
 
-预期 pnpm 版本为9.15.9。冻结安装会应用仓库中的 Vitest coverage 补丁。若 Corepack 不可用，用 `npx --yes pnpm@9.15.9` 替代 `pnpm`。不要通过删除 lockfile 或跳过补丁解决安装问题。用 `git rev-parse HEAD` 记录版本：已发布文档固定在[审计提交](/zh/reference/source-revisions)，新拉取分支可能继续前进。
+预期 pnpm 版本为9.15.9。冻结安装会应用仓库中的 Vitest coverage 与 Vue 编译器补丁。若 Corepack 不可用，用 `npx --yes pnpm@9.15.9` 替代 `pnpm`。不要通过删除 lockfile 或跳过补丁解决安装问题。用 `git rev-parse HEAD` 记录版本：已发布文档固定在[审计提交](/zh/reference/source-revisions)，新拉取分支可能继续前进。
 
 ## 2. 构建前端 Mock 包
 
@@ -41,7 +41,7 @@ pnpm dev:mp-weixin:mock
 | 自己拥有的本地 API 栈 | [快速开始](/zh/get-started/quickstart)的显式构建 | 实际 API/存储/队列/数据库及选定认证/供应商模式 |
 | 微信生产 API 产物 | 配好 origin 后运行 `pnpm quality:mp-weixin:api` | 契约/设计、Babel 与生产产物门禁 |
 | 团队云环境 | 对应环境的[平台包装脚本](/zh/frontend/platforms) | 就绪、所选环境与产物检查 |
-| 专业户型 | 先读[集成边界](/zh/frontend/floor-plans) | 本轮后端尚未提供所需路由 |
+| 专业户型 | 先读[集成边界](/zh/frontend/floor-plans) | 后端已有路由，仍需激活 SDK release、配置产品并登记 web-view origin |
 
 固定8080的 `:api-local` helper 只适合该端口确实属于当前会话的情况。不要在它前面加另一个 URL 就认为覆盖了脚本行内值。其他端口使用快速开始中的显式构建，包含匹配的结果/报告 origin，并关闭演示权益覆盖。
 
@@ -64,4 +64,4 @@ pnpm dev:mp-weixin:mock
 
 ## 源码依据
 
-核验日期 2026-10-28：[固定工具链、命令和补丁](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [抖音构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/config/build-targets.mjs) · [真机地址检查](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/require-device-api-url.mjs) · [微信产物门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs)。
+核验日期 2026-11-10：[固定工具链、命令和补丁](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [页面注册](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pages.json) · [抖音构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/config/build-targets.mjs) · [真机地址检查](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/require-device-api-url.mjs) · [微信产物门禁](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-code-quality.mjs)。

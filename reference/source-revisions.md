@@ -29,10 +29,12 @@ Normal CI validates content against the **committed audited snapshot**, without 
 
 A maintainer with source access runs the source comparison when updating documentation. The tool reads Git objects and parses Python syntax; it does not import the application, load `.env`, start services or call suppliers. See [Maintenance](/reference/maintenance) for the update commands and review process.
 
-## Cross-repository and source-document differences
+## Current cross-repository boundaries and audit scope
 
-The [integration map](/reference/integration-status) records frontend floor-plan code whose dedicated backend is absent from this main. It also distinguishes quota APIs with no mini-program editor and theme infrastructure with a hidden settings entry. Snapshot coverage is therefore broader than a claim that every screen works end to end.
+The [integration map](/reference/integration-status) records actual callers: floor-plan/ThreeVjia and member-quota integration now exist in source; daily reports currently have backend APIs without a caller in this frontend. Implemented, enabled, device-ready and provider-accepted are separate conclusions.
 
-The backend's current detail handler and Get Workflow Status contract permit owner read-only detail, although a result-file paragraph still contains an older creator-only sentence. These docs follow the actual shared loader and current detail contract, explicitly separating read and write permission. Likewise, saving an empty same-style template is possible in the admin form while runtime script validation rejects it; saving is not admission acceptance. Follow the pinned [implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py) and [runtime video rules](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/video_template_rules.py).
+This audit covers frontend `88c75c1f15cd65f45c7fb09d560df80430ddc198` and backend `749e82df3a51c441335ba6a4db607a98bacbcf97`. All 157 public route declarations, including nine H5 gateway methods, have bilingual explanations, real handlers and source-symbol evidence. Operations overlapping main are removed from the historical frontend candidate scope.
 
-`sources/audit-2026-10-28.json` records every bilingual page's review disposition against the previous docs baseline. Source links are rebased through function identity or proven text context, with uncertain mappings reviewed manually. See [maintenance](/reference/maintenance).
+Detail and collection input disclosure differ, current assignee and original submitter differ, and SDK bindings differ from ordinary model connections. When source-contract prose lags, follow the actual handler, caller and tests; a matching DTO name does not prove authority. Source extraction executes neither application nor test code.
+
+`sources/audit-2026-11-10.json` records each bilingual page's disposition and the docs baseline. Source links move through function identity or proven unchanged context; unproven mappings receive manual review. Validation covers the docs, not the application stack, devices, deployment or real paid providers.

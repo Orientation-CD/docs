@@ -12,7 +12,7 @@ A Feature is a discoverable business capability; a Workflow is the backend execu
 | Eight copywriting/Q&A products | `POST /v1/workflows` | Exact product key, prompts and `inputs:[]`; `prepareCopywriting` then shared submit repository |
 | New design reports | `POST /v1/workflows` | `design_report_9/13/17` and structured inputs; `prepareProjectWorkflow` → `postWorkflow` |
 
-`postPrepared` chooses the route for the first four rows; report creation uses `workflowsRepository.submit`. New API consumers should start with [canonical Workflows](/backend/workflows). Existing HTML-report code is not the schema or recommended entry for new reports. Professional floor-plan screens have [a separate candidate-contract boundary](/frontend/floor-plans), rather than an implemented backend path in this audited pair.
+`postPrepared` chooses the route for the first four rows; report creation uses `workflowsRepository.submit`. New API consumers should start with [canonical Workflows](/backend/workflows). Existing HTML-report code is not the schema or recommended entry for new reports. Professional floor-plan and scheme-image screens now use [implemented SDK and Workflow paths](/frontend/floor-plans); their immutable release, activation and deployment checks are separate from the table above.
 
 ## Shared preparation and acceptance
 
@@ -44,7 +44,7 @@ The page requests authenticated `GET /v1/prompt-templates?purpose=same_style_vid
 | Scene images | Script: exactly 1; same-style:0–1 | General schema:0–12; same-style admission further caps 0–1 |
 | Script text | Script path 1–1000 characters | Public request model max 20000; not sent with same-style prompts |
 | Recording | Same-style required; UI recorder captures up to 120 seconds | At most 1; same-style requires audio/mpeg with duration_ms>5000 |
-| Custom reference video | One MP4, at most 100 MiB (104857600 bytes) | Validated VIDEO/reference_video Asset and mode-specific admission |
+| Custom reference video | One MP4, 15–120 seconds inclusive and at most 100 MiB (104857600 bytes) | Validated VIDEO/reference_video Asset and mode-specific admission |
 | Dialogue replacement list | At most 10 pairs, each side at most 200 characters | Same-style only; forwarded as instructions to rendering |
 
 An accepted generic schema inventory is not proof that the integrated supplier supports every combination. Script creation currently needs a scene for its upstream background path. Same-style uses the remake path and allows an empty scene list. Do not “fix” UI validation by copying the general API maximum.
@@ -62,8 +62,12 @@ sequenceDiagram
   P->>S: Character + optional scene + recording + local MP4
   S->>S: Validate mode, replacements, scope and model
   S->>API: Recheck profile and Feature catalog
-  S->>A: Stage image, recording and reference-video Assets
+  S->>A: Stage reference-video Asset first
   A->>API: Upload-intent / direct bytes / complete
+  S->>API: Canonical price preview
+  API-->>S: Current effective model and final Tokens
+  S->>P: Confirm fee
+  S->>A: Stage remaining images and recording
   S->>S: Build prompts and explicit port/role inputs
   S->>API: POST prepared job with stable action key
   API-->>P: 202 with accepted public Job
@@ -111,6 +115,14 @@ An optional attachment is `.pptx`, at most 100 MiB/104857600 bytes, staged and v
 
 The HTML viewer requires fresh authorized access. Supported PPTX artifacts are consumed as typed outputs; a backend artifact does not imply every page has a separate export action. For child execution, durable state and output publication, continue with [the report chain](/reference/flows/report-view-flow).
 
+## Confirm a video fee without losing an uncertain action
+
+`submitVideoGeneration` uploads a custom reference before preview because the server needs its measured duration. It obtains and confirms `previewVideoBilling`, stages remaining materials, then persists the prepared body/key with `expected_token_cost` and `expected_effective_model` before sending. The form debounces display previews; a displayed amount alone does not imply a confirmation receipt.
+
+A definitive 409 `VIDEO_PRICE_CHANGED` enters `reconfirmVideoGeneration`: fetch and confirm current fees, update the acknowledgement fields, persist and send through the same logical action. A timeout or unknown acceptance instead uses `replayVideoGeneration` with the unchanged prepared request. Scope must still match the saved account/workspace. Do not turn replay into reupload, repricing or a new task key. Read the [fee chain](/reference/flows/video-billing-flow).
+
+Source: [reconfirmVideoGeneration](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/videoGenerationSubmit.ts#L214) · [replayVideoGeneration](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/videoGenerationSubmit.ts#L209).
+
 ## Source evidence
 
-Verified 2026-10-28: [Actual route choice](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [Video orchestration](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/videoGenerationSubmit.ts#L69) · [Same-style fields](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/sameStyleVideo.ts#L10) · [Video staging/limits](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/videoAssets.ts#L25) · [Catalog selection](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/promptCatalog.ts#L198) · [Report builder](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/reportBlueprint.ts#L65) · [Report action freezing](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/services/workflowSubmission.ts) · [Backend video mode limits](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L1279).
+Verified 2026-11-10: [Actual route choice](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/designJobSubmit.ts#L184) · [Video orchestration](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/videoGenerationSubmit.ts#L76) · [Same-style fields](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/sameStyleVideo.ts#L10) · [Video staging/limits](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/videoAssets.ts#L26) · [Catalog selection](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/repositories/promptCatalog.ts#L198) · [Report builder](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/reportBlueprint.ts#L65) · [Report action freezing](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-features/services/workflowSubmission.ts) · [Backend video mode limits](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L1550).

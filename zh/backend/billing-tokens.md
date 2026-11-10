@@ -37,6 +37,12 @@ Feature价格、套餐权益、赠送与订单金额由服务端决定。客户�
 
 `POST /v1/subscriptions`、`/v1/token-purchases`使用持久动作key。履约由供应商确认的证据授权，客户端支付成功画面不足以确认。支付GET只读本地状态，主动reconcile会查询支付渠道。当前UI可用性和运维边界见[支付链路](/zh/reference/flows/payment-flow)、[退款链路](/zh/reference/flows/refund-flow)、[抖音](/zh/reference/douyin-payment)与[联调状态](/zh/reference/integration-status)。
 
+## 视频采用版本化费用计算
+
+视频价格权威是 `VideoBillingConfig`、`VideoModelRate`、`VideoModeRule`。预览读取来源时长、模型单价和个人折扣，不预留余额、不检查月额度。最终准入核对 `expected_token_cost` 与 `expected_effective_model`，然后同时按钱包和成员额度预留冻结金额。价格变化拒绝不产生新预留；已接纳重放沿用原价格，符合条件的显式重试按新记账代际/月份预留原金额。见[视频费用与重放](/zh/reference/flows/video-billing-flow)。
+
+源码：[video_commercial_snapshot](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/video_billing.py#L34) · [tests/test_video_member_quota_integration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_video_member_quota_integration.py)。
+
 ---
 
-源码依据 · backend `e59716c8`: [app/billing/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/submissions/workflow_submission_retry.py).
+源码依据 · backend `749e82df`: [app/billing/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_submission_retry.py).

@@ -4,7 +4,7 @@ Reference is a source-reading course. Pick an action you can recognize in the mi
 
 ## A concrete first journey {#first-journey}
 
-Use [the real local-API tutorial](/get-started/quickstart), with simulated external services where configured. Frontend Mock never reaches SQL, Redis or workers. Check [integration status](/reference/integration-status) first; the new floor-plan client is not a working backend-main exercise.
+Use [the real local-API tutorial](/get-started/quickstart), with simulated external services where configured. Frontend Mock never reaches SQL, Redis or workers. Begin with an ordinary image, then use [the floor-plan chain](/reference/flows/floor-plan-flow) after SDK/H5 configuration. [Integration status](/reference/integration-status) distinguishes client callers from backend-only daily reports.
 
 Choose one image task and keep user ID, workspace ID, uploaded Asset ID, action key and public Job ID. These identities connect processes; filenames and progress percentages do not.
 
@@ -35,7 +35,7 @@ sequenceDiagram
   W->>O: Stage and publish exact output
   W->>D: Finalize graph, settle once
   U->>A: Poll public Job ID
-  A->>D: Check creator or current-owner read access
+  A->>D: Check submitter / current owner / current assignee read access
   A-->>U: Typed outputs and expiring URLs
 ```
 
@@ -47,7 +47,7 @@ Messages 6, 8, 10, 11 and 16 are distinct SQL checkpoints. Storage I/O at9 canno
 | 3–10 | [Asset upload/archive](/reference/flows/asset-upload-flow), [audio handoff](/reference/flows/voice-upload-flow) | Role-bound intent, verified version, receipt and Asset identity |
 | 7–14 | [Admission/workers](/reference/flows/design-job-lifecycle), [member cap](/reference/flows/member-quota-flow), [product branches](/reference/flows/workflow-products-flow) | Exact replay before new work; durable pins, wallet/quota reservation and generation |
 | 15–16 | [Reports/exports](/reference/flows/report-view-flow), [diagnosis](/reference/flows/runtime-debugging) | Publication evidence and one-time settlement |
-| 17–19 | [History/actions](/reference/flows/workflow-history-flow) | Refreshable links, authorized read-only owner detail and creator-only writes |
+| 17–19 | [History/actions](/reference/flows/workflow-history-flow) | Refreshable links, authorized detail, current assignment and action-specific write permission |
 
 ## How a source link becomes a learning step {#reading-code}
 
@@ -64,10 +64,10 @@ Read a function in this order:
 
 Example starting points:
 
-- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/request.ts#L369)
-- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/api.py#L1135)
-- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2939)
-- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/worker.py#L254)
+- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/request.ts#L370)
+- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py#L1229)
+- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L3291)
+- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/worker.py#L269)
 
 Do not infer the running path from a filename alone. The current API accepts canonical `/v1/workflows`, while some shipped image/audio/video forms still deliberately post to the compatibility `/v1/design-jobs` adapter. The [product route matrix](/reference/flows/workflow-products-flow#frontend-routing) states the actual caller for each branch.
 
@@ -85,7 +85,7 @@ Do not infer the running path from a filename alone. The current API accepts can
 | How do projects, enterprise seats and referral rewards differ? | [Projects](/reference/flows/project-flow) · [membership](/reference/flows/workspace-membership-flow) · [referrals](/reference/flows/referral-rewards-flow) |
 | What really grants tokens after a payment or removes them after refund? | [Payment](/reference/flows/payment-flow) · [Douyin](/reference/douyin-payment) · [refunds](/reference/flows/refund-flow) |
 | Why can a funded enterprise reject one member? | [Monthly cap and accounting month](/reference/flows/member-quota-flow) |
-| Which new frontend cannot run against this backend main? | [Integration status](/reference/integration-status) · [floor plans](/frontend/floor-plans) |
+| Which capabilities require SDK configuration or still lack a client? | [Integration status](/reference/integration-status) · [floor plans](/frontend/floor-plans) |
 
 The [per-API route index](/reference/rest-api#generated-route-index) links every public route declaration to its handler and an endpoint-specific explanation. A webhook has a provider trigger; an operator API may have no mini-program button. Those boundaries are stated explicitly instead of inventing a UI caller. Conditional mock routes and browser Admin routes are explained as separate surfaces, not counted as public mobile APIs.
 
@@ -116,3 +116,7 @@ Use a local task already created by the onboarding tutorial; do not purchase a r
 5. Close/reopen the detail page. Use the GET request and frontend poller to explain why the result survives navigation.
 
 If you cannot name a concrete function or stored identity for a step, return to that chapter's code map. Reading the whole repository alphabetically is not necessary.
+
+## Continue across the new boundaries
+
+Follow [SDK editor/Works/panorama](/reference/flows/floor-plan-flow), [ThreeVjia images/discovery](/reference/flows/three-vjia-image-flow), [video fee confirmation](/reference/flows/video-billing-flow), [project handoff](/reference/flows/project-assignment-flow), [stage evidence](/reference/flows/project-stages-flow) and [daily reports](/reference/flows/daily-report-flow). For each, retain the actual identity: Group is opaque supplier identity, assignee is current responsibility, submitter is immutable history, report membership is a specific membership period. A successful H5 save, accepted platform Job, completed output and settled wallet are separate checkpoints.

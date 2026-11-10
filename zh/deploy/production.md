@@ -8,7 +8,7 @@
 
 ```bash
 ./deploy/sae/deploy.sh \
-  --namespace=yuanzhu-prod --stage=production \
+  --namespace=yuanzhu-test --stage=production \
   --promote="$RELEASE_SHA" --rollback-sha="$ROLLBACK_SHA" \
   --cloud-test-workflow="$CLOUD_TEST_WORKFLOW_URL" \
   --smoke-evidence="$SMOKE_EVIDENCE" --approver="$APPROVER" \
@@ -39,7 +39,7 @@
 
 ```bash
 ./deploy/sae/deploy.sh \
-  --namespace=yuanzhu-prod --stage=production \
+  --namespace=yuanzhu-test --stage=production \
   --rollback="$ROLLBACK_SHA" --approver="$APPROVER" \
   --change-record="$CHANGE_RECORD"
 ```
@@ -62,13 +62,25 @@ python -m app.assets.input_asset_repair --job-id '<job-uuid>' --asset-id '<asset
 
 默认 dry-run，`--apply` 是针对同一已核验对象对的运维写操作。CLI 不发现目标、不启动服务、不建 schema；已执行物理 pins、任务状态、收费及原始内容身份不变。`INPUT_REPAIR_AMBIGUOUS_OWNER` 需要归属决策，不能挑第一个消费者。复制回执不确定时保留 receipt／lease，按恢复契约处理，不删除元数据绕过。
 
-记录打包的 Alembic heads、`alembic current --check-heads`、`alembic check`，不要永久写死一个“最新 revision”。新增输入／视频／额度 schema 不替代原有停机和兼容要求。写操作前阅读[修复实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/input_asset_repair.py)及[归档实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py)。
+记录打包的 Alembic heads、`alembic current --check-heads`、`alembic check`，不要永久写死一个“最新 revision”。新增输入／视频／额度 schema 不替代原有停机和兼容要求。写操作前阅读[修复实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/input_asset_repair.py)及[归档实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py)。
+
+## 销售阶段增加持久化激活边界
+
+当前生产用户使用 `test-api.yuanzhushuzhi.com` / `yuanzhu-test`，虽然历史名称带 test；测试/开发使用 `api.yuanzhushuzhi.com` / `yuanzhu-prod`。保留映射，按实际用户决定生产保护，不能按名称猜测。
+
+待执行销售阶段迁移 `a6b876c1d430` 要求全栈停机，即使指派迁移 `f4a843b2c610` 已应用。`PROJECT_SALES_STAGES_ENABLED` 默认 false；仅升级 schema 不初始化历史阶段事实。首次启用需要完整兼容栈及 `PROJECT_SALES_STAGES_COMPATIBILITY_V1`、单独批准的停写窗口和固定 runbook 的已捕获维护会话。所有 writer 停止时，按完整合并 Envs 给 API/submit/poll 设置同一模式绑定，保留无关条目；Secret/ConfigMap 归其既有配置所有者操作。
+
+`sales-stage-inspection` 在 READ ONLY 事务中读取真实持久化 singleton。初始化器把恢复的来源证据/审计、投影和 `enabled_at` 原子提交，再在任何角色启动前读回。再次以启用模式启动仅核验，不重放历史。保存分类回填报告；没有可回填项目不能证明非空恢复。生产启用前应验证目标旧客户端，并演练已审阅版本的隔离生产副本。
+
+存在 `enabled_at` 后，即使没有任何项目，也拒绝关闭模式或选择没有兼容标记的恢复镜像。`BOOTSTRAP_PRE_ACTIVATION_ONLY` 只记录前驱，不授权激活后重新启动它。初始化结果不确定时保持停栈，先只读协调，再按兼容前进修复；不能删除标记、盲重试云写或降级 schema。普通 dry-run 不执行新的数据库探针，不能当作激活证明。
+
+源码：[deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md) · [deploy/sae/lib/migration.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/lib/migration.sh) · [deploy/sae/lib/preflight.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/lib/preflight.sh)。
 
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [生产、成败与活动运行流程](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/deploy.sh)
-- [活动修复操作器](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/project_activity_operator.py)
-- [活动兼容 marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)
+- [生产、成败与活动运行流程](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy.sh)
+- [活动修复操作器](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_activity_operator.py)
+- [活动兼容 marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)

@@ -18,6 +18,10 @@ If the active-session store is unavailable, the site refuses authenticated opera
 
 The language selector writes `admin_language` and reloads the page. This preference is browser-local. Start with [Overview](/admin/dashboard), then [Models](/admin/providers), [Workflows](/admin/workflows) and [Billing](/admin/billing).
 
+## First SDK configuration
+
+After login, ThreeVjia SDK is a separate menu at `/admin/three-vjia-sdk`. Startup creates missing inactive floor-plan/shared-image defaults; it does not upload, activate or prove availability of a supplier release/account. Follow [provider and SDK setup](/admin/providers) and the [publication runbook](/deploy/sae-deployment) before enabling the product. The administrator cookie/CSRF boundary is unchanged; customer bearer tokens cannot activate a release.
+
 ---
 
-Source evidence · backend `e59716c8`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [app/admin/auth.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/auth.py) · [app/identity/admin_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/admin_sessions.py).
+Source evidence · backend `749e82df`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py) · [app/admin/auth.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/auth.py) · [app/identity/admin_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/identity/admin_sessions.py).

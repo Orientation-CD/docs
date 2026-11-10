@@ -45,23 +45,25 @@ Example syntax, after explicit ownership and storage authorization:
 
 ./scripts/run_e2e_tests.sh --local localhost \
   --port "$DEV_TEST_PORT" --project "$DEV_TEST_PROJECT" \
-  --wechat mock --storage minio --secret .env.minio-test --mode coverage
+  --wechat mock --storage oss --secret .env.oss-test --mode coverage
 ```
 
 For OSS-related behavior, use the authorized OSS profile/storage variant as required by the upstream policy. Local runners recreate their selected stack while preserving volumes; these are not read-only probes. Cloud mode uses an explicit `--cloud https://...` and an existing remote stack. Cloud E2E additionally requires dedicated coordination Redis and read-only monitoring PostgreSQL credentials; never point it at production/customer data.
 
 ## Production-bound upgrade validation
 
-The current backend policy uses **one deployed-baseline replica**, not an additional fresh-stack E2E pass:
+The normative test policy uses **one deployed-baseline replica**, without an additional fresh-stack E2E pass:
 
-1. After focused tests, coverage/risk review, retained reviewers and full regression, restore an authorized read-only deployed database dump to an owned disposable PostgreSQL volume.
-2. Migrate that same volume with the candidate and localize providers/legal bodies; do not start the old deployed API/workers or write the cloud source.
-3. Run E2E coverage, then 300-second endurance, then affected smoke paths on that migrated volume; add OSS variants where required.
-4. Preserve the owned migrated volume/evidence for an interrupted continuation. Use `--preconfigured` and the runner's upgrade-reuse controls so a later phase does not reimport an older cloud configuration or rerun a successful migration.
+1. After focused tests, changed-line/branch coverage, risk review and both retained exact-candidate reviews, restore an authorized read-only deployed database dump to an owned disposable PostgreSQL volume.
+2. Migrate that volume with the candidate; localize providers and current legal-document bodies. Do not start the old API/workers or write the cloud source.
+3. Run affected smoke against MinIO, then E2E coverage against real OSS on the same migrated database, then 300-second OSS endurance. Do not reimport cloud configuration or rerun a successful migration between phases.
+4. After successful E2E, stop writers and perform receipt-owned OSS cleanup. A cleanup failure remains a separate retryable obligation. Only after required E2E phases pass, run complete bounded portable/resource regression; browser and SDK inventories remain separate.
 
-The required coverage topology is two user containers with two mobile users each plus one administrator; endurance uses ten user containers with seven mobile users each plus one administrator. Diagnostic overrides do not replace those gates. The upgrade runner owns private evidence under the worktree's ignored `.local/upgrade-gates/` and cleans only its verified resources.
+Coverage requires two user containers with two mobile users each plus one administrator. Endurance requires ten user containers with ten mobile users each plus one administrator. Diagnostic overrides do not replace these gates. The runner retains private recovery inputs under ignored `.local/upgrade-gates/` and cleans only verified owned resources.
 
-Docs-only work requires documentation validation, not these product gates. The normative upstream test policy and live runbook decide which actual tests are applicable; this page does not authorize paid model calls, real payment, cloud writes or destructive cleanup.
+The normative policy records a time-limited delivery-specific endurance deferral for #918/#925. It is not a general waiver or a passing load result; read its actual scope/expiry before using that delivery evidence. A source audit does not establish that a deployed environment passed these gates.
+
+Docs-only work requires documentation validation. The current upstream policy and live runbook decide actual product gates; this page does not authorize paid providers, real payment, cloud writes or destructive cleanup.
 
 ## Reuse an upgraded fixture without replacing its configuration
 
@@ -73,7 +75,7 @@ Storage evidence now includes input archival: claim SQL commit → exact-version
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Normative environment and gate policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/tests/documents/TEST_STRATEGY.md)
-- [Live stack/test runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/runbook.md)
-- [Compose precedence and topology](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/docker-compose.yml)
-- [Upgrade gate](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/run_deployed_upgrade_gate.sh)
+- [Normative environment and gate policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md)
+- [Live stack/test runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)
+- [Compose precedence and topology](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/docker-compose.yml)
+- [Upgrade gate](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/run_deployed_upgrade_gate.sh)

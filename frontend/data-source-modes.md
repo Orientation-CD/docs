@@ -47,7 +47,7 @@ Build output is `dist/build/<platform>`; watch output is `dist/dev/<platform>`. 
 | `VITE_DESIGN_PROMPT_FIELD_MAX_LENGTH` | Editable design text limit; example 4000, supported 1–12000 |
 | `VITE_WECHAT_CORP_ID`, `VITE_WECHAT_CUSTOMER_SERVICE_URL` | Optional enterprise WeChat customer-service configuration |
 
-These values are bundled into the client. Never include AppSecrets, provider credentials or private keys. A trusted report origin is not automatically trusted for storage or the floor-plan editor. Professional-editor configuration also cannot create routes missing from [the audited backend](/frontend/floor-plans).
+These values are bundled into the client. Never include AppSecrets, provider credentials or private keys. A trusted report origin is not automatically trusted for storage or the floor-plan editor. The pinned backend now implements the [professional editor and works routes](/frontend/floor-plans); configured SDK release, product activation and target-environment acceptance remain separate requirements.
 
 ## Local and cloud wrappers
 
@@ -57,6 +57,12 @@ Cloud wrappers check readiness before building, select API/report/storage/static
 
 API-local WeChat does not replace the native payment bridge with a fake callback. Confirm a mock order through the documented backend mock-settlement flow. Disable demo subscription scenarios when checking actual server entitlement. Backend `PROJECT_OUTCOMES_ENABLED` and `VIDEO_MODEL_SELECTION_ENABLED` are deployment controls; client flags cannot enable them.
 
+## Platform-selected code is part of the profile
+
+WeChat alone selects asynchronous enterprise/floor-plan/design presentation packages and registers their placeholders. Keep the API/mock and project aliases aligned when comparing outputs; a mock component test or a package compiled with projects disabled cannot verify enterprise read-only/quota behavior. `src/main.ts` uses the project theme mixin without uView installation, and the frontend package no longer depends on uView. Reinstall the frozen lockfile after updating the checkout instead of preserving a previously populated dependency tree.
+
+Source: [vite.config.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/vite.config.ts) · [src/main.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/main.ts) · [package.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json).
+
 ## Source evidence
 
-Verified 2026-10-28: [Commands and inline assignments](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Runtime](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/runtime.ts) · [Douyin profiles](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/config/build-targets.mjs) · [Environment example](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/.env.example) · [Production wrapper](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/build_mp-weixin-cloud-production.sh) · [Douyin production wrapper](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/build_mp-toutiao-cloud-production.sh).
+Verified 2026-11-10: [Commands and inline assignments](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [Runtime](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/runtime.ts) · [Douyin profiles](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/config/build-targets.mjs) · [Environment example](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/.env.example) · [Production wrapper](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/build_mp-weixin-cloud-production.sh) · [Douyin production wrapper](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/build_mp-toutiao-cloud-production.sh).

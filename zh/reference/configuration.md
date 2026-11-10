@@ -39,15 +39,21 @@
 
 ## 配置不证明功能已部署
 
-`VITE_FLOOR_PLAN_WEB_ORIGIN` 是精确受信前端 H5 origin（否则用 API origin），不是补出后端户型路由的开关。主题选择也受 selectable 目录约束，当前设置页入口隐藏。见[对齐状态](/zh/reference/integration-status)。
+`VITE_FLOOR_PLAN_WEB_ORIGIN` 是客户端精确信任的 H5 origin（回退为 API origin）。后端 `H5_3VJIA_BASE_URL`、已发布版本及数据库 SDK 配置控制原始三维家 H5。供应商账号凭据与续期由服务端管理；信任源站或启用 Feature 都不证明 release 可执行，见[户型](/zh/backend/floor-plans)。
 
 成员月额度是持久的企业／成员配置，不是环境变量开关。性能窗口与版本归属见[可观测性](/zh/backend/observability)，每个运行进程／镜像保留 `APP_VERSION`。生成表代码默认值不等于实际部署值。
+
+## SDK 与销售阶段配置
+
+三维家使用独立的 SDK 配置／发布管理，不是新增普通 ProviderConnection。接受任务时冻结配置身份／generation、release 和契约摘要。账号 Token 续期与发布维护有各自的锁及设置（`THREE_VJIA_REFRESH_MARGIN_SECONDS`、`THREE_VJIA_MAINTENANCE_ENABLED`、`THREE_VJIA_MAINTENANCE_LOCK_PATH`）。供应商秘密不能进入前端配置。
+
+`PROJECT_SALES_STAGES_ENABLED` 是有持久激活状态保护的首次启用边界，不是反转已写阶段证据的普通开关。销售阶段与此前成败边界都按[发布流程](/zh/deploy/production)操作。视频费率是有版本的数据库配置，不是浏览器价格或图节点费用之和，见[费用确认](/zh/reference/flows/video-billing-flow)。
 
 ## 源码依据
 
 已按[记录的源码版本](/zh/reference/source-revisions)核对。
 
-- [Settings 与校验](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/config.py)
-- [已提交本地示例](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/.env.example)
-- [数据库 provider 配置](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/providers/provider_configuration.py)
-- [构建脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json)
+- [Settings 与校验](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/config.py)
+- [已提交本地示例](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/.env.example)
+- [数据库 provider 配置](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_configuration.py)
+- [构建脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)

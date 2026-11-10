@@ -49,6 +49,12 @@ Detail refresh is60s; live/active Job refresh is10s. Both pause in hidden tabs a
 
 See [observability semantics](/backend/observability) before exporting or interpreting the measurements. Read persisted retry classification before any paid recovery action.
 
+## Correlate video runtime and client evidence
+
+Video diagnostics retain a reported `runtime_version` when available, including failure paths after configuration starts. Correlate it with backend `APP_VERSION`, task/generation, image digest and private supplier source. A missing value is unknown. Client-exported diagnostics carry bounded request/response evidence with credentials/signed URLs removed and special project-field redaction for protected reads. A user-shared diagnostic file is not a durable financial or provider-acceptance receipt.
+
+Source: [runtime_version](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/conversion/video_jinqiu_adapter.py#L46) · [diagnosticPayload](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/diagnosticPayload.ts#L25) · [src/services/diagnosticExport.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/diagnosticExport.ts).
+
 ---
 
-Source evidence · backend `e59716c8`: [app/admin/performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/performance.py) · [app/core/performance_history.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/performance_history.py) · [app/core/performance_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/performance_reports.py) · [app/templates/admin/performance.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/templates/admin/performance.html).
+Source evidence · backend `749e82df`: [app/admin/performance.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/performance.py) · [app/core/performance_history.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/performance_history.py) · [app/core/performance_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/performance_reports.py) · [app/templates/admin/performance.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/performance.html).

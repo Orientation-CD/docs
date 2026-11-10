@@ -1,35 +1,29 @@
-# 后端总览
+# 后端概览
 
-YuanZhu 使用 FastAPI 提供身份认证、工作空间、私有客户项目、AI Workflow 与支付服务。同一服务还在 `/admin` 提供 Studio Control 管理后台。
+FastAPI 管理身份、工作区、客户项目、AI Workflows、私有 Asset 和支付，也在 `/admin` 提供认证的 Studio Control。公开产品路由使用 `/v1`；`/health/live`、`/health/ready`、`/openapi.json` 与 Swagger `/docs` 各有不同职责。
 
-公开 API 使用 `/v1`；健康检查为 `/health/live` 和 `/health/ready`。运行中的服务在 `/docs` 提供 Swagger UI，在 `/openapi.json` 提供接口结构。完整合同与兼容接口见 [REST API](/zh/reference/rest-api)。
+## 产品与执行
 
-## 系统提供什么
-
-| 能力 | 执行与产物 |
+| 能力 | 执行与结果 |
 | --- | --- |
-| 图片设计 | 绑定角色的图片与提示词 → 不可变图片 Asset |
-| 需求采集 | 1–3 段录音 → Markdown 需求总结 Document |
-| AI 文案 | 八种文本功能 → Markdown，可使用私有知识文档 |
-| 设计报告 | 9、13 或 17 页 Blueprint → HTML 预览与可编辑 PowerPoint |
-| 视频生成 | 脚本、主角图片与可选参考图/录音 → MP4 |
+| 普通图片设计 | 角色化图片与提示词生成不可变图片 Asset |
+| 语音与文案 | 有序录音或文本／知识库输入生成 Markdown Document |
+| 报告 | 冻结 9、13、17 页 Blueprint，生成 HTML 与受支持的可编辑 PowerPoint |
+| 视频 | 剧本或同款输入使用时长／模型计费快照，本地执行 MP4 |
+| 户型图片／全景 | 自有供应商 Group、冻结渲染文档及主图进入 SDK 执行 |
+| 三维家图片设计 | 七种客户 Feature 共用 SDK Workflow 与原始 H5 集成 |
+| 企业协作 | 当前负责人项目、指派历史、阶段、销售统计及成员日报 |
 
-**Feature** 是面向客户的计价功能，指向代码定义的 **Workflow**，其中的节点执行 **Operation**。管理员在每个 Workflow 的节点上选择执行模型。功能是否开放以及套餐授权决定客户能否使用；创建服务商连接并不会直接开放产品。
+**Feature** 是定价的客户能力，**Workflow** 定义图，**Operation** 是节点。普通模型节点绑定供应商／模型配置；三维家节点通过专用后台绑定版本化 SDK 配置与发布。连接已配置不等于用户有产品权限，也不证明供应商验收。
 
 ## 持久化边界
 
-PostgreSQL 保存账号、权限、余额、任务状态与执行回执。Redis 承担 ARQ 队列、限流、会话及有界性能数据。私有对象存储保存核验后的输入、产物和精确版本。API 与 worker 使用同一个应用镜像。
+PostgreSQL 保存权限、余额、Job 状态、冻结执行及恢复证据。Redis 承担队列、限流、接力缓存和有界性能观测。对象存储保存已核验的精确版本字节。API、Submit worker、Poll worker 共享镜像，但分别运行。
 
-每次提交都显式指定工作空间。个人任务使用个人钱包，企业任务使用该企业的钱包。同一企业中的项目管理仍对创建者私有；所有者的企业概览通过单独合同披露成员与项目数据。
+输入准备在最终准入前提交可恢复的存储凭据；接受后，自有输入才变为无过期 ACTIVE。最终准入原子创建执行 pin、冻结商业证据、预留及 outbox。企业先检查共享钱包，再检查提交成员的月额度。视频预览不产生预留。
 
-先读[本地启动](/zh/backend/getting-started)，再读[系统架构](/zh/backend/architecture)与 [Workflow 生命周期](/zh/backend/workflows)。产品能力分别见[设计报告](/zh/backend/reports)、[语音](/zh/backend/voice)、[文案](/zh/backend/copywriting)与[视频](/zh/backend/video)。
+项目创建者、当前负责人和 Job 提交者是不同身份。读取谓词提供有界的 owner／负责人访问，写操作仍独立检查。列表隐藏他人输入，授权详情则可返回类型化输入，见[项目](/zh/backend/projects)、[历史操作](/zh/reference/flows/workflow-history-flow)与[数据模型](/zh/reference/data-model)。
 
-## 当前持久化与授权边界
+从[本地入门](/zh/backend/getting-started)、[架构](/zh/backend/architecture)和[工作流生命周期](/zh/backend/workflows)开始，再读[户型](/zh/backend/floor-plans)、[视频计费](/zh/reference/flows/video-billing-flow)或[日报](/zh/reference/flows/daily-report-flow)。[对齐表](/zh/reference/integration-status)区分源码支持、客户端调用者与部署验收。
 
-Workflow 自有输入先归档，再进入最终准入事务；接受后成为 ACTIVE、无过期时间并形成不可变 pins。企业任务还检查提交成员的月额度，与共享钱包独立。owner 可以读取他人可见任务详情但不返回私有输入，写操作仍限创建者。见[资产](/zh/backend/assets-storage)、[额度](/zh/reference/flows/member-quota-flow)、[历史授权](/zh/reference/flows/workflow-history-flow)。
-
-视频现有脚本、系统同款、自传参考三条路径，并非都必须“脚本加一张场景图”。性能分析采用带版本的有界历史与完整窗口比较。[对齐表](/zh/reference/integration-status)还记录了此前端已有、此后端 main 缺失的户型能力。
-
----
-
-代码依据 · backend `e59716c8`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/api/__init__.py) · [app/workflows/workflow_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_configuration.py).
+源码: [app/api/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/api/__init__.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py) · [app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py)

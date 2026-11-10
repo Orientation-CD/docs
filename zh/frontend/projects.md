@@ -1,80 +1,46 @@
-# 项目、成员看板与只读结果
+# 项目、成员管理与共享只读结果
 
-项目体验通过 `VITE_ENABLE_PRIVATE_PROJECTS=true` 编入。成员关系、项目容量、状态转换和写权限由服务端负责；前端守卫阻止过时 UI 操作，但不能授予权限。本文区分当前小程序 UI 与后端新增的独立管理能力。
+项目体验由 `VITE_ENABLE_PRIVATE_PROJECTS=true` 编译启用；后端成员关系、返回权限及当前负责关系仍是最终依据。先读[项目链路](/zh/reference/flows/project-flow)，再读[指派](/zh/reference/flows/project-assignment-flow)、[销售阶段](/zh/reference/flows/project-stages-flow)和[成员额度](/zh/reference/flows/member-quota-flow)。
 
-## 工作区 → 当前选择 → 已接受绑定
+## 空间 → 选择 → 已受理绑定
 
-账户拥有个人工作区，也可拥有/加入企业。**当前项目**是 UI 的活动选择，**默认项目**是已保存偏好，**阶段**是项目生命周期值，三者不能混用。临时 `scratch` 项目是稳定回退，不是可任意删除的普通客户项目。
+`projectContextRepository` 按账号／空间保存设备当前选择，服务端默认是另一条偏好，临时项目是永久回退项。提交前 `designProjectBinding.ts` 固定已接受的项目和客户信息快照；之后切换选择器不能改变已受理或结果不确定请求的归属。任务写入和指派事件使相关列表／计数失效，已知 `assignmentVersion` 阻止迟到响应恢复旧负责关系。
 
-`projectContextRepository` 按用户/工作区保存选择，首页、项目页和提交 service 共用。任务准备前，绑定操作确定接受的项目和客户资料快照；之后切换选择器不能改写被冻结或结果未知的请求。提交、重试、移动、删除都会让相关项目计数失效。
+普通列表现在展示当前账号负责的项目，不是它最初创建的全部项目。响应可包含创建者、负责人、最近交接及权限。编辑页支持所有者替当前成员创建，或将自己的项目设为“稍后指派”。详情提供指派／改派及所有者接管。指派页写前刷新资料／概览／详情，但保留用户实际确认的版本；超时进入刷新核对，不自动重复交接。
 
-| 动作 | 追踪源码 | 保留的状态 |
-| --- | --- | --- |
-| 选择/设为默认项目 | `repositories/projectContext.ts` | 用户、工作区、当前/默认项目 |
-| 提交到项目 | 功能包内 `services/designProjectBinding.ts` | 已接受项目、客户快照、冻结动作 |
-| 查看项目成果 | `ProjectResults.vue` | 当前作用域操作与列表筛选 |
-| 移动方案 | `PlansJobMove.vue` | 源/目标作用域，刷新两侧计数 |
-| 删除项目 | `ProjectDeleteSheet.vue` | 支持的服务端模式与异步接受状态 |
+## 每项操作分别使用返回权限
 
-## 阶段、结果与容量
-
-认证的 `GET /v1/project-statuses` 提供阶段、状态、可选标记、结果、流失原因与停滞天数规则。客户端使用五分钟作用域缓存和最小回退，不能把写死的 enum 当作完整当前目录。
-
-UI 区分主阶段、旁路状态和成交/流失终态；历史最远进度独立于当前阶段。流失资料可要求原因及最多100个 Unicode 字符的 OTHER 说明。恢复跟进可能占用容量，应由服务端决定接受或拒绝。
-
-普通项目上限统计20个进行中项目，排除临时项目和关闭结果；本轮契约允许关闭项目继续被选择/绑定。后端 `PROJECT_OUTCOMES_ENABLED` 及其迁移/发布决定结果写入是否可用，构建前端不能启用服务端行为。
-
-删除项目支持服务端的“任务转入临时项目”或“删除任务”模式，202表示接受，不是清理完成；临时项目不能作为普通项目删除。
-
-## 当前成员看板实际计算什么
-
-所有者打开企业概览，`loadProjectOverview` 校验 `GET /v1/workspaces/{workspace_id}/overview`，看板消费的是**当前成员**。服务端契约可能保留历史成员记录，但当前组件有意隐藏该区域。
-
-| 展示 | 实际计算或守卫 |
+| 上下文 | 当前行为 |
 | --- | --- |
-| 搜索与筛选 | 当前成员名，以及服务端派生的阶段/phase/结果；未知状态归“其他”保持可见 |
-| 关注项 | 按服务端状态目录停滞规则统计项目；仅支持活跃数据且北京时间日期差大于7时提示未活跃 |
-| 阶段分布 | 非终态项目；主状态超过4个时按 phase 分组 |
-| 成交与转化 | 成功结果总数、成功/已关闭比例；无分母时显示横线 |
-| 本月成交 | 有效关闭日期与当前同属北京时间月份的成功项目 |
-| 排序 | 关注项、筛选后项目数、成交数或最后活跃，再用姓名/ID稳定排序 |
-| 打开成员项目 | 必须存在所需方案计数能力，字段缺失不等于零 |
+| 当前项目负责人 | 编辑允许字段、提交自己的新任务并使用返回的项目操作 |
+| 当前企业所有者 | 查看普通成员项目、指派交接、管理额度；销售模式可改阶段／成交流失 |
+| 新负责人查看前任内容 | 查看结果及受支持的保存／复制链接／下载；不能修改或复用前任输入 |
+| 前任作者 | 保留可见的本人历史归因；打开项目和修改仍需当前权限 |
+| 混合作者项目删除 | 只有所有者能授权整项目清理 |
 
-`memberProjectDashboard.ts` 提供复用计算，`EnterpriseProjectOverview.vue` 组合响应式筛选和交互守卫。北京时间是展示/分组规则，不会额外写服务端，也不会为每个项目单独轮询。
+`assignmentReadAccess` 在保护读取／下载时重新核对负责关系，`memberProjectRead` 以会话代次、空间、当前成员关系和限定证据隔离所有者查看。结果保留真实提交者。获授权详情可包含类型化原始输入，只读播放／展示使用校验后的投影，非作者列表仍隐藏输入；这些投影都不授予复制输入权。使用服务端／客户端的具体操作权限，URL 查询标记不是授权。
 
-## 从成员卡片追到结果
+## 销售阶段控件与看板
 
-```mermaid
-sequenceDiagram
-  autonumber
-  participant UI as 所有者看板
-  participant G as memberProjectRead
-  participant P as 资料 / 概览 repository
-  participant D as Job 详情 repository
-  participant API as 后端
-  UI->>G: 以只读作用域打开成员项目
-  G->>P: 确认最新账户 / 工作区 / owner角色
-  P->>API: 经过授权的资料与概览读取
-  G->>G: 确认当前成员项目并保留作用域证明
-  UI->>D: 读取/轮询所选任务
-  D->>G: 验证当前作用域和所有者身份
-  D->>API: 经过授权的任务详情
-  API-->>D: 隐藏受保护输入的结果投影
-  D-->>UI: 校验后的只读结果
-```
+服务端目录选择基础／成交流失／销售模式。销售模式使用独立点亮的 `stageFacts`、业务日期、来源类型及撤销权限。`ProjectSalesStages` 打开日期／确认流程，`writeSalesStage` 使用专门 PUT／DELETE，`readSalesEvents` 加载事件线。签单要求量房或到店证据，恢复跟进保留证据；旧模式继续使用自己的状态语义。20 个项目上限按当前负责人／空间计算，启用结果时排除已关闭项目。
 
-`createMemberReadView` 记录会话代次、工作区和项目。`verifyMemberReadAccess` 在读取时刷新账户/owner上下文，成员证明仅随当前 scope 对象存活。恢复页面、会话改变、成员/项目事件都会使证明失效，晚到响应不能将其恢复。
+所有者看板基于已验证目录和证据展示当前成员、需关注及阶段分布。缺少能力保持不可用，不当作零。销售转化使用专门后端统计，按所选月或全部周期、当前成员与当前负责人计算。`loadSalesMetrics` 校验周期、时区和成员集合，零分母显示横杠；不能从当前筛选页的状态标签自行推导转化。活动／停滞使用北京日期及服务端证据，不对每个项目再写一次状态。
 
-Repository 首先调用任务详情；当前后端 `main` 已明确支持经过授权的 owner 只读投影。前端只针对特定404未找到响应保留有限的企业列表回退，不是通用绕权；它不会改用任意成员私有接口或缓存签名 URL。
+## 成员管理与额度界面
 
-成员结果页支持图片、Markdown 总结（隐藏原录音）、视频、报告读取，不提供提交、继续生成、复制输入、重试、删除或移动。账户/工作区/owner身份丢失时清空视图并返回合法入口，仅凭 URL 标记不能授予权限。
+所有者成员管理位于 `pkg-projects/pages/members/index.vue`，与项目阶段展示分开。`MemberManagement` 使用概览额度元数据和当前成员详情，缺失／错误／上月数据保持不可用。`MemberQuotaSheet` 可编辑全局默认或单人成员额度，明确提示全局保存会清空全部个人例外。单人零表示暂停新增任务，null 表示不限额；同值全局保存仍发送到后端。
 
-## 成员管理与后端独立的额度控制
+[saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L78) 在请求前后核对当前账号／空间／所有者，即使保存结果不确定也使个人／概览额度失效，绝不自动重放全局覆盖。本人展示通过 `MyMemberQuota` 和 [readMyMemberTokenQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L38)，按账号／空间／北京月缓存。只有精确的路由缺失 404 才隐藏可选能力；过月、响应无效和失去权限是不同错误。准入拒绝 `MEMBER_MONTHLY_TOKEN_LIMIT_REACHED` 会保留输入，并区别所有者暂停和额度耗尽。
 
-所有者管理企业名称、席位、邀请和移除，成员可自行退出；席位包含所有者，未接受邀请不预占席位，也没有任意成员角色编辑器。原生邀请携带一次性邀请码，接受时由后端重查成员关系和容量。
+## 源码地图与阅读顺序
 
-最新后端还会实施成员月度 Token 额度，但当前前端没有成员额度编辑器。文档解释这些 API，不代表小程序已提供相应管理 UI。服务端额度/权限规则见[工作区链路](/zh/reference/flows/workspace-membership-flow)，准入被拒时应保留用户输入。
+| 阅读对象 | 入口 | 应回答的问题 |
+| --- | --- | --- |
+| 选择与缓存 | [projectContextRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectContext.ts#L203) | 响应属于哪个账号、空间和指派版本？ |
+| 交接 | [assignProject](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/services/projectAssignment.ts#L40) | 提交不确定或版本过期后如何处理？ |
+| 阶段证据 | [writeSalesStage](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/services/projectSalesStages.ts#L27) | 来源是人工、自动还是迁移？ |
+| 销售比例 | [loadSalesMetrics](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectSalesMetrics.ts#L35) | 统计哪个日期分组与当前成员集合？ |
+| 额度 | [saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L78) | 本次是全局重置还是单人例外？ |
+| 只读内容 | [verifyAssignmentRead](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/assignmentReadAccess.ts#L7) | 当前权限是否仍允许读取该结果？ |
 
-## 源码依据
-
-核验日期 2026-10-28：[项目上下文](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/projectContext.ts) · [概览](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/projectOverview.ts#L88) · [看板计算](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/memberProjectDashboard.ts#L9) · [看板 UI](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/components/projects/EnterpriseProjectOverview.vue) · [只读作用域](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/memberProjectRead.ts#L52) · [详情投影](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/designJobDetail.ts#L190) · [后端工作区授权](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py)。
+固定后端已有企业日报，但本前端版本没有日报路由调用者。见[企业日报](/zh/reference/flows/daily-report-flow)中的已认证集成边界；概览摘要元数据不能证明编辑页已经交付。

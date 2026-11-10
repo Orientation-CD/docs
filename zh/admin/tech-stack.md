@@ -18,6 +18,10 @@ Studio Control 属于 Python 后端。FastAPI/Starlette 负责路由、签名会
 
 后端通过 `/admin/configuration/export` 导出授权部署快照。配置导入/导出范围大于提示词归档替换，需保留密钥与兼容边界。工具权威说明留在后端仓库，本站是独立 VitePress 项目。
 
+## SDK 激活具有准备／提交边界
+
+[admin_activate_three_vjia_sdk](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/three_vjia_sdk.py) 先验证管理员和 CSRF，再准备发布契约及账户安装，不在目录／存储／Redis 工作期间持有数据库会话连接。核对页面配置代次与凭据修订后，取得发布／配置锁执行短数据库激活，再次检查管理员并提交。`SDK_CONFIGURATION_CHANGED` 要求刷新核对。提交后的进程通知仅用于预热，通知失败不能把已提交激活报告为保存失败。修改 UI 时必须同时维护浏览器控件和后端代次检查。
+
 ---
 
-代码依据 · backend `e59716c8`: [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/__init__.py) · [app/admin/dependencies.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/dependencies.py) · [app/core/configuration/config_export.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/configuration/config_export.py).
+代码依据 · backend `749e82df`: [app/admin/__init__.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/__init__.py) · [app/admin/dependencies.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/dependencies.py) · [app/core/configuration/config_export.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/configuration/config_export.py).

@@ -67,7 +67,7 @@ Use [FAQ](/get-started/faq) for symptoms, [macOS setup](/get-started/macos-setup
 | --- | --- |
 | Archive receipt / activation | Proof that an exact owned object was relocated / final transaction assigning the accepted Job, ACTIVE lifetime and immutable execution pins. A completed receipt alone is not acceptance. |
 | Member quota / shared wallet | A monthly admission cap attributed to a member / actual enterprise funds. `used` already includes `reserved`. |
-| Owner read-only detail | Authorized projection of another creator's visible enterprise task; `inputs: []`, no creator writes. |
+| Owner/assignee read-only detail | Authorized by-ID detail can include typed inputs; collections hide other authors' inputs. Server action permissions still govern writes. |
 | Same-style reference | A managed or uploaded Video used as the story source; template fields, replacements and recording are distinct inputs. |
 | Candidate contract | A captured source schema for a feature branch. It does not prove backend main or a deployment implements it. |
 | Performance coverage | Which processes/versions/time buckets actually contributed evidence; missing coverage cannot be interpreted as zero. |
@@ -76,4 +76,4 @@ Use [integration status](/reference/integration-status) and the [current data mo
 
 ## Source evidence
 
-Documented against frontend `3662578` and backend `e59716c` (2026-10-28). [Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts) · [Workflow request types](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py).
+Documented against frontend `88c75c1f` and backend `749e82df` (2026-11-10). [Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [Workflow request types](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py).

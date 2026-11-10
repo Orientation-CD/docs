@@ -13,7 +13,7 @@ pnpm --version
 pnpm install --frozen-lockfile
 ```
 
-Expected pnpm version:9.15.9. A frozen install applies the committed Vitest coverage patch. If Corepack is unavailable, use `npx --yes pnpm@9.15.9` in place of `pnpm`. Do not solve an install failure by deleting the lockfile or bypassing the patch. Record the installed commit with `git rev-parse HEAD`; published docs are tied to [the audited commits](/reference/source-revisions), while a newly pulled branch can be ahead.
+Expected pnpm version:9.15.9. A frozen install applies the committed Vitest coverage and Vue compiler patches. If Corepack is unavailable, use `npx --yes pnpm@9.15.9` in place of `pnpm`. Do not solve an install failure by deleting the lockfile or bypassing the patch. Record the installed commit with `git rev-parse HEAD`; published docs are tied to [the audited commits](/reference/source-revisions), while a newly pulled branch can be ahead.
 
 ## 2. Build a frontend Mock package
 
@@ -41,7 +41,7 @@ If DevTools shows the previous UI, check the imported output directory, rebuild 
 | Owned local API stack | [Quick Start](/get-started/quickstart) explicit build | Real API/storage/queue/database behavior with configured identity/provider mode |
 | WeChat production API artifact | `pnpm quality:mp-weixin:api` after configuring origins | Contract/design, Babel and production artifact gates |
 | Team cloud environment | [Platform wrapper](/frontend/platforms) for that environment | Readiness + selected environment + artifact checks |
-| Professional floor plans | [Integration boundary](/frontend/floor-plans) first | This audited backend does not yet supply the required routes |
+| Professional floor plans | [Integration boundary](/frontend/floor-plans) first | Backend routes exist; requires an active SDK release, product configuration and registered web-view origin |
 
 The fixed 8080 `:api-local` helpers are convenient only when that is the owned session port. Do not prefix an alternate URL and assume it overrides the script's inline value. Use the explicit build in Quick Start for a different port, including matching result/report origins and disabled entitlement-demo overrides.
 
@@ -64,4 +64,4 @@ Before review, run the relevant [tests and artifact gates](/frontend/testing). A
 
 ## Source evidence
 
-Verified 2026-10-28: [Pinned package/scripts/patches](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Page registry](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [Douyin build targets](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/config/build-targets.mjs) · [Device address guard](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/require-device-api-url.mjs) · [WeChat artifact gate](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/check-code-quality.mjs).
+Verified 2026-11-10: [Pinned package/scripts/patches](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [Page registry](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pages.json) · [Douyin build targets](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/config/build-targets.mjs) · [Device address guard](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/require-device-api-url.mjs) · [WeChat artifact gate](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/check-code-quality.mjs).

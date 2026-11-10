@@ -18,6 +18,10 @@
 
 语言选择写入 `admin_language` 并刷新页面，仅影响本浏览器。接下来可读[概览](/zh/admin/dashboard)、[模型](/zh/admin/providers)、[Workflows](/zh/admin/workflows)及[计费](/zh/admin/billing)。
 
+## 首次配置 SDK
+
+登录后三维家 SDK 使用独立菜单 `/admin/three-vjia-sdk`。启动只补齐缺失且未启用的户型／共享图片默认记录，不会上传、激活或证明供应商发布与账户可用。启用产品前按[服务商及 SDK 配置](/zh/admin/providers)与[发布手册](/zh/deploy/sae-deployment)核验。管理员 cookie／CSRF 边界保持一致，客户 Bearer 不能激活发布。
+
 ---
 
-代码依据 · backend `e59716c8`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py) · [app/admin/auth.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/admin/auth.py) · [app/identity/admin_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/identity/admin_sessions.py).
+代码依据 · backend `749e82df`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py) · [app/admin/auth.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/auth.py) · [app/identity/admin_sessions.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/identity/admin_sessions.py).

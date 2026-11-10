@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "verifiedAt": "2026-10-28",
-  "docsBaseCommit": "cf5dcd08a80e28d3d1185a222fb1db26698dd15d",
+  "verifiedAt": "2026-11-10",
+  "docsBaseCommit": "d98a81732946899663b97ad3356be23504350c94",
   "repositories": {
     "frontend": {
       "repository": "Orientation-CD/wechat_mini_program",
       "branch": "ui-integration",
-      "commit": "3662578b384fd5b0fbe7509229b2a08a6fe44ab9",
+      "commit": "88c75c1f15cd65f45c7fb09d560df80430ddc198",
       "authorities": [
         {
           "path": "package.json",
-          "sha256": "ae17089db1954265b53cf96ad683fe36f0602a06b2b5ae1651dd88b5b21da136"
+          "sha256": "864437f3c89d56e38a7e7a06e2c76fd5f508b87dfbf023f22e5cc9312dcd45e8"
         },
         {
           "path": ".env.example",
@@ -18,7 +18,7 @@
         },
         {
           "path": "src/env.d.ts",
-          "sha256": "8aafa05d0785a254a0dd19590617e7cbd96b20e63ce17242949260c0d4b64b5a"
+          "sha256": "493c45153059e80bd9b149a78c2eca099e6e722759e5a6c773b279c3f21131c6"
         },
         {
           "path": "config/build-targets.mjs",
@@ -30,19 +30,19 @@
         },
         {
           "path": "src/styles/design-tokens.json",
-          "sha256": "6116c1e67b674f4573667c02e0e44e5a8e94f274d0053f6638afaa3338cc7a73"
+          "sha256": "68deeff5dd0d048217ad7855bc753325bbc8be0e98bf33cafaa71dbc37b9ced7"
         },
         {
           "path": "src/styles/themes/minimal.json",
-          "sha256": "912721761fb300920df98b98c2fc4c4c55c1f9c809a8f8930085b60569bc8c79"
+          "sha256": "b01b3528446956fb0839aaed0336583f2a6f938e218224c48619d7c30cf499ac"
         },
         {
           "path": "src/styles/themes/modern.json",
-          "sha256": "f0927fab052863706f49841de38ee213121da7888b9e9e5e1d985bac3e9e635a"
+          "sha256": "6e4b98f414aa57049bcc0f8c0f08cfc209b257483b2b75c105fec59478dd022c"
         },
         {
           "path": "src/api/dto/floorPlan.ts",
-          "sha256": "57fa558ca47607828ea0499d4cda47399337f8dd5b3ad16468b36086878934b8"
+          "sha256": "fa62a44a9de5a9e188b616ef1d0a75ed60bbaa8d5a0c0b25bd52148a9415d80c"
         },
         {
           "path": "scripts/api-contract-source.mjs",
@@ -69,27 +69,27 @@
     "backend": {
       "repository": "Orientation-CD/YuanZhu-AI",
       "branch": "main",
-      "commit": "e59716c83e087deda8477da5ea7b327a40cf65c5",
+      "commit": "749e82df3a51c441335ba6a4db607a98bacbcf97",
       "authorities": [
         {
           "path": "app/api/__init__.py",
-          "sha256": "387fd93429b9244578987a7a54a7eeaae194cfc94fb20175f30f8b7beedc1424"
+          "sha256": "696712c16c4aa9aa4452a68be43b6b31cac3b6c2e72148cc066f16a9df8bf9d0"
         },
         {
           "path": "app/core/models.py",
-          "sha256": "dcdb4aa5b9989d85ccf049035cce5b5f5041c90cfb1034f70047bd7615e592f7"
+          "sha256": "9fef423c3ac61f3f7aae8484f98ba618b8434b7b5639d21e905174d9c8f56875"
         },
         {
           "path": "app/core/config.py",
-          "sha256": "81b6feaba09b1b7f824d55daa1f7f29c9224df93c114c89016a5217b5c310ad7"
+          "sha256": "0f625d9ac01058eade978739ec8e35d7d4fb8228c5cc488c6ccc7d31845f0b59"
         },
         {
           "path": "app/persistence/db_models.py",
-          "sha256": "5a60794adef7a570ae4cb148ec6f7190c22a700fb14dc659d1f187c2a299e2f4"
+          "sha256": "3770807435929892dfb456894744abc03b5ee1c2418666fbe50897423287f546"
         },
         {
           "path": "app/workflows/workflow_admission.py",
-          "sha256": "93afd909e8770649988c5fbe4828c2002e2510484fa014db4bfcb1a8aeb1464e"
+          "sha256": "e613a4400e0f59b638c299dd6b81d132ca0dd69d3d3011d3f2b6c8dbff54f4b6"
         },
         {
           "path": "app/assets/asset_input_archival.py",
@@ -104,28 +104,56 @@
           "sha256": "91737c9564946ce1793e74ad1d61a217d351d3a73de4bd9b13c61a1aada7ba0c"
         },
         {
+          "path": "app/floor_plans/api.py",
+          "sha256": "245dd1df73380ff6a9c8df858a9e7d033f317b02b338d3978ed80d2f24821c2b"
+        },
+        {
+          "path": "app/floor_plans/gateway.py",
+          "sha256": "6a309bc070989064e54458325cc3449bbfc59f57e18ba35cfc854322af137599"
+        },
+        {
+          "path": "app/three_vjia/sdk.py",
+          "sha256": "82a580c9e1f6fce8257207b377e6b6c90da29f39945cb4002863fcd5c62258de"
+        },
+        {
+          "path": "app/three_vjia/account_credentials.py",
+          "sha256": "eb367a76a749773b0dd564d7b43f276e03d6907f91816e37494d0afc49a34281"
+        },
+        {
+          "path": "app/workspaces/project_stages.py",
+          "sha256": "e18e2c425755e9627798b25e5d02d5514bed1370de7953e51488b80cc1c428db"
+        },
+        {
+          "path": "app/workspaces/daily_report_api.py",
+          "sha256": "d4318eeccc1cc1511bb9f30fbbcb6cc36c635d7eb5294dd57f6531376ef59578"
+        },
+        {
+          "path": "app/billing/video_pricing.py",
+          "sha256": "621b4dbc56604e0b527f923111f0ea451b97a87f65dd28703fe57ccddd5686ad"
+        },
+        {
           "path": "documents/REST_API_INTERFACE.md",
-          "sha256": "af7d411a0d91b51a19d48616704b313c10107fb7d5a95b32bb936cb56dd9217d"
+          "sha256": "04b5396628d1f1d45d1e0de9a249ffca9852242cb82a0fc0912f3292db99bdbb"
         },
         {
           "path": "documents/ASSET_STORAGE_OPERATIONS.md",
-          "sha256": "4b733b09d61808f7d5b9dc0f3e858d64325de564ffb07abca63cd4dd9e2fce71"
+          "sha256": "088885837bf82ab8759e2909ee1262cc90f7e7be15036624e9109b7b58715df2"
         },
         {
           "path": "README.md",
-          "sha256": "cbdb861eb9a45f09de236739c75f7a2f7b47cff5ccc84e3ba6cc2acb01215a21"
+          "sha256": "df5fb439417c3ce09241f2359247107788575f3d1e3c303e9df05a9bc8dfe8dc"
         },
         {
           "path": "tests/documents/TEST_STRATEGY.md",
-          "sha256": "e84769246fdc4d9fc5b12693126789266761b55d9a40a85365aa51fa42f15f0d"
+          "sha256": "7ddba3234463c5caceb9110a33ca29a7f3bf642b1a3a92671a4032853b3655b8"
         },
         {
           "path": "scripts/runbook.md",
-          "sha256": "51b3c5b6df936cb8cbe3268e1a3826ad7750a652dbd99360e8ab7f5b31e250d3"
+          "sha256": "999c417eeaab4ae9f8995a1bc48bb6562443835280366d32398cf4d8c7ef9e85"
         },
         {
           "path": "deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md",
-          "sha256": "b8ccec3f958ce897c71d722ec19f49395de99a80fb638ffe9d134be0264d37db"
+          "sha256": "4e2af98cef277843425f25777a17ee0e12007eecc602d7f9b11ce811a4e4cea2"
         },
         {
           "path": "documents/DOUYIN_PAYMENT.md",

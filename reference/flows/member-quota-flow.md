@@ -1,16 +1,16 @@
 # Member monthly quota: configuration → ledger view → admission
 
-This chapter traces three implemented APIs and the financial check they control. **The audited mini-program has no caller for these three quota APIs.** The entry point is an authenticated integration or operator script, not an invented screen/button. See [integration status](/reference/integration-status) before treating a backend capability as shipped UI.
+This chapter traces three implemented APIs and their financial check. The current mini-program has owner member-management/quota editing and member self-quota display. Configuration starts at `pkg-projects/pages/members/index.vue`: `MemberQuotaSheet` → `saveQuota` → `saveMemberTokenLimit`. Self display uses `MyMemberQuota.refresh` → `readMyMemberTokenQuota`. Displayed state, effective server limit and actual task admission are different checkpoints.
 
 An enterprise wallet and a member quota are different authorities: the wallet pays; the quota limits how much new work one member may reserve in a calendar month. Neither quota save transfers Tokens, creates a Job or calls Redis/provider execution.
 
 ```mermaid
 sequenceDiagram
   autonumber
-  participant O as Current owner integration
+  participant O as Owner member-management page
   participant API as Workspace API
   participant DB as PostgreSQL
-  participant M as Member integration
+  participant M as Member quota UI
   participant A as Workflow admission
   O->>API: PUT global or one member limit
   API->>DB: Lock active enterprise and verify current owner
@@ -25,12 +25,22 @@ sequenceDiagram
   A->>DB: Commit accepted reservation/Job/outbox, or reject without them
 ```
 
+## Follow the current UI into the request
+
+| Diagram steps | Frontend source | Boundary to verify |
+| --- | --- | --- |
+| 1–4 | [saveQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/pages/members/index.vue#L103) → [saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L78) | Account/workspace/owner authority, explicit global-reset disclosure and refresh-only uncertain recovery |
+| 5–7 | [refresh](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/components/account/MyMemberQuota.vue#L23) → [readMyMemberTokenQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L38) | Cache key includes account/workspace/Beijing month; mismatched response month stays unavailable |
+| 8–11 | [presentMemberQuotaRejection](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/memberQuota.ts#L85) | Preserve task inputs, distinguish pause from insufficient quota and never authorize from cache |
+
+Only exact missing-route 404 hides optional self quota; permission failures, previous-month response and malformed data are not zero quota. Same-value global saves still clear overrides; individual zero pauses while global zero is invalid. Both sides of a save recheck current context, and even failures invalidate overview/self cache because the server may have committed.
+
 ## Save the enterprise default {#workspace-token-limit}
 
 **Endpoint:** `PUT /v1/workspaces/{workspace_id}/member-token-limit`. Bearer authentication and current OWNER membership of an active enterprise are required. The body is an object: `{"limit":50000}` for a finite cap or `{"limit":null}` for unlimited; bare JSON null is invalid. Accepted finite values are strict integers1..10,000,000; zero, missing, string, boolean, float and unknown fields fail422.
 
-1. [app/workspaces/workspace_api.py → update_member_token_default](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py#L208) passes the authenticated actor and explicit workspace UUID to `set_enterprise_member_token_limit`; saved selection is not permission.
-2. [app/billing/member_token_quotas.py → set_enterprise_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L198) calls `_locked_owner_enterprise`, checks accessible active Enterprise/current OWNER and locks enterprise authority before override rows.
+1. [app/workspaces/workspace_api.py → update_member_token_default](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L258) passes the authenticated actor and explicit workspace UUID to `set_enterprise_member_token_limit`; saved selection is not permission.
+2. [app/billing/member_token_quotas.py → set_enterprise_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L198) calls `_locked_owner_enterprise`, checks accessible active Enterprise/current OWNER and locks enterprise authority before override rows.
 3. It counts current nonowners, writes `Enterprise.member_monthly_token_limit`, stamps configured-at and **deletes every override**, including departed members' retained overrides. This happens even for the same value or null.
 4. It appends `EnterpriseMemberTokenLimitAudit` with old/new/source, affected count and cleared override count. The route commits configuration+audit together; no financial ledger event is created.
 5. Returns **200** with `{"limit":50000,"affected_members":3}`. This count means current nonowners, not deleted override rows. Refresh owner overview after success.
@@ -41,8 +51,8 @@ A global save is not a patch that preserves individual exceptions. Integrators m
 
 **Endpoint:** `PUT /v1/workspaces/{workspace_id}/members/{user_id}/token-limit`. Current OWNER only. The required `limit` is null or strict integer0..10,000,000. Individual0 deliberately pauses new reservations; it is not the global limit's validation range.
 
-1. [app/workspaces/workspace_api.py → update_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py#L225) forwards actor/workspace/target/limit to `set_member_token_limit`.
-2. [app/billing/member_token_quotas.py → set_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L250) takes current enterprise owner authority, then validates the target's current membership. Missing/former target is404 `MEMBER_NOT_FOUND`; owner target is409 `WORKSPACE_OWNER_TOKEN_LIMIT_FORBIDDEN`.
+1. [app/workspaces/workspace_api.py → update_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L275) forwards actor/workspace/target/limit to `set_member_token_limit`.
+2. [app/billing/member_token_quotas.py → set_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L250) takes current enterprise owner authority, then validates the target's current membership. Missing/former target is404 `MEMBER_NOT_FOUND`; owner target is409 `WORKSPACE_OWNER_TOKEN_LIMIT_FORBIDDEN`.
 3. It creates/updates the member's `EnterpriseMemberTokenLimit` row and appends the config audit. Every individual save produces `source:"custom"`, including null or a value equal to global default.
 4. It calls `read_member_token_quota`, and the route commits. Example200: `{"limit":0,"used":120,"reserved":20,"source":"custom","month":"2026-11"}`. Refresh the selected quota/overview.
 
@@ -52,10 +62,10 @@ The override survives leaving/rejoining unless a later global save clears it. Ze
 
 **Endpoint:** `GET /v1/workspaces/{workspace_id}/me/token-quota`. Current member or owner of an active enterprise; no target-member parameter or request body. This does not change selected workspace.
 
-1. [app/workspaces/workspace_api.py → get_own_member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workspaces/workspace_api.py#L242) resolves current accessible workspace/membership; personal space fails422 `ENTERPRISE_WORKSPACE_REQUIRED`.
-2. [app/billing/member_token_quotas.py → read_member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L157) captures one current clock, loads that member's optional override and calls `enterprise_member_token_usage`.
-3. [app/billing/member_token_quotas.py → member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L140) chooses owner→unlimited/source owner, explicit row→custom, otherwise Enterprise default. Null is unlimited, not zero or a missing value.
-4. [app/billing/member_token_quotas.py → enterprise_member_token_usage](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L57) aggregates immutable ledger generation identities.200 returns `limit`, `used`, `reserved`, `source`, `month`.
+1. [app/workspaces/workspace_api.py → get_own_member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L292) resolves current accessible workspace/membership; personal space fails422 `ENTERPRISE_WORKSPACE_REQUIRED`.
+2. [app/billing/member_token_quotas.py → read_member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L157) captures one current clock, loads that member's optional override and calls `enterprise_member_token_usage`.
+3. [app/billing/member_token_quotas.py → member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L140) chooses owner→unlimited/source owner, explicit row→custom, otherwise Enterprise default. Null is unlimited, not zero or a missing value.
+4. [app/billing/member_token_quotas.py → enterprise_member_token_usage](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L57) aggregates immutable ledger generation identities.200 returns `limit`, `used`, `reserved`, `source`, `month`.
 
 | Example field | Meaning |
 | --- | --- |
@@ -75,7 +85,7 @@ Ledger idempotency identities survive cleared Job FKs, so Job deletion does not 
 
 ## The later create/retry transaction
 
-[app/workflows/workflow_admission.py → _reserve_feature_workflow_tokens](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/workflows/workflow_admission.py#L2295) first checks enterprise spendable balance (`remaining_tokens - reserved_tokens`). `TOKEN_SHORTAGE_WORKSPACE` retains priority. With sufficient funds, [app/billing/member_token_quotas.py → member_token_limit_violation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/member_token_quotas.py#L302) reads the current member role/override/ledger under the caller's enterprise account lock and requires `used + required <= limit`. Owner/unlimited bypass this cap.
+[app/workflows/workflow_admission.py → _reserve_feature_workflow_tokens](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L2607) first checks enterprise spendable balance (`remaining_tokens - reserved_tokens`). `TOKEN_SHORTAGE_WORKSPACE` retains priority. With sufficient funds, [app/billing/member_token_quotas.py → member_token_limit_violation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L302) reads the current member role/override/ledger under the caller's enterprise account lock and requires `used + required <= limit`. Owner/unlimited bypass this cap.
 
 A failed check is402:
 

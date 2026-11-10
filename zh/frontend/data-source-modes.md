@@ -47,7 +47,7 @@
 | `VITE_DESIGN_PROMPT_FIELD_MAX_LENGTH` | 可编辑设计文本上限，示例4000，可配置1–12000 |
 | `VITE_WECHAT_CORP_ID`、`VITE_WECHAT_CUSTOMER_SERVICE_URL` | 可选的企业微信客服配置 |
 
-这些值会进入客户端，不能放 AppSecret、供应商凭据或私钥。受信的报告 origin 不会自动获得存储或户型编辑器权限；编辑器配置也不能让[本轮后端缺失的路由](/zh/frontend/floor-plans)凭空出现。
+这些值会进入客户端，不能放 AppSecret、供应商凭据或私钥。受信的报告 origin 不会自动获得存储或户型编辑器权限；本轮后端已实现[专业编辑器与作品路由](/zh/frontend/floor-plans)，但 SDK release、产品激活与目标环境验收仍是独立前提。
 
 ## 本地和云环境包装脚本
 
@@ -57,6 +57,12 @@
 
 微信 API-local 不会把原生支付桥替换成假的成功回调；模拟订单应经过文档中的后端 mock 结算流程。检查真实服务端权益时关闭演示套餐情景。后端 `PROJECT_OUTCOMES_ENABLED`、`VIDEO_MODEL_SELECTION_ENABLED` 属于部署控制，不能由客户端开关启用。
 
+## 平台选码也是构建档的一部分
+
+只有微信选择异步企业/户型/专业设计展示分包并注册 placeholder。比较产物时同时核对 API/Mock 和项目 alias；Mock 组件测试或关闭项目的构建不能验证企业只读与额度行为。`src/main.ts` 使用项目主题 mixin，不安装 uView，前端依赖也已移除 uView。更新检出后按固定 lockfile 安装，不能凭旧依赖目录判断当前包体。
+
+源码：[vite.config.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/vite.config.ts) · [src/main.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/main.ts) · [package.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)。
+
 ## 源码依据
 
-核验日期 2026-10-28：[命令与行内赋值](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [运行时](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/runtime.ts) · [抖音构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/config/build-targets.mjs) · [环境示例](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/.env.example) · [生产包装脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/build_mp-weixin-cloud-production.sh) · [抖音生产脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/scripts/build_mp-toutiao-cloud-production.sh)。
+核验日期 2026-11-10：[命令与行内赋值](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [运行时](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/runtime.ts) · [抖音构建档](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/config/build-targets.mjs) · [环境示例](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/.env.example) · [生产包装脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/build_mp-weixin-cloud-production.sh) · [抖音生产脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/scripts/build_mp-toutiao-cloud-production.sh)。

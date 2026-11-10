@@ -170,7 +170,7 @@ Continue with [Frontend getting started](/frontend/getting-started), [Projects](
 
 ## Verify the new persistence boundary
 
-Use the original image exercise in **AI设计 → AI轻盈设计 → 室内设计**. Do not choose the professional floor-plan candidate as the first backend-main acceptance task. Record the actual submit endpoint: the current image UI can use the supported adapter even though new API examples use Workflows.
+Keep the first exercise on an ordinary interior-image Feature. Professional floor plans are implemented, but additionally require a published SDK/H5 release and supplier credentials; use their [separate setup](/backend/floor-plans). Record the actual endpoint: existing image UI can use the supported adapter, while new API examples use Workflows.
 
 After a successful owned-input task, have the local database operator inspect these **read-only** records in that same stack (replace the UUID with the upload Asset ID):
 
@@ -185,4 +185,4 @@ Expected: the accepted owned input is ACTIVE with no expiry; the COMPLETED archi
 
 ## Source evidence
 
-Frontend `3662578`, backend `e59716c` (2026-10-28): [Build commands](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [Session storage](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/stores/session.ts) · [Local launcher](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/create_stack.sh) · [Port derivation](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/scripts/stack_ports.py) · [Mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing_api.py).
+Frontend `88c75c1f`, backend `749e82df` (2026-11-10): [Build commands](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [Session storage](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/stores/session.ts) · [Local launcher](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/create_stack.sh) · [Port derivation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/stack_ports.py) · [Mock settlement](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py).

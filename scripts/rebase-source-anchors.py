@@ -105,4 +105,4 @@ def map_file(item):
 
 
 if __name__ == '__main__':
-    print(json.dumps([mapped for item in json.load(sys.stdin)['files'] for mapped in map_file(item)], ensure_ascii=False))
+    print(json.dumps([mapped for item in json.loads(sys.stdin.buffer.read())['files'] for mapped in map_file(item)], ensure_ascii=True))

@@ -48,13 +48,13 @@ API 构建仍调用原生微信支付桥；`VITE_PAYMENT_MODE=mock` 不会把它
 
 | 现象 | 先查什么 |
 | --- | --- |
-| 有专业户型入口却没有 API | [分支对齐差异](/zh/reference/integration-status)，候选夹具不等于服务端 main |
+| 专业户型入口无法打开 | 检查部署源码版本、SDK 配置／release、供应商凭据和可信 H5 origin；[源码支持](/zh/reference/integration-status)不证明环境就绪 |
 | 上传完成但提交拒绝 | [归档／激活边界](/zh/reference/flows/asset-upload-flow)，仍检查钱包、权益、成员额度 |
 | 企业有积分但成员不能提交 | [月额度](/zh/reference/flows/member-quota-flow)，企业余额不足优先于成员上限错误 |
-| owner 可读成员任务却无输入／编辑按钮 | 有意的[只读投影](/zh/reference/flows/workflow-history-flow)，不是编辑器损坏 |
+| owner 可读成员任务却不能编辑 | 授权详情可能显示输入，集合可能隐藏；检查[当前责任与动作权限](/zh/reference/flows/workflow-history-flow) |
 | 同款模板保存成功但不能执行 | [提示词运行时校验](/zh/admin/prompts)，保存不证明脚本有效或模型配置成功 |
 | 性能报告不完整／无法比较 | [覆盖与样本门槛](/zh/admin/performance)，不表示零耗时 |
 
 ## 源码依据
 
-核对版本：前端 `3662578`、后端 `e59716c`（2026-10-28）。[构建命令](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json) · [运行模式](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/repositories/runtime.ts) · [本地模拟结算](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/billing/billing_api.py)。
+核对版本：前端 `88c75c1f`、后端 `749e82df`（2026-11-10）。[构建命令](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [运行模式](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/runtime.ts) · [本地模拟结算](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py)。

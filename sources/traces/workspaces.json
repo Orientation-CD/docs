@@ -698,8 +698,8 @@
         "symbol": "set_default_project"
       },
       {
-        "path": "app/workspaces/project_api.py",
-        "symbol": "_owned_project"
+        "path": "app/workspaces/project_jobs.py",
+        "symbol": "require_assignee_project"
       }
     ],
     "frontend": [
@@ -996,10 +996,15 @@
         "symbol": "enterprise_member_token_usage"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/repositories/memberTokenQuota.ts",
+        "symbol": "readMyMemberTokenQuota"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration/script entry; this pinned mini-program has no caller for the member quota API.",
-      "zh": "入口为已认证的集成客户端或脚本；该固定版本的小程序尚无成员额度接口调用者。"
+      "en": "Member self-quota refresh.",
+      "zh": "成员本人额度刷新。"
     }
   },
   {
@@ -1017,10 +1022,15 @@
         "symbol": "set_enterprise_member_token_limit"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/repositories/memberTokenQuota.ts",
+        "symbol": "saveMemberTokenLimit"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration/script entry; this pinned mini-program has no caller for the member quota API.",
-      "zh": "入口为已认证的集成客户端或脚本；该固定版本的小程序尚无成员额度接口调用者。"
+      "en": "Owner member-management global or individual quota Save.",
+      "zh": "所有者成员管理中保存全局或单人额度。"
     }
   },
   {
@@ -1038,10 +1048,15 @@
         "symbol": "set_member_token_limit"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/repositories/memberTokenQuota.ts",
+        "symbol": "saveMemberTokenLimit"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration/script entry; this pinned mini-program has no caller for the member quota API.",
-      "zh": "入口为已认证的集成客户端或脚本；该固定版本的小程序尚无成员额度接口调用者。"
+      "en": "Owner member-management global or individual quota Save.",
+      "zh": "所有者成员管理中保存全局或单人额度。"
     }
   }
 ]

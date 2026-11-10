@@ -1,62 +1,44 @@
-# Frontend Overview
+# Frontend overview
 
-The audited frontend is `ui-integration@3662578`; the backend is `main@e59716c8`. This guide describes those source versions, with full commit pins in [Source versions](/reference/source-revisions). A frontend screen or committed API fixture does not establish that the audited backend implements its contract.
+The uni-app application builds WeChat and Douyin mini programs from Vue 3 and TypeScript. Use **Node 22 and pnpm 9.15.9** for this application; the documentation repository has its own pnpm version. Vue modules own session/theme state; the application does not depend on Pinia or uView.
 
-The mini program uses uni-app, Vue 3 and TypeScript, with project-owned shared components and native uni-app controls. Its toolchain is **Node 22 and pnpm 9.15.9**. Shared session/theme modules use Vue state; there is no Pinia dependency. Build settings choose real APIs, frontend Mock, platform adapters and project capabilities before the package is produced.
-
-## Find a feature from the actual navigation
+## Start from a visible action
 
 ```mermaid
 flowchart TB
   H[Home] --> D[AI design]
-  D --> L[Lightweight design]
-  D --> P[Professional design]
-  L --> I[Interior / furniture / colored floor plan]
-  L --> R[Recording summary / customized design / report]
-  L --> O[Old-house renovation]
-  O --> K[Local / kitchen / bathroom]
-  P --> F[Floor-plan editor and Works]
-  H --> C[AI creation]
-  C --> V[AI video]
-  C --> T[AI copywriting]
-  A[Profile] --> Q[AI Q&A]
+  D --> L[Light design and inline renovation]
+  D --> P[Professional floor-plan editor]
+  H --> C[AI creation: video and copywriting]
+  H --> R[Recent features and quick entries]
+  H --> I[Inspiration and discovery H5]
+  A[Account] --> Q[AI Q and A / membership]
+  W[Projects] --> M[Members / quota / assignment / stages]
 ```
 
-Home also has a hero carousel, shortcut strip, quick actions and store cards. `homeEntries.ts` supplies presentation metadata; `featureGroups.ts` supplies the membership tree and breadcrumbs. `useFeatureLauncher` intersects the displayed entries with discovery and eligibility. A visible card, a displayed price and permission to submit are different facts.
+`featureGroups.ts` defines design/creation membership and breadcrumbs. Voice summaries and reports are quick/recent entries, outside the light-design membership tree. `useFeatureLauncher` checks discovery and entitlement; a card being visible does not grant execution. Recent features retain a bounded 30-day local history, rank by frequency then recency and show up to three entries; they are not server project activity.
 
-**Professional floor plans require separate integration attention:** this frontend contains their screens and repositories, but the audited backend `main` has no corresponding routes. Read [Floor-plan integration boundaries](/frontend/floor-plans) before trying that path. It is independent of the existing colored-floor-plan image feature.
+Professional design now has matching backend implementation. Start with [the floor-plan client](/frontend/floor-plans), then follow the H5 gateway and SDK execution. The colored-floor-plan image Feature is a separate standard image action. Inspiration/creation H5 entries use scoped server-prepared URLs rather than opening arbitrary supplier pages.
 
-| Product | Start reading here | Result or boundary |
-| --- | --- | --- |
-| Standard images and renovations | `pkg-features/components/StandardFeaturePage.vue` | Image task, role-based uploads and prompt selections |
-| Furniture and customized design | Their pages plus `*DesignSubmit.ts` services | Mask/reference material or editable template fields |
-| Recording summary | `pages/voice_summary` and `voiceSummarySubmit.ts` | Markdown and original recordings |
-| AI video | `pages/video_generation` and `videoGenerationSubmit.ts` | Script, system same-style or uploaded-reference same-style |
-| Copywriting and AI Q&A | `services/copywriting.ts`, `copywritingSubmit.ts` | Eight distinct text-only Workflow products |
-| Design report | `reportBlueprint.ts`, `workflowSubmission.ts` | Blueprint-driven HTML and supported PPTX outputs |
-| Professional floor plans | `useFloorPlanAvailability`, `floorPlanRepository` | Implemented frontend; audited backend integration absent |
+## Code map
 
-## Main package, subpackages and shared modules
+| Source area | First question |
+| --- | --- |
+| `src/pages` | Which Home, Plans, Projects or Account event triggered navigation? |
+| `src/pkg-features` | How are image/voice/video inputs staged and the action body frozen? |
+| `src/pkg-features/pages/floor_plan_editor` and `floor_plan_works` | Which original H5/editor handoff or native Works page is opened? |
+| `src/pkg-plans` | How do image, audio/Markdown, video, report and panorama results refresh? |
+| `src/pkg-projects` | Who is the current assignee, and which member/quota/stage operation is permitted? |
+| `src/pkg-account` | Which authenticated membership, invitation, order or legal action occurs? |
+| `src/repositories`, `src/api/dto` | Which endpoint is sent and which runtime response shape is accepted? |
+| `src/services`, `src/stores` | Which session, scope, uncertain-action or deletion guard must survive navigation? |
 
-| Location | Responsibility | Typical first question |
-| --- | --- | --- |
-| `src/pages` | Startup, Home, Contact, Projects, Plans, Profile and diagnostics | Which button opens the next page? |
-| `src/pkg-features` | Forms, feature-specific upload/submission orchestration | What becomes the request body? |
-| `src/pkg-plans` | Image, Markdown/audio, video, report and panorama viewers | How is progress refreshed and output rendered? |
-| `src/pkg-projects` | Project editor, current-member read-only view and activity | Whose workspace/project is being read? |
-| `src/pkg-account` | Login, legal consent, orders, subscription, organization and drafts | Which account action grants or confirms access? |
-| `src/repositories`, `src/api/dto` | Requests and runtime response validation | Which endpoint is called, and what JSON is accepted? |
-| `src/services`, `src/stores`, `src/domain` | Orchestration, credentials/theme, shared guards and pure rules | Which state must survive, expire or be invalidated? |
-| `config`, `scripts`, `tests` | Build profiles, generated assets, contracts and artifact gates | What does the actual target package contain? |
+Source folders and emitted packages differ: `vite.config.ts` generates virtual floor-plan/professional-design component/service sources, while the WeChat build merges their pages into the feature subpackage to preserve package headroom. Inspect the target artifact and [package gates](/frontend/testing), rather than assuming each emitted package is a source directory. `VITE_ENABLE_PRIVATE_PROJECTS` selects the project implementation at build time; development wrappers have their own explicit assignments.
 
-`VITE_ENABLE_PRIVATE_PROJECTS=true` compiles the Project tab, project subpackage and related implementations. Otherwise the tab is absent, with Home, Contact, Plans and Profile remaining. The explicit WeChat Mock build forces projects off; other commands have their own assignments. See [Build modes](/frontend/data-source-modes).
+## Follow one complete task
 
-## Read one complete action
+For an interior image, follow the form into `standardDesignSubmit.ts`, role-bound uploads and `submitDesignJob`. The current wrapper sends `POST /v1/design-jobs`; the backend adapts it into the unified runtime. Keep the action key/body, workspace/project and accepted Job ID through polling and result reads. New integrations use canonical [Workflows](/backend/workflows).
 
-Start with an interior-image action. Follow the page's submit handler into `standardDesignSubmit.ts`, then `stageDesignImages`, then `submitDesignJob` and the request client. Keep the logical action key, accepted Job ID, workspace and project visible while following the result page. The frontend currently sends that action through `POST /v1/design-jobs`; the backend adapts it into its unified execution engine. New API integrations should use the canonical [Workflow contract](/backend/workflows).
+Enterprise read-only detail can expose authorized inputs while denying mutation. The response's permissions and current assignment are authoritative. A deleting result is a placeholder with media cleared; a stale response must not restore the old preview. See [history](/reference/flows/workflow-history-flow) and [projects](/frontend/projects).
 
-The [architecture guide](/frontend/architecture) explains shared boundaries. [Workflows](/frontend/workflows) records the actual payload families and video modes. [Projects](/frontend/projects) explains member dashboards and read-only access. The [full-chain reference](/reference/system-walkthrough) continues from frontend requests into database, object storage, queues and workers.
-
-## Source evidence
-
-Verified 2026-10-28: [Navigation tree](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/services/featureGroups.ts#L23) · [Home composition](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages/home/index.vue) · [Page registration](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pages.json) · [Actual submit transport](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/src/pkg-features/repositories/designJobSubmit.ts#L182) · [Toolchain](https://github.com/Orientation-CD/wechat_mini_program/blob/3662578b384fd5b0fbe7509229b2a08a6fe44ab9/package.json).
+Sources: [src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [src/services/recentFeatures.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/recentFeatures.ts) · [src/services/jobDeletionState.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/jobDeletionState.ts) · [src/pages.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pages.json) · [package.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)

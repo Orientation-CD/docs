@@ -1,6 +1,6 @@
 # OpenAPI and Contract Boundaries
 
-Use the running backend's `/openapi.json` for machine-readable transport schemas and `/docs` for Swagger UI. The pinned [REST client contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md) defines domain errors and retry semantics. These sources serve different purposes.
+Use the running backend's `/openapi.json` for machine-readable transport schemas and `/docs` for Swagger UI. The pinned [REST client contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md) defines domain errors and retry semantics. These sources serve different purposes.
 
 ## Read a schema from the selected environment
 
@@ -47,15 +47,17 @@ Compatibility paths are not proof that retired request fields remain accepted. S
 
 Generate a client from a saved, revision-identified schema with your team's pinned generator. Keep its output separate from handwritten domain/repository logic. Check discriminated unions, nullable values, endpoint-specific statuses (Asset/voice-session creation `201` new versus `200` replay; Workflow submission `202` for both), capability URLs and multipart **POST** storage forms manually. Schema generation cannot implement consent UX, entitlement handling, safe paid retries or platform payment bridges for you.
 
-## A candidate fixture is not this backend main
+## Historical fixtures and current SDK boundaries
 
-The frontend contains captured floor-plan schemas from candidate source branches. This audited backend main exposes no dedicated floor-plan routes. [Integration status](/reference/integration-status) and [floor-plan source reading](/frontend/floor-plans) identify the gap; those client contracts are deliberately excluded from the main public-route inventory. Only the explicitly scoped candidate guide may reference their recorded method/path set. Do not generate a main client from a merged collection of incompatible schemas.
+This backend main implements floor-plan/Works/panorama, ThreeVjia image and discovery routes. They belong in the main API inventory with endpoint traces. Old candidate fixtures retain their original source identity and do not override current implementation. Generate clients from this pinned revision or the intended deployment schema; see [integration status](/reference/integration-status) and [floor plans](/reference/flows/floor-plan-flow).
+
+The gateway declares nine methods without permitting every supplier operation under each. It restricts service origins, current configuration/release and identity scope, while intercepting or rejecting known paid, historical and managed operations. Remaining ordinary paths are not a complete per-path allowlist. Read [gateway behavior](/reference/flows/floor-plan-flow) for forwarding and failure boundaries.
 
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions).
 
-- [Normative REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/REST_API_INTERFACE.md)
-- [Application router registration](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/main.py)
-- [Public schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/core/models.py)
-- [Conditional mock interfaces](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/MOCK_API_INTERFACE.md)
+- [Normative REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md)
+- [Application router registration](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py)
+- [Public schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)
+- [Conditional mock interfaces](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/MOCK_API_INTERFACE.md)

@@ -45,8 +45,14 @@ python -m app.assets.input_asset_repair --job-id <job-uuid> --asset-id <asset-uu
 
 ## 存储部署边界
 
-`S3_ENDPOINT` 是服务端地址，`S3_PRESIGN_ENDPOINT` 必须能从手机/浏览器访问。MinIO使用`s3v4`，已核验OSS兼容路径使用`s3`。除明确发布的法律正文外，bucket保持私有。版本管理、CORS、HEAD/GET/copy/delete权限及版本保留必须支持完整归档生命周期，不能只验证直接上传成功。
+`S3_ENDPOINT` 是服务端地址，`S3_PRESIGN_ENDPOINT` 必须能从手机/浏览器访问。MinIO使用`s3v4`，已核验OSS兼容路径使用`s3`。业务对象保持私有，法律正文与自有 H5 文件分别按明确范围发布。版本管理、CORS、HEAD/GET/copy/delete权限及版本保留必须支持完整归档生命周期，不能只验证直接上传成功。
+
+## H5 发布文件与存储诊断
+
+业务 Asset 输入／结果保持私有。自有三维家 H5 发布使用同一个 ObjectStorage 配置桶中的明确 `3vjia/h5/` 前缀，并要求公共根地址／CDN 对齐。带版本发布文件保持不可变缓存，稳定 bootstrap／index／catalog 使用显式 `no-cache` 覆盖。这是自有应用文件发布，不是公开业务 Asset。退役仅删除已核验清单中的键和版本，见[部署](/zh/deploy/sae-deployment)。
+
+[_log_storage_failure](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/storage.py) 新增受限 `object_storage_failure` 记录，包含请求 ID、操作、原因、白名单错误码／状态及异常类型链，不记录原始 SDK 正文、对象键、签名 URL 或凭据。用请求关联区分签名、精确版本读取／复制和删除故障，不要通过放松版本校验让上传通过。
 
 ---
 
-源码依据 · backend `e59716c8`: [app/assets/asset_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_api.py) · [app/assets/asset_completion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_completion.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/app/assets/asset_input_archival.py) · [documents/ASSET_STORAGE_OPERATIONS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/e59716c83e087deda8477da5ea7b327a40cf65c5/documents/ASSET_STORAGE_OPERATIONS.md).
+源码依据 · backend `749e82df`: [app/assets/asset_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_api.py) · [app/assets/asset_completion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_completion.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py) · [documents/ASSET_STORAGE_OPERATIONS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/ASSET_STORAGE_OPERATIONS.md).
