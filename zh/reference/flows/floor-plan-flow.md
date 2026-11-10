@@ -76,56 +76,51 @@
 
 源码阅读：[upload](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L794) · [authenticate_editor_context](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/works.py#L90)。
 
+## 网关共用授权与传输边界 {#gateway-boundary}
+
+下方九种方法声明都进入同一个 `relay` 边界。先按顺序阅读共用检查，再看各方法的具体行为。这里固定的是**契约服务及其来源**，有意允许该服务内未知的普通供应商路径，并不是完整的逐路径允许列表。
+
+| 步骤 | 源码 | 进入下一步前必须成立的事实 |
+| --- | --- | --- |
+| 1. 核验范围 | [authenticate_editor_context](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/works.py#L90) | 确认当前平台身份、空间／项目权限及 SDK 配置／代次。 |
+| 2. 选择精确契约 | [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24) | 绑定 SDK 配置与 `X-Editor-Version`；请求保留发布版时，该版仍须可用。`target` 只能解析到该契约中的服务来源。 |
+| 3. 保护资源边界 | [relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) | 核对字面 raw-path 前缀，阻止跨发布版已知 render／history 签名及方法不匹配的管理请求；识别到的保存／更新／删除保留作品／写入栅栏，其他普通路径／查询字节保持原样。 |
+| 4. 交换受限回执 | [ThreeVjiaSDK.forward](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/sdk.py#L276) | 网关过滤／替换凭据，将别名／cookie 与范围绑定并隐藏响应秘密。传输限制在所选服务内、不跟随重定向，限制响应字节／头，并返回 `no-store`。 |
+
+错误区分路径禁止、认证缓存缺失、配置不可用与上游故障。认证／缓存读取失败不能证明先前远程写入未被接受。重试写入前，沿[后端模型](/zh/backend/floor-plans)的编号保存／渲染链阅读；方法声明不等于所有供应商操作均被授权。
+
 ## GET 进入 H5 网关 {#gateway-get}
 
-`GET /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。读取普通供应商资源；SDK 对未映射 GET 按只读请求判断不确定响应，不创建本地付费预留。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`GET /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。读取普通供应商资源；SDK 对未映射 GET 按只读请求判断不确定响应，不创建本地付费预留。 解读回执时先应用[网关共用检查](#gateway-boundary)。
 
 ## POST 进入 H5 网关 {#gateway-post}
 
-`POST /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。既承载原 H5 保存／更新兼容，也转发普通供应商 POST。分组保存由 prepare_group_save／finish_group_save 观察登记，删除转为持久声明；付费 render 签名被拒绝，必须走 Workflow。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`POST /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。既承载原 H5 保存／更新兼容，也转发普通供应商 POST。分组保存由 prepare_group_save／finish_group_save 观察登记，删除转为持久声明；付费 render 签名被拒绝，必须走 Workflow。 解读回执时先应用[网关共用检查](#gateway-boundary)。
 
 ## PUT 进入 H5 网关 {#gateway-put}
 
-`PUT /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。携带 body 的供应商 PUT 不归为只读；已识别管理操作必须匹配契约方法并保留作品／写栅栏，模糊回执不能成为重发依据。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`PUT /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。携带 body 的供应商 PUT 不归为只读；已识别管理操作必须匹配契约方法并保留作品／写栅栏，模糊回执不能成为重发依据。 解读回执时先应用[网关共用检查](#gateway-boundary)。
 
 ## PATCH 进入 H5 网关 {#gateway-patch}
 
-`PATCH /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。普通 PATCH 保留供应商 body 字节；已知管理目标从实际供应商 payload 提取并与平台作品范围对照，不能信任客户端分组标签。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`PATCH /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。普通 PATCH 保留供应商 body 字节；已知管理目标从实际供应商 payload 提取并与平台作品范围对照，不能信任客户端分组标签。 解读回执时先应用[网关共用检查](#gateway-boundary)。
 
 ## DELETE 进入 H5 网关 {#gateway-delete}
 
-`DELETE /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。通用 DELETE 声明不能绕过作品归属和清理；识别为分组删除时进入相同持久声明／恢复分支，终态204和受理202的含义不同。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`DELETE /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。通用 DELETE 声明不能绕过作品归属和清理；识别为分组删除时进入相同持久声明／恢复分支，终态204和受理202的含义不同。 解读回执时先应用[网关共用检查](#gateway-boundary)。
 
 ## HEAD 进入 H5 网关 {#gateway-head}
 
-`HEAD /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。在同一范围边界读取资源头；SDK 对未映射 HEAD 按只读判断，它不是权限或可用性检查的捷径。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`HEAD /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。在同一范围边界读取资源头；SDK 对未映射 HEAD 按只读判断，它不是权限或可用性检查的捷径。 解读回执时先应用[网关共用检查](#gateway-boundary)。
 
 ## OPTIONS 进入 H5 网关 {#gateway-options}
 
-`OPTIONS /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。携带平台认证转发普通供应商 OPTIONS，与浏览器 CORS 中间件不是同一机制；未映射传输按只读判断。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`OPTIONS /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。携带平台认证转发普通供应商 OPTIONS，与浏览器 CORS 中间件不是同一机制；未映射传输按只读判断。 解读回执时先应用[网关共用检查](#gateway-boundary)。
 
 ## TRACE 进入 H5 网关 {#gateway-trace}
 
-`TRACE /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。兼容路由声明 TRACE 并进入 relay，当前原生 repository 不调用它。它不是额外诊断权限或任意回显 API，仍受所选服务、凭据过滤、body 限制和拦截约束；SDK 对未映射 TRACE 按非只读判断。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`TRACE /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。兼容路由声明 TRACE 并进入 relay，当前原生 repository 不调用它。它不是额外诊断权限或任意回显 API，仍受所选服务、凭据过滤、body 限制和拦截约束；SDK 对未映射 TRACE 按非只读判断。 解读回执时先应用[网关共用检查](#gateway-boundary)。
 
 ## CONNECT 进入 H5 网关 {#gateway-connect}
 
-`CONNECT /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。CONNECT 是声明的兼容方法，不是平台隧道服务。relay 仍对所选契约服务进行普通受限 HTTP 交换，此处没有独立隧道生命周期；SDK 对未映射 CONNECT 按非只读判断。 `selected_contract` 绑定 X-Editor-Version 与 SDK 配置。替换凭据之前检查平台认证、空间／项目范围、字面 raw-path 边界和精确服务来源。所选服务中未知普通路径有意保留，而跨发布版已知 render／history 和方法不匹配的管理操作被阻止。auth 别名／cookie 与范围绑定，响应字节／头受限并隐藏凭据，使用 no-store。错误区分路径禁止、认证缓存缺失、配置和上游故障。重试写入前先读[后端模型](/zh/backend/floor-plans)中的共用保存／渲染图。
-
-源码阅读：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+`CONNECT /v1/floor-plan-editor/gateway/{target}/{path:path}` 进入 `relay`。CONNECT 是声明的兼容方法，不是平台隧道服务。relay 仍对所选契约服务进行普通受限 HTTP 交换，此处没有独立隧道生命周期；SDK 对未映射 CONNECT 按非只读判断。 解读回执时先应用[网关共用检查](#gateway-boundary)。

@@ -32,6 +32,39 @@ def literal(node, constants=None):
     raise ValueError('nonliteral')
 
 
+def route_constants_before(tree, registration):
+    """Resolve direct module bindings before a registration, without executing code."""
+    constants = {}
+    for statement in tree.body:
+        if (statement.end_lineno, statement.end_col_offset) > (registration.lineno, registration.col_offset):
+            break
+        if isinstance(statement, (ast.Assign, ast.AnnAssign)):
+            if statement.value is None:  # A bare annotation does not rebind a value.
+                continue
+            targets = statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+            try:
+                value = literal(statement.value, constants)
+            except (ValueError, TypeError):
+                value = None
+                resolved = False
+            else:
+                resolved = True
+            for target in targets:
+                if isinstance(target, ast.Name) and resolved:
+                    constants[target.id] = value
+                else:
+                    for name in ast.walk(target):
+                        if isinstance(name, ast.Name):
+                            constants.pop(name.id, None)
+        elif isinstance(statement, (ast.AugAssign, ast.Delete)):
+            targets = statement.targets if isinstance(statement, ast.Delete) else [statement.target]
+            for target in targets:
+                for name in ast.walk(target):
+                    if isinstance(name, ast.Name):
+                        constants.pop(name.id, None)
+    return constants
+
+
 for path, source in sorted(files.items()):
     if not path.endswith('.py'):
         continue
@@ -56,17 +89,7 @@ for path, source in sorted(files.items()):
             symbols.append({'source': path, 'symbol': name, 'qualifiedSymbol': '.'.join(qualified),
                             'line': node.lineno, 'startLine': start, 'endLine': node.end_lineno})
     prefixes = {}
-    route_constants = {}
     for node in tree.body:
-        if isinstance(node, (ast.Assign, ast.AnnAssign)):
-            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-            try:
-                value = literal(node.value, route_constants)
-                for target in targets:
-                    if isinstance(target, ast.Name):
-                        route_constants[target.id] = value
-            except (ValueError, TypeError):
-                pass
         if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'APIRouter':
             prefix = next((k.value.value for k in node.value.keywords if k.arg == 'prefix' and isinstance(k.value, ast.Constant)), '')
             for target in node.targets:
@@ -85,10 +108,13 @@ for path, source in sorted(files.items()):
         methods = [method.upper()]
         if method == 'api_route':
             try:
-                methods = literal(kwargs['methods'], route_constants) if 'methods' in kwargs else ['GET']
+                methods = literal(kwargs['methods'], route_constants_before(tree, node)) if 'methods' in kwargs else ['GET']
             except (ValueError, TypeError) as exc:
                 raise ValueError(f'{path}:{node.lineno}: public api_route methods must be statically resolvable') from exc
-            if not isinstance(methods, (list, tuple)) or not methods or any(item not in {'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT'} for item in methods):
+            if not isinstance(methods, (list, tuple)) or not methods or any(not isinstance(item, str) for item in methods):
+                raise ValueError(f'{path}:{node.lineno}: invalid public api_route methods')
+            methods = [item.upper() for item in methods]
+            if any(item not in {'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT'} for item in methods):
                 raise ValueError(f'{path}:{node.lineno}: invalid public api_route methods')
         code = ast.unparse(kwargs['status_code']) if 'status_code' in kwargs else '200'
         code = re.search(r'HTTP_(\d+)', code).group(1) if re.search(r'HTTP_(\d+)', code) else code

@@ -72,17 +72,19 @@ const settings = settingsWithExamples(facts.settings, backendExamples)
 const frontendScripts = JSON.parse(repos.frontend.files['package.json']).scripts
 const frontendEnv = [...new Set(['src/env.d.ts', '.env.example', 'config/build-targets.mjs'].map(name => repos.frontend.files[name]).flatMap((text) => text.match(/\bVITE_[A-Z0-9_]+\b/g) || []))].sort()
 const candidateApi = new Map()
+const promotedOperations = new Set()
 for (const file of candidateContractFiles) {
   const source = repos.frontend.files[file]
   if (!source) throw new Error(`Missing frontend candidate contract ${file}`)
   const contract = JSON.parse(source)
   const evidence = { path: file, commit: repos.frontend.commit, sha256: createHash('sha256').update(source).digest('hex') }
-  for (const entry of frontendOnlyCandidateOperations(contract, facts.api)) {
+  for (const entry of frontendOnlyCandidateOperations(contract, facts.api, { onPromoted: row => promotedOperations.add(traceKey(row)) })) {
     const row = candidateApi.get(traceKey(entry)) || { ...entry, status: 'frontend-candidate-only', sources: [] }
     row.sources.push(evidence)
     candidateApi.set(traceKey(entry), row)
   }
 }
+if (promotedOperations.size) console.warn(`Warning: frontend fixture operations are implemented by the pinned backend and excluded from candidate scope. Review their prose and main-API traces:\n${[...promotedOperations].sort().map(key => `  ${key}`).join('\n')}`)
 const snapshot = {
   schemaVersion: 1,
   commits: Object.fromEntries(Object.entries(repos).map(([key, value]) => [key, value.commit])),

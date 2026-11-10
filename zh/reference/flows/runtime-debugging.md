@@ -132,8 +132,9 @@ flowchart LR
 | --- | --- |
 | Network 没有请求 | 是否选择前端 Mock？表单/account/权益校验是否在 repository HTTP 前就阻止？ |
 | HTTP 401 或同意错误 | 沿[身份链](/zh/reference/flows/wechat-login-flow)：refresh 是否轮换、同意是否当前、会话是否改变？ |
-| 存储上传成功，但提交不接受输入 | 沿[完成验证](/zh/reference/flows/asset-upload-flow)：是否真的 READY，角色/version 是否一致？ |
+| 存储上传成功，但提交不接受输入 | 沿[完成验证](/zh/reference/flows/asset-upload-flow)：是否已 READY 且角色／version 一致，归档回执是否有证据，最终 ACTIVE／归属受理是否已提交？ |
 | POST 202、Job pending、outbox 未处理 | [app/workflows/submissions/workflow_submission_dispatch.py → dispatch_workflow_submission_outbox](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_submission_dispatch.py#L1396)：确定消息是否入队/确认？ |
+| 402 成员额度不足，但企业余额充足 | 沿[额度链路](/zh/reference/flows/member-quota-flow)：比较 `used + required`，而不是 `used + reserved + required`；保留当前记账月份和原始 key。 |
 | 故障后无可执行消息 | [app/worker.py → reconcile_workflow_submissions](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/worker.py#L561)：Poll worker 是否带 `recover=True` 运行恢复？ |
 | Submission DISPATCHING、请求数大于零、无 provider ID | [供应商不确定分支](/zh/reference/flows/design-job-lifecycle#uncertain-provider)：无 ID 不证明没收费 |
 | child 完成、根仍 running | [报告依赖关联](/zh/reference/flows/report-view-flow#report-graph)和 finalizer：sibling/export/input/output 是否仍未证实？ |
