@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "verifiedAt": "2026-11-10",
-  "docsBaseCommit": "d98a81732946899663b97ad3356be23504350c94",
+  "verifiedAt": "2026-11-14",
+  "docsBaseCommit": "22aba432176cbcea3861e5ca0b036377e1a862da",
   "repositories": {
     "frontend": {
       "repository": "Orientation-CD/wechat_mini_program",
       "branch": "ui-integration",
-      "commit": "88c75c1f15cd65f45c7fb09d560df80430ddc198",
+      "commit": "7f1a3169338c10bd4139c24318f7a35caf86310c",
       "authorities": [
         {
           "path": "package.json",
@@ -30,7 +30,7 @@
         },
         {
           "path": "src/styles/design-tokens.json",
-          "sha256": "68deeff5dd0d048217ad7855bc753325bbc8be0e98bf33cafaa71dbc37b9ced7"
+          "sha256": "440086e9a8a0fd16b8db4f3d61e1011fb8bf05c0bbc3d323233876566faee28f"
         },
         {
           "path": "src/styles/themes/minimal.json",
@@ -69,7 +69,7 @@
     "backend": {
       "repository": "Orientation-CD/YuanZhu-AI",
       "branch": "main",
-      "commit": "749e82df3a51c441335ba6a4db607a98bacbcf97",
+      "commit": "f34b8a4d6307c83c6f7bbc905485a4f586d59a99",
       "authorities": [
         {
           "path": "app/api/__init__.py",
@@ -77,7 +77,7 @@
         },
         {
           "path": "app/core/models.py",
-          "sha256": "9fef423c3ac61f3f7aae8484f98ba618b8434b7b5639d21e905174d9c8f56875"
+          "sha256": "09cfc1ab5726f15b9b02ae90dac01bb796de203b3eb197acf2b92ea1dfd9ae9b"
         },
         {
           "path": "app/core/config.py",
@@ -85,11 +85,11 @@
         },
         {
           "path": "app/persistence/db_models.py",
-          "sha256": "3770807435929892dfb456894744abc03b5ee1c2418666fbe50897423287f546"
+          "sha256": "58e4a7b31729ea4ecc3a9ec354f6c2b8738eddc3cbaf5b7f89ddd1a5ea6fcf8c"
         },
         {
           "path": "app/workflows/workflow_admission.py",
-          "sha256": "e613a4400e0f59b638c299dd6b81d132ca0dd69d3d3011d3f2b6c8dbff54f4b6"
+          "sha256": "c9bed87dfbaa4d492bda12b532701e6585c829ea4e7d47cdfe1179ee375c6c7e"
         },
         {
           "path": "app/assets/asset_input_archival.py",
@@ -129,11 +129,11 @@
         },
         {
           "path": "app/billing/video_pricing.py",
-          "sha256": "621b4dbc56604e0b527f923111f0ea451b97a87f65dd28703fe57ccddd5686ad"
+          "sha256": "85ac6ff8fc10b020b8c391526da23f637997fff3099ed542eba899dfd2e4dfd0"
         },
         {
           "path": "documents/REST_API_INTERFACE.md",
-          "sha256": "04b5396628d1f1d45d1e0de9a249ffca9852242cb82a0fc0912f3292db99bdbb"
+          "sha256": "a3a9f851edaffc9f3bb939598f3b779424602bf6a8d6a28bf3491af17393e2e4"
         },
         {
           "path": "documents/ASSET_STORAGE_OPERATIONS.md",

@@ -46,22 +46,24 @@ sequenceDiagram
   API-->>UI: VIDEO类型输出与新签名URL
 ```
 
-先读[`_build_render_request`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_local_video_submission.py#L587)，再读[`build_config`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/conversion/video_jinqiu_adapter.py#L237)。存在参考视频时进入`_remake_config`，script_path保持空；否则`_script_config`读取暂存脚本和映射。输出是核验后的`video/mp4` Asset，不是任意供应商URL。
+先读[`_build_render_request`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/submissions/workflow_local_video_submission.py#L617)，再读[`build_config`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/conversion/video_jinqiu_adapter.py#L237)。存在参考视频时进入`_remake_config`，script_path保持空；否则`_script_config`读取暂存脚本和映射。输出是核验后的`video/mp4` Asset，不是任意供应商URL。
 
 ## 模型、恢复与证据边界
 
-`VIDEO_MODEL_SELECTION_ENABLED`控制是否提供/透传模型选择，关闭时默认`Doubao-Seedance-2.0-mini`。应发现支持模型和价格，不能硬编码供应商积分表。平台Token与真实供应商消费是两回事。
+启用 `VIDEO_MODEL_SELECTION_ENABLED` 后，计费目录列出每个模型可售分辨率及单价。关闭时有效组合固定为 `Doubao-Seedance-2.0-mini / 480p`。供应商能否执行所售组合需要用目标镜像验证。
 
 渲染有有界租约、总时长/阶段预算、spool及上传限制，可以运行数小时。API健康不证明供应商容量。失败本地视频渲染为终态，不自动重新生成；人工付费重跑由支持流程决定，过时代次不能覆盖新代次。发布证据记录镜像内私有供应商版本，并区分模拟测试与仍待真实供应商/长时运行验证的边界。[产品全链路](/zh/reference/flows/workflow-products-flow#video-branch)提供错误码和代码导航。
 
 ## 费用预览与已接纳计费事实
 
-当前视频表单先请求并确认 `POST /v1/video-billing/preview` 再提交。视频按所选模型持久化单价与模式规则计算费用，不能用单一 Feature 固定价代替。参考视频必须有 15–120 秒实测时长；剧本按秒模式使用 UTF-16 长度，按次模式使用配置的固定秒数。个人折扣只应用一次，并保留共享的 10 积分最低收费。
+当前视频表单先请求并确认 `POST /v1/video-billing/preview` 再提交。视频按所选模型与分辨率的持久化单价与模式规则计算费用，不能用单一 Feature 固定价代替。参考视频必须有 15–120 秒实测时长；剧本按秒模式使用 UTF-16 长度，按次模式使用配置的固定秒数。个人折扣只应用一次，并保留共享的 10 积分最低收费。
 
-准入在预留前重新计算，费用/模型确认值变化返回 `VIDEO_PRICE_CHANGED`。成功后冻结 `video_time_v1` 的来源身份、模型、配置和价格；已接纳重放及符合条件的显式重试沿用这些事实，即使实时配置已经改变。普通本地渲染失败仍为终态，不自动重新购买。见[视频费用全链路](/zh/reference/flows/video-billing-flow)，跟读源码、重新确认与回执未知重放的区别，以及记账示例。
+准入在预留前重新计算，费用/模型确认值变化返回 `VIDEO_PRICE_CHANGED`。成功后冻结 `video_time_v1` 的来源身份、模型、分辨率、配置和价格；已接纳重放及符合条件的显式重试沿用这些事实，即使实时配置已经改变。普通本地渲染失败仍为终态，不自动重新购买。见[视频费用全链路](/zh/reference/flows/video-billing-flow)，跟读源码、重新确认与回执未知重放的区别，以及记账示例。
 
-子进程在能够取得时报告已安装 `jinqiu_e2e` 的 `runtime_version`。缺失时保留未知，并结合镜像/私有源码证据排查；后端提交不能单独确定每次重建后的私有管线版本。源码：[runtime_version](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/conversion/video_jinqiu_adapter.py#L46)。
+画幅是独立的渲染选择。剧本及同款支持 `9:16`、`16:9`、`3:4`、`4:3`、`21:9`。worker 从接纳后的公开输入取得 `aspect_ratio`，缺省按 `9:16` 发送 `video_aspect_ratio`；`video_resolution` 来自 `video_time_v1` 商业快照。两种模式都在 renderer pipeline 配置使用这两个值，最终费用只随模型、分辨率、计费规则与来源变化。 [_build_render_request](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/submissions/workflow_local_video_submission.py#L617)
+
+子进程在能够取得时报告已安装 `jinqiu_e2e` 的 `runtime_version`。缺失时保留未知，并结合镜像/私有源码证据排查；后端提交不能单独确定每次重建后的私有管线版本。源码：[runtime_version](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/conversion/video_jinqiu_adapter.py#L46)。
 
 ---
 
-源码依据 · backend `749e82df`: [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py) · [app/workflows/video_template_rules.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/video_template_rules.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_local_video_submission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_local_video_submission.py) · [app/conversion/video_jinqiu_adapter.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/conversion/video_jinqiu_adapter.py).
+源码依据 · backend `f34b8a4d`: [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/models.py) · [app/workflows/video_template_rules.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/video_template_rules.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_local_video_submission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/submissions/workflow_local_video_submission.py) · [app/conversion/video_jinqiu_adapter.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/conversion/video_jinqiu_adapter.py).

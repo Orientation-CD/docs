@@ -1,6 +1,6 @@
 # OpenAPI 与契约边界
 
-运行后端的 `/openapi.json` 提供机器可读传输 schema，`/docs` 提供 Swagger UI。[固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md) 决定业务错误和重试语义，两者用途不同。
+运行后端的 `/openapi.json` 提供机器可读传输 schema，`/docs` 提供 Swagger UI。[固定版本 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/REST_API_INTERFACE.md) 决定业务错误和重试语义，两者用途不同。
 
 ## 从选定环境读取
 
@@ -57,7 +57,7 @@ curl --fail "$API_BASE_URL/openapi.json" -o openapi.json
 
 已按[记录的源码版本](/zh/reference/source-revisions)核对。
 
-- [规范 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md)
-- [应用路由注册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py)
-- [公开 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)
-- [条件 mock 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/MOCK_API_INTERFACE.md)
+- [规范 REST 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/REST_API_INTERFACE.md)
+- [应用路由注册](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/main.py)
+- [公开 schema](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/models.py)
+- [条件 mock 契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/MOCK_API_INTERFACE.md)

@@ -26,7 +26,7 @@ Changing a process environment variable does not automatically configure a Featu
 - **Billing:** WeChat/Douyin mock/live modes, channel-specific merchant/key/callback values, expiry/reconciliation and encrypted provider configuration. API and both workers need consistent values.
 - **Assets:** internal S3 service endpoint, public presign endpoint, bucket/region/credentials, size/type limits and retention. Direct uploads use signed multipart POST; a CDN host is not interchangeable with the signing host.
 - **Workflow execution:** queue/concurrency/rate limits, request/provider timeouts, retry/lease rules, local video/PPTX limits and installed supplier capability. Do not expand API validation limits as proof a supplier supports them.
-- **Feature activation:** `PROJECT_OUTCOMES_ENABLED=false` is a first-activation boundary, not a rolling or post-write rollback switch. `VIDEO_MODEL_SELECTION_ENABLED` controls optional model selection; discovery remains authoritative. Follow the protected release procedure for outcomes.
+- **Feature activation:** `PROJECT_OUTCOMES_ENABLED=false` is a first-activation boundary, not a rolling or post-write rollback switch. `VIDEO_MODEL_SELECTION_ENABLED` controls model and resolution selection. When disabled, the effective pair is mini at 480p. When enabled, discovery advertises available pairs through `model_resolution_rates`. Follow the protected release procedure for outcomes.
 - **Voice browser handoff:** enabling voice upload also requires public HTTPS URL/origin/cookie configuration. A local API bearer token is not the browser session's credential.
 
 ## Precedence and secret handling
@@ -39,7 +39,7 @@ Use a stable configuration-encryption key across roles and retained data. Rotati
 
 ## Configuration is not feature deployment evidence
 
-`VITE_FLOOR_PLAN_WEB_ORIGIN` is the exact trusted client H5 origin (API-origin fallback). Backend `H5_3VJIA_BASE_URL`, published releases and database-owned SDK configuration govern the original ThreeVjia H5. Supplier account credentials and renewal are server responsibilities; neither a trusted origin nor an enabled Feature proves a release is runnable. See [floor plans](/backend/floor-plans).
+`VITE_FLOOR_PLAN_WEB_ORIGIN` is the exact trusted client H5 origin (API-origin fallback). The WeChat cloud-production wrapper explicitly uses `https://public.cdn.yuanzhushuzhi.com` for the H5 origin. Backend `H5_3VJIA_BASE_URL`, published releases and database-owned SDK configuration govern the original ThreeVjia H5. Supplier account credentials and renewal are server responsibilities; neither a trusted origin nor an enabled Feature proves a release is runnable. See [floor plans](/backend/floor-plans).
 
 Member monthly caps are persisted enterprise/member configuration, not an environment flag. Performance windows and release attribution follow [observability](/backend/observability); retain `APP_VERSION` per running process/image. Source defaults in the generated table are distinct from an actual deployment's values.
 
@@ -47,13 +47,13 @@ Member monthly caps are persisted enterprise/member configuration, not an enviro
 
 ThreeVjia uses dedicated SDK configuration/release management, not a new ordinary ProviderConnection. Its binding freezes configuration identity/generation, release and contract digest into accepted execution. Account token renewal and release maintenance have separate locks and settings (`THREE_VJIA_REFRESH_MARGIN_SECONDS`, `THREE_VJIA_MAINTENANCE_ENABLED`, `THREE_VJIA_MAINTENANCE_LOCK_PATH`). Do not copy supplier secrets into frontend configuration.
 
-`PROJECT_SALES_STAGES_ENABLED` is a protected first-activation boundary backed by durable activation state, rather than a routine toggle to reverse written stage evidence. Stage activation and the earlier outcome boundary must follow the [release procedure](/deploy/production). Video rates are database configuration with a version, not a browser price or sum of graph-node costs; see [fee confirmation](/reference/flows/video-billing-flow).
+`PROJECT_SALES_STAGES_ENABLED` is a protected first-activation boundary backed by durable activation state, rather than a routine toggle to reverse written stage evidence. Stage activation and the earlier outcome boundary must follow the [release procedure](/deploy/production). Video rates are versioned database configuration keyed by model and resolution; see [fee confirmation](/reference/flows/video-billing-flow).
 
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions).
 
-- [Settings and validation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/config.py)
-- [Committed local example](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/.env.example)
-- [Database provider configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_configuration.py)
-- [Build modes and scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)
+- [Settings and validation](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/config.py)
+- [Committed local example](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/.env.example)
+- [Database provider configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/providers/provider_configuration.py)
+- [Build modes and scripts](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/package.json)

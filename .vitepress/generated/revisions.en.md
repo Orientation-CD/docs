@@ -1,6 +1,6 @@
 | Component | Repository at verified revision | Branch | Commit SHA |
 | --- | --- | --- | --- |
-| frontend | [Orientation-CD/wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program/tree/88c75c1f15cd65f45c7fb09d560df80430ddc198) | `ui-integration` | `88c75c1f15cd65f45c7fb09d560df80430ddc198` |
-| backend | [Orientation-CD/YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI/tree/749e82df3a51c441335ba6a4db607a98bacbcf97) | `main` | `749e82df3a51c441335ba6a4db607a98bacbcf97` |
+| frontend | [Orientation-CD/wechat_mini_program](https://github.com/Orientation-CD/wechat_mini_program/tree/7f1a3169338c10bd4139c24318f7a35caf86310c) | `ui-integration` | `7f1a3169338c10bd4139c24318f7a35caf86310c` |
+| backend | [Orientation-CD/YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI/tree/f34b8a4d6307c83c6f7bbc905485a4f586d59a99) | `main` | `f34b8a4d6307c83c6f7bbc905485a4f586d59a99` |
 
-Verified on 2026-11-10.
+Verified on 2026-11-14.

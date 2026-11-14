@@ -1,6 +1,6 @@
 # 成员月额度：配置 → 流水投影 → 准入
 
-本章追踪三个已实现 API 及其控制的账务检查。当前小程序已有所有者成员管理与额度编辑、成员本人额度展示。配置入口在 `pkg-projects/pages/members/index.vue`，通过 `MemberQuotaSheet` → `saveQuota` → `saveMemberTokenLimit`；本人展示通过 `MyMemberQuota.refresh` → `readMyMemberTokenQuota`。界面展示、服务端有效上限和真实准入是三个检查点。
+本章追踪三个已实现 API 及其控制的账务检查。当前小程序已有所有者成员管理与额度编辑、成员本人额度展示。在企业看板打开成员页，切换到「成员与额度」可编辑。保存链为 `MemberQuotaSheet` → `saveQuota` → `saveMemberTokenLimit`；本人展示通过 `MyMemberQuota.refresh` → `readMyMemberTokenQuota`。界面展示、服务端有效上限和真实准入是三个检查点。
 
 企业钱包与成员额度是不同权威：钱包负责付钱，额度限制某成员在一个自然月能预留多少新工作。额度保存不会转积分、创建Job或调用Redis/供应商执行。
 
@@ -29,9 +29,9 @@ sequenceDiagram
 
 | 图中步骤 | 前端源码 | 要核对的边界 |
 | --- | --- | --- |
-| 1–4 | [saveQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/pages/members/index.vue#L103) → [saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L78) | 确认账号／空间／所有者、保留全局重置提示，响应不确定时只刷新核对 |
-| 5–7 | [refresh](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/components/account/MyMemberQuota.vue#L23) → [readMyMemberTokenQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L38) | 按账号／空间／北京月缓存，返回月份不匹配视为不可用 |
-| 8–11 | [presentMemberQuotaRejection](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/memberQuota.ts#L85) | 保留任务输入，区分单人暂停与额度不足，不以缓存授权提交 |
+| 1–4 | [saveQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/pages/members/index.vue#L109) → [saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/services/saveMemberTokenLimit.ts#L11) | 确认账号／空间／所有者、保留全局重置提示，响应不确定时只刷新核对 |
+| 5–7 | [refresh](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/components/account/MyMemberQuota.vue#L23) → [readMyMemberTokenQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/memberTokenQuota.ts#L29) | 按账号／空间／北京月缓存，返回月份不匹配视为不可用 |
+| 8–11 | [presentMemberQuotaRejection](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/memberQuota.ts#L76) | 保留任务输入，区分单人暂停与额度不足，不以缓存授权提交 |
 
 只有精确“路由不存在”的 404 才隐藏可选本人额度，权限失败、上月响应和坏数据不是零额度。全局同值保存仍执行清空，成员额度设置零可暂停、全局设置零无效。保存前后都重新核对当前上下文；即使请求失败也失效概览和本人缓存，防止把结果不确定当作未提交。
 
@@ -39,8 +39,8 @@ sequenceDiagram
 
 **接口：** `PUT /v1/workspaces/{workspace_id}/member-token-limit`，要求Bearer及活跃企业当前OWNER。body 是对象：有限额用`{"limit":50000}`，不限额用`{"limit":null}`；不能发送裸 JSON null。有限值必须严格整数1..10,000,000；零、缺字段、字符串、布尔、小数和未知字段都422。
 
-1. [app/workspaces/workspace_api.py → update_member_token_default](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L258)把当前认证actor及显式workspace UUID传给`set_enterprise_member_token_limit`；保存的空间选择不是权限。
-2. [app/billing/member_token_quotas.py → set_enterprise_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L198)调用`_locked_owner_enterprise`，验证可访问活跃Enterprise及当前OWNER，先锁企业权威再锁override行。
+1. [app/workspaces/workspace_api.py → update_member_token_default](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L258)把当前认证actor及显式workspace UUID传给`set_enterprise_member_token_limit`；保存的空间选择不是权限。
+2. [app/billing/member_token_quotas.py → set_enterprise_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py#L198)调用`_locked_owner_enterprise`，验证可访问活跃Enterprise及当前OWNER，先锁企业权威再锁override行。
 3. 统计当前非owner成员，写`Enterprise.member_monthly_token_limit`、配置时间，并**删除每一条override**，包括已离开成员的保留设置。保存相同值或null也执行清除。
 4. 追加`EnterpriseMemberTokenLimitAudit`，记录旧/新值、来源、受影响成员数及清除override数。路由共同提交配置与审计，不写财务流水。
 5. 返回 **200**：`{"limit":50000,"affected_members":3}`，数量是当前非owner，不是删除行数。成功后刷新owner总览。
@@ -51,8 +51,8 @@ sequenceDiagram
 
 **接口：** `PUT /v1/workspaces/{workspace_id}/members/{user_id}/token-limit`，仅当前OWNER。必填`limit`为null或严格整数0..10,000,000。单人0有意表示暂停新预留，与全局范围不同。
 
-1. [app/workspaces/workspace_api.py → update_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L275)把actor/企业/目标/上限传给`set_member_token_limit`。
-2. [app/billing/member_token_quotas.py → set_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L250)取得当前企业owner权威，再验证目标当前成员关系。不存在/已离开目标为404 `MEMBER_NOT_FOUND`；owner目标为409 `WORKSPACE_OWNER_TOKEN_LIMIT_FORBIDDEN`。
+1. [app/workspaces/workspace_api.py → update_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L275)把actor/企业/目标/上限传给`set_member_token_limit`。
+2. [app/billing/member_token_quotas.py → set_member_token_limit](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py#L250)取得当前企业owner权威，再验证目标当前成员关系。不存在/已离开目标为404 `MEMBER_NOT_FOUND`；owner目标为409 `WORKSPACE_OWNER_TOKEN_LIMIT_FORBIDDEN`。
 3. 创建/更新`EnterpriseMemberTokenLimit`并追加配置审计。每次单人保存都为`source:"custom"`，即使null或等于全局值。
 4. 调用`read_member_token_quota`后路由提交。200示例：`{"limit":0,"used":120,"reserved":20,"source":"custom","month":"2026-11"}`。刷新该成员额度/总览。
 
@@ -62,10 +62,10 @@ sequenceDiagram
 
 **接口：** `GET /v1/workspaces/{workspace_id}/me/token-quota`，要求活跃企业当前成员或owner，不传目标成员参数或body，不改变当前空间选择。
 
-1. [app/workspaces/workspace_api.py → get_own_member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L292)解析当前可访问工作区/成员关系；个人空间422 `ENTERPRISE_WORKSPACE_REQUIRED`。
-2. [app/billing/member_token_quotas.py → read_member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L157)固定本次时钟，读取该成员可选override，调用`enterprise_member_token_usage`。
-3. [app/billing/member_token_quotas.py → member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L140)按owner→无限/source owner、存在显式行→custom、否则企业默认选择。null是无限，不是零或字段缺失。
-4. [app/billing/member_token_quotas.py → enterprise_member_token_usage](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L57)聚合不可变流水代次身份。200返回`limit`、`used`、`reserved`、`source`、`month`。
+1. [app/workspaces/workspace_api.py → get_own_member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L292)解析当前可访问工作区/成员关系；个人空间422 `ENTERPRISE_WORKSPACE_REQUIRED`。
+2. [app/billing/member_token_quotas.py → read_member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py#L157)固定本次时钟，读取该成员可选override，调用`enterprise_member_token_usage`。
+3. [app/billing/member_token_quotas.py → member_token_quota](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py#L140)按owner→无限/source owner、存在显式行→custom、否则企业默认选择。null是无限，不是零或字段缺失。
+4. [app/billing/member_token_quotas.py → enterprise_member_token_usage](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py#L57)聚合不可变流水代次身份。200返回`limit`、`used`、`reserved`、`source`、`month`。
 
 | 示例字段 | 含义 |
 | --- | --- |
@@ -85,7 +85,7 @@ sequenceDiagram
 
 ## 随后的创建/重试事务
 
-[app/workflows/workflow_admission.py → _reserve_feature_workflow_tokens](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L2607)先检查企业可用余额`remaining_tokens - reserved_tokens`，保留`TOKEN_SHORTAGE_WORKSPACE`优先级。余额足够后，[app/billing/member_token_quotas.py → member_token_limit_violation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L302)在调用者已有企业账户锁下读取当前角色、override和流水，要求`used + required <= limit`。owner/无限成员跳过此限制。
+[app/workflows/workflow_admission.py → _reserve_feature_workflow_tokens](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_admission.py#L2617)先检查企业可用余额`remaining_tokens - reserved_tokens`，保留`TOKEN_SHORTAGE_WORKSPACE`优先级。余额足够后，[app/billing/member_token_quotas.py → member_token_limit_violation](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py#L302)在调用者已有企业账户锁下读取当前角色、override和流水，要求`used + required <= limit`。owner/无限成员跳过此限制。
 
 失败为402：
 

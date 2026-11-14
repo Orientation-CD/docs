@@ -75,13 +75,13 @@ python -m scripts.maintain_3vjia_h5 gc
 
 两条命令默认仅预演。写入要求 `--apply`，且指定实例 `THREE_VJIA_MAINTENANCE_ENABLED=true`。CLI 与周期任务的 `THREE_VJIA_MAINTENANCE_LOCK_PATH` 必须指向同一实际挂载锁文件；不同宿主机上字符串相同不代表互斥。GC 保护 latest、激活配置、未完成执行和供应商删除中的引用，再按 RETIRING/DELETED 状态恢复 manifest 范围清理，不删除任意 Asset，也不把发布变成激活。
 
-源码：[maintain](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/maintain_3vjia_h5.py#L16) · [reconcile_releases](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/maintenance.py#L297) · [activate_sdk_configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/three_vjia_sdk.py#L70)。
+源码：[maintain](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/maintain_3vjia_h5.py#L16) · [reconcile_releases](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/three_vjia/maintenance.py#L297) · [activate_sdk_configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/three_vjia_sdk.py#L70)。
 
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [完整运维手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [不可变镜像构建](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/build-image.sh)
-- [容器化云测部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/run-deploy-container.sh)
-- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy.sh)
+- [完整运维手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [不可变镜像构建](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/build-image.sh)
+- [容器化云测部署](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/run-deploy-container.sh)
+- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/deploy.sh)

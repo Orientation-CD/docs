@@ -6,4 +6,4 @@ search: false
 
 请使用[当前报告工作流](/zh/backend/reports)和[工作流节点配置](/zh/admin/workflows)。
 
-[Source](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/__init__.py)
+[Source](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/__init__.py)

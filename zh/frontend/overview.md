@@ -13,7 +13,7 @@ flowchart TB
   H --> R[最近使用与快捷入口]
   H --> I[灵感与发现H5]
   A[我的] --> Q[AI问答与会员权益]
-  W[项目] --> M[成员 额度 指派 销售阶段]
+  W[项目] --> M[成员 额度 指派 销售阶段 日报]
 ```
 
 `featureGroups.ts` 定义设计／创作成员树与面包屑。语音总结、报告属于快捷／最近入口，不在轻盈设计成员树内。`useFeatureLauncher` 检查发现与权益，卡片可见不等于有执行权限。最近使用保留有界的本地 30 天记录，按次数、最近时间排序，最多展示三项；它不是服务端项目活动。
@@ -28,7 +28,7 @@ flowchart TB
 | `src/pkg-features` | 图片／语音／视频怎样准备输入并冻结动作 body？ |
 | `src/pkg-features/pages/floor_plan_editor`、`floor_plan_works` | 打开哪个原始 H5／编辑器接力或原生作品页面？ |
 | `src/pkg-plans` | 图片、音频／Markdown、视频、报告、全景结果怎样刷新？ |
-| `src/pkg-projects` | 当前负责人是谁，哪些成员／额度／阶段操作被允许？ |
+| `src/pkg-projects` | 当前负责人是谁，哪些成员、额度、阶段或日报操作被允许？ |
 | `src/pkg-account` | 执行哪项认证、成员、邀请、订单或协议动作？ |
 | `src/repositories`、`src/api/dto` | 请求哪个接口，运行时接受什么响应形状？ |
 | `src/services`、`src/stores` | 哪些会话、范围、结果不确定动作或删除保护需要跨页面保留？ |
@@ -41,4 +41,4 @@ flowchart TB
 
 企业只读详情可以返回经过授权的输入，同时拒绝写操作。以响应权限与当前指派为准。删除中结果是清空媒体的占位，晚到响应不能恢复旧预览，见[历史操作](/zh/reference/flows/workflow-history-flow)与[项目](/zh/frontend/projects)。
 
-源码: [src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [src/services/recentFeatures.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/recentFeatures.ts) · [src/services/jobDeletionState.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/jobDeletionState.ts) · [src/pages.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pages.json) · [package.json](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)
+源码: [src/services/featureGroups.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/featureGroups.ts) · [src/services/recentFeatures.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/recentFeatures.ts) · [src/services/jobDeletionState.ts](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/jobDeletionState.ts) · [src/pages.json](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pages.json) · [package.json](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/package.json)

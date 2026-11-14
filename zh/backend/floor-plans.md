@@ -8,7 +8,7 @@
 
 `account_identity` 选择可续期的账号凭据服务；现有加密 API key 配置仍有受支持分支。供应商凭据保留在平台边界内。短期编辑器别名／cookie 使用含用户、配置、凭据代次的 Redis scope，和接力给 H5 的独立平台 auth pair 是两回事。SDK 配置不再是通用 Provider 目录中的一个模型。历史冻结执行保留其精确发布版，不会悄悄选择最新版。
 
-源码：[current_editor_model](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/editor_entry.py#L37) · [prepare_editor_entry](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/editor_entry.py#L182) · [AccountCredentials](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/account_credentials.py#L95) · [sdk_render_execution](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py#L60)。
+源码：[current_editor_model](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/editor_entry.py#L37) · [prepare_editor_entry](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/editor_entry.py#L182) · [AccountCredentials](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/three_vjia/account_credentials.py#L95) · [sdk_render_execution](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_sdk_execution.py#L60)。
 
 ## SQL 保存什么，什么仍在远端
 
@@ -22,7 +22,7 @@
 
 不存在需要创建或续期的持久编辑器 Session 资源。`bootstrap_auth` 可创建普通平台认证会话，那是 access／refresh 会话，不是编辑器作品。`group_id` 是与 SDK 配置 ID 配对的不透明文本，不能和 Workflow UUID 互换。
 
-源码：[FloorPlanWork](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/persistence/db_models.py#L2223) · [WorkIdentity](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/ownership.py#L15) · [finish_group_save](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/registration.py#L78)。
+源码：[FloorPlanWork](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/persistence/db_models.py#L2225) · [WorkIdentity](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/ownership.py#L15) · [finish_group_save](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/registration.py#L78)。
 
 ## 分开追踪保存与付费渲染
 
@@ -52,11 +52,13 @@ sequenceDiagram
 
 | 步骤 | 源码符号 | 检查点及目的 |
 | --- | --- | --- |
-| 1–4 | [relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [prepare_group_save](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/registration.py#L50) · [finish_group_save](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/registration.py#L78) | 观察一次供应商原保存，用确证回执绑定归属。`x-floor-plan-work-registration: unavailable` 表示本地登记失败，不能重放供应商保存 |
-| 5–6 | [import_before_asset](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/before_assets.py#L88) | 下载前已有清理归属；图片字节和版本经过普通 Asset 完成核验 |
-| 7–10 | [admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L3291) · [stage_render_document](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/rendering.py#L142) | 版本和作品权限一致；受理 ID 不代表供应商执行成功 |
-| 11–12 | [sdk_render_execution](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py#L60) · [ThreeVjiaRenderExecution](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/operations/image/three_vjia_execution.py#L148) | worker 消费冻结的发布版／输入身份，复用现有尝试、产物和结算机制 |
-| 13 | [work_workflows](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/group_works.py#L634) · [panorama_viewer_url](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/panorama.py#L38) | 授权读者取得标准 Workflow 结果或新的只读全景能力 |
+| 1–4 | [relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/gateway.py#L263) · [prepare_group_save](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/registration.py#L50) · [finish_group_save](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/registration.py#L78) | 观察一次供应商原保存，用确证回执绑定归属。`x-floor-plan-work-registration: unavailable` 表示本地登记失败，不能重放供应商保存 |
+| 5–6 | [import_before_asset](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/before_assets.py#L88) | 下载前已有清理归属；图片字节和版本经过普通 Asset 完成核验 |
+| 7–10 | [admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_admission.py#L3301) · [stage_render_document](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/rendering.py#L142) | 版本和作品权限一致；受理 ID 不代表供应商执行成功 |
+| 11–12 | [sdk_render_execution](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_sdk_execution.py#L60) · [ThreeVjiaRenderExecution](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/operations/image/three_vjia_execution.py#L148) | worker 消费冻结的发布版／输入身份，复用现有尝试、产物和结算机制 |
+| 13 | [work_workflows](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/group_works.py#L634) · [panorama_viewer_url](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/panorama.py#L38) | 授权读者取得标准 Workflow 结果或新的只读全景能力 |
+
+户型编辑器工具栏显示场景准备状态，并在保存成功且作品关联登记得到确认后进入渲染设置。用户随后可单独提交渲染，由平台执行准入。在个人套餐缺失、待生效、过期或不授予该 Feature 时，H5 可提示前往商店。返回页面会刷新套餐状态，再由用户决定是否提交。最终权限与费用由服务端检查。源码见 [工具栏保存补丁](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/static/3vjia/h5/patches.json) 和 [membershipReason](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/static/3vjia/h5/bootstrap.js#L172)。
 
 ## 输入与准入边界
 
@@ -64,7 +66,7 @@ sequenceDiagram
 
 H5 桥接先导入原图，再用 `Idempotency-Key` 和 `X-Editor-Version` 提交精确冻结 body。准入检查发布版和执行指纹，解析真实供应商分组、检查已登记作品范围，保存私有版本化请求 Document。最后短事务重查项目／作品权限、预留积分并写入作品关联；最终数据库锁不会跨越供应商 HTTP。未被使用的暂存 Document 仍受普通临时清理机制管理。
 
-源码：[FloorPlanWorkflowCreate](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py#L711) · [dispatchStored](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/static/3vjia/h5/bridge.js#L437) · [resolve_render_scheme](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/rendering.py#L96)。
+源码：[FloorPlanWorkflowCreate](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/models.py#L711) · [dispatchStored](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/static/3vjia/h5/bridge.js#L454) · [resolve_render_scheme](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/rendering.py#L96)。
 
 ## 网关传输不是第二套渲染引擎
 
@@ -72,7 +74,7 @@ H5 桥接先导入原图，再用 `Idempotency-Key` 和 `X-Editor-Version` 提�
 
 包围 `ThreeVjiaSDK.forward` 的网关去除或替换敏感头，读取受限回执，不跟随重定向。网关认证缓存缺失是可恢复的认证失败，不能证明此前远程写入失败。已经确认的原保存或删除，不能因本地响应处理失败而重复发送。
 
-源码：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/gateway.py#L263) · [forward](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/sdk.py#L276) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/sdk_binding.py#L24)。
+源码：[relay](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/gateway.py#L263) · [forward](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/three_vjia/sdk.py#L276) · [selected_contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/sdk_binding.py#L24)。
 
 ## 移动、删除和全景具有不同语义
 
@@ -82,4 +84,4 @@ H5 桥接先导入原图，再用 `Idempotency-Key` 和 `X-Editor-Version` 提�
 
 全景查看检查 Workflow 可读范围和 panorama 模式，加载当前精确发布版的完整查看器文件，再次核对读权限后才提交可选 bootstrap auth。查看权限与作者专属编辑权限分离，也不会提交新的渲染。
 
-源码：[move_group](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/group_move.py#L73) · [resume_group_deletion](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/group_recovery.py#L172) · [finalize_group](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/group_recovery.py#L51) · [panorama_viewer_url](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/floor_plans/panorama.py#L38)。
+源码：[move_group](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/group_move.py#L73) · [resume_group_deletion](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/group_recovery.py#L172) · [finalize_group](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/group_recovery.py#L51) · [panorama_viewer_url](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/floor_plans/panorama.py#L38)。

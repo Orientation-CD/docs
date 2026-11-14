@@ -23,7 +23,7 @@ API key 使用稳定配置加密密钥静态加密。密码输入留空保留已
 3. 在[计费](/zh/admin/billing)配置 Feature 价格、开放状态与套餐授权。
 4. 在授权环境验证对应产品。
 
-保存凭据不等于真实供应商验收。已接受任务保留冻结服务商配置。[服务商集成政策](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/MODEL_PROVIDER_INTEGRATION_POLICY.md)要求供应商协议差异封装在 adapter 内。
+保存凭据不等于真实供应商验收。已接受任务保留冻结服务商配置。[服务商集成政策](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/MODEL_PROVIDER_INTEGRATION_POLICY.md)要求供应商协议差异封装在 adapter 内。
 
 ## 三维家使用独立 SDK 配置
 
@@ -31,8 +31,8 @@ API key 使用稳定配置加密密钥静态加密。密码输入留空保留已
 
 安装核验为同一供应商账号的 access/refresh 整对，留空保留现有凭据。网络准备发生在短 SQL 锁之外；提交后的通知只用于预热，失败不撤销数据库激活。自动续期由唯一账号所有者负责，先加密持久化后继整对，再发布 ready。已派发但结果不确定的续期不能重放旧 refresh token，应按固定版本 runbook 重新安装已核验的同账号整对。见[户型运行时](/zh/backend/floor-plans)与[部署](/zh/deploy/sae-deployment)。
 
-源码：[admin_activate_three_vjia_sdk](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/three_vjia_sdk.py#L153) · [app/three_vjia/account_credentials.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/account_credentials.py)。
+源码：[admin_activate_three_vjia_sdk](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/three_vjia_sdk.py#L153) · [app/three_vjia/account_credentials.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/three_vjia/account_credentials.py)。
 
 ---
 
-代码依据 · backend `749e82df`: [app/admin/providers.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/providers.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_configuration.py) · [app/templates/admin/provider.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/provider.html).
+代码依据 · backend `749e82df`: [app/admin/providers.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/providers.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/providers/provider_configuration.py) · [app/templates/admin/provider.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/templates/admin/provider.html).

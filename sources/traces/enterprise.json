@@ -170,10 +170,19 @@
         "symbol": "member_status"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pages/projects/index.vue",
+        "symbol": "refreshDailyStatus"
+      },
+      {
+        "path": "src/services/dailyReportStatus.ts",
+        "symbol": "loadDailyReportStatus"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "A current nonowner opens or returns to Projects in their enterprise workspace.",
+      "zh": "当前企业的非所有者成员打开或返回项目页。"
     }
   },
   {
@@ -191,10 +200,19 @@
         "symbol": "calendar"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/pages/daily-report/index.vue",
+        "symbol": "loadHistory"
+      },
+      {
+        "path": "src/pkg-projects/services/dailyReports.ts",
+        "symbol": "apiDailyReports"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "The member report page loads history or appends an older calendar page.",
+      "zh": "成员日报页读取历史或加载更多日期。"
     }
   },
   {
@@ -212,10 +230,19 @@
         "symbol": "read_detail"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/pages/daily-report/index.vue",
+        "symbol": "refresh"
+      },
+      {
+        "path": "src/pkg-projects/services/dailyReports.ts",
+        "symbol": "apiDailyReports"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "Member opens the report card, comment reminder or history day, or refreshes detail before saving.",
+      "zh": "成员打开日报卡片、批注提醒或历史日期，或在保存前刷新详情。"
     }
   },
   {
@@ -233,10 +260,19 @@
         "symbol": "save_report"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/pages/daily-report/index.vue",
+        "symbol": "save"
+      },
+      {
+        "path": "src/pkg-projects/services/dailyReports.ts",
+        "symbol": "apiDailyReports"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "Member submits, edits or explicitly confirms a late report.",
+      "zh": "成员提交、编辑或明确确认补交日报。"
     }
   },
   {
@@ -254,10 +290,19 @@
         "symbol": "see_comment"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/pages/daily-report/index.vue",
+        "symbol": "acknowledge"
+      },
+      {
+        "path": "src/pkg-projects/services/dailyReports.ts",
+        "symbol": "apiDailyReports"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "Member detail renders a saved report with an unseen comment.",
+      "zh": "成员详情渲染已保存且有未看批注的日报。"
     }
   },
   {
@@ -275,10 +320,19 @@
         "symbol": "owner_day"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/components/OwnerReportList.vue",
+        "symbol": "load"
+      },
+      {
+        "path": "src/pkg-projects/services/dailyReports.ts",
+        "symbol": "apiDailyReports"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "The owner opens the Reports tab in Members or selects another day.",
+      "zh": "所有者打开成员页「日报」标签或切换日期。"
     }
   },
   {
@@ -296,10 +350,23 @@
         "symbol": "owner_detail"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/components/OwnerReportList.vue",
+        "symbol": "open"
+      },
+      {
+        "path": "src/pkg-projects/pages/daily-report/index.vue",
+        "symbol": "refresh"
+      },
+      {
+        "path": "src/pkg-projects/services/dailyReports.ts",
+        "symbol": "apiDailyReports"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "Owner opens a submitted member row on the selected date.",
+      "zh": "所有者打开所选日期的一条已提交成员行。"
     }
   },
   {
@@ -317,10 +384,19 @@
         "symbol": "mark_read"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/pages/daily-report/index.vue",
+        "symbol": "acknowledge"
+      },
+      {
+        "path": "src/pkg-projects/services/dailyReports.ts",
+        "symbol": "apiDailyReports"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "Owner detail renders an unread saved version.",
+      "zh": "所有者详情渲染未读的已保存版本。"
     }
   },
   {
@@ -338,10 +414,19 @@
         "symbol": "save_comment"
       }
     ],
-    "frontend": [],
+    "frontend": [
+      {
+        "path": "src/pkg-projects/pages/daily-report/index.vue",
+        "symbol": "saveComment"
+      },
+      {
+        "path": "src/pkg-projects/services/dailyReports.ts",
+        "symbol": "apiDailyReports"
+      }
+    ],
     "trigger": {
-      "en": "Authenticated integration client; the pinned mini-program has no daily-report API caller.",
-      "zh": "已认证集成客户端；固定小程序版本没有日报 API 调用者。"
+      "en": "Owner saves or clears a comment on a submitted report.",
+      "zh": "所有者保存或清空已提交日报的批注。"
     }
   }
 ]

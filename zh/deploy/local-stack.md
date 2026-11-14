@@ -73,13 +73,13 @@ python scripts/build_3vjia_h5.py \
 
 源码缓存用于验证固定供应商输入；自有发布包包含 bridge、适配和明确获准的运行资源，不是任意供应商站点镜像。核对 `manifest.json`、契约字节和 release 身份。API 健康或包构建成功不代表 SDK 已激活、凭据已可用。若本机 MinIO 公开根匿名读取返回 403，按 runbook 对已核验的单一静态前缀导出，不能把业务 bucket 改成公开。
 
-源码：[scripts/build_3vjia_h5.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/build_3vjia_h5.py) · [scripts/runbook.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)。
+源码：[scripts/build_3vjia_h5.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/build_3vjia_h5.py) · [scripts/runbook.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md)。
 
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)
-- [启动器及冲突行为](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/create_stack.sh)
-- [会话与测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md)
-- [镜像与私有供应商依赖](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/Dockerfile)
+- [本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md)
+- [启动器及冲突行为](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/create_stack.sh)
+- [会话与测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/documents/TEST_STRATEGY.md)
+- [镜像与私有供应商依赖](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/Dockerfile)

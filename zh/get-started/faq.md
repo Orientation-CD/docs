@@ -57,4 +57,4 @@ API 构建仍调用原生微信支付桥；`VITE_PAYMENT_MODE=mock` 不会把它
 
 ## 源码依据
 
-核对版本：前端 `88c75c1f`、后端 `749e82df`（2026-11-10）。[构建命令](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [运行模式](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/runtime.ts) · [本地模拟结算](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py)。
+核对版本：前端 `7f1a3169`、后端 `f34b8a4d`（2026-11-14）。[构建命令](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/package.json) · [运行模式](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/runtime.ts) · [本地模拟结算](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing_api.py)。

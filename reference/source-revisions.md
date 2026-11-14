@@ -31,10 +31,10 @@ A maintainer with source access runs the source comparison when updating documen
 
 ## Current cross-repository boundaries and audit scope
 
-The [integration map](/reference/integration-status) records actual callers: floor-plan/ThreeVjia and member-quota integration now exist in source; daily reports currently have backend APIs without a caller in this frontend. Implemented, enabled, device-ready and provider-accepted are separate conclusions.
+The [integration map](/reference/integration-status) records actual callers, including the member and owner daily-report screens, the model and resolution selection in video, and the native draft box used by seven ThreeVjia image Features.
 
-This audit covers frontend `88c75c1f15cd65f45c7fb09d560df80430ddc198` and backend `749e82df3a51c441335ba6a4db607a98bacbcf97`. All 157 public route declarations, including nine H5 gateway methods, have bilingual explanations, real handlers and source-symbol evidence. Operations overlapping main are removed from the historical frontend candidate scope.
+This audit covers frontend `7f1a3169338c10bd4139c24318f7a35caf86310c` and backend `f34b8a4d6307c83c6f7bbc905485a4f586d59a99`. All 157 public route declarations, including nine H5 gateway methods, have bilingual explanations, real handlers and source-symbol evidence. Operations overlapping main are removed from the historical frontend candidate scope.
 
 Detail and collection input disclosure differ, current assignee and original submitter differ, and SDK bindings differ from ordinary model connections. When source-contract prose lags, follow the actual handler, caller and tests; a matching DTO name does not prove authority. Source extraction executes neither application nor test code.
 
-`sources/audit-2026-11-10.json` records each bilingual page's disposition and the docs baseline. Source links move through function identity or proven unchanged context; unproven mappings receive manual review. Validation covers the docs, not the application stack, devices, deployment or real paid providers.
+`sources/audit-2026-11-14.json` records each bilingual page's disposition and the docs baseline. Source links move through function identity or proven unchanged context; unproven mappings receive manual review. Validation covers the docs, not the application stack, devices, deployment or real paid providers.

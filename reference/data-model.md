@@ -61,7 +61,8 @@ Read [recovery](/deploy/production) before selecting a rollback image: applicati
 | Daily-report records and membership identity | A report belongs to an enterprise membership period and Beijing date; saved revisions, owner read/comment and member comment-seen state are distinct |
 | `floor_plan_works` | Local ownership keyed by SDK configuration plus opaque supplier Group; live title/cover/layout remain supplier metadata |
 | `three_vjia_releases`, `three_vjia_sdk_configurations` | Published contract/H5 identity versus selected execution configuration; no persisted editor-session table |
-| `video_billing_config` and accepted commercial snapshots | Current versioned rate rules versus immutable accepted model/duration/charge |
+| `video_billing_config`, `video_model_rates`, `video_mode_rules` | Live configuration version, rates keyed by `(model_key, resolution)`, and duration rules by mode |
+| Accepted video commercial snapshot | The Workflow retains the accepted model, resolution, duration and charge for execution and eligible recovery |
 | Submission/provider UNKNOWN fields | Persistent start/deadline/next query/count; restarting a worker does not restart the recovery clock |
 
 ```mermaid
@@ -79,4 +80,4 @@ erDiagram
 
 The diagram shows logical relationships, not extra SQL foreign keys. A Work may exist before any Job; its related Workflow count does not equal its supplier identity. Read [floor-plan ownership](/reference/flows/floor-plan-flow), [stages](/reference/flows/project-stages-flow) and [daily reports](/reference/flows/daily-report-flow) for their separate transaction boundaries.
 
-Source: [app/persistence/db_models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/persistence/db_models.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)
+Source: [app/persistence/db_models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/persistence/db_models.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/assets/asset_input_archival.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/models.py)

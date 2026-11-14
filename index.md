@@ -57,12 +57,12 @@ YuanZhu AI (装易装AI) supports design/renovation images, recording summaries,
 | [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | `749e82df` |
 | [docs](https://github.com/Orientation-CD/docs) | `main` | This bilingual documentation site |
 
-The content was checked on **2026-11-10**. Implementation in a branch does not prove a feature is enabled or has passed device/production acceptance. Current public product API paths begin with `/v1`; source evidence distinguishes client UI limits from wider backend contracts.
+The content was checked on **2026-11-14**. Implementation in a branch does not prove a feature is enabled or has passed device/production acceptance. Current public product API paths begin with `/v1`; source evidence distinguishes client UI limits from wider backend contracts.
 
 ## Source evidence
 
-[Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [Frontend commands](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [Backend contracts](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py) · [Local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md).
+[Frontend feature groups](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/featureGroups.ts) · [Frontend commands](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/package.json) · [Backend contracts](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/models.py) · [Local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md).
 
 ## Audited integration boundary
 
-This source pair adds professional floor-plan/ThreeVjia SDK execution, member-quota UI, project assignment and independent sales stages, time/model video billing and backend daily reports. Start with [actual integration boundaries](/reference/integration-status).
+This source pair includes mini-program daily reports, video model and resolution pricing, selectable video aspect ratios and local drafts for seven ThreeVjia image features. Start with [actual integration boundaries](/reference/integration-status).

@@ -8,6 +8,10 @@
       {
         "path": "app/billing/billing_api.py",
         "symbol": "billing_catalog"
+      },
+      {
+        "path": "app/billing/video_pricing_catalog.py",
+        "symbol": "video_billing_discovery"
       }
     ],
     "frontend": [
