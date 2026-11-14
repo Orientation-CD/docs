@@ -57,7 +57,7 @@
 
 微信 API-local 不会把原生支付桥替换成假的成功回调；模拟订单应经过文档中的后端 mock 结算流程。检查真实服务端权益时关闭演示套餐情景。后端 `PROJECT_OUTCOMES_ENABLED`、`VIDEO_MODEL_SELECTION_ENABLED` 属于部署控制，不能由客户端开关启用。
 
-微信 `scripts/build_mp-weixin-cloud-production.sh` 将 `VITE_FLOOR_PLAN_WEB_ORIGIN` 固定为 `https://public.cdn.yuanzhushuzhi.com`，并沿用脚本中的 API 与报告源 `https://api.yuanzhushuzhi.com`。查看脚本实际 API 目标和受众选择发行档。客户端按完整 origin 比较服务端返回的 H5 地址，配置应与后端三维家发布根的 origin 及微信业务域名登记一致。URL 校验通过后，访问对仅在内存中的 web-view fragment 交付。 [scripts/build_mp-weixin-cloud-production.sh](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/scripts/build_mp-weixin-cloud-production.sh) · [floorPlanHandoff](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-features/services/floorPlanHandoff.ts#L8)
+微信 `scripts/build_mp-weixin-cloud-production.sh` 将 `VITE_FLOOR_PLAN_WEB_ORIGIN` 固定为 `https://public.cdn.yuanzhushuzhi.com`。所有者已确认，这个构建有意将 API 和报告请求发往 `https://api.yuanzhushuzhi.com`，该域名对应 SAE 命名空间 `yuanzhu-prod`，当前用于测试和开发。见[环境映射](/zh/deploy/production#销售阶段增加持久化激活边界)。客户端按完整 origin 比较服务端返回的 H5 地址，配置应与后端三维家发布根的 origin 及微信业务域名登记一致。URL 校验通过后，访问对仅在内存中的 web-view fragment 交付。 [scripts/build_mp-weixin-cloud-production.sh](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/scripts/build_mp-weixin-cloud-production.sh) · [floorPlanHandoff](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-features/services/floorPlanHandoff.ts#L8)
 
 ## 平台选码也是构建档的一部分
 
