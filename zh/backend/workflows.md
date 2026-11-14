@@ -36,7 +36,7 @@ READY表示上传并核验；archive COMPLETED表示准备好持久位置；只�
 
 新移动／重试／继续编辑要求原始作者与当前负责人身份，并分别检查当前范围／生命周期。移动核对预期来源和终态，关联户型执行会委托整组移动。新删除 claim 要求原作者／当前负责人，已持久化清理继续执行，后续改派不构成取消。保留历史的作者删除不必取得新的成员关系，但前端写前检查可更严格。清理故障保留 `deletion_pending`、空媒体投影和可重试的可见占位，见[历史动作](/zh/reference/flows/workflow-history-flow)。
 
-源码：[readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py#L79) · [finalize_workflow_reads](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py#L117) · [move_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_jobs.py#L185) · [delete_terminal_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/design_job.py#L487)。
+源码：[readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/read_access.py#L79) · [finalize_workflow_reads](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/read_access.py#L117) · [move_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_jobs.py#L185) · [delete_terminal_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/design_job.py#L487)。
 
 ## 不重新发付费 POST 的 UNKNOWN 恢复 {#unknown-recovery}
 
@@ -59,10 +59,10 @@ sequenceDiagram
 
 | 步骤 | 源码 | 证据与边界 |
 | --- | --- | --- |
-| 1 | [finish_provider_attempt](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_attempt.py#L586) · [ensure_unknown_deadline](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/provider_unknown.py#L11) | UNKNOWN 保留原请求证据，不能通过再领取预留打开新的付费派发 |
-| 2 | [reconcile_unknown_provider_handoffs](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_submission_dispatch.py#L525) | outbox 使用 recovery_only、协议／代次和恢复 epoch 去重，Redis 唤醒不是新供应商尝试 |
-| 3–5 | [recover_unknown_provider_attempt](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_attempt.py#L773) · [unknown_query_due](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/provider_unknown.py#L40) | 最多8次确认，每次最多3秒且受剩余时间限制，网络耗时不延长截止时间 |
-| 6 | [preserve_unknown_failure](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_attempt.py#L324) | 终态失败保留受理 UNKNOWN、failure_class AMBIGUOUS、重试处置 NEVER，不宣称供应商什么都没做 |
+| 1 | [finish_provider_attempt](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/providers/provider_attempt.py#L586) · [ensure_unknown_deadline](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/provider_unknown.py#L11) | UNKNOWN 保留原请求证据，不能通过再领取预留打开新的付费派发 |
+| 2 | [reconcile_unknown_provider_handoffs](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/submissions/workflow_submission_dispatch.py#L525) | outbox 使用 recovery_only、协议／代次和恢复 epoch 去重，Redis 唤醒不是新供应商尝试 |
+| 3–5 | [recover_unknown_provider_attempt](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/providers/provider_attempt.py#L773) · [unknown_query_due](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/provider_unknown.py#L40) | 最多8次确认，每次最多3秒且受剩余时间限制，网络耗时不延长截止时间 |
+| 6 | [preserve_unknown_failure](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/providers/provider_attempt.py#L324) | 终态失败保留受理 UNKNOWN、failure_class AMBIGUOUS、重试处置 NEVER，不宣称供应商什么都没做 |
 
 只有实现 `AmbiguityRecoverableProvider` 的供应商支持这些确认。恢复解码精确信封，调用 `recover_unknown`，绝不调用 `submit`；证据缺失／无效或供应商不支持时等待到期。后续间隔依次为1、2、4、8、16、30、30秒，裁剪到原截止时间；达到8次后不再发第9次。回执改变状态前再次核对租约、查询次数、信封、请求次数和代次。迟到或旧响应不能恢复已过期／新代次执行，读取错误也不能证明受理或拒绝。
 
@@ -70,4 +70,4 @@ sequenceDiagram
 
 ---
 
-源码依据 · backend `749e82df`: [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_submission_retry.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py).
+源码依据 · backend `749e82df`: [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/api.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/submissions/workflow_submission_retry.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py).

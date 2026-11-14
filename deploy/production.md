@@ -62,7 +62,7 @@ python -m app.assets.input_asset_repair --job-id '<job-uuid>' --asset-id '<asset
 
 This is dry-run by default. `--apply` is an operator action for that same verified pair. The CLI does not discover targets, start services or create schema. It preserves executed physical pins, task status, charges and original content identity. `INPUT_REPAIR_AMBIGUOUS_OWNER` requires an ownership decision, not selecting the first consumer. Preserve copy receipts/leases after uncertain acknowledgements and use the documented recovery authority instead of deleting metadata.
 
-Record packaged Alembic heads, `alembic current --check-heads` and `alembic check`; do not hardcode one forever-current revision. The new input/video/quota schema does not remove existing stopped-fleet or compatibility requirements. Read [the current repair implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/input_asset_repair.py) and [archival implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py) before any write.
+Record packaged Alembic heads, `alembic current --check-heads` and `alembic check`; do not hardcode one forever-current revision. The new input/video/quota schema does not remove existing stopped-fleet or compatibility requirements. Read [the current repair implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/assets/input_asset_repair.py) and [archival implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/assets/asset_input_archival.py) before any write.
 
 ## Sales stages add a persistent activation boundary
 
@@ -74,13 +74,13 @@ Pending sales-stage migration `a6b876c1d430` requires complete-fleet maintenance
 
 After `enabled_at` exists, disabling the flag or selecting an unmarked recovery image is refused even if there are no Projects. `BOOTSTRAP_PRE_ACTIVATION_ONLY` is evidence of a predecessor, not permission to restart it after activation. Uncertain initialization leaves the fleet stopped for read-only reconciliation and compatible forward recovery; do not erase the marker, blindly retry a cloud write or downgrade schema. Normal dry-run does not execute the new database probe and is not activation proof.
 
-Source: [deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md) · [deploy/sae/lib/migration.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/lib/migration.sh) · [deploy/sae/lib/preflight.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/lib/preflight.sh).
+Source: [deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md) · [deploy/sae/lib/migration.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/lib/migration.sh) · [deploy/sae/lib/preflight.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/lib/preflight.sh).
 
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Production, outcome and activity procedures](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [Protected release implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy.sh)
-- [Activity operator](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_activity_operator.py)
-- [Activity compatibility marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)
+- [Production, outcome and activity procedures](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [Protected release implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/deploy.sh)
+- [Activity operator](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_activity_operator.py)
+- [Activity compatibility marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)

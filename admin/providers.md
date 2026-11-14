@@ -23,7 +23,7 @@ Saving a compatible edit to an already-bound model is permitted; a change that b
 3. Configure the Feature's price, activation and subscription grants in [Billing](/admin/billing).
 4. Verify the intended product in the authorized environment.
 
-A saved credential is not a live vendor acceptance test. Existing accepted runs retain frozen provider configuration. The [provider integration policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/MODEL_PROVIDER_INTEGRATION_POLICY.md) keeps vendor-specific protocol behavior inside adapters.
+A saved credential is not a live vendor acceptance test. Existing accepted runs retain frozen provider configuration. The [provider integration policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/MODEL_PROVIDER_INTEGRATION_POLICY.md) keeps vendor-specific protocol behavior inside adapters.
 
 ## ThreeVjia uses a separate SDK configuration
 
@@ -31,8 +31,8 @@ New ThreeVjia admission does not select a legacy provider model. `/admin/three-v
 
 Install a verified access/refresh pair for the same supplier account; blank credential fields preserve the pair. Network preparation occurs outside short SQL locks. The post-commit notification only prewarms processes, so its failure does not undo database activation. Automatic renewal has one account owner and persists encrypted successors before publishing ready. An uncertain dispatched refresh must not replay an old refresh token; follow the pinned runbook to reinstall a verified same-account pair. See [floor-plan runtime](/backend/floor-plans) and [deployment](/deploy/sae-deployment).
 
-Source: [admin_activate_three_vjia_sdk](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/three_vjia_sdk.py#L153) · [app/three_vjia/account_credentials.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/account_credentials.py).
+Source: [admin_activate_three_vjia_sdk](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/three_vjia_sdk.py#L153) · [app/three_vjia/account_credentials.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/three_vjia/account_credentials.py).
 
 ---
 
-Source evidence · backend `749e82df`: [app/admin/providers.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/providers.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/providers/provider_configuration.py) · [app/templates/admin/provider.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/provider.html).
+Source evidence · backend `749e82df`: [app/admin/providers.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/providers.py) · [app/providers/provider_configuration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/providers/provider_configuration.py) · [app/templates/admin/provider.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/templates/admin/provider.html).

@@ -25,15 +25,15 @@ sequenceDiagram
 
 | 图中步骤 | 源码 | 应核对的内容 |
 | --- | --- | --- |
-| 1–4 | [fetchList](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectContext.ts#L114) → [list_projects](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py#L373) | 列表按 `assignee_user_id` 过滤，不再按历史创建者 |
-| 5–8 | [save](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/pages/editor/index.vue#L145) → [create_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py#L414) | 必填字段、代创建、目标容量／名称和提交边界 |
-| 9–10 | [_project_responses](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py#L238) | 响应同时携带创建者、负责人、指派版本、阶段证据和逐操作权限 |
+| 1–4 | [fetchList](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectContext.ts#L114) → [list_projects](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_api.py#L373) | 列表按 `assignee_user_id` 过滤，不再按历史创建者 |
+| 5–8 | [save](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/pages/editor/index.vue#L145) → [create_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_api.py#L414) | 必填字段、代创建、目标容量／名称和提交边界 |
+| 9–10 | [_project_responses](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_api.py#L238) | 响应同时携带创建者、负责人、指派版本、阶段证据和逐操作权限 |
 
 ## 加载代码维护的阶段目录 {#project-status-catalog}
 
 `GET /v1/project-statuses`
 
-`get_project_statuses` 需要登录，但不要求选定空间。`visible_project_statuses` 根据后端开关选择基础、成交流失或销售模式，返回标签／顺序、分组、停滞阈值和能力字段，并提供私有五分钟缓存；前端 [projectStatusCatalogRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectStatusCatalog.ts#L92) 校验响应。销售模式公布可独立点亮的阶段和成交流失，旧枚举不能证明某阶段已经完成。见[销售阶段](/zh/reference/flows/project-stages-flow)。读取不修改状态，也不调用供应商。
+`get_project_statuses` 需要登录，但不要求选定空间。`visible_project_statuses` 根据后端开关选择基础、成交流失或销售模式，返回标签／顺序、分组、停滞阈值和能力字段，并提供私有五分钟缓存；前端 [projectStatusCatalogRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectStatusCatalog.ts#L92) 校验响应。销售模式公布可独立点亮的阶段和成交流失，旧枚举不能证明某阶段已经完成。见[销售阶段](/zh/reference/flows/project-stages-flow)。读取不修改状态，也不调用供应商。
 
 ## 读取负责人列表、临时项目和默认项 {#list-projects}
 
@@ -57,7 +57,7 @@ sequenceDiagram
 
 `PUT /v1/workspaces/{workspace_id}/projects/default`
 
-`set_default_project` 接收 `{"project_id":"<UUID>"}`，锁定可访问空间，经 [require_assignee_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_jobs.py#L81)（导入别名 `_owned_project`）验证调用者负责的有效目标。只修改本人偏好并提交，200 回显默认 ID，临时项目可以作为默认。前任不能继续把已交接项目保留为服务端默认，指派事务会原子修复。设备本地当前选择仍独立，历史任务不移动。
+`set_default_project` 接收 `{"project_id":"<UUID>"}`，锁定可访问空间，经 [require_assignee_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_jobs.py#L81)（导入别名 `_owned_project`）验证调用者负责的有效目标。只修改本人偏好并提交，200 回显默认 ID，临时项目可以作为默认。前任不能继续把已交接项目保留为服务端默认，指派事务会原子修复。设备本地当前选择仍独立，历史任务不移动。
 
 ## 打开当前项目详情 {#get-project}
 
@@ -77,7 +77,7 @@ sequenceDiagram
 
 `POST /v1/workspaces/{workspace_id}/projects/{project_id}/delete`
 
-`ProjectDeleteSheet` → `remove` → `projectContextRepository` 显式发送 `delete_jobs` 或 `move_to_scratch`。`delete_project` 调用 [delete_project_group](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_deletion.py#L147)，先检查当前权限，快照全部任务和未删除户型作品，依序锁定参与作者的准入权限、任务／空间／项目／作品，再检查完整集合。快照变化最多重试三次。临时项目、执行中／删除中／提交中的任务及保留的外部依赖都可能阻止操作；弹层预读不能授权删除。
+`ProjectDeleteSheet` → `remove` → `projectContextRepository` 显式发送 `delete_jobs` 或 `move_to_scratch`。`delete_project` 调用 [delete_project_group](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_deletion.py#L147)，先检查当前权限，快照全部任务和未删除户型作品，依序锁定参与作者的准入权限、任务／空间／项目／作品，再检查完整集合。快照变化最多重试三次。临时项目、执行中／删除中／提交中的任务及保留的外部依赖都可能阻止操作；弹层预读不能授权删除。
 
 项目包含前任任务或没有任务的户型作品时，负责人不能整组销毁，`PROJECT_OWNER_REQUIRED_FOR_FOREIGN_CONTENT` 要求所有者。`move_to_scratch` 把每位作者的内容放回该作者自己的永久临时项目，必要时修复当前负责人默认项，原子返回 204。空项目清理也返回 204。非空 `delete_jobs` 保存 DELETING 和持久化子删除认领，提交后返回 202。
 
@@ -89,4 +89,4 @@ sequenceDiagram
 
 首次练习先列出一个空间，创建自己负责的普通项目，核对 201／详情／默认项三者独立；再追所有者交接，确认旧默认回到临时项目，而任务原作者不变。销售模式下对比一次手动点亮前后的来源和事件。本次文档审计不声称运行过真实应用端到端测试。
 
-源码测试：[tests/test_project_assignment.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_assignment.py) · [tests/test_project_assignment_deletion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_assignment_deletion.py) · [tests/test_project_sales_stage_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_sales_stage_api.py)。
+源码测试：[tests/test_project_assignment.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_assignment.py) · [tests/test_project_assignment_deletion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_assignment_deletion.py) · [tests/test_project_sales_stage_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_sales_stage_api.py)。

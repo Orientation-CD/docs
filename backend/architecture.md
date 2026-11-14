@@ -57,7 +57,7 @@ Production schema changes run before cutover; application startup is not a migra
 
 ---
 
-Source evidence · backend `749e82df`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py) · [app/worker.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/worker.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py).
+Source evidence · backend `749e82df`: [app/main.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/main.py) · [app/worker.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/worker.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_admission.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/assets/asset_input_archival.py).
 
 ## SDK execution is a separate binding
 
@@ -65,7 +65,7 @@ ThreeVjia capabilities enter the same Job/Workflow/outbox runtime with `executio
 
 Project responsibility can move without changing historical Job submitters or wallet attribution. Authorized response signing occurs outside the initial load transaction; `finalize_workflow_reads` then rechecks fresh scalar authority so a transfer cannot silently preserve stale permissions. Read [assignment](/reference/flows/project-assignment-flow) before tracing mutations.
 
-[app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py)
+[app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_sdk_execution.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/read_access.py)
 
 ## SDK execution is a separate binding
 
@@ -73,4 +73,4 @@ ThreeVjia capabilities enter the same Job/Workflow/outbox runtime with `executio
 
 Project responsibility can move without changing historical Job submitters or wallet attribution. Authorized response signing occurs outside the initial load transaction; `finalize_workflow_reads` then rechecks fresh scalar authority so a transfer cannot silently preserve stale permissions. Read [assignment](/reference/flows/project-assignment-flow) before tracing mutations.
 
-[app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_sdk_execution.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py)
+[app/workflows/workflow_sdk_execution.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_sdk_execution.py) · [app/workflows/read_access.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/read_access.py)

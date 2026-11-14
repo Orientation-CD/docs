@@ -28,19 +28,21 @@
 
 ## 成员管理与额度界面
 
-所有者成员管理位于 `pkg-projects/pages/members/index.vue`，与项目阶段展示分开。`MemberManagement` 使用概览额度元数据和当前成员详情，缺失／错误／上月数据保持不可用。`MemberQuotaSheet` 可编辑全局默认或单人成员额度，明确提示全局保存会清空全部个人例外。单人零表示暂停新增任务，null 表示不限额；同值全局保存仍发送到后端。
+所有者从企业看板进入「成员」，默认查看「日报」，再切换到「成员与额度」管理额度。写入逻辑位于项目分包。`MemberManagement` 使用概览额度元数据和当前成员详情，缺失／错误／上月数据保持不可用。`MemberQuotaSheet` 可编辑全局默认或单人成员额度，明确提示全局保存会清空全部个人例外。单人零表示暂停新增任务，null 表示不限额；同值全局保存仍发送到后端。
 
-[saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L78) 在请求前后核对当前账号／空间／所有者，即使保存结果不确定也使个人／概览额度失效，绝不自动重放全局覆盖。本人展示通过 `MyMemberQuota` 和 [readMyMemberTokenQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L38)，按账号／空间／北京月缓存。只有精确的路由缺失 404 才隐藏可选能力；过月、响应无效和失去权限是不同错误。准入拒绝 `MEMBER_MONTHLY_TOKEN_LIMIT_REACHED` 会保留输入，并区别所有者暂停和额度耗尽。
+[saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/services/saveMemberTokenLimit.ts#L11) 在请求前后核对当前账号／空间／所有者，即使保存结果不确定也使个人／概览额度失效，绝不自动重放全局覆盖。本人展示通过 `MyMemberQuota` 和 [readMyMemberTokenQuota](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/memberTokenQuota.ts#L29)，按账号／空间／北京月缓存。只有精确的路由缺失 404 才隐藏可选能力；过月、响应无效和失去权限是不同错误。准入拒绝 `MEMBER_MONTHLY_TOKEN_LIMIT_REACHED` 会保留输入，并区别所有者暂停和额度耗尽。
 
 ## 源码地图与阅读顺序
 
 | 阅读对象 | 入口 | 应回答的问题 |
 | --- | --- | --- |
-| 选择与缓存 | [projectContextRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectContext.ts#L203) | 响应属于哪个账号、空间和指派版本？ |
-| 交接 | [assignProject](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/services/projectAssignment.ts#L40) | 提交不确定或版本过期后如何处理？ |
-| 阶段证据 | [writeSalesStage](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/services/projectSalesStages.ts#L27) | 来源是人工、自动还是迁移？ |
-| 销售比例 | [loadSalesMetrics](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectSalesMetrics.ts#L35) | 统计哪个日期分组与当前成员集合？ |
-| 额度 | [saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/memberTokenQuota.ts#L78) | 本次是全局重置还是单人例外？ |
-| 只读内容 | [verifyAssignmentRead](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/assignmentReadAccess.ts#L7) | 当前权限是否仍允许读取该结果？ |
+| 选择与缓存 | [projectContextRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectContext.ts#L203) | 响应属于哪个账号、空间和指派版本？ |
+| 交接 | [assignProject](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/services/projectAssignment.ts#L40) | 提交不确定或版本过期后如何处理？ |
+| 阶段证据 | [writeSalesStage](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/services/projectSalesStages.ts#L27) | 来源是人工、自动还是迁移？ |
+| 销售比例 | [loadSalesMetrics](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectSalesMetrics.ts#L35) | 统计哪个日期分组与当前成员集合？ |
+| 额度 | [saveMemberTokenLimit](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/services/saveMemberTokenLimit.ts#L11) | 本次是全局重置还是单人例外？ |
+| 只读内容 | [verifyAssignmentRead](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/assignmentReadAccess.ts#L7) | 当前权限是否仍允许读取该结果？ |
 
-固定后端已有企业日报，但本前端版本没有日报路由调用者。见[企业日报](/zh/reference/flows/daily-report-flow)中的已认证集成边界；概览摘要元数据不能证明编辑页已经交付。
+## 项目页如何进入企业日报
+
+当前企业成员的项目页显示日报主按钮和独立的未看批注提醒。所有者看板的成员入口在概览返回当天日报摘要时展示应交、已交、未交和求助人数。成员连续三天未交时，看板显示日报提醒。进入「成员」后默认查看「日报」，可以切换日期、打开已提交详情及保存批注。编辑、补交和已读回执的逐步说明见[企业日报](/zh/reference/flows/daily-report-flow)。 [memberAttention](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/memberProjectDashboard.ts#L12)

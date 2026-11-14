@@ -4,7 +4,7 @@ Reference 是源码学习路径。先选一个你在小程序里认得的操作�
 
 ## 第一条可以亲手追踪的链 {#first-journey}
 
-使用[真实本地 API 教程](/zh/get-started/quickstart)，按配置模拟外部服务。前端 Mock 不经过 SQL、Redis 或 worker。先做普通图片，配置 SDK／H5 后再学[户型链路](/zh/reference/flows/floor-plan-flow)。[对齐状态](/zh/reference/integration-status)区分当前客户端调用与仅后端日报。
+使用[真实本地 API 教程](/zh/get-started/quickstart)，按配置模拟外部服务。前端 Mock 不经过 SQL、Redis 或 worker。先做普通图片，配置 SDK／H5 后再学[户型链路](/zh/reference/flows/floor-plan-flow)。阅读[企业日报链路](/zh/reference/flows/daily-report-flow)，对照成员和负责人在小程序里的同步操作。
 
 选一个图片任务，记录用户 ID、空间 ID、上传 Asset ID、动作 key 和公开 Job ID。用这些身份跨进程连接证据，不能只靠文件名和进度百分比。
 
@@ -64,10 +64,10 @@ sequenceDiagram
 
 可以从这些真实入口开始：
 
-- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/request.ts#L370)
-- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py#L1229)
-- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L3291)
-- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/worker.py#L269)
+- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/request.ts#L370)
+- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/api.py#L1229)
+- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_admission.py#L3301)
+- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/worker.py#L269)
 
 不能仅凭文件名推测实际路径。当前 API 支持主入口 `/v1/workflows`，但已交付的部分图片、语音、视频表单仍明确走 `/v1/design-jobs` 兼容适配器。[产品路由矩阵](/zh/reference/flows/workflow-products-flow#frontend-routing)逐项列出真实调用者。
 

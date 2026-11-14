@@ -12,7 +12,7 @@
 | `SECOND_VISIT` | 二访 | 手动／迁移 |
 | `MULTIPLE_VISITS` | 多访 | 手动／迁移 |
 
-[app/workflows/project_stage_completion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/project_stage_completion.py) 选择自动完成证据；子任务／不受支持结果不能被当成通用人工阶段变更。`ProjectStageSource` 保存来源身份、业务日期和来源快照，`ProjectStageEvent` 保存变更事件。`stage_facts` 按阶段聚合来源，取最早已知日期并推导可撤销性。迁移历史中未知的日期保持未知，不补成今天。
+[app/workflows/project_stage_completion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/project_stage_completion.py) 选择自动完成证据；子任务／不受支持结果不能被当成通用人工阶段变更。`ProjectStageSource` 保存来源身份、业务日期和来源快照，`ProjectStageEvent` 保存变更事件。`stage_facts` 按阶段聚合来源，取最早已知日期并推导可撤销性。迁移历史中未知的日期保持未知，不补成今天。
 
 ```mermaid
 sequenceDiagram
@@ -32,9 +32,9 @@ sequenceDiagram
 
 | 图中步骤 | 源码 | 为什么需要 |
 | --- | --- | --- |
-| 1–2 | [writeSalesStage](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/services/projectSalesStages.ts#L27) | 检查服务端逐阶段权限，编码空间并保留会话代次 |
-| 3–5 | [put_project_stage](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py#L884)、[add_manual_stage](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_stages.py#L185) | 业务修改共用项目锁，与活动记录一起提交 |
-| 6–7 | [project_stage_projections](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_stage_views.py#L161) | 展示证据和权限，不再用线性枚举猜测完成情况 |
+| 1–2 | [writeSalesStage](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/services/projectSalesStages.ts#L27) | 检查服务端逐阶段权限，编码空间并保留会话代次 |
+| 3–5 | [put_project_stage](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_api.py#L884)、[add_manual_stage](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_stages.py#L185) | 业务修改共用项目锁，与活动记录一起提交 |
+| 6–7 | [project_stage_projections](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_stage_views.py#L161) | 展示证据和权限，不再用线性枚举猜测完成情况 |
 
 ## 点亮一个阶段 {#put-project-stage}
 
@@ -60,8 +60,8 @@ sequenceDiagram
 
 `GET /v1/workspaces/{workspace_id}/sales-metrics`
 
-所有者看板通过 [loadSalesMetrics](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectSalesMetrics.ts#L35) 发送 `period=YYYY-MM` 或 `all`。`get_enterprise_sales_metrics` 要求当前有效企业所有者与销售模式，省略周期时取当前北京月，调用 [enterprise_sales_metrics](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/enterprise_sales_metrics.py#L56)，提交读取权限事务后返回 200，并设置 `Cache-Control: private, no-store`。
+所有者看板通过 [loadSalesMetrics](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectSalesMetrics.ts#L35) 发送 `period=YYYY-MM` 或 `all`。`get_enterprise_sales_metrics` 要求当前有效企业所有者与销售模式，省略周期时取当前北京月，调用 [enterprise_sales_metrics](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/enterprise_sales_metrics.py#L56)，提交读取权限事务后返回 200，并设置 `Cache-Control: private, no-store`。
 
 查询按**当前负责人**统计当前成员名下的有效普通项目。即使一个阶段有多个来源，每个项目也只计一次。量房到店率的分母是最早量房日期在该周期的项目，分子是其中同时具有到店证据的项目；到店签单率使用到店日期分组及当前 WON 状态。签单数另按当前 WON 与本周期 `closed_at` 计算。因此它是当前状态下的分组转化，不是不可变的历史漏斗，交接或成交流失变更都可能改变统计。团队比例先求原始分子／分母总和，不平均成员百分比。分母为零时 `ratio:null`，前端显示横杠；成员集合不匹配、数据不可用或响应无效都不能伪装为零。
 
-结合 [tests/test_project_sales_stage_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_sales_stage_api.py)、[tests/test_project_sales_stage_completion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_sales_stage_completion.py)、[tests/test_enterprise_sales_metrics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_enterprise_sales_metrics.py) 阅读空缺、并发、自动证据、过滤后的游标同时间排序与分组边界。启用开关前必须协调迁移与发布，见 [SAE 部署](/zh/deploy/sae-deployment)。
+结合 [tests/test_project_sales_stage_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_sales_stage_api.py)、[tests/test_project_sales_stage_completion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_sales_stage_completion.py)、[tests/test_enterprise_sales_metrics.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_enterprise_sales_metrics.py) 阅读空缺、并发、自动证据、过滤后的游标同时间排序与分组边界。启用开关前必须协调迁移与发布，见 [SAE 部署](/zh/deploy/sae-deployment)。

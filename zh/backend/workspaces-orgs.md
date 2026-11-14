@@ -11,7 +11,7 @@
 | 当前企业所有者 | 共享池、有边界的成员／项目／任务详情 | 企业／成员／额度配置和指派；销售模式阶段／成交流失；明确授权的混合作者清理 |
 | 已退出成员 | 企业仍可用时有限的原作者历史 | 无新企业提交或当前项目管理权 |
 
-[readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py#L79) 与 `readable_project` 分别检查任务读取和项目导航。获授权任务详情可以返回文本／图片／音频类型化输入；非作者列表投影仍返回 `inputs:[]`。`job_response` 和 `finalize_workflow_reads` 保留真实提交者，并在拿到签名 URL 后重新检查当前 SQL 权限。能看详情不授予新 Asset 复用、继续编辑、重试、移动或删除权；这些仍有当前负责关系和作者检查。无权／隐藏／不存在的任务 ID 统一 404。
+[readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/read_access.py#L79) 与 `readable_project` 分别检查任务读取和项目导航。获授权任务详情可以返回文本／图片／音频类型化输入；非作者列表投影仍返回 `inputs:[]`。`job_response` 和 `finalize_workflow_reads` 保留真实提交者，并在拿到签名 URL 后重新检查当前 SQL 权限。能看详情不授予新 Asset 复用、继续编辑、重试、移动或删除权；这些仍有当前负责关系和作者检查。无权／隐藏／不存在的任务 ID 统一 404。
 
 ## 容量与邀请
 
@@ -25,14 +25,14 @@
 
 当前小程序已有独立所有者成员管理页、全局／单人额度编辑和本人额度展示。[额度配置](/zh/reference/flows/member-quota-flow) 限制新增成员预留，不转积分或所有权。全局保存清空所有个人例外，包括离开成员保留的设置；同值保存也清空。单人例外退出／重进后保留，除非全局重置。零暂停单人、null 不限额，`reserved` 是 `used` 子集。准入先查企业可支付余额，再查成员额度。
 
-销售转化是[销售阶段](/zh/reference/flows/project-stages-flow#enterprise-sales-metrics)中的独立所有者接口，按所选北京日期分组和当前成员／负责人快照计算，不能从筛选后的概览推导分母。概览日报摘要不能证明前端日报编辑页存在。
+销售转化是[销售阶段](/zh/reference/flows/project-stages-flow#enterprise-sales-metrics)中的独立所有者接口，按所选北京日期分组和当前成员／负责人快照计算，不能从筛选后的概览推导分母。概览还为所有者提供当天日报摘要，供企业看板的成员入口展示。
 
 ## 日报与成员任期
 
-[日报](/zh/reference/flows/daily-report-flow) 在本前端版本中属于后端已实现的认证集成 API。当前非所有者填自己的日期，所有者读／批注当前成员。持久化 `(空间,用户,joined_at,日期)` 防止旧任期内容在重新加入后出现。起始日取迁移的 `DailyReportState`，不是客户端配置。提交冻结业务活动；普通读取不标记正文或批注已读。截止窗口、正文版本和批注版本分别校验。
+当前非所有者从项目页填写本人日报。所有者通过企业看板进入「成员」的「日报」标签，读取当前成员的日报并写批注。见[日报链路](/zh/reference/flows/daily-report-flow)。持久化 `(空间,用户,joined_at,日期)` 防止旧任期内容在重新加入后出现。起始日取迁移的 `DailyReportState`，不是客户端配置。提交冻结业务活动；普通读取不标记正文或批注已读。截止窗口、正文版本和批注版本分别校验。
 
 ## 离开、交接与移除
 
 离开或被移除结束当前成员关系，不重写历史作者或账务归因。所有者可把已离开负责人的普通项目交给有效成员。已受理任务按冻结的原权限继续，账号／空间变化不是供应商取消。移除企业阻止新的保护读取，已发短期 URL 按其自身期限失效。交接后结果／清理权限见[项目指派](/zh/reference/flows/project-assignment-flow)。
 
-源码地图：[app/workspaces/workspace_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py) · [app/workspaces/workspaces.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py) · [app/workspaces/daily_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/daily_reports.py) · [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py)。
+源码地图：[app/workspaces/workspace_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py) · [app/workspaces/workspaces.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py) · [app/workspaces/daily_reports.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/daily_reports.py) · [app/workflows/api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/api.py)。

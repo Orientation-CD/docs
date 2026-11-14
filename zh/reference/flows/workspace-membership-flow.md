@@ -38,9 +38,9 @@ sequenceDiagram
 
 | 步骤 | 按顺序打开 | 阅读重点 |
 | --- | --- | --- |
-| 1–4 | [`invite` · `src/pkg-account/pages/organization/index.vue:305`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/organization/index.vue#L307) → [`shareInvitationOwnerRepository` · `src/pkg-account/repositories/shareInvitations.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/shareInvitations.ts#L70) → [`create_share_invitation` · `app/workspaces/share_invitations.py:178`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/share_invitations.py#L178) | 页面保留同一逻辑邀请身份；repository 添加 `Idempotency-Key`；service 保存摘要和加密的原始响应。 |
-| 5–9 | [`accept` · `src/pkg-account/pages/invitation/index.vue:99`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/invitation/index.vue#L101) → [`shareInvitationPreviewRepository` · `src/pkg-account/repositories/shareInvitationPreview.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/shareInvitationPreview.ts#L70) → [`enforce_rate_limit` · `app/core/rate_limit.py:25`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/rate_limit.py#L25) | 卡片传来的是 bearer，不是登录身份。Redis 保护预览入口；真实状态在数据库。 |
-| 10–15 | [`shareInvitationAcceptanceRepository` · `src/pkg-account/repositories/shareInvitationAcceptance.ts:89`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/shareInvitationAcceptance.ts#L89) → [`accept_share_invitation` · `app/workspaces/share_invitations.py:360`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/share_invitations.py#L360) → [`accessible_workspace` · `app/workspaces/workspaces.py:223`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L229) | 先注册与同意；accept 是一个事务；之后每个请求仍要单独检查成员资格。 |
+| 1–4 | [`invite` · `src/pkg-account/pages/organization/index.vue:305`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/organization/index.vue#L307) → [`shareInvitationOwnerRepository` · `src/pkg-account/repositories/shareInvitations.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/shareInvitations.ts#L70) → [`create_share_invitation` · `app/workspaces/share_invitations.py:178`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/share_invitations.py#L178) | 页面保留同一逻辑邀请身份；repository 添加 `Idempotency-Key`；service 保存摘要和加密的原始响应。 |
+| 5–9 | [`accept` · `src/pkg-account/pages/invitation/index.vue:99`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/invitation/index.vue#L101) → [`shareInvitationPreviewRepository` · `src/pkg-account/repositories/shareInvitationPreview.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/shareInvitationPreview.ts#L70) → [`enforce_rate_limit` · `app/core/rate_limit.py:25`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/rate_limit.py#L25) | 卡片传来的是 bearer，不是登录身份。Redis 保护预览入口；真实状态在数据库。 |
+| 10–15 | [`shareInvitationAcceptanceRepository` · `src/pkg-account/repositories/shareInvitationAcceptance.ts:89`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/shareInvitationAcceptance.ts#L89) → [`accept_share_invitation` · `app/workspaces/share_invitations.py:360`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/share_invitations.py#L360) → [`accessible_workspace` · `app/workspaces/workspaces.py:223`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L229) | 先注册与同意；accept 是一个事务；之后每个请求仍要单独检查成员资格。 |
 
 ## 跨边界时跟踪哪些字段
 
@@ -53,7 +53,7 @@ sequenceDiagram
 | `User.current_workspace_id` | 服务端持久化的当前空间。移除/退出后可能修复为个人空间。 |
 | `Project` / `ProjectPreference` | 创建者私有项目 / 默认项目。加入时确保该 `(user, workspace)` 有临时项目。 |
 
-模型声明见 [`EnterpriseMembership` · `app/persistence/db_models.py:895`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/persistence/db_models.py#L1025)，权限判断见 [`accessible_workspace` · `app/workspaces/workspaces.py:223`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L229)。普通读取和成员变更不会提交 AI 任务，也不调用模型供应商。本章仅明确标出限流的位置使用 Redis；席位、邀请消耗、幂等和成员关系由 PostgreSQL 管理。
+模型声明见 [`EnterpriseMembership` · `app/persistence/db_models.py:895`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/persistence/db_models.py#L1025)，权限判断见 [`accessible_workspace` · `app/workspaces/workspaces.py:223`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L229)。普通读取和成员变更不会提交 AI 任务，也不调用模型供应商。本章仅明确标出限流的位置使用 Redis；席位、邀请消耗、幂等和成员关系由 PostgreSQL 管理。
 
 ## 发现空间并修复当前上下文 {#list-workspaces}
 
@@ -71,7 +71,7 @@ sequenceDiagram
 
 **响应和失败分支：** 返回 `current_workspace_id` 与 `items`，handler 提交修复。前端校验身份并广播已确认的上下文；缓存的企业名称不能覆盖后续 403。
 
-**源码停靠点：** [`workspaceReadRepository` · `src/repositories/workspaceRead.ts:142`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/workspaceRead.ts#L142) → [`get_my_workspaces` · `app/workspaces/api.py:13`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/api.py#L13) → [`list_workspace_summaries` · `app/workspaces/workspaces.py:440`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L514)
+**源码停靠点：** [`workspaceReadRepository` · `src/repositories/workspaceRead.ts:142`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/workspaceRead.ts#L142) → [`get_my_workspaces` · `app/workspaces/api.py:13`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/api.py#L13) → [`list_workspace_summaries` · `app/workspaces/workspaces.py:440`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L514)
 
 ## 创建企业及其所有者 {#create-workspace}
 
@@ -89,7 +89,7 @@ sequenceDiagram
 
 **响应和失败分支：** 201 返回成员可见详情，不会赠送已付费积分。数量上限、企业重名和空名称会阻止创建；该 API 无动作键重放，网络结果不确定时先核对列表再创建。
 
-**源码停靠点：** [`createOrganization` · `src/pkg-account/pages/organization/index.vue:202`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/organization/index.vue#L204) → [`workspaceCreateRepository` · `src/pkg-account/repositories/workspaceCreate.ts:84`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/workspaceCreate.ts#L84) → [`create_workspace` · `app/workspaces/workspace_api.py:328`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L438) → [`ensure_scratch_project` · `app/workspaces/workspaces.py:80`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L81)
+**源码停靠点：** [`createOrganization` · `src/pkg-account/pages/organization/index.vue:202`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/organization/index.vue#L204) → [`workspaceCreateRepository` · `src/pkg-account/repositories/workspaceCreate.ts:84`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/workspaceCreate.ts#L84) → [`create_workspace` · `app/workspaces/workspace_api.py:328`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L438) → [`ensure_scratch_project` · `app/workspaces/workspaces.py:80`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L81)
 
 ## 读取成员可见详情 {#get-workspace}
 
@@ -107,7 +107,7 @@ sequenceDiagram
 
 **响应和失败分支：** 200 不暴露成员手机号，也不授予修改其他创建者项目的权限。没有成员资格为 403 `WORKSPACE_ACCESS_DENIED`；停用企业为 409 `WORKSPACE_INACTIVE`。
 
-**源码停靠点：** [`workspaceDetailRepository` · `src/pkg-account/repositories/workspaceDetail.ts:113`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/workspaceDetail.ts#L113) → [`get_workspace` · `app/workspaces/workspace_api.py:161`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L176) → [`workspace_detail` · `app/workspaces/workspaces.py:473`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L549) → [`accessible_workspace` · `app/workspaces/workspaces.py:223`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L229)
+**源码停靠点：** [`workspaceDetailRepository` · `src/pkg-account/repositories/workspaceDetail.ts:113`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/workspaceDetail.ts#L113) → [`get_workspace` · `app/workspaces/workspace_api.py:161`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L176) → [`workspace_detail` · `app/workspaces/workspaces.py:473`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L549) → [`accessible_workspace` · `app/workspaces/workspaces.py:223`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L229)
 
 ## 修改名称或席位 {#update-workspace}
 
@@ -125,7 +125,7 @@ sequenceDiagram
 
 **响应和失败分支：** `MEMBER_LIMIT_BELOW_MEMBER_COUNT` 保护已占席位；即使 UI 隐藏按钮，服务端仍检查 OWNER。页面在权限/角色失败后重新加载上下文。
 
-**源码停靠点：** [`applyUpdate` · `src/pkg-account/pages/organization/index.vue:230`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/organization/index.vue#L232) → [`workspaceDetailRepository` · `src/pkg-account/repositories/workspaceDetail.ts:113`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/workspaceDetail.ts#L113) → [`update_workspace` · `app/workspaces/workspace_api.py:392`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L502) → [`require_workspace_owner` · `app/workspaces/workspaces.py:509`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L585)
+**源码停靠点：** [`applyUpdate` · `src/pkg-account/pages/organization/index.vue:230`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/organization/index.vue#L232) → [`workspaceDetailRepository` · `src/pkg-account/repositories/workspaceDetail.ts:113`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/workspaceDetail.ts#L113) → [`update_workspace` · `app/workspaces/workspace_api.py:392`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L502) → [`require_workspace_owner` · `app/workspaces/workspaces.py:509`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L585)
 
 ## 汇总共享积分及所有者项目视图 {#workspace-overview}
 
@@ -143,15 +143,15 @@ sequenceDiagram
 
 **响应和失败分支：** 所有者概览是专门开放的读取视图；普通项目管理现在检查当前 `assignee_user_id` 和逐操作权限，所有者另有指派与销售阶段权限。离开者不能访问当前成员概览。活动可信状态缺失时返回 503，不伪造活动时间。
 
-**源码停靠点：** [`projectContextRepository` · `src/repositories/projectContext.ts:203`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectContext.ts#L203) → [`loadProjectOverview` · `src/repositories/projectOverview.ts:111`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectOverview.ts#L111) → [`get_enterprise_overview` · `app/workspaces/workspace_api.py:175`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L190) → [`enterprise_overview` · `app/admin/enterprise_overview.py:52`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/enterprise_overview.py#L62) → [`attach_overview_thumbnails` · `app/workflows/history_thumbnails.py:319`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/history_thumbnails.py#L319)
+**源码停靠点：** [`projectContextRepository` · `src/repositories/projectContext.ts:203`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectContext.ts#L203) → [`loadProjectOverview` · `src/repositories/projectOverview.ts:129`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectOverview.ts#L129) → [`get_enterprise_overview` · `app/workspaces/workspace_api.py:175`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L190) → [`enterprise_overview` · `app/admin/enterprise_overview.py:52`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/enterprise_overview.py#L62) → [`attach_overview_thumbnails` · `app/workflows/history_thumbnails.py:319`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/history_thumbnails.py#L319)
 
 ## 分清owner查看、成员额度和创建者写权限 {#owner-read-and-quota}
 
 `get_enterprise_overview`仍按当前成员关系限定响应。`enterprise_overview`仅向当前OWNER增加`member_token_limit`、`member_token_limit_configured`、`quota_month`；当前成员行有`token_quota:{limit,used,reserved,source}`，已退出成员行省略当前quota；普通成员省略这些owner新字段，私有成员/历史段仍为null。
 
-[app/admin/enterprise_overview.py → enterprise_overview](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/enterprise_overview.py#L62)按结算月读取`consumption.current_month`，与[app/billing/member_token_quotas.py → enterprise_member_token_usage](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py#L57)独立。额度按预留月，待结算预留只计一次，`reserved`是`used`子集，不能再加。全局保存重置所有override，单人零持续暂停。当前小程序通过成员管理页编辑全局／单人额度，通过本人额度组件读取；完整 UI／服务／流水／准入链见[成员额度](/zh/reference/flows/member-quota-flow)。
+[app/admin/enterprise_overview.py → enterprise_overview](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/enterprise_overview.py#L62)按结算月读取`consumption.current_month`，与[app/billing/member_token_quotas.py → enterprise_member_token_usage](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py#L57)独立。额度按预留月，待结算预留只计一次，`reserved`是`used`子集，不能再加。全局保存重置所有override，单人零持续暂停。当前小程序通过成员管理页编辑全局／单人额度，通过本人额度组件读取；完整 UI／服务／流水／准入链见[成员额度](/zh/reference/flows/member-quota-flow)。
 
-当前企业owner可从可见成员任务进入`GET /v1/workflows/{id}`并轮询规范status URL。[app/workflows/api.py → _get_design_job_response](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py#L1428)每次重查当前owner关系及可见企业/Project范围。`job_response`标明实际`submitted_by`，在授权详情中可返回类型化输入和已有输出；非作者列表投影仍把 `inputs` 设为 `[]`。签名后 `finalize_workflow_reads` 重新核对权限。企业活跃时可包含已退出成员的可见Job。这不授予提交、删除、移动、重试权。无权/隐藏/不存在ID都404，换当前空间不能把无权ID变可读。[历史动作](/zh/reference/flows/workflow-history-flow)追踪原作者加当前负责人变更检查。
+当前企业owner可从可见成员任务进入`GET /v1/workflows/{id}`并轮询规范status URL。[app/workflows/api.py → _get_design_job_response](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/api.py#L1428)每次重查当前owner关系及可见企业/Project范围。`job_response`标明实际`submitted_by`，在授权详情中可返回类型化输入和已有输出；非作者列表投影仍把 `inputs` 设为 `[]`。签名后 `finalize_workflow_reads` 重新核对权限。企业活跃时可包含已退出成员的可见Job。这不授予提交、删除、移动、重试权。无权/隐藏/不存在ID都404，换当前空间不能把无权ID变可读。[历史动作](/zh/reference/flows/workflow-history-flow)追踪原作者加当前负责人变更检查。
 
 ## 分页追踪空间积分账本 {#workspace-token-detail}
 
@@ -169,7 +169,7 @@ sequenceDiagram
 
 **响应和失败分支：** `limit` 为 1–100，默认 50；`next_cursor=null` 表示结束。无关 cursor 为 422 `TOKEN_DETAIL_CURSOR_INVALID`。返回金额为绝对值，需要结合类型判断含义。
 
-**源码停靠点：** [`workspaceTokenDetailRepository` · `src/pkg-account/repositories/workspaceTokenDetail.ts:144`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/workspaceTokenDetail.ts#L144) → [`get_workspace_token_detail` · `app/workspaces/workspace_api.py:199`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L309)
+**源码停靠点：** [`workspaceTokenDetailRepository` · `src/pkg-account/repositories/workspaceTokenDetail.ts:144`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/workspaceTokenDetail.ts#L144) → [`get_workspace_token_detail` · `app/workspaces/workspace_api.py:199`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L309)
 
 ## 生成可转发邀请 {#create-share-invitation}
 
@@ -187,7 +187,7 @@ sequenceDiagram
 
 **响应和失败分支：** 用 `id` 跟踪生命周期，禁止把 bearer 写入日志/分析。加入时还会再次检查席位，所以生成不是预占席位。同键不同指纹会冲突；无法重放时应核对结果，不能无限生成新邀请。
 
-**源码停靠点：** [`invite` · `src/pkg-account/pages/organization/index.vue:305`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/organization/index.vue#L307) → [`shareInvitationOwnerRepository` · `src/pkg-account/repositories/shareInvitations.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/shareInvitations.ts#L70) → [`create_workspace_share_invitation` · `app/workspaces/workspace_api.py:489`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L599) → [`create_share_invitation` · `app/workspaces/share_invitations.py:178`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/share_invitations.py#L178)
+**源码停靠点：** [`invite` · `src/pkg-account/pages/organization/index.vue:305`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/organization/index.vue#L307) → [`shareInvitationOwnerRepository` · `src/pkg-account/repositories/shareInvitations.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/shareInvitations.ts#L70) → [`create_workspace_share_invitation` · `app/workspaces/workspace_api.py:489`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L599) → [`create_share_invitation` · `app/workspaces/share_invitations.py:178`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/share_invitations.py#L178)
 
 ## 注册前预览 {#preview-share-invitation}
 
@@ -205,7 +205,7 @@ sequenceDiagram
 
 **响应和失败分支：** 未知 bearer 为 404；已使用/过期/撤销/满员/停用会返回对应展示状态及 `can_accept=false`。Redis 故障为 503，超限为带 `Retry-After` 的 429。preview 到 accept 之间状态可能变化。
 
-**源码停靠点：** [`load` · `src/pkg-account/pages/invitation/index.vue:83`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/invitation/index.vue#L85) → [`shareInvitationPreviewRepository` · `src/pkg-account/repositories/shareInvitationPreview.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/shareInvitationPreview.ts#L70) → [`preview_workspace_share_invitation` · `app/workspaces/workspace_api.py:522`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L632) → [`preview_share_invitation` · `app/workspaces/share_invitations.py:292`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/share_invitations.py#L292) → [`enforce_rate_limit` · `app/core/rate_limit.py:25`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/rate_limit.py#L25)
+**源码停靠点：** [`load` · `src/pkg-account/pages/invitation/index.vue:83`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/invitation/index.vue#L85) → [`shareInvitationPreviewRepository` · `src/pkg-account/repositories/shareInvitationPreview.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/shareInvitationPreview.ts#L70) → [`preview_workspace_share_invitation` · `app/workspaces/workspace_api.py:522`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L632) → [`preview_share_invitation` · `app/workspaces/share_invitations.py:292`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/share_invitations.py#L292) → [`enforce_rate_limit` · `app/core/rate_limit.py:25`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/rate_limit.py#L25)
 
 ## 原子消耗 bearer 并加入企业 {#accept-share-invitation}
 
@@ -225,7 +225,7 @@ sequenceDiagram
 
 **响应和失败分支：** 响应含 `invitation_id`、`current_workspace_id`、空间角色和 `joined/already_member`。已使用/过期/撤销为 410；满员/停用/管理员禁入为 409。后续请求仍以当前成员资格为准，重放只证明历史动作结果。
 
-**源码停靠点：** [`accept` · `src/pkg-account/pages/invitation/index.vue:99`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/invitation/index.vue#L101) → [`shareInvitationAcceptanceRepository` · `src/pkg-account/repositories/shareInvitationAcceptance.ts:89`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/shareInvitationAcceptance.ts#L89) → [`accept_workspace_share_invitation` · `app/workspaces/workspace_api.py:544`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L654) → [`accept_share_invitation` · `app/workspaces/share_invitations.py:360`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/share_invitations.py#L360) → [`remember_enterprise_membership` · `app/workspaces/workspaces.py:168`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L174) → [`ensure_scratch_project` · `app/workspaces/workspaces.py:80`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L81)
+**源码停靠点：** [`accept` · `src/pkg-account/pages/invitation/index.vue:99`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/invitation/index.vue#L101) → [`shareInvitationAcceptanceRepository` · `src/pkg-account/repositories/shareInvitationAcceptance.ts:89`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/shareInvitationAcceptance.ts#L89) → [`accept_workspace_share_invitation` · `app/workspaces/workspace_api.py:544`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L654) → [`accept_share_invitation` · `app/workspaces/share_invitations.py:360`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/share_invitations.py#L360) → [`remember_enterprise_membership` · `app/workspaces/workspaces.py:168`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L174) → [`ensure_scratch_project` · `app/workspaces/workspaces.py:80`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L81)
 
 ## 查看生命周期而不恢复 bearer {#list-share-invitations}
 
@@ -243,7 +243,7 @@ sequenceDiagram
 
 **响应和失败分支：** 不返回明文或摘要。403 `WORKSPACE_OWNER_REQUIRED` 防止普通成员枚举邀请元数据。
 
-**源码停靠点：** [`shareInvitationOwnerRepository` · `src/pkg-account/repositories/shareInvitations.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/shareInvitations.ts#L70) → [`list_workspace_share_invitations` · `app/workspaces/workspace_api.py:584`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L694) → [`owner_item` · `app/workspaces/share_invitations.py:550`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/share_invitations.py#L550)
+**源码停靠点：** [`shareInvitationOwnerRepository` · `src/pkg-account/repositories/shareInvitations.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/shareInvitations.ts#L70) → [`list_workspace_share_invitations` · `app/workspaces/workspace_api.py:584`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L694) → [`owner_item` · `app/workspaces/share_invitations.py:550`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/share_invitations.py#L550)
 
 ## 撤销待接受的分享邀请 {#revoke-share-invitation}
 
@@ -261,7 +261,7 @@ sequenceDiagram
 
 **响应和失败分支：** 缺失为 404；非 pending 为 409 `INVITATION_NOT_PENDING`。此 DELETE 可重放；手机号邀请撤销第二次会因非 pending 冲突，不能混为一谈。
 
-**源码停靠点：** [`shareInvitationOwnerRepository` · `src/pkg-account/repositories/shareInvitations.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/shareInvitations.ts#L70) → [`revoke_workspace_share_invitation` · `app/workspaces/workspace_api.py:614`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L724)
+**源码停靠点：** [`shareInvitationOwnerRepository` · `src/pkg-account/repositories/shareInvitations.ts:70`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/shareInvitations.ts#L70) → [`revoke_workspace_share_invitation` · `app/workspaces/workspace_api.py:614`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L724)
 
 ## 退出而不把历史转到个人空间 {#leave-workspace}
 
@@ -279,7 +279,7 @@ sequenceDiagram
 
 **响应和失败分支：** 204 表示退出已确认。响应不确定时 `reconcile` 读取上下文/详情判断是否完成，不盲目重发 DELETE。离开者可读取允许的本人历史，但不能提交新企业任务或管理项目。
 
-**源码停靠点：** [`confirmMembership` · `src/pkg-account/pages/organization/index.vue:120`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/organization/index.vue#L122) → [`enterpriseMembershipRepository` · `src/pkg-account/repositories/enterpriseMembership.ts:44`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/enterpriseMembership.ts#L44) → [`leave_workspace_membership` · `app/workspaces/workspace_api.py:674`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L784) → [`remember_enterprise_membership` · `app/workspaces/workspaces.py:168`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L174)
+**源码停靠点：** [`confirmMembership` · `src/pkg-account/pages/organization/index.vue:120`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/organization/index.vue#L122) → [`enterpriseMembershipRepository` · `src/pkg-account/repositories/enterpriseMembership.ts:44`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/enterpriseMembership.ts#L44) → [`leave_workspace_membership` · `app/workspaces/workspace_api.py:674`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L784) → [`remember_enterprise_membership` · `app/workspaces/workspaces.py:168`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L174)
 
 ## 所有者移除成员 {#remove-workspace-member}
 
@@ -297,7 +297,7 @@ sequenceDiagram
 
 **响应和失败分支：** 404 `MEMBER_NOT_FOUND` 表示成员已变化；409 `WORKSPACE_MEMBER_ACTIVE_JOBS` 防止中断记账。UI 确认不是权限依据，过期或替换的成员关系仍需再核对。
 
-**源码停靠点：** [`confirmMembership` · `src/pkg-account/pages/organization/index.vue:120`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/pages/organization/index.vue#L122) → [`enterpriseMembershipRepository` · `src/pkg-account/repositories/enterpriseMembership.ts:44`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-account/repositories/enterpriseMembership.ts#L44) → [`remove_workspace_member` · `app/workspaces/workspace_api.py:735`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L845) → [`remove_enterprise_member` · `app/billing/billing.py:1229`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L1247)
+**源码停靠点：** [`confirmMembership` · `src/pkg-account/pages/organization/index.vue:120`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/pages/organization/index.vue#L122) → [`enterpriseMembershipRepository` · `src/pkg-account/repositories/enterpriseMembership.ts:44`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-account/repositories/enterpriseMembership.ts#L44) → [`remove_workspace_member` · `app/workspaces/workspace_api.py:735`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L845) → [`remove_enterprise_member` · `app/billing/billing.py:1229`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L1247)
 
 ## 发现离开企业的本人历史入口 {#history-workspaces}
 
@@ -315,7 +315,7 @@ sequenceDiagram
 
 **响应和失败分支：** 重新加入后该企业不再属于离开列表；企业被移除后也不再可发现。此请求不写数据库、不进入 Redis 队列。
 
-**源码停靠点：** [`historyWorkspaceRepository` · `src/repositories/historyWorkspaces.ts:45`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/historyWorkspaces.ts#L45) → [`list_history_workspaces` · `app/workspaces/workspace_api.py:88`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L103) → [`accessible_history_workspace` · `app/workspaces/workspaces.py:192`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspaces.py#L198)
+**源码停靠点：** [`historyWorkspaceRepository` · `src/repositories/historyWorkspaces.ts:45`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/historyWorkspaces.ts#L45) → [`list_history_workspaces` · `app/workspaces/workspace_api.py:88`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L103) → [`accessible_history_workspace` · `app/workspaces/workspaces.py:192`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspaces.py#L198)
 
 ## 按设备显示企业移除通知 {#workspace-removal-notices}
 
@@ -333,7 +333,7 @@ sequenceDiagram
 
 **响应和失败分支：** 另一设备再次读到同事件属于正常行为。企业移除与退出仍有效企业不同，后者应去历史发现入口。
 
-**源码停靠点：** [`loadWorkspaceRemovalNotices` · `src/repositories/workspaceRemovalNotices.ts:48`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/workspaceRemovalNotices.ts#L48) → [`list_workspace_removal_notices` · `app/workspaces/workspace_api.py:127`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L142)
+**源码停靠点：** [`loadWorkspaceRemovalNotices` · `src/repositories/workspaceRemovalNotices.ts:48`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/workspaceRemovalNotices.ts#L48) → [`list_workspace_removal_notices` · `app/workspaces/workspace_api.py:127`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L142)
 
 ## 手机号邀请与单数路由：另一套协议
 
@@ -355,7 +355,7 @@ sequenceDiagram
 
 **响应和失败分支：** 201 返回摘要。无效手机号为 422，目标未注册为 404；自邀/已有成员/待接受重复/满员分别为 409。该接口没有动作键重放。
 
-**源码停靠点：** [`invite_workspace_member` · `app/workspaces/workspace_api.py:457`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/workspace_api.py#L567) → [`create_enterprise_invitation` · `app/billing/billing.py:901`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L919)
+**源码停靠点：** [`invite_workspace_member` · `app/workspaces/workspace_api.py:457`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/workspace_api.py#L567) → [`create_enterprise_invitation` · `app/billing/billing.py:901`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L919)
 
 ## 在当前企业创建手机号邀请 {#phone-invite-current}
 
@@ -373,7 +373,7 @@ sequenceDiagram
 
 **响应和失败分支：** 201 返回摘要。手机号/目标/席位错误同显式创建，但所有者资格从当前上下文解析。响应不确定时先重读上下文再创建。
 
-**源码停靠点：** [`invite_workspace_member` · `app/billing/billing_api.py:995`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py#L1026) → [`create_enterprise_invitation` · `app/billing/billing.py:901`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L919)
+**源码停靠点：** [`invite_workspace_member` · `app/billing/billing_api.py:995`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing_api.py#L1026) → [`create_enterprise_invitation` · `app/billing/billing.py:901`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L919)
 
 ## 读取手机号邀请收件箱 {#phone-invitation-inbox}
 
@@ -391,7 +391,7 @@ sequenceDiagram
 
 **响应和失败分支：** 200 返回 items，可包含终态摘要。不需要动作键或 cursor，空收件箱合法；必须登录，手机号过滤在服务端执行。
 
-**源码停靠点：** [`received_workspace_invitations` · `app/billing/billing_api.py:1024`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py#L1055) → [`invitation_summary` · `app/billing/billing.py:185`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L185)
+**源码停靠点：** [`received_workspace_invitations` · `app/billing/billing_api.py:1024`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing_api.py#L1055) → [`invitation_summary` · `app/billing/billing.py:185`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L185)
 
 ## 接受指向自己的收件箱邀请 {#phone-invitation-accept}
 
@@ -409,7 +409,7 @@ sequenceDiagram
 
 **响应和失败分支：** 200 返回最新 UserResponse。无效/已消费/过期/手机号不符为 400 INVITATION_INVALID；管理员/已有成员/满员/停用为 409。此协议无接受动作重放键，成功后再试会看到已消费邀请。
 
-**源码停靠点：** [`accept_invitation_by_id` · `app/billing/billing_api.py:1051`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py#L1082) → [`accept_enterprise_invitation_by_id` · `app/billing/billing.py:1101`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L1119)
+**源码停靠点：** [`accept_invitation_by_id` · `app/billing/billing_api.py:1051`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing_api.py#L1082) → [`accept_enterprise_invitation_by_id` · `app/billing/billing.py:1101`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L1119)
 
 ## 拒绝指向自己的邀请 {#phone-invitation-decline}
 
@@ -427,7 +427,7 @@ sequenceDiagram
 
 **响应和失败分支：** 204 无正文。无效/已消费/过期/手机号不符为 400 INVITATION_INVALID，重复拒绝也一样；此动作不会删除已有成员关系。
 
-**源码停靠点：** [`decline_invitation_by_id` · `app/billing/billing_api.py:1073`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py#L1104) → [`decline_enterprise_invitation` · `app/billing/billing.py:1135`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L1153)
+**源码停靠点：** [`decline_invitation_by_id` · `app/billing/billing_api.py:1073`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing_api.py#L1104) → [`decline_enterprise_invitation` · `app/billing/billing.py:1135`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L1153)
 
 ## 撤销发出的手机号邀请 {#phone-invitation-revoke}
 
@@ -445,7 +445,7 @@ sequenceDiagram
 
 **响应和失败分支：** 204 无正文。非所有者为 403；当前所有者范围内找不到为 404；任何非 pending 状态（包括重复撤销）为 409 INVITATION_NOT_PENDING。
 
-**源码停靠点：** [`revoke_outgoing_invitation` · `app/billing/billing_api.py:1093`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py#L1124) → [`revoke_enterprise_invitation` · `app/billing/billing.py:1155`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L1173)
+**源码停靠点：** [`revoke_outgoing_invitation` · `app/billing/billing_api.py:1093`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing_api.py#L1124) → [`revoke_enterprise_invitation` · `app/billing/billing.py:1155`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L1173)
 
 ## 读取旧的所有者管理投影 {#current-workspace-management}
 
@@ -463,7 +463,7 @@ sequenceDiagram
 
 **响应和失败分支：** 200 返回所有者管理详情。解析到非所有者关系或没有有效企业成员关系时为 403 WORKSPACE_OWNER_REQUIRED。此请求只读，响应缓存不能建立成员资格或授予权限。
 
-**源码停靠点：** [`current_workspace_management` · `app/billing/billing_api.py:1110`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py#L1141) → [`active_membership` · `app/billing/billing.py:140`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L140)
+**源码停靠点：** [`current_workspace_management` · `app/billing/billing_api.py:1110`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing_api.py#L1141) → [`active_membership` · `app/billing/billing.py:140`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L140)
 
 ## 通过旧的当前空间上下文移除成员 {#current-workspace-remove-member}
 
@@ -481,7 +481,7 @@ sequenceDiagram
 
 **响应和失败分支：** 204 无正文。非所有者为 403；成员缺失为 404 MEMBER_NOT_FOUND；移除 OWNER 或活跃任务成员为 409。重复 DELETE 不保证 204，应读取核对。
 
-**源码停靠点：** [`remove_member` · `app/billing/billing_api.py:1169`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing_api.py#L1200) → [`remove_enterprise_member` · `app/billing/billing.py:1229`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py#L1247)
+**源码停靠点：** [`remove_member` · `app/billing/billing_api.py:1169`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing_api.py#L1200) → [`remove_enterprise_member` · `app/billing/billing.py:1229`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py#L1247)
 
 ## 自己复现并解释边界
 
@@ -497,9 +497,9 @@ sequenceDiagram
 
 ## 不必读完 Vue，也能检查 HTTP 边界
 
-repository 把路由和 `{ auth:true, method, data }` 交给 [`request` · `src/services/request.ts:370`](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/request.ts#L370)。共享 transport 组装配置的 API URL、加入 bearer 身份和请求观测信息、通过平台请求 API 发送 JSON，并把非 2xx detail 规范化为 ApiRequestError（`statusCode`、`code`、`message`、`requestId`）。随后 repository mapper 将契约的 snake_case 转为 UI 值，拒绝不属于正确账号/空间/项目的响应。学习一个动作时，分别在页面 handler、repository、transport 打断点，按 data → URL → 响应 → 规范化错误观察；不要把 bearer token 粘进文档或 issue 截图。
+repository 把路由和 `{ auth:true, method, data }` 交给 [`request` · `src/services/request.ts:370`](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/request.ts#L370)。共享 transport 组装配置的 API URL、加入 bearer 身份和请求观测信息、通过平台请求 API 发送 JSON，并把非 2xx detail 规范化为 ApiRequestError（`statusCode`、`code`、`message`、`requestId`）。随后 repository mapper 将契约的 snake_case 转为 UI 值，拒绝不属于正确账号/空间/项目的响应。学习一个动作时，分别在页面 handler、repository、transport 打断点，按 data → URL → 响应 → 规范化错误观察；不要把 bearer token 粘进文档或 issue 截图。
 
-FastAPI 的 [`get_current_user` · `app/identity/auth.py:161`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/identity/auth.py#L162) 验证 bearer 与有效账号；[`get_db` · `app/core/database.py:115`](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/database.py#L115) 提供 AsyncSession。然后接口对应 service 再证明空间/项目/奖励范围。登录回答“谁在调用”，不能代替资源授权。本章源码链接固定前后端版本，不随 main 漂移。
+FastAPI 的 [`get_current_user` · `app/identity/auth.py:161`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/identity/auth.py#L162) 验证 bearer 与有效账号；[`get_db` · `app/core/database.py:115`](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/database.py#L115) 提供 AsyncSession。然后接口对应 service 再证明空间/项目/奖励范围。登录回答“谁在调用”，不能代替资源授权。本章源码链接固定前后端版本，不随 main 漂移。
 
 ## 从小段真实代码读懂交接
 
@@ -530,4 +530,4 @@ EnterpriseMembership(
 
 项目概览按当前负责人归组，响应中的创建者仍用于历史归因。交接不会改写既有任务的提交者或计费；新的任务按当前提交人准入。专门的[指派链路](/zh/reference/flows/project-assignment-flow)、[销售阶段及转化](/zh/reference/flows/project-stages-flow)解释所有者的新增权限。
 
-当前所有者概览另含 `daily_report_today` 北京当天摘要，由 `load_report_day` 和 `report_day_counts` 按当前非所有者成员任期统计。它不代表前端已接通日报编辑；九个[日报接口](/zh/reference/flows/daily-report-flow)当前以认证集成为入口。
+当前所有者概览另含 `daily_report_today` 北京当天摘要，由 `load_report_day` 和 `report_day_counts` 按当前非所有者成员任期统计。前端把摘要显示在企业看板的成员入口。所有者进入「成员」后按日期查看日报，成员从项目页直接打开自己的日报。两端都通过认证接口验证当前任期。见[日报链路](/zh/reference/flows/daily-report-flow)。

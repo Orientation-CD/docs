@@ -25,9 +25,9 @@ sequenceDiagram
 
 | 图中步骤 | 源码 | 应阅读的分支与目的 |
 | --- | --- | --- |
-| 1–4 | [assignProject](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/services/projectAssignment.ts#L40) 与 `assignmentSnapshot` | 刷新权限，但不偷偷替换用户确认时看到的乐观锁版本 |
-| 5–8 | [assign_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py#L634) | 企业／成员锁、嵌套事务以及默认项目外键的原子修复 |
-| 9–10 | [projectContextRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectContext.ts#L203) | 用指派版本挡住迟到响应，防止旧负责人状态恢复 |
+| 1–4 | [assignProject](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/services/projectAssignment.ts#L40) 与 `assignmentSnapshot` | 刷新权限，但不偷偷替换用户确认时看到的乐观锁版本 |
+| 5–8 | [assign_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_api.py#L634) | 企业／成员锁、嵌套事务以及默认项目外键的原子修复 |
+| 9–10 | [projectContextRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectContext.ts#L203) | 用指派版本挡住迟到响应，防止旧负责人状态恢复 |
 
 ## 指派或改派项目 {#assign-project}
 
@@ -45,14 +45,14 @@ sequenceDiagram
 
 `PUT /v1/workspaces/{workspace_id}/projects/{project_id}/assignment/seen`
 
-详情页的 [acknowledgeAssignment](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/services/projectAssignment.ts#L59) 仅在当前账号是展示的负责人且尚未读过时发送 `expected_assignment_version`。`acknowledge_assignment` 锁定有效企业上下文，调用 [require_assignee_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_jobs.py#L81)（在路由文件中别名为 `_owned_project`），再核对版本。它只更新已读版本并提交响应，刻意保留 `updated_at` 与活动时间。同版本重复确认无害；版本 2 的迟到请求不能确认新的版本 3，会返回 409 stale。
+详情页的 [acknowledgeAssignment](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/services/projectAssignment.ts#L59) 仅在当前账号是展示的负责人且尚未读过时发送 `expected_assignment_version`。`acknowledge_assignment` 锁定有效企业上下文，调用 [require_assignee_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_jobs.py#L81)（在路由文件中别名为 `_owned_project`），再核对版本。它只更新已读版本并提交响应，刻意保留 `updated_at` 与活动时间。同版本重复确认无害；版本 2 的迟到请求不能确认新的版本 3，会返回 409 stale。
 
 ## 交接后的读取与写入边界
 
-[readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/read_access.py#L79) 允许原任务作者、当前企业所有者或当前项目负责人读取符合条件的历史。打开项目另需当前负责关系或有边界的企业所有者权限。因此 A 可以保留自己的历史结果入口，同时失去打开 P 的权限。响应保留真实提交者、当前项目负责人和明确的操作权限。
+[readable_design_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/read_access.py#L79) 允许原任务作者、当前企业所有者或当前项目负责人读取符合条件的历史。打开项目另需当前负责关系或有边界的企业所有者权限。因此 A 可以保留自己的历史结果入口，同时失去打开 P 的权限。响应保留真实提交者、当前项目负责人和明确的操作权限。
 
-B 可只读查看 A 的结果，但不会变成作者。`finalize_workflow_reads` 在外部签名之后重新计算权限：变更需要“原作者＋当前负责人＋有效空间”。复用输入还要经过 Asset 自身权限；可见结果或签名 URL 不等于获得复用权。前端 [verifyAssignmentRead](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/assignmentReadAccess.ts#L7) 在读取／下载时防止会话、空间或负责关系变化。
+B 可只读查看 A 的结果，但不会变成作者。`finalize_workflow_reads` 在外部签名之后重新计算权限：变更需要“原作者＋当前负责人＋有效空间”。复用输入还要经过 Asset 自身权限；可见结果或签名 URL 不等于获得复用权。前端 [verifyAssignmentRead](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/assignmentReadAccess.ts#L7) 在读取／下载时防止会话、空间或负责关系变化。
 
-已受理任务通过 [active_task_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_jobs.py#L138) 继续执行，交接不是取消，也不会对旧预留重新定价。交接后 A 发起新的原作者变更会被 `PROJECT_NOT_ASSIGNEE` 拦截。整项目删除同时检查任务与没有任务的户型作品；存在前任内容时，只有所有者能授权清理（`PROJECT_OWNER_REQUIRED_FOR_FOREIGN_CONTENT`）。`move_to_scratch` 把内容送回各自作者的临时项目，不把所有历史都交给 B。
+已受理任务通过 [active_task_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_jobs.py#L138) 继续执行，交接不是取消，也不会对旧预留重新定价。交接后 A 发起新的原作者变更会被 `PROJECT_NOT_ASSIGNEE` 拦截。整项目删除同时检查任务与没有任务的户型作品；存在前任内容时，只有所有者能授权清理（`PROJECT_OWNER_REQUIRED_FOR_FOREIGN_CONTENT`）。`move_to_scratch` 把内容送回各自作者的临时项目，不把所有历史都交给 B。
 
-结合 [tests/test_project_assignment.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_assignment.py)、[tests/test_project_assignment_deletion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_assignment_deletion.py) 阅读处理函数。本章是源码跟读，不代表已完成真机或生产验收。
+结合 [tests/test_project_assignment.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_assignment.py)、[tests/test_project_assignment_deletion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_assignment_deletion.py) 阅读处理函数。本章是源码跟读，不代表已完成真机或生产验收。

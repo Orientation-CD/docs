@@ -62,7 +62,7 @@ python -m app.assets.input_asset_repair --job-id '<job-uuid>' --asset-id '<asset
 
 默认 dry-run，`--apply` 是针对同一已核验对象对的运维写操作。CLI 不发现目标、不启动服务、不建 schema；已执行物理 pins、任务状态、收费及原始内容身份不变。`INPUT_REPAIR_AMBIGUOUS_OWNER` 需要归属决策，不能挑第一个消费者。复制回执不确定时保留 receipt／lease，按恢复契约处理，不删除元数据绕过。
 
-记录打包的 Alembic heads、`alembic current --check-heads`、`alembic check`，不要永久写死一个“最新 revision”。新增输入／视频／额度 schema 不替代原有停机和兼容要求。写操作前阅读[修复实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/input_asset_repair.py)及[归档实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py)。
+记录打包的 Alembic heads、`alembic current --check-heads`、`alembic check`，不要永久写死一个“最新 revision”。新增输入／视频／额度 schema 不替代原有停机和兼容要求。写操作前阅读[修复实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/assets/input_asset_repair.py)及[归档实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/assets/asset_input_archival.py)。
 
 ## 销售阶段增加持久化激活边界
 
@@ -74,13 +74,13 @@ python -m app.assets.input_asset_repair --job-id '<job-uuid>' --asset-id '<asset
 
 存在 `enabled_at` 后，即使没有任何项目，也拒绝关闭模式或选择没有兼容标记的恢复镜像。`BOOTSTRAP_PRE_ACTIVATION_ONLY` 只记录前驱，不授权激活后重新启动它。初始化结果不确定时保持停栈，先只读协调，再按兼容前进修复；不能删除标记、盲重试云写或降级 schema。普通 dry-run 不执行新的数据库探针，不能当作激活证明。
 
-源码：[deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md) · [deploy/sae/lib/migration.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/lib/migration.sh) · [deploy/sae/lib/preflight.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/lib/preflight.sh)。
+源码：[deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md) · [deploy/sae/lib/migration.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/lib/migration.sh) · [deploy/sae/lib/preflight.sh](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/lib/preflight.sh)。
 
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [生产、成败与活动运行流程](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy.sh)
-- [活动修复操作器](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_activity_operator.py)
-- [活动兼容 marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)
+- [生产、成败与活动运行流程](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [受保护发布实现](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/deploy.sh)
+- [活动修复操作器](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_activity_operator.py)
+- [活动兼容 marker](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/PROJECT_ACTIVITY_COMPATIBILITY_V1)

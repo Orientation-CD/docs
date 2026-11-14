@@ -25,15 +25,15 @@ sequenceDiagram
 
 | Steps | Source | What to verify |
 | --- | --- | --- |
-| 1–4 | [fetchList](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectContext.ts#L114) → [list_projects](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py#L373) | The list filters `assignee_user_id`, not historical creator |
-| 5–8 | [save](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/pkg-projects/pages/editor/index.vue#L145) → [create_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py#L414) | Required fields, delegated creation, target-scoped capacity/name and commit |
-| 9–10 | [_project_responses](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_api.py#L238) | Creator, assignee, assignment version, stage facts and per-action permissions accompany the row |
+| 1–4 | [fetchList](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectContext.ts#L114) → [list_projects](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_api.py#L373) | The list filters `assignee_user_id`, not historical creator |
+| 5–8 | [save](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/pkg-projects/pages/editor/index.vue#L145) → [create_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_api.py#L414) | Required fields, delegated creation, target-scoped capacity/name and commit |
+| 9–10 | [_project_responses](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_api.py#L238) | Creator, assignee, assignment version, stage facts and per-action permissions accompany the row |
 
 ## Load the code-owned status catalog {#project-status-catalog}
 
 `GET /v1/project-statuses`
 
-`get_project_statuses` authenticates without requiring a selected workspace. `visible_project_statuses` chooses base, outcomes or sales mode from backend flags. It returns code-owned labels/order, phases, stale thresholds and capability fields with private five-minute caching; [projectStatusCatalogRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/repositories/projectStatusCatalog.ts#L92) validates them. Sales mode publishes independent lightable stages and outcomes; an older enum cannot prove a stage was completed. See [sales stages](/reference/flows/project-stages-flow). This read changes no state or provider work.
+`get_project_statuses` authenticates without requiring a selected workspace. `visible_project_statuses` chooses base, outcomes or sales mode from backend flags. It returns code-owned labels/order, phases, stale thresholds and capability fields with private five-minute caching; [projectStatusCatalogRepository](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/repositories/projectStatusCatalog.ts#L92) validates them. Sales mode publishes independent lightable stages and outcomes; an older enum cannot prove a stage was completed. See [sales stages](/reference/flows/project-stages-flow). This read changes no state or provider work.
 
 ## Read the assignee list, scratch and default {#list-projects}
 
@@ -57,7 +57,7 @@ The capacity is 20 ordinary projects per assignee/workspace, excluding closed ou
 
 `PUT /v1/workspaces/{workspace_id}/projects/default`
 
-`set_default_project` accepts `{"project_id":"<UUID>"}`, locks accessible workspace and validates the active assignee-owned target through [require_assignee_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_jobs.py#L81) (imported as `_owned_project`). It updates only the caller's preference and commits 200 with the echoed default ID. Scratch is allowed. A former assignee cannot keep a handed-off project as their server default; assignment repairs that preference atomically. Device current selection remains separate, and no historical task moves.
+`set_default_project` accepts `{"project_id":"<UUID>"}`, locks accessible workspace and validates the active assignee-owned target through [require_assignee_project](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_jobs.py#L81) (imported as `_owned_project`). It updates only the caller's preference and commits 200 with the echoed default ID. Scratch is allowed. A former assignee cannot keep a handed-off project as their server default; assignment repairs that preference atomically. Device current selection remains separate, and no historical task moves.
 
 ## Open a current project detail {#get-project}
 
@@ -77,7 +77,7 @@ In sales mode the assignee edits customer fields; an enterprise owner inspecting
 
 `POST /v1/workspaces/{workspace_id}/projects/{project_id}/delete`
 
-`ProjectDeleteSheet` → `remove` → `projectContextRepository` sends explicit mode `delete_jobs` or `move_to_scratch`. `delete_project` delegates to [delete_project_group](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workspaces/project_deletion.py#L147), which probes current authority, snapshots all Jobs and nondeleted floor-plan Works, locks participating authors' admission authorities in order, locks Jobs/workspace/Projects/Works and rechecks the whole set. Changed snapshots retry at most three times. Scratch, active/deleting/submitting work and retained external dependencies are blockers; deletion is never authorized by the sheet's preview.
+`ProjectDeleteSheet` → `remove` → `projectContextRepository` sends explicit mode `delete_jobs` or `move_to_scratch`. `delete_project` delegates to [delete_project_group](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workspaces/project_deletion.py#L147), which probes current authority, snapshots all Jobs and nondeleted floor-plan Works, locks participating authors' admission authorities in order, locks Jobs/workspace/Projects/Works and rechecks the whole set. Changed snapshots retry at most three times. Scratch, active/deleting/submitting work and retained external dependencies are blockers; deletion is never authorized by the sheet's preview.
 
 Assignees cannot destroy a project containing previous authors' Jobs or zero-job Works: `PROJECT_OWNER_REQUIRED_FOR_FOREIGN_CONTENT` requires the owner. `move_to_scratch` returns each author's content to that author's permanent scratch, updates the current assignee's default if needed and atomically returns 204. Empty cleanup also returns 204. Nonempty `delete_jobs` saves DELETING state and durable child deletion claims, commits and returns 202.
 
@@ -89,4 +89,4 @@ Assignees cannot destroy a project containing previous authors' Jobs or zero-job
 
 For a first exercise, list one workspace, create a self-assigned ordinary project and verify 201/detail/default remain distinct. Then trace an owner transfer and confirm the old default becomes scratch while old task authorship stays fixed. For sales mode, inspect stage evidence and event records before/after a manual point. No live app E2E is claimed by this documentation audit.
 
-Source tests: [tests/test_project_assignment.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_assignment.py) · [tests/test_project_assignment_deletion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_assignment_deletion.py) · [tests/test_project_sales_stage_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_project_sales_stage_api.py).
+Source tests: [tests/test_project_assignment.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_assignment.py) · [tests/test_project_assignment_deletion.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_assignment_deletion.py) · [tests/test_project_sales_stage_api.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_project_sales_stage_api.py).

@@ -45,7 +45,7 @@ VitePress 输出 `.vitepress/dist`，GitHub Pages 在 `/docs/` 提供服务。PR
 
 前端 `pnpm test` 现包含 `test:package-budget`，微信质量门禁包含构建产物／Babel 检查。包体预算是项目规则，不是引用平台官方上限。户型夹具门禁只证明记录的源码契约；本轮另行跟读后端 main 的真实实现，两者都不能单独证明部署就绪。
 
-授权的后端部署基线升级使用 `run_deployed_upgrade_gate.sh`，在同一所有权已核验的一次性数据库上完成迁移及选定 MinIO／OSS 门禁。该栈产品配置已准备后，受影响 smoke／E2E runner 使用 `--preconfigured`，避免被旧云端快照覆盖。这与文档校验不同，见[测试／存储策略](/zh/testing/storage-environments)及[源码 runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)。
+授权的后端部署基线升级使用 `run_deployed_upgrade_gate.sh`，在同一所有权已核验的一次性数据库上完成迁移及选定 MinIO／OSS 门禁。该栈产品配置已准备后，受影响 smoke／E2E runner 使用 `--preconfigured`，避免被旧云端快照覆盖。这与文档校验不同，见[测试／存储策略](/zh/testing/storage-environments)及[源码 runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md)。
 
 视频镜像重建会读取私有上游默认分支，即使后端 commit 不变，也应记录实际供应商提交和镜像 digest，不能声称仅凭后端 SHA 就能复现每次供应商构建。
 
@@ -55,13 +55,13 @@ VitePress 输出 `.vitepress/dist`，GitHub Pages 在 `/docs/` 提供服务。PR
 
 `python3.12 scripts/run_regression_groups.py --with-integration --port "$DEV_TEST_PORT"` 使用四条本地执行通道：每组 portable 两个 pytest worker 完成后，同一通道立即串行运行对应 resource shard，总实际 worker 预算为八，不会同时启动所有 shard。夹具资源、收集计划、清理回执和性能观察绑定真实源码版本；缺失、取消或未收集工作不能计为 PASS。全量回归通过也不能代替独立浏览器/SDK 或真实供应商要求。
 
-当前原生平台边界与报告语义见 [tests/documents/TEST_STRATEGY.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md) · [scripts/run_regression_groups.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/run_regression_groups.py)。仅更新本文档不需要启动产品栈或执行这些门禁。
+当前原生平台边界与报告语义见 [tests/documents/TEST_STRATEGY.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/documents/TEST_STRATEGY.md) · [scripts/run_regression_groups.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/run_regression_groups.py)。仅更新本文档不需要启动产品栈或执行这些门禁。
 
 ## 源码依据
 
 已按[本文档记录的源码版本](/zh/reference/source-revisions)核对；实际运行配置与云端启用状态需要单独确认。
 
-- [后端文档工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/.github/workflows/sdd-docs.yml)
-- [定时运行工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/.github/workflows/daily-endurance.yml)
-- [规范测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md)
-- [前端脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json)
+- [后端文档工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/.github/workflows/sdd-docs.yml)
+- [定时运行工作流](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/.github/workflows/daily-endurance.yml)
+- [规范测试策略](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/documents/TEST_STRATEGY.md)
+- [前端脚本](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/package.json)

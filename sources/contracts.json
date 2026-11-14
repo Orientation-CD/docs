@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "commits": {
-    "frontend": "88c75c1f15cd65f45c7fb09d560df80430ddc198",
-    "backend": "749e82df3a51c441335ba6a4db607a98bacbcf97"
+    "frontend": "7f1a3169338c10bd4139c24318f7a35caf86310c",
+    "backend": "f34b8a4d6307c83c6f7bbc905485a4f586d59a99"
   },
   "api": [
     {
@@ -4265,6 +4265,9 @@
       "documents/assets/home-hero/homeHeroBanners.patch.json",
       "documents/assets/home-hero/space-design.jpg",
       "documents/assets/home-hero/validation.json",
+      "documents/assets/home-store-20261114/README.md",
+      "documents/assets/home-store-20261114/local-background.jpg",
+      "documents/assets/home-store-20261114/national-background.jpg",
       "documents/assets/home-v2/README.md",
       "documents/assets/home-v2/ai-creation.jpg",
       "documents/assets/home-v2/banner-template.svg",
@@ -4339,17 +4342,22 @@
       "documents/assets/recent-features/style-comparison.png",
       "documents/assets/recent-features/validation.json",
       "documents/design_system.md",
+      "documents/draft-refresh-scope-fix.md",
       "documents/entry-layering-evidence/README.md",
       "documents/entry-layering-evidence/cards-375.png",
       "documents/entry-layering-evidence/cards-390.png",
       "documents/entry-layering-evidence/metrics.json",
       "documents/examples/ad-assets.json",
+      "documents/floor-render-background-immediate.md",
       "documents/home-arrow-evidence/README.md",
       "documents/home-arrow-evidence/cards-320.png",
       "documents/home-arrow-evidence/cards-375.png",
       "documents/home-arrow-evidence/cards-390.png",
       "documents/home-arrow-evidence/metrics.json",
+      "documents/home-caption-baseline-fix.md",
       "documents/home-entry-artwork-delivery.md",
+      "documents/home-recent-entry-delivery.md",
+      "documents/home-store-card-tuning.md",
       "documents/integration-runbook.md",
       "documents/issue406-cache-batch1-validation.md",
       "documents/issue406-cache-batch2-validation.md",
@@ -5037,6 +5045,22 @@
       "documents/issue531/verification.json",
       "documents/issue531/verify-artifacts.mjs",
       "documents/issue531/visual-results.json",
+      "documents/issue532/README.md",
+      "documents/issue532/build-comparison.json",
+      "documents/issue532/screenshots/320-minimal-detail@2x.png",
+      "documents/issue532/screenshots/320-minimal-keyboard@2x.png",
+      "documents/issue532/screenshots/320-minimal-late@2x.png",
+      "documents/issue532/screenshots/320-minimal-owner@2x.png",
+      "documents/issue532/screenshots/320-minimal-write@2x.png",
+      "documents/issue532/screenshots/320-modern-detail@2x.png",
+      "documents/issue532/screenshots/320-modern-keyboard@2x.png",
+      "documents/issue532/screenshots/320-modern-late@2x.png",
+      "documents/issue532/screenshots/320-modern-owner@2x.png",
+      "documents/issue532/screenshots/320-modern-write@2x.png",
+      "documents/issue532/screenshots/validation.json",
+      "documents/issue532/visual/entry.js",
+      "documents/issue532/visual/index.html",
+      "documents/issue532/visual/uni-lifecycle.js",
       "documents/issue535/README.md",
       "documents/issue535/build-comparison.json",
       "documents/issue535/review-revision.md",
@@ -5071,11 +5095,13 @@
       "documents/project-switch-counts-evidence/browser-layout-metrics.json",
       "documents/project-switch-counts-evidence/native-enterprise.png",
       "documents/project-switch-counts-evidence/native-personal.png",
+      "documents/recent-professional-direct-entry.md",
       "documents/release-validation-backlog.md",
       "documents/sass-button-warning-fix.md",
       "documents/three-vjia-discovery/entry-320.png",
       "documents/three-vjia-discovery/entry-390.png",
       "documents/three-vjia-discovery/layout.json",
+      "documents/three-vjia-preparation-page.md",
       "documents/weixin-babel-evidence/README.md",
       "documents/weixin-babel-evidence/babel-detail.png",
       "documents/weixin-babel-evidence/babel-plans-filter.png",
@@ -5123,6 +5149,7 @@
       "scripts/build_mp-weixin-cloud-production.sh",
       "scripts/build_mp-weixin-cloud-test.sh",
       "scripts/build_mp-weixin-local-test.sh",
+      "scripts/capture-daily-report.mjs",
       "scripts/capture-issue379-openapi.mjs",
       "scripts/capture-issue611-project-contract.py",
       "scripts/capture-issue619-project-contract.py",
@@ -5208,7 +5235,6 @@
       "src/components/plans/PlansProjectFilterDisabled.vue",
       "src/components/plans/ReportThumbnail.vue",
       "src/components/projects/EnterpriseProjectOverview.vue",
-      "src/components/projects/MemberQuotaSheet.vue",
       "src/components/projects/MemberQuotaView.vue",
       "src/components/projects/ProjectDeleteSheet.vue",
       "src/composables/useDiscoveryEntry.ts",
@@ -5373,6 +5399,8 @@
       "src/pkg-features/services/reportSources.ts",
       "src/pkg-features/services/sameStyleVideo.ts",
       "src/pkg-features/services/standardDesignSubmit.ts",
+      "src/pkg-features/services/threeVjiaImageDrafts.ts",
+      "src/pkg-features/services/videoAspectRatios.ts",
       "src/pkg-features/services/videoContainerDuration.ts",
       "src/pkg-features/services/videoGenerationSubmit.ts",
       "src/pkg-features/services/videoModels.ts",
@@ -5388,11 +5416,12 @@
       "src/pkg-features/static/design-light/bathroom-seafarm.jpg",
       "src/pkg-features/static/design-light/customized-temple-house.jpg",
       "src/pkg-features/static/design-light/interior-est-living-126.jpg",
+      "src/pkg-features/static/design-light/kitchen-hana.jpg",
       "src/pkg-features/static/design-light/local-five-dock.jpg",
       "src/pkg-features/static/design-overview/chevron.svg",
       "src/pkg-features/static/design-overview/header.jpg",
-      "src/pkg-features/static/design-overview/light-original.webp",
-      "src/pkg-features/static/design-overview/pro-original.webp",
+      "src/pkg-features/static/design-overview/light-original.jpg",
+      "src/pkg-features/static/design-overview/pro-original.jpg",
       "src/pkg-features/static/design-overview/report.jpg",
       "src/pkg-features/static/design-pro-add-riviera.jpg",
       "src/pkg-features/static/design-pro-cabinet-walsh.jpg",
@@ -5429,25 +5458,33 @@
       "src/pkg-plans/services/workflowDownload.ts",
       "src/pkg-projects/components/AssigneePicker.vue",
       "src/pkg-projects/components/MemberManagement.vue",
+      "src/pkg-projects/components/MemberQuotaSheet.vue",
       "src/pkg-projects/components/MemberQuotaStrip.vue",
+      "src/pkg-projects/components/OwnerReportList.vue",
       "src/pkg-projects/components/ProjectActivityTimeline.vue",
       "src/pkg-projects/components/ProjectOutcomeSheet.vue",
       "src/pkg-projects/components/ProjectResults.vue",
       "src/pkg-projects/components/ProjectSalesEventFeed.vue",
       "src/pkg-projects/components/ProjectSalesStages.vue",
       "src/pkg-projects/components/ProjectWorks.vue",
+      "src/pkg-projects/components/ReportActivity.vue",
       "src/pkg-projects/pages/activity/index.vue",
       "src/pkg-projects/pages/assignment/index.vue",
+      "src/pkg-projects/pages/daily-report/index.vue",
       "src/pkg-projects/pages/detail/index.vue",
       "src/pkg-projects/pages/editor/index.vue",
       "src/pkg-projects/pages/member/index.vue",
       "src/pkg-projects/pages/members/index.vue",
       "src/pkg-projects/services/UNICODE-LICENSE.txt",
+      "src/pkg-projects/services/dailyReports.ts",
+      "src/pkg-projects/services/dailyReportsMock.ts",
+      "src/pkg-projects/services/memberQuotaInput.ts",
       "src/pkg-projects/services/projectActivityTimeline.ts",
       "src/pkg-projects/services/projectAssignment.ts",
       "src/pkg-projects/services/projectForm.ts",
       "src/pkg-projects/services/projectNavigation.ts",
       "src/pkg-projects/services/projectSalesStages.ts",
+      "src/pkg-projects/services/saveMemberTokenLimit.ts",
       "src/pkg-projects/services/unicodeCaseFold.ts",
       "src/repositories/account.ts",
       "src/repositories/accountApi.ts",
@@ -5494,6 +5531,7 @@
       "src/services/clientInfo.ts",
       "src/services/clipboardFailure.ts",
       "src/services/copywriting.ts",
+      "src/services/dailyReportStatus.ts",
       "src/services/designChoicePresentation.ts",
       "src/services/designFailurePresentation.ts",
       "src/services/designIcons.ts",
@@ -5582,7 +5620,6 @@
       "src/shime-uni.d.ts",
       "src/static/brand/zyz-avatar.png",
       "src/static/brand/zyz-mark.svg",
-      "src/static/design-light/kitchen-hana.jpg",
       "src/static/design-pro/unfinished-gully-gray.jpg",
       "src/static/icons/account/drafts.svg",
       "src/static/icons/account/enterprise.svg",
@@ -5732,6 +5769,26 @@
       "src/static/icons/navigation/back.svg",
       "src/static/icons/navigation/home-primary.svg",
       "src/static/icons/navigation/home.svg",
+      "src/static/icons/recent-features/ai_copywriting.svg",
+      "src/static/icons/recent-features/ai_qa.svg",
+      "src/static/icons/recent-features/bathroom.svg",
+      "src/static/icons/recent-features/cabinet_redesign.svg",
+      "src/static/icons/recent-features/colored_floor_plan.svg",
+      "src/static/icons/recent-features/customized_design.svg",
+      "src/static/icons/recent-features/design_report.svg",
+      "src/static/icons/recent-features/finished_room_design.svg",
+      "src/static/icons/recent-features/floor_plan_render.svg",
+      "src/static/icons/recent-features/furniture.svg",
+      "src/static/icons/recent-features/furniture_add.svg",
+      "src/static/icons/recent-features/furniture_remove.svg",
+      "src/static/icons/recent-features/furniture_replace.svg",
+      "src/static/icons/recent-features/interior.svg",
+      "src/static/icons/recent-features/kitchen.svg",
+      "src/static/icons/recent-features/local.svg",
+      "src/static/icons/recent-features/old_room_renovation.svg",
+      "src/static/icons/recent-features/rough_room_design.svg",
+      "src/static/icons/recent-features/video_generation.svg",
+      "src/static/icons/recent-features/voice_summary.svg",
       "src/static/icons/tabbar/contact-active.png",
       "src/static/icons/tabbar/contact-active.svg",
       "src/static/icons/tabbar/contact.png",
@@ -5777,6 +5834,7 @@
       "src/styles/_blend-surfaces.scss",
       "src/styles/_button-layout.scss",
       "src/styles/_design-primitives.generated.scss",
+      "src/styles/_entry-arrow-motion.scss",
       "src/styles/_home-entry-card.scss",
       "src/styles/_plans-scope-pill.scss",
       "src/styles/_scope-location.scss",
@@ -5790,6 +5848,7 @@
       "src/styles/themes/modern.json",
       "src/types/account.ts",
       "src/types/auth.ts",
+      "src/types/dailyReports.ts",
       "src/types/design.ts",
       "src/types/home.ts",
       "src/types/markdown-it-browser.d.ts",
@@ -5839,6 +5898,8 @@
       "tests/customizedDesignRepository.test.ts",
       "tests/customizedDesignSubmit.test.ts",
       "tests/customizedDesignSuccess.live.mjs",
+      "tests/dailyReportPage.test.ts",
+      "tests/dailyReports.test.ts",
       "tests/deletionResultPages.test.ts",
       "tests/designAssets.test.ts",
       "tests/designCardBorders.test.ts",
@@ -5882,6 +5943,7 @@
       "tests/editablePromptCatalog.test.ts",
       "tests/editingDrafts.test.ts",
       "tests/editingDraftsApiScope.test.ts",
+      "tests/editingDraftsSessionRefresh.test.ts",
       "tests/enterpriseMembership.test.ts",
       "tests/enterpriseProjectDetails.test.ts",
       "tests/enterpriseProjectOverview.test.ts",
@@ -5900,6 +5962,7 @@
       "tests/fixtures/HarnessProbe.vue",
       "tests/fixtures/api-contract-cases.json",
       "tests/fixtures/backend-3vjia-image-6060-9c8c82f0.json",
+      "tests/fixtures/backend-daily-report-routes-905.json",
       "tests/fixtures/backend-floor-plan-dual-feature-t42-source.json",
       "tests/fixtures/backend-floor-plan-entry-6060-87737599.json",
       "tests/fixtures/backend-floor-plan-group-6060-4bd4094c.json",
@@ -5966,6 +6029,7 @@
       "tests/homeProjectSwitch.test.ts",
       "tests/homeQuickEntries.test.ts",
       "tests/homeScopeSwitch.test.ts",
+      "tests/homeStores.test.ts",
       "tests/idempotency.test.ts",
       "tests/imageConfirmStep.test.ts",
       "tests/imageFileMetadata.test.ts",
@@ -6142,7 +6206,9 @@
       "tests/taskState.test.ts",
       "tests/theme.test.ts",
       "tests/threeVjiaDiscovery.test.ts",
+      "tests/threeVjiaFacadeCompatibility.test.ts",
       "tests/threeVjiaImage.test.ts",
+      "tests/threeVjiaImageDrafts.test.ts",
       "tests/tokenDetailPresentation.test.ts",
       "tests/tokenShortageDialog.test.ts",
       "tests/tokensPage.test.ts",
@@ -6151,6 +6217,8 @@
       "tests/useDesignTokenCost.test.ts",
       "tests/userDiagnostics.test.ts",
       "tests/vendorStartupArtifact.test.mjs",
+      "tests/videoAspectRatioPage.test.ts",
+      "tests/videoAspectRatios.test.ts",
       "tests/videoAssets.test.ts",
       "tests/videoBillingContract.test.ts",
       "tests/videoBillingPreview.test.ts",
@@ -6221,6 +6289,7 @@
       ".github/spec-driven-delivery/archive/enterprise-sales-metrics-876-pr2.md",
       ".github/spec-driven-delivery/archive/issue-825-isolated-integration-regression.md",
       ".github/spec-driven-delivery/archive/issue-871-regression-performance-reports.md",
+      ".github/spec-driven-delivery/archive/issue-979-three-vjia-image-drafts.md",
       ".github/spec-driven-delivery/archive/local-recovery-569.md",
       ".github/spec-driven-delivery/archive/owner-member-inputs-774.md",
       ".github/spec-driven-delivery/archive/project-activity-619.md",
@@ -6230,6 +6299,8 @@
       ".github/spec-driven-delivery/archive/three-vjia-scheme-change-877.md",
       ".github/spec-driven-delivery/archive/three-vjia-scheme-image-855.md",
       ".github/spec-driven-delivery/archive/validation-retry-reuse-604.md",
+      ".github/spec-driven-delivery/archive/video-aspect-ratio-978.md",
+      ".github/spec-driven-delivery/archive/video-model-resolution-pricing-928.md",
       ".github/spec-driven-delivery/archive/video-studio-diagnostics-711.md",
       ".github/spec-driven-delivery/archive/video-time-billing-682-464.md",
       ".github/spec-driven-delivery/archive/workflow-input-archive-647.md",
@@ -6435,6 +6506,7 @@
       "app/static/3vjia/h5/discovery.css",
       "app/static/3vjia/h5/discovery.js",
       "app/static/3vjia/h5/icon.svg",
+      "app/static/3vjia/h5/motion.css",
       "app/static/3vjia/h5/panorama/compare.css",
       "app/static/3vjia/h5/panorama/compare.js",
       "app/static/3vjia/h5/panorama/index.html",
@@ -6559,6 +6631,7 @@
       "app/workflows/operations/video/__init__.py",
       "app/workflows/operations/video/video_catalog.py",
       "app/workflows/operations/video/video_duration_estimate.py",
+      "app/workflows/operations/video/video_pricing_matrix.py",
       "app/workflows/operations/video/workflow_video_definition.py",
       "app/workflows/operations/video/workflow_video_execution.py",
       "app/workflows/project_stage_completion.py",
@@ -6759,6 +6832,7 @@
       "documents/THREE_VJIA_INTEGRATION.md",
       "documents/ai_copywriting_setup.md",
       "documents/database_locking_convention.md",
+      "documents/design-mockups/video-billing-resolution-v6.html",
       "documents/examples/copywriting_kb/copywriting_operations_experience.md",
       "documents/examples/copywriting_kb/copywriting_titles.md",
       "documents/examples/copywriting_kb/copywriting_xiaohongshu.md",
@@ -6824,6 +6898,7 @@
       "migrations/versions/b7c1d2e3f4a5_add_video_model_rate_custom.py",
       "migrations/versions/b7c4e8a1d629_project_outcomes.py",
       "migrations/versions/b7d3e9a4c102_remove_design_job_cancellation.py",
+      "migrations/versions/b7d4e2a9c510_merge_daily_reports_and_video_rate_resolution.py",
       "migrations/versions/b7e3a1d9c240_workflow_node_configuration.py",
       "migrations/versions/b7e4c1d9f260_add_design_job_submissions.py",
       "migrations/versions/b7e4c9a1d320_add_prompt_template_purpose.py",
@@ -6856,6 +6931,7 @@
       "migrations/versions/c8d5f1a2e730_project_activity.py",
       "migrations/versions/c8e1f4a9d207_attribute_enterprise_job_ledger.py",
       "migrations/versions/c8f4b2e0d351_retire_workflow_node_switch.py",
+      "migrations/versions/c9e4a7f1b820_add_video_rate_resolution_key.py",
       "migrations/versions/c9e4b2a7d650_merge_workflow_and_subscription_heads.py",
       "migrations/versions/c9e5a3d8b201_remove_legacy_asset_schema.py",
       "migrations/versions/c9e6a2b4f810_add_three_vjia_provider_adapter.py",
@@ -6879,6 +6955,7 @@
       "migrations/versions/d6b4e2a7c190_add_enterprise_membership_history.py",
       "migrations/versions/d6e8b1a4c930_model_owned_provider_timeout.py",
       "migrations/versions/d7a4e9c1b620_soft_remove_billing_catalog_entries.py",
+      "migrations/versions/d7e1f4a9c305_drop_video_rate_resolution_default.py",
       "migrations/versions/d8c4a1f2e930_snapshot_report_image_descriptions.py",
       "migrations/versions/d8e3a6b9f021_prepare_three_vjia_sdk_configuration.py",
       "migrations/versions/d9a3f6b1e482_chain_report_presentation.py",
@@ -7035,6 +7112,7 @@
       "tests/browser/test_three_vjia_source_browser.py",
       "tests/browser/test_workflow_node_admin_browser.py",
       "tests/browser/test_workflow_report_preview_browser.py",
+      "tests/browser/vendor_page_title.py",
       "tests/conftest.py",
       "tests/design_job_helpers.py",
       "tests/documents/TEST_STRATEGY.md",
@@ -7132,6 +7210,7 @@
       "tests/resources/reference_image.jpeg",
       "tests/resources/rendered_floorplan.jpeg",
       "tests/resources/terms.txt",
+      "tests/resources/three_vjia_discovery/shopping_initializer.js",
       "tests/test_account_lifecycle.py",
       "tests/test_account_lifecycle_api.py",
       "tests/test_admin.py",
@@ -7632,6 +7711,7 @@
       "tests/test_video_pricing.py",
       "tests/test_video_pricing_admin.py",
       "tests/test_video_pricing_catalog.py",
+      "tests/test_video_pricing_factory_matrix.py",
       "tests/test_video_pricing_migration.py",
       "tests/test_video_pricing_postgres.py",
       "tests/test_video_quota_merge_migration.py",
@@ -7789,8 +7869,8 @@
         "sha256": "3217d7d7d3c3f5adf6e0624e9f3e043c09efafd6a5c9ccf6accba1386c39cc75"
       },
       "scripts/build_mp-weixin-cloud-production.sh": {
-        "lines": 28,
-        "sha256": "d0d306bd70d1b1d3916dddfbf356d8ad20c2cc21f5138ac547e9ce1a8a187862"
+        "lines": 31,
+        "sha256": "e74a2c6cdfa39073d5bb18a690499f3924cacbff7d82c77c81b8d3a50d65f038"
       },
       "scripts/build_mp-weixin-cloud-test.sh": {
         "lines": 28,
@@ -7799,6 +7879,10 @@
       "scripts/build_mp-weixin-local-test.sh": {
         "lines": 64,
         "sha256": "2bb90b2d548c1b464662a15bd176ab71a83c69d287a25364356c4f4dcb48bcdf"
+      },
+      "scripts/capture-daily-report.mjs": {
+        "lines": 128,
+        "sha256": "263829a4843a41ea3e2d5572c7275dea5b026ce3a55aa15b858c56c0d4d27130"
       },
       "scripts/capture-issue379-openapi.mjs": {
         "lines": 17,
@@ -7821,8 +7905,8 @@
         "sha256": "c69dc462495cc8be8cfaaf06fbe5fc0c8323ca95d6b3439af980188c21fa97c2"
       },
       "scripts/check-api-contract.mjs": {
-        "lines": 95,
-        "sha256": "20bf8bf239e627407e3c83eef7e1f8b469269545c150e197cbdb3c800ab8f2ea"
+        "lines": 96,
+        "sha256": "bd9c5650c50c8f97d673dd076025f88e93e7465da9430c837dbb984c1b1b0cd0"
       },
       "scripts/check-api-dtos.mjs": {
         "lines": 29,
@@ -7890,7 +7974,7 @@
       },
       "scripts/check-project-navigation.mjs": {
         "lines": 20,
-        "sha256": "e82911e9bea9c398cff95748823e003c509324e98d9f2ad721774d26ea21b40b"
+        "sha256": "549aee74b6d2c267608fb0c34613bd1953f992a93733f3ba71d40a424bf229d6"
       },
       "scripts/check-project-press-feedback.mjs": {
         "lines": 65,
@@ -7965,12 +8049,12 @@
         "sha256": "158cd83aa9bda62c5262ae4e695e5c881342051ae829716f7a137b38220813bd"
       },
       "src/api/dto/billing.ts": {
-        "lines": 35,
-        "sha256": "ac56d52829554651ea2a3a7084ca58238528c5ed1c6da312e8a8dd7e93711351"
+        "lines": 40,
+        "sha256": "388cf3d5961066d75a120bad8bb1fba246d070b037deac97896815d9a9e46a40"
       },
       "src/api/dto/design.ts": {
-        "lines": 119,
-        "sha256": "566baed83e1f500df3cdbe47e15fd186f7ae7728db6a1b57e48ed9f17dfd4b98"
+        "lines": 123,
+        "sha256": "a438436eb4d4a4e8269500ca406b64c1eea6a009919e8fcbdb8d3aa563d02bc6"
       },
       "src/api/dto/floorPlan.ts": {
         "lines": 66,
@@ -8033,8 +8117,8 @@
         "sha256": "3867477ee072e2cd7c6f05802d781a06db14616aaa3f3dc1b0baa86dfea882e8"
       },
       "src/components/home/FeatureGroupEntries.vue": {
-        "lines": 51,
-        "sha256": "fdf69fa4268933698ab7aa37b5e72836bc6d4be950bada86c06594678dff508a"
+        "lines": 53,
+        "sha256": "4f002a4894ac3c745ca3642e2a34d603f11550afcae78940ec5ad7c3e3ceaab1"
       },
       "src/components/home/HeroCarousel.vue": {
         "lines": 129,
@@ -8045,8 +8129,8 @@
         "sha256": "4497e5f1c416f7266a881878f9a8150ded5b5892830a0d1c006a12db9a11bdf1"
       },
       "src/components/home/HomeEntryArrow.vue": {
-        "lines": 22,
-        "sha256": "a8f426215090ea366a54bea76afd385382c081d5761626d0be5358ba0dd1a2ed"
+        "lines": 25,
+        "sha256": "d3a03f56a44967d1a579833b0fc93c792bfe0d8f01135201e0eb423eecf21198"
       },
       "src/components/home/HomeEntryArtwork.vue": {
         "lines": 36,
@@ -8057,8 +8141,8 @@
         "sha256": "4523a05e1b72dade823984bda4b447b3532b280c0cb7abb2fcb840d6663dc64e"
       },
       "src/components/home/HomeInspirationCard.vue": {
-        "lines": 39,
-        "sha256": "4b9044188f3fccf8b6de39186be726bf88252fc97d4985694332a01bab3a4f48"
+        "lines": 41,
+        "sha256": "7efdbdd4e515e575d72e9d751fc92f0478ce192f6f78f093f0a03032521e676e"
       },
       "src/components/home/HomeProjectSwitch.vue": {
         "lines": 189,
@@ -8069,20 +8153,20 @@
         "sha256": "ac08adaaf7ab024821bca6a2bbcce2fa6703f4396518284eb7d1ff01ac1460af"
       },
       "src/components/home/HomeQuickEntries.vue": {
-        "lines": 35,
-        "sha256": "da3212cf57f326cd4c14e9d9d8b8d875de164e3a2f8572c28ccc7b7d6865357f"
+        "lines": 33,
+        "sha256": "f1f5b6e71975ebb0f5b78fa1e4df87404448ed5af76c180e20aa353d78fbf774"
       },
       "src/components/home/HomeScopeSwitch.vue": {
-        "lines": 750,
-        "sha256": "476c2ffb411de4d210b3ebb1703a59e9d05b27a58f6528364a4c1da514e27ed1"
+        "lines": 754,
+        "sha256": "ddf7f842378e1603ba91802d93c6db79c19a91233529c1166ea073e8837d9f19"
       },
       "src/components/home/HomeShortcutStrip.vue": {
         "lines": 33,
         "sha256": "2672043c3b46f723b7a8269fcd549b7f498d8bf122f5dd30e0e5b9c3a07a76fb"
       },
       "src/components/home/HomeStores.vue": {
-        "lines": 60,
-        "sha256": "1a48d99bc9cc1c783acb950495c109ce3e0e3881542a82a4129657161ae7a4ad"
+        "lines": 50,
+        "sha256": "d64814589e3ffa027c3d99f898b8150e4e58ffa11c2621dca7ba4053771067f7"
       },
       "src/components/plans/FloorPlanEntryPreparation.vue": {
         "lines": 18,
@@ -8093,12 +8177,12 @@
         "sha256": "7a79b33aa0d25f1e1a376b8f02ff6e53fba55855b208f2ff2e37948aee5533c3"
       },
       "src/components/plans/FloorPlanWorkManager.vue": {
-        "lines": 206,
-        "sha256": "209431b9b68b344d2b2465edf80dff277e92f45d1d96f04575cd652154e52ccd"
+        "lines": 207,
+        "sha256": "a7ab470cc970f3c368e7ad7200d2dac715e191b06f7a3f969d1cfcc82d94bd00"
       },
       "src/components/plans/FloorPlanWorksPanel.vue": {
-        "lines": 179,
-        "sha256": "106acd844ef8593b50d1900cc97e26e61e0badbd2a37464d566cd9c1fb57e3e8"
+        "lines": 177,
+        "sha256": "190e482835763134b8879c4a09c2d323e942d7fa22f87479df7b6071645ab6f6"
       },
       "src/components/plans/PlanTaskCard.vue": {
         "lines": 202,
@@ -8133,12 +8217,8 @@
         "sha256": "482939f54b690f42fea6ff2bf00240ff0dafb12b4279dd8d928f182873235568"
       },
       "src/components/projects/EnterpriseProjectOverview.vue": {
-        "lines": 331,
-        "sha256": "19db6085a5f570d43faf0b693619b97bcb9fcbbcc67e07f12f76fe0a761c7f45"
-      },
-      "src/components/projects/MemberQuotaSheet.vue": {
-        "lines": 128,
-        "sha256": "da2045f6e96375c3c22d05638d666f3ede12508956a854b00e1f8558c3a5c83c"
+        "lines": 333,
+        "sha256": "a4a56f075d092c4081ac65adb43fcd4047e9f2302873d133460d6e093c768272"
       },
       "src/components/projects/MemberQuotaView.vue": {
         "lines": 77,
@@ -8149,24 +8229,24 @@
         "sha256": "ae6184b38f0ec07b7755804232bc5a1e8ed049dffc661e5d43d44e9fc812335f"
       },
       "src/composables/useDiscoveryEntry.ts": {
-        "lines": 51,
-        "sha256": "a7c0701e2d8e2669cf305c1baa02b217ab0f988b4ebe9405fa32acfa609d5b5d"
+        "lines": 18,
+        "sha256": "5015358aa223ff291425754f8b86e48c8993f4bbae24dd30ce48c0329b916c9c"
       },
       "src/composables/useFloorPlanEntry.ts": {
-        "lines": 111,
-        "sha256": "bb4146a4c2efd39fa967be5f1104597bbc0faedb1586e50000d1b24f4220b4c4"
+        "lines": 40,
+        "sha256": "bbda71e1068a054ec37d6602043860e8bfb914038b29d96b43a1e244e7da9ed9"
       },
       "src/composables/useFloorPlanWorks.ts": {
         "lines": 204,
-        "sha256": "6b6850652fed78b0d3dac918d97fd5554f2faedfddc2ce8ac8465250a866de30"
+        "sha256": "bdf9501604288b3d550897c32d9a8e79f2e41c6b9d3e2dc856e652fdd8593001"
       },
       "src/composables/usePageTheme.ts": {
         "lines": 10,
         "sha256": "c8f7fdced9d9348b983836354fec40cd1946d1cb9ed68a6798a06bae81a83a65"
       },
       "src/composables/useRecentFeatures.ts": {
-        "lines": 35,
-        "sha256": "d79cb5c55fbb1782b72dc9efcc1c4da54e3760974e7ceb1301acb5919f452eba"
+        "lines": 40,
+        "sha256": "c9e4f6f3c0d9f5edcf5dc1ede531e0cc19e3907fbbc01ace1d4e3fb982f1494b"
       },
       "src/composables/useWeixinPackage.ts": {
         "lines": 43,
@@ -8194,11 +8274,11 @@
       },
       "src/manifest.json": {
         "lines": 106,
-        "sha256": "e5d273125768148d93535333d46711dc981ca771634fea7f5292086853753677"
+        "sha256": "4ceae14fcd111c0cfbec8cc87370c44dbebba4644f8ab434c623a432386b6e91"
       },
       "src/pages.json": {
         "lines": 331,
-        "sha256": "0d7b4c8ea69dd5d228208db124910c217d04ccc5c91a0fd1d0eead2c22730a48"
+        "sha256": "312d6e76298fcd5b27c0d581d12eba47da52c7cdf93c526e4d89b39853571ac1"
       },
       "src/pages/ad-splash/index.vue": {
         "lines": 281,
@@ -8213,8 +8293,8 @@
         "sha256": "e09148423361bcdb420b29a5e16cbff9871c190afa04e3103459497fcfeae76f"
       },
       "src/pages/home/index.vue": {
-        "lines": 209,
-        "sha256": "70024905d3636c8cc11d524cea012d4e2ebc9515261fe454e29e5a5f92ff01da"
+        "lines": 243,
+        "sha256": "0638dc27e9e16d046f69140cac9093c6acb2a52469955300048ca6e248a5ce9d"
       },
       "src/pages/payment_order/index.vue": {
         "lines": 11,
@@ -8229,8 +8309,8 @@
         "sha256": "7a04a9c28b6c9c85415d13bf5412065a2d25d8af1f5aa28421742226670acdfb"
       },
       "src/pages/projects/index.vue": {
-        "lines": 730,
-        "sha256": "098784fe5f84308eeb0f04fdae27af7a9a462e24c945431c46955b7eaed6c5b0"
+        "lines": 787,
+        "sha256": "f4ac53bda589a03aa92be41a8ee36c0f38eab78b281fca376329b97481027cea"
       },
       "src/pages/splash/index.vue": {
         "lines": 148,
@@ -8446,23 +8526,23 @@
       },
       "src/pkg-features/components/DesignLanding.vue": {
         "lines": 89,
-        "sha256": "6e4d21cd813352431cbeb4030e2c6556382ce2e4d8dce46b398f4c89d632b713"
+        "sha256": "d17a7bb8aaea8cad90ef7510eaf0b1af3a4808a97571e25d25914bf7347dbe66"
       },
       "src/pkg-features/components/DesignLightLanding.vue": {
         "lines": 165,
-        "sha256": "a50dad89c30d1eb1ed103828de5651d5daaa56d22335453cb57b56c598c799bb"
+        "sha256": "1205bfa2e7301f832d3e157f747f6e4ca2947ffaa200da08b8a2e20fcf69e85b"
       },
       "src/pkg-features/components/DesignModeSelector.vue": {
         "lines": 43,
         "sha256": "ba57090687062382dbb6075e50d1e15c47c0588e124e407103cd8e243a360007"
       },
       "src/pkg-features/components/DesignOverviewCard.vue": {
-        "lines": 53,
-        "sha256": "4550ce346cd40da3b2387b048f80e4e7687dcd8e1ad2443c9cd6c1e527e5dea6"
+        "lines": 48,
+        "sha256": "bcac1157a13d9210002c55b4bb748b3b046454ac1d9c9c5b0b56ac021c8c17b9"
       },
       "src/pkg-features/components/DesignProLanding.vue": {
-        "lines": 153,
-        "sha256": "1c6bcbe5b7fd61d8fee81a8cd2e07ec7d3199b47077fef55af456bc078c9f2c5"
+        "lines": 140,
+        "sha256": "b433e3f161e034d6f5aa1ba8fdb187e84369fe02c7144a1743a628a9d75828ca"
       },
       "src/pkg-features/components/FeatureShell.vue": {
         "lines": 327,
@@ -8541,8 +8621,8 @@
         "sha256": "9505129ebfcd42cd20122cca16c9500bc50198fbe584c5b3913ae4b23ae2e072"
       },
       "src/pkg-features/composables/useFloorPlanAvailability.ts": {
-        "lines": 82,
-        "sha256": "be89f3f3f9d93596d08b4b73aabced97b1f3f1ba594f6552dcdb544d1053bab4"
+        "lines": 62,
+        "sha256": "d19691c3be495b5873797bedda633dc02e082210c2b5da497589fc2fcd981410"
       },
       "src/pkg-features/composables/useProjectClientInfo.ts": {
         "lines": 141,
@@ -8581,12 +8661,12 @@
         "sha256": "bed260ef46d018fdfc8c168b022d3445fba44676eaf8db48d422d3491ec55c0a"
       },
       "src/pkg-features/pages/feature_group/index.vue": {
-        "lines": 322,
-        "sha256": "f8a3829aae755dac781be35e66c44d2bdd8b1d7288df996ec4ea9b6ebde34696"
+        "lines": 328,
+        "sha256": "e2aa8167906957d4c82b951fc9e1f528148acddf0d66d705daf75fff659768d6"
       },
       "src/pkg-features/pages/floor_plan_editor/index.vue": {
-        "lines": 161,
-        "sha256": "b90bf355a8e92ac1f093c4e1a83522250e4e3055d7c10e7f7adc4b435a37ed58"
+        "lines": 222,
+        "sha256": "a3024a3cfd093e38a4b1022a5d09e65ffe318060a7114bf8688504c7327247ab"
       },
       "src/pkg-features/pages/floor_plan_works/index.vue": {
         "lines": 44,
@@ -8613,8 +8693,8 @@
         "sha256": "44968c2db935bb4baadb4090b7cffec3155e92f2917d626bf394db0246eb03d9"
       },
       "src/pkg-features/pages/video_generation/index.vue": {
-        "lines": 1582,
-        "sha256": "917fa99f2ec50a258535e36cfb59a0aa12ac3f8c5a9cf7ed299b5be3be0ab5af"
+        "lines": 1673,
+        "sha256": "6517c87b317dc07e6c567bd3f7e06546be0cb30889c50bd7deba9bfcfb7ee021"
       },
       "src/pkg-features/pages/voice_summary/index.vue": {
         "lines": 1419,
@@ -8633,8 +8713,8 @@
         "sha256": "3f2a7804b11f75ec98e5dd095a7a613f74945e4bb4c1d3b667116d7c41da7224"
       },
       "src/pkg-features/repositories/designJobSubmit.ts": {
-        "lines": 220,
-        "sha256": "6dc30b6644b233e590e6a08da942b00955f229e0e0b35cf0fab1b0c3a6800b8d"
+        "lines": 227,
+        "sha256": "40c3c381e8f856db39647ba9d99964d614a2e80b2020bc52666a414e0dfe1b34"
       },
       "src/pkg-features/repositories/furnitureDesignJob.ts": {
         "lines": 121,
@@ -8661,12 +8741,12 @@
         "sha256": "0a3ee5a810dc7ec03ec213e4b53689f68f60e5680b87721e05c68d6559686ff0"
       },
       "src/pkg-features/repositories/threeVjiaDiscovery.ts": {
-        "lines": 1,
-        "sha256": "06d1cb8f3ab415cae982923aa9d03c39db761a891414ef32e720655826968eec"
+        "lines": 12,
+        "sha256": "deaadc94db74e9166ca3acae4926e754d1b9cb08923e6ad2524e983427ed7db8"
       },
       "src/pkg-features/repositories/threeVjiaImage.ts": {
         "lines": 14,
-        "sha256": "c6a75204f9f6bbfd9fe0b652e5de3064f0ce56d2945c4b68c0f447a73526dc6f"
+        "sha256": "9c507fae99e58ce7b292c70bc1d505704f63c6f90d82009794bb25f66d90a08a"
       },
       "src/pkg-features/repositories/videoAssets.ts": {
         "lines": 215,
@@ -8674,7 +8754,7 @@
       },
       "src/pkg-features/repositories/videoBilling.ts": {
         "lines": 32,
-        "sha256": "491c13a1145d6c5d4f1528c80f8eb2e5a70c619823df68f9bf72135804f039a3"
+        "sha256": "12d181c70105039228c0514b0665a74e0832761ab69dce1713acd05aa6cceb31"
       },
       "src/pkg-features/repositories/voiceAudioAssets.ts": {
         "lines": 280,
@@ -8705,12 +8785,12 @@
         "sha256": "87c46d6d2cad5d2d0c66e93d64bfbb67b24174826574127ee7a3d39f73de556f"
       },
       "src/pkg-features/services/designProPresentation.ts": {
-        "lines": 12,
-        "sha256": "4572f60cb7a1c9fb0bb886ddb4e69d2170f7309774af7cf39b1394a5e7b648d0"
+        "lines": 14,
+        "sha256": "8f940c2969d5b7bf10f4948385998e34689ad19aa2b9c526b830edac40e779da"
       },
       "src/pkg-features/services/designProjectBinding.ts": {
-        "lines": 1,
-        "sha256": "ae45e7268f36a58106317dec5b2d574c39c66b3f48b2d7f8274c3c4851ea6174"
+        "lines": 45,
+        "sha256": "fc71bbeb4021efd687171b52504d9615d9293c753d739ee782501d44f485fb29"
       },
       "src/pkg-features/services/designProjectBindingDisabled.ts": {
         "lines": 10,
@@ -8729,20 +8809,20 @@
         "sha256": "90223e971d5dfc63541767d2eb97786287136d82ae5dce1eb5208ddfbfa9c5a1"
       },
       "src/pkg-features/services/editingDrafts.ts": {
-        "lines": 117,
-        "sha256": "9728c4cede01fe52b7e220870b8196391a3e48e73f198b3d205c84c752c7263c"
+        "lines": 118,
+        "sha256": "7e0f2388cc364cea852c12677bd122b766a406709836c05e6afe7df7dffda0f7"
       },
       "src/pkg-features/services/files.ts": {
         "lines": 256,
         "sha256": "6825b988bc5154d7cbb1d7fd64596923fcb756878fd52910e095cf85d6a55c46"
       },
       "src/pkg-features/services/floorPlanHandoff.ts": {
-        "lines": 1,
-        "sha256": "fe3fa71bebbe12c6a5ef91ac0fb5dfd796804b0eabfc1c5a7935543f5aef4da3"
+        "lines": 35,
+        "sha256": "422810a3e9729319f8a2b02386a742424148a9ec3dd544ef5df85c887ebfffa3"
       },
       "src/pkg-features/services/floorPlanLocation.ts": {
-        "lines": 1,
-        "sha256": "0ab57ff491a8b9de3dc569bb55c4a406b7872c31372f7f79cbd1e4a5192389b9"
+        "lines": 30,
+        "sha256": "ac9ae83145d5a9149bcf59db77f27fbf1ecb92bc03de3c93f0d124edf6726c52"
       },
       "src/pkg-features/services/furnitureDesignSubmit.ts": {
         "lines": 90,
@@ -8796,17 +8876,25 @@
         "lines": 82,
         "sha256": "dcc8db12240cfa55e4de1a749d43f74fbb68e92c01afefd322ba9367d7caaaa0"
       },
+      "src/pkg-features/services/threeVjiaImageDrafts.ts": {
+        "lines": 121,
+        "sha256": "f2bdec067f9375364959e749674729c02724afbe8fead7e2e77fb128cf98f90e"
+      },
+      "src/pkg-features/services/videoAspectRatios.ts": {
+        "lines": 16,
+        "sha256": "166cd261eb2f0e3e135a25b3a3be5a7c0d7722702db641f7718cc9969e6f723d"
+      },
       "src/pkg-features/services/videoContainerDuration.ts": {
         "lines": 199,
         "sha256": "3d9801d959eadf0ea41c5c7690cf2e24423b6c198030743e2356e4dd15aa9092"
       },
       "src/pkg-features/services/videoGenerationSubmit.ts": {
-        "lines": 241,
-        "sha256": "98ed58eff2f67b8624759eae514a85e3d058de84d61f6a6424e15f447b3b808d"
+        "lines": 266,
+        "sha256": "d4b7042ec51ae9e43620dca0177ef2de5379c362842dcb04925b3247078143a5"
       },
       "src/pkg-features/services/videoModels.ts": {
-        "lines": 8,
-        "sha256": "26b280d2fd3d1bdc8c255fa8703349ad5b9a4b65d61443060ef3b3b0ea87c6e1"
+        "lines": 7,
+        "sha256": "6f232927e84ac10297be7f953ef5de41c0e67c17b7f489e5bcc094e48445eef9"
       },
       "src/pkg-features/services/videoScriptFile.ts": {
         "lines": 116,
@@ -8905,8 +8993,8 @@
         "sha256": "012894fc0759ae32313570bb7b489307b8feabbe988f840fecb69b83df5795e4"
       },
       "src/pkg-plans/services/floorPlanHandoff.ts": {
-        "lines": 1,
-        "sha256": "fe3fa71bebbe12c6a5ef91ac0fb5dfd796804b0eabfc1c5a7935543f5aef4da3"
+        "lines": 35,
+        "sha256": "422810a3e9729319f8a2b02386a742424148a9ec3dd544ef5df85c887ebfffa3"
       },
       "src/pkg-plans/services/idempotency.ts": {
         "lines": 130,
@@ -8952,9 +9040,17 @@
         "lines": 66,
         "sha256": "7a4222577e6d9f3ede3aab697084161dcf7e41853e0889c0f11dc8e8fbb14f0f"
       },
+      "src/pkg-projects/components/MemberQuotaSheet.vue": {
+        "lines": 129,
+        "sha256": "eb2bc035f7d3eb3981e23323059d5afd076b66f943a8a91f39bfb75b4f1bcfd7"
+      },
       "src/pkg-projects/components/MemberQuotaStrip.vue": {
-        "lines": 36,
-        "sha256": "a15ef5af01f3ae33a5f61160298b81a39594c38eb169de630e35d5779025dae2"
+        "lines": 39,
+        "sha256": "bab2fe6616c5a0a4ccaf9ae791bf14fd199d2354ff5a7087c0cdb1e288b4e7bd"
+      },
+      "src/pkg-projects/components/OwnerReportList.vue": {
+        "lines": 136,
+        "sha256": "7ed440a9a564bcaeff3dcfc7b3931880747944e02b2f35c6bd032cb228e18d3b"
       },
       "src/pkg-projects/components/ProjectActivityTimeline.vue": {
         "lines": 50,
@@ -8980,6 +9076,10 @@
         "lines": 66,
         "sha256": "a0ba7e66ef1f18bc338e00546cbb4082fdd3ba59ee696be0e71389ff5af2aa1e"
       },
+      "src/pkg-projects/components/ReportActivity.vue": {
+        "lines": 51,
+        "sha256": "726118cfaf03fa06f154141ca16e389dc3ef0ea2d706f858d3b2e17b931aa91c"
+      },
       "src/pkg-projects/pages/activity/index.vue": {
         "lines": 65,
         "sha256": "5bfb38418bd34f2b1b537166b8dc39dc0e9f058a18ca3108b5bb583f61285515"
@@ -8987,6 +9087,10 @@
       "src/pkg-projects/pages/assignment/index.vue": {
         "lines": 95,
         "sha256": "9bd9007075677411080728920dd9e9eaf4576f038e0f594402033f10991672d4"
+      },
+      "src/pkg-projects/pages/daily-report/index.vue": {
+        "lines": 457,
+        "sha256": "f4d553f2054437ede41742ca6486e055ca45e11f2160d4fbefba128de6670e8d"
       },
       "src/pkg-projects/pages/detail/index.vue": {
         "lines": 423,
@@ -9001,8 +9105,20 @@
         "sha256": "de2edd8305835068aceb3855952db20717697d5e2275b031c4013b480e3dce17"
       },
       "src/pkg-projects/pages/members/index.vue": {
-        "lines": 165,
-        "sha256": "fd0c92873053272a3c60c9bf7732c6be2941cd5042af045d609a8bf7bf46a707"
+        "lines": 188,
+        "sha256": "0ca4d558ed6af256ba111c52a90cea2c189b4fd21051c0fbe204d9d38af4e28b"
+      },
+      "src/pkg-projects/services/dailyReports.ts": {
+        "lines": 114,
+        "sha256": "d664c789824f2d1a926610af8056bb49c1a410acf7d774e4df8dac46ca1e0b2b"
+      },
+      "src/pkg-projects/services/dailyReportsMock.ts": {
+        "lines": 178,
+        "sha256": "90f33f3e4d40ce35ad128e913a54ce432bc42bc033ed4d8074ef236c723098a9"
+      },
+      "src/pkg-projects/services/memberQuotaInput.ts": {
+        "lines": 12,
+        "sha256": "b2f2aed1b9d155a57bf5e2636d3b668063a90369a903044599d76b2aba2b183f"
       },
       "src/pkg-projects/services/projectActivityTimeline.ts": {
         "lines": 19,
@@ -9024,6 +9140,10 @@
         "lines": 65,
         "sha256": "a85760d76231d1e75cceadba12e2eae481b6a2c11e06c643003d80401474b96e"
       },
+      "src/pkg-projects/services/saveMemberTokenLimit.ts": {
+        "lines": 56,
+        "sha256": "ae7adc9a4341895bdf52e2d49026bdd4110a997dd36d881601f47fd4d188e09d"
+      },
       "src/pkg-projects/services/unicodeCaseFold.ts": {
         "lines": 104,
         "sha256": "462718b8c62dfb4b66d0903432e905db85123bab8e8555133304d7b6e4fd4e94"
@@ -9037,8 +9157,8 @@
         "sha256": "2b5a3ddb649101290396e41fa041b30e7d8f54e10076c90fe597c666ce94a02b"
       },
       "src/repositories/content.ts": {
-        "lines": 169,
-        "sha256": "ec311f66a6f9e2bcf7cd1bd9af6303e2843b587a5554f017dd56a73052e16e0b"
+        "lines": 170,
+        "sha256": "e8be9a626072e4752b4df02cc045b6894238b88dc0bef942d5c152bfcd92e234"
       },
       "src/repositories/designCatalog.ts": {
         "lines": 172,
@@ -9081,8 +9201,8 @@
         "sha256": "03fa36ef887bbf2e8b7e356d9599053eddf300f13c47e79add13b29b5182d95f"
       },
       "src/repositories/memberTokenQuota.ts": {
-        "lines": 116,
-        "sha256": "72323ff85f95c7649062c7061d7b8281efc05d3f8320a1b286dee214a32d4aba"
+        "lines": 71,
+        "sha256": "41f7020c05823710e78892ecaefa838b0ff5664f697165bf21a9c6825feb2a0e"
       },
       "src/repositories/mockWallet.ts": {
         "lines": 32,
@@ -9105,8 +9225,8 @@
         "sha256": "92ce1b6ec9c03fefb48df21eb1989955da39db1b465b69a26b2e7f1bf84dab9c"
       },
       "src/repositories/projectOverview.ts": {
-        "lines": 205,
-        "sha256": "2bb49a0e113ae4b53041ab1b3c9846d394d7795d02458eaff100fc9b4d85f8f4"
+        "lines": 223,
+        "sha256": "b63f5f13a0f536710dcba9dbba7e9e949a77d390590ab2b95cbaf9dc2be694ef"
       },
       "src/repositories/projectSalesMetrics.ts": {
         "lines": 45,
@@ -9137,8 +9257,8 @@
         "sha256": "3ecf95c6bb912c76149aff0c6dc1f72b0fa2a0b3ea1e204573f160ba9bdcf9b4"
       },
       "src/repositories/threeVjiaDiscovery.ts": {
-        "lines": 12,
-        "sha256": "c0cee1c5cc57ea9e1ffe60e796adbce9e18444a61f93ee166f327b706746224b"
+        "lines": 1,
+        "sha256": "8967a345fefcc0046db25eb6e4d6e8affdd045eb6f638c61a00a6d66a43ac28d"
       },
       "src/repositories/threeVjiaImage.ts": {
         "lines": 11,
@@ -9208,6 +9328,10 @@
         "lines": 453,
         "sha256": "3defb84cbe6015b7ee89689b5f00a453505117951d920d672978ca49e0a7ac6f"
       },
+      "src/services/dailyReportStatus.ts": {
+        "lines": 14,
+        "sha256": "d58bd7cfd7e4a8bb1ee12e86ecada5c9fb1b473ad27a2a182eca2c17ad9c8b4d"
+      },
       "src/services/designChoicePresentation.ts": {
         "lines": 52,
         "sha256": "b475e87f91228bbe5e92b913557f98d9b5dbe1a293657cf47a13770c78823f02"
@@ -9225,8 +9349,8 @@
         "sha256": "d376c847280dc30e8856b38d8f45cfdb8ccbab8330953bcdfe19a610ac13141c"
       },
       "src/services/designProjectBinding.ts": {
-        "lines": 45,
-        "sha256": "fc71bbeb4021efd687171b52504d9615d9293c753d739ee782501d44f485fb29"
+        "lines": 1,
+        "sha256": "aa5ba08df382fe488aa870ac8fb3bad8f292cc1c1a6f24b8873749f608b091f3"
       },
       "src/services/dev/subscriptionScenarioMock.ts": {
         "lines": 72,
@@ -9253,28 +9377,28 @@
         "sha256": "85dd34593837f1c87e76408616511bba8a72d763ff54c3d764bf6dd548fefaa7"
       },
       "src/services/featureDrafts.ts": {
-        "lines": 168,
-        "sha256": "47a0d89270ee29615aff5da750353b957ce19ea3e364c2e61e6f8133280d230b"
+        "lines": 176,
+        "sha256": "2caa916d8890c35dbc167cc071961e46dab42161592a563aa8fbbc235e9f014b"
       },
       "src/services/featureGroups.ts": {
-        "lines": 135,
-        "sha256": "bdd896702812bf3b7bb6feeba3d94a0a04050d715138130c36e1f2f4a5a9c769"
+        "lines": 136,
+        "sha256": "1c77259e59b63ab878ffdd1624986b3c22ef5a4e41697e44578f93bab6393f78"
       },
       "src/services/featureUsage.ts": {
         "lines": 40,
         "sha256": "3259cc1e9fd8718dc023c79f3f719e2a08e449bf629d1868ba5e6183f7007adb"
       },
       "src/services/floorPlanHandoff.ts": {
-        "lines": 35,
-        "sha256": "422810a3e9729319f8a2b02386a742424148a9ec3dd544ef5df85c887ebfffa3"
+        "lines": 1,
+        "sha256": "98880f05deec8610c3e8f9ff3a218bec87d57a6a28efcaff2c2b1c3ca9da6bb1"
       },
       "src/services/floorPlanLocation.ts": {
-        "lines": 30,
-        "sha256": "ac9ae83145d5a9149bcf59db77f27fbf1ecb92bc03de3c93f0d124edf6726c52"
+        "lines": 1,
+        "sha256": "3d76b0108fdb1e10d0a0034973c168016ead2b9e208d09f6d6d94b5fc245e8e5"
       },
       "src/services/floorPlanPage.ts": {
-        "lines": 73,
-        "sha256": "911ad025a7b9de87ac7a39fe271f0355acf903099d1e49b45a69c43f73ed7f27"
+        "lines": 81,
+        "sha256": "74dd68aa1781de142de29508254aa08d8c2b986720e389b248d61518c608d4db"
       },
       "src/services/floorPlanResults.ts": {
         "lines": 14,
@@ -9293,12 +9417,12 @@
         "sha256": "8d2dd78c4035dcdb90027c190997730e64f8c7065c74a810ce21f8c9b5c1af5e"
       },
       "src/services/homeAssets.ts": {
-        "lines": 54,
-        "sha256": "3b6d0224444e9a688b71931d95be03062d89eae59e83b6cd677b02a73ded6e5b"
+        "lines": 45,
+        "sha256": "ea75a841b7d5fd2c06fc39dec1ceb35968fa37f6e349cffb645150a1dfcab73c"
       },
       "src/services/homeEntries.ts": {
-        "lines": 16,
-        "sha256": "f7a7c77901045da4ec65732d7bcc5c03d522ba4ff0a99b7d58f5555162271060"
+        "lines": 21,
+        "sha256": "6ab4c55a3197aae020192616aade0a690aeca5727c3da0deadb25d530c1c2231"
       },
       "src/services/homeEntryGuard.ts": {
         "lines": 63,
@@ -9345,8 +9469,8 @@
         "sha256": "6250e523e076ecafe289c334fe53e838266f4d6d192023ccd301baf7f4a77d10"
       },
       "src/services/memberProjectDashboard.ts": {
-        "lines": 63,
-        "sha256": "f7ae5ee47573c0a7c085b5e3e25b791a2d65a4e3b29c76b505086f00d57f517b"
+        "lines": 68,
+        "sha256": "65632955febbf99b942c9048c0bd8d4c82c009109731bd1215087eeac7d972a1"
       },
       "src/services/memberProjectRead.ts": {
         "lines": 144,
@@ -9357,8 +9481,8 @@
         "sha256": "71509c8e026b3c367f21143cd088d8cb7d69fa93d077340ff7e6e0e050cddbd9"
       },
       "src/services/memberQuota.ts": {
-        "lines": 91,
-        "sha256": "a30e7b4d4aabdd16010467ed09c7ba064535603d73fe2a73aaff7a46d764847b"
+        "lines": 82,
+        "sha256": "abe7c3fe80fd9c13c14a64f17d3d60318b9c46989724bd22c6b15bbbca6ec2cd"
       },
       "src/services/memberQuotaOverviewInvalidation.ts": {
         "lines": 1,
@@ -9429,8 +9553,8 @@
         "sha256": "4ed8bb10ec567b2062b8706a57980959005fdf3fe6fb8ab1b15d575692aeb3f8"
       },
       "src/services/projectScopeEvents.ts": {
-        "lines": 54,
-        "sha256": "799cebc6664a489c19ba02ebd91a66b151bc059321d2967a54b307aba3144b36"
+        "lines": 55,
+        "sha256": "ae2c2038b2b51159985b516c8b0c82d11899ee67b0a52811377f923d6dee4dd7"
       },
       "src/services/projectScopePreload.ts": {
         "lines": 73,
@@ -9449,8 +9573,8 @@
         "sha256": "36ead644380a4d184e2cc5e7c1f0f3e2cd370476de3a6fe9d67ed50beaf466fa"
       },
       "src/services/recentFeatures.ts": {
-        "lines": 59,
-        "sha256": "766198fc978ee4b4e0139777b909090f2796b4529cce3a6fae5a540bcc191219"
+        "lines": 70,
+        "sha256": "30230a39b51dfb24f32aacbf50235fcc1e169f1b22a06f894dbdc76bd00bd413"
       },
       "src/services/reportCapability.ts": {
         "lines": 43,
@@ -9509,8 +9633,8 @@
         "sha256": "b7c4db5c927409a253dd705687c7c6ee74b27c95291b83501c9ead4d95703ca0"
       },
       "src/services/videoPricing.ts": {
-        "lines": 26,
-        "sha256": "6f9a2bc566a5802b2b57ae2891c3f19f8ba7dc44838356bb907ec9f11df671e1"
+        "lines": 36,
+        "sha256": "82501d131653c35e7568e4f63be294f9d63ca8a673baf005899e33467aa0957f"
       },
       "src/services/wechatAuth.ts": {
         "lines": 70,
@@ -10144,6 +10268,86 @@
         "lines": 4,
         "sha256": "f7549f54b2d8f30b35a4ff935edb46f91d218b9e4c66357cbd3afe54a1de5d8a"
       },
+      "src/static/icons/recent-features/ai_copywriting.svg": {
+        "lines": 1,
+        "sha256": "1520f19a6f78489c3d4d10282c1074421b1119fb4dabf7a094b147164cce9bc5"
+      },
+      "src/static/icons/recent-features/ai_qa.svg": {
+        "lines": 1,
+        "sha256": "e87e90f8c0181fd2c6b6e28485f61596916ba5beb05b05975258091c921a7e71"
+      },
+      "src/static/icons/recent-features/bathroom.svg": {
+        "lines": 1,
+        "sha256": "979252189875d5802be4ff7ecc807733e65ac9f223147b8f83a0a115c44f9ce9"
+      },
+      "src/static/icons/recent-features/cabinet_redesign.svg": {
+        "lines": 1,
+        "sha256": "c8e997bf881c3d4fa29dc0b4ecbb370134fa03e7599ff5cca19bc9eb677a6e81"
+      },
+      "src/static/icons/recent-features/colored_floor_plan.svg": {
+        "lines": 1,
+        "sha256": "33cc7a5830dfd023a36d8254e0b1d53ef6c148b269a60962401887c9ee9668e1"
+      },
+      "src/static/icons/recent-features/customized_design.svg": {
+        "lines": 1,
+        "sha256": "c10d5ab48dcc83a7a5306385dc321e58f54aa89c4c7b874c1149939b6ba8a0ea"
+      },
+      "src/static/icons/recent-features/design_report.svg": {
+        "lines": 1,
+        "sha256": "b8eead7587f4302734afa805d6c72b799fadde2c5f4fa804e187e346bf322360"
+      },
+      "src/static/icons/recent-features/finished_room_design.svg": {
+        "lines": 1,
+        "sha256": "69de8382398368d8cb43513bc20372c697b08f168e6e2e354a4699a58d2598b3"
+      },
+      "src/static/icons/recent-features/floor_plan_render.svg": {
+        "lines": 9,
+        "sha256": "717be5fcb71de87278fc567e8dc99cf5838d38e52d73feddf6810ab477ccd62f"
+      },
+      "src/static/icons/recent-features/furniture.svg": {
+        "lines": 1,
+        "sha256": "6a85ec467e859a4b361b7f39dcf16e28a03a9bff5029b392deceb9e1da69b895"
+      },
+      "src/static/icons/recent-features/furniture_add.svg": {
+        "lines": 1,
+        "sha256": "88baa2cc368f7e58ad65db9a88751ea06355950c26832b6a479d7c28c9b421b8"
+      },
+      "src/static/icons/recent-features/furniture_remove.svg": {
+        "lines": 1,
+        "sha256": "2002eb06df7e80aa00528bd7bf28484f14a77726ce4c8537003edbbe48c47b33"
+      },
+      "src/static/icons/recent-features/furniture_replace.svg": {
+        "lines": 1,
+        "sha256": "2be1bac4097e7ab60cae5d68babc1cf438ecfbb0454154b61168ca7438174376"
+      },
+      "src/static/icons/recent-features/interior.svg": {
+        "lines": 1,
+        "sha256": "0a04170b6468805e98115e2c8ff821f72f902dcf72669a49e60249ab03c98138"
+      },
+      "src/static/icons/recent-features/kitchen.svg": {
+        "lines": 1,
+        "sha256": "772a769d113fe70eccd746292340c45a0fa042e246d39c25db93004f5e719463"
+      },
+      "src/static/icons/recent-features/local.svg": {
+        "lines": 8,
+        "sha256": "69eadfbb19753015edf625dcf6bd655afce2817a08b5ab1cac29aa7f0ccfe2f7"
+      },
+      "src/static/icons/recent-features/old_room_renovation.svg": {
+        "lines": 1,
+        "sha256": "443453a76632f5037a8eeca64a1a7e4d7504870d7577a8ffb465fd8a863843a1"
+      },
+      "src/static/icons/recent-features/rough_room_design.svg": {
+        "lines": 1,
+        "sha256": "0afdcbf300eb29bc3646506e2da2b5548ad2b6b15443faa4125066192e4a20eb"
+      },
+      "src/static/icons/recent-features/video_generation.svg": {
+        "lines": 4,
+        "sha256": "b7af3a376c6a6f915a68b817bea4ae22dfecd655764f4f8ac8c0d3b3729b2015"
+      },
+      "src/static/icons/recent-features/voice_summary.svg": {
+        "lines": 1,
+        "sha256": "ca12723eb2c96348cf242f6e323fe48f03694a619b4e4c11940f879323bee5f5"
+      },
       "src/static/icons/tabbar/contact-active.svg": {
         "lines": 1,
         "sha256": "d9466881a170e31705c34bbec052d7962123d2c086cd0d59349729f97427dd61"
@@ -10221,12 +10425,16 @@
         "sha256": "456a21e2890436c13004174a0601979c48655cbb426cc489be563993c077c854"
       },
       "src/styles/_design-primitives.generated.scss": {
-        "lines": 637,
-        "sha256": "479baf0b0efc7e4ffa5b0e572852132b166a9583cea29d781b518b20294b7b49"
+        "lines": 641,
+        "sha256": "7bb1b1cff46a7dfa24c4e50dc75696d8ffa3e31f70f9a3318f1316b117d16094"
+      },
+      "src/styles/_entry-arrow-motion.scss": {
+        "lines": 17,
+        "sha256": "d35a40b68febe60f315823fb954c41d9c03c043d82eb8dde779824d6a1b33ec5"
       },
       "src/styles/_home-entry-card.scss": {
-        "lines": 29,
-        "sha256": "a0b63845891c4e511b0a8c69a84dec18c4ae758c2328cd23f78b4f878d035839"
+        "lines": 68,
+        "sha256": "e87cc2aaf3a449712586706b73870e3d50f792518267064b95a0520032d8d57b"
       },
       "src/styles/_plans-scope-pill.scss": {
         "lines": 16,
@@ -10237,12 +10445,12 @@
         "sha256": "d8fdbda09d0175a63cb62bf85ce9e91a6c8a1de27650f09d500dbd3edf92d3b0"
       },
       "src/styles/design-tokens.generated.scss": {
-        "lines": 641,
-        "sha256": "9196a7d39be377b9a52301871fd9946ee3afb867661a1c6e6b42947637da9bb8"
+        "lines": 645,
+        "sha256": "2d8ef02b882725e6b3dd6bfb276c9619897da173a3064f740c124c05794543de"
       },
       "src/styles/design-tokens.json": {
-        "lines": 511,
-        "sha256": "68deeff5dd0d048217ad7855bc753325bbc8be0e98bf33cafaa71dbc37b9ced7"
+        "lines": 515,
+        "sha256": "440086e9a8a0fd16b8db4f3d61e1011fb8bf05c0bbc3d323233876566faee28f"
       },
       "src/styles/designIcons.generated.ts": {
         "lines": 135,
@@ -10276,6 +10484,10 @@
         "lines": 8,
         "sha256": "4abd76a57bfa5848df24783782fd5fc47c3fafff6e02e4bface808f21ad8d616"
       },
+      "src/types/dailyReports.ts": {
+        "lines": 130,
+        "sha256": "43d8c62bf067f01eb5f52b28fe9df7b500ffb60f8e1d2f0cc3bf70ec47c04031"
+      },
       "src/types/design.ts": {
         "lines": 158,
         "sha256": "08dfd521bd9c8f56c6a09092dd16d410fdba742c15688c051d0fd36a0a70a4ee"
@@ -10300,6 +10512,14 @@
         "lines": 78,
         "sha256": "f64f896ee9e1db6bb51ec53d09f185d529d6e77bb3b8f74cc3282f76343f6bed"
       },
+      "tests/dailyReportPage.test.ts": {
+        "lines": 299,
+        "sha256": "c9c7bee6c65d96a67216b4140abb18a6d275354d0f04ee931dbb77b0f8099d60"
+      },
+      "tests/dailyReports.test.ts": {
+        "lines": 54,
+        "sha256": "bfd7c2d89d4956ebec79b3bbd2f4e2398b54cc8fe1bb9df486ba475c795af342"
+      },
       "tests/fixtures/backend-floor-plan-group-6060-4bd4094c.json": {
         "lines": 1448,
         "sha256": "bc5cc94326108816d71d061a9b72860b2b20749e033b77881727a70ec0dae437"
@@ -10315,6 +10535,10 @@
       "tests/fixtures/backend-floor-plan-workflows-t45-source.json": {
         "lines": 1644,
         "sha256": "314266e98830d7a02f3911ca57152a41ea01876360a2133686263876d8a73a5b"
+      },
+      "tests/membersPage.test.ts": {
+        "lines": 278,
+        "sha256": "24d25b8c320d31d92cc7d37997d2a3e763522b89b951bed407098710efa0b861"
       },
       "vite.config.ts": {
         "lines": 248,
@@ -10415,8 +10639,8 @@
         "sha256": "23e93db0f43ef1e8c0ea812ce0fcc2c36c9a56a7e07adba0ed22c64969c5e3b0"
       },
       "app/admin/video_billing.py": {
-        "lines": 229,
-        "sha256": "7fd11c83a824481324199b245075ba9fbc4c21c00f5942d6cdf0108b412d91aa"
+        "lines": 201,
+        "sha256": "f715fbfaadc88c1c721effef5d4792d4c8425adaa67a958782a13c6c9e093bea"
       },
       "app/admin/workflow_diagnostics.py": {
         "lines": 160,
@@ -10512,7 +10736,7 @@
       },
       "app/billing/billing_api.py": {
         "lines": 1406,
-        "sha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+        "sha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
       },
       "app/billing/douyin_api.py": {
         "lines": 583,
@@ -10555,20 +10779,20 @@
         "sha256": "3eda62530cf9f115fb04383b078456d94c66191f5f999cd6c847a478a6eed6ec"
       },
       "app/billing/video_billing.py": {
-        "lines": 170,
-        "sha256": "f9e50f42001759d74e404056e76e6bb7e54517cdb2a4541de9ca1837fcc7b2d6"
+        "lines": 183,
+        "sha256": "1e0d7683aec24ed1820c549a166535246004f14bfc0af994ec8266f7be343ab7"
       },
       "app/billing/video_billing_api.py": {
-        "lines": 163,
-        "sha256": "7957f3e77db3bc2aa86b701c13953fed3ab08f2bdc0da86879ddfb7b8bc221c4"
+        "lines": 164,
+        "sha256": "7cbe4ca01a4098cb7591725a4b65fd093330ced0431808505b273dbb7333f391"
       },
       "app/billing/video_pricing.py": {
-        "lines": 170,
-        "sha256": "621b4dbc56604e0b527f923111f0ea451b97a87f65dd28703fe57ccddd5686ad"
+        "lines": 215,
+        "sha256": "85ac6ff8fc10b020b8c391526da23f637997fff3099ed542eba899dfd2e4dfd0"
       },
       "app/billing/video_pricing_catalog.py": {
-        "lines": 37,
-        "sha256": "4fde2029fa9fc982160a902ce2e06f9bd3ff8fcee717b9ac7348483c61192811"
+        "lines": 67,
+        "sha256": "ca38c0a5c012e05899a3c0ca4618477e5439573ad0d3f06f6c1aa054b1940a3d"
       },
       "app/billing/wechat_pay.py": {
         "lines": 469,
@@ -10687,8 +10911,8 @@
         "sha256": "e670eeb4eb41189363f50fe4bbee137e4759e69f3ca5ef7019b6d7ecddeb2c3d"
       },
       "app/core/models.py": {
-        "lines": 2034,
-        "sha256": "9fef423c3ac61f3f7aae8484f98ba618b8434b7b5639d21e905174d9c8f56875"
+        "lines": 2048,
+        "sha256": "09cfc1ab5726f15b9b02ae90dac01bb796de203b3eb197acf2b92ea1dfd9ae9b"
       },
       "app/core/performance.py": {
         "lines": 1587,
@@ -10891,8 +11115,8 @@
         "sha256": "af0ee3454ffe2280ec870fa553fe3e367920a95e2aa197d0f25ae59d4a5b12db"
       },
       "app/persistence/db_models.py": {
-        "lines": 4021,
-        "sha256": "3770807435929892dfb456894744abc03b5ee1c2418666fbe50897423287f546"
+        "lines": 4023,
+        "sha256": "58e4a7b31729ea4ecc3a9ec354f6c2b8738eddc3cbaf5b7f89ddd1a5ea6fcf8c"
       },
       "app/prompts/__init__.py": {
         "lines": 1,
@@ -10991,32 +11215,36 @@
         "sha256": "ff92241c7be0b2918f4fa520a975f851bcdc2226cf74e087a8086726cc67430a"
       },
       "app/static/3vjia/h5/bootstrap.js": {
-        "lines": 195,
-        "sha256": "115363ca1200412613bc24fa23a1353b05c369f7107c04723f02850a1955ae3a"
+        "lines": 307,
+        "sha256": "d9a042b79aaaed24f44b57aa833c068cddfcecdb51b365b35945ca3954922766"
       },
       "app/static/3vjia/h5/bridge.js": {
-        "lines": 1360,
-        "sha256": "9b77c45fe0ab313246fc6711b3517dcbbe036506dc02a726e60940135da1121e"
+        "lines": 1426,
+        "sha256": "f82579bd1c0ddab7b06f4afc5fed95c0edb2fa21c91c974d93ec0c8077738c42"
       },
       "app/static/3vjia/h5/discovery-patches.json": {
-        "lines": 138,
-        "sha256": "b408a80f81b69148001749bf7c3d37f72c33c65801f153d80d22e5923c1e6697"
+        "lines": 153,
+        "sha256": "feb0fb611a09a84fbf8667972da5f8a3df1990b797bf58059942ad42c1cf40ff"
       },
       "app/static/3vjia/h5/discovery-source-lock.json": {
         "lines": 19,
         "sha256": "afb862a3eb956ce3788e3c88f852a61fbcbb491effc604c9ab7af577e10f141c"
       },
       "app/static/3vjia/h5/discovery.css": {
-        "lines": 6,
-        "sha256": "203d26d2ce6c3516181d108e480db8381472e9a10be3303bb52cd00ce1637708"
+        "lines": 7,
+        "sha256": "254bbfbd2d3befedb943083736e758874307709ceb1823dfde861d27ab23840d"
       },
       "app/static/3vjia/h5/discovery.js": {
-        "lines": 283,
-        "sha256": "e6b19ac99da58cec7e8366677e38b92db0e7e36747b3f027611c388aa0bf0f0c"
+        "lines": 291,
+        "sha256": "9e63615a13754adde2d0bc38f600a85760765e4a96e41aee827acf5ce62c23f1"
+      },
+      "app/static/3vjia/h5/motion.css": {
+        "lines": 37,
+        "sha256": "9c6dfa5ffd38c59f65d884e29edd53aa7a1fa173f787cf68a51217f577076cd4"
       },
       "app/static/3vjia/h5/panorama/compare.css": {
         "lines": 22,
-        "sha256": "c0d06de691c8ae6a3e48bc315a7ec3eab503925e3cc0b39e38ffd21c23cc4950"
+        "sha256": "836d956a59941f44ac129cb8dea980d7408c3489219798c0ddd2bd372e522d1d"
       },
       "app/static/3vjia/h5/panorama/compare.js": {
         "lines": 219,
@@ -11031,24 +11259,24 @@
         "sha256": "a97556e0177cad2df111fe9c96a3e91b4eb09feecc7a47b540ab2077b46113b6"
       },
       "app/static/3vjia/h5/patches.json": {
-        "lines": 199,
-        "sha256": "3013e30e8101388e96b017b2b4da3ea2d32252c79abe62f5ef14e7e6564f3c01"
+        "lines": 204,
+        "sha256": "ef3d92297af9fb5c663c1e8af33ebab4c14982f674e1de47ebb5147b25fdb35c"
       },
       "app/static/3vjia/h5/scheme-patches.json": {
-        "lines": 160,
-        "sha256": "f4695d8fe423d1a5b2ab11a84cdc454b7d5b95449ebb5da41f949553ca031cc4"
+        "lines": 210,
+        "sha256": "fd8ff76c1e759025db5f717ac9f816bdc319f4ad6534b8f741c5d62c4bf8ad60"
       },
       "app/static/3vjia/h5/scheme-source-lock.json": {
         "lines": 20,
         "sha256": "3173de74242a8fe0f33157ed6a52b1061a2b5b32400b329984b95a3bc0504ba0"
       },
       "app/static/3vjia/h5/scheme.css": {
-        "lines": 14,
-        "sha256": "2e9b017da8afaa8f0b589036db37d8ca5af6c3aff68795a1ae995eac8657cf09"
+        "lines": 38,
+        "sha256": "116ed295605b97b05c251db54255e68004f272b661147e835975ddb7091e505e"
       },
       "app/static/3vjia/h5/scheme.js": {
-        "lines": 257,
-        "sha256": "ef3c6746e4bfd87458665681ba91a1860a85ac72fd74a1582bc5f87fcb1b1b07"
+        "lines": 531,
+        "sha256": "c2bc75ee43971affe7dee6c8b731fd3ffe6f2970c14ca82a154059e905c7227a"
       },
       "app/static/3vjia/h5/selector-patches.json": {
         "lines": 103,
@@ -11063,16 +11291,16 @@
         "sha256": "a01f1be2706230c3259d045d529b64e962b0644a31066a4d852ef2c013b2b734"
       },
       "app/static/3vjia/h5/selector.js": {
-        "lines": 140,
-        "sha256": "44630b84a08c1685863b2e53851c4aceac2ad084237113a9d823e48c362616a8"
+        "lines": 141,
+        "sha256": "a13c24b2d068afb9ba1267d37abe2cf665c01607330e0246c63ff1e143effece"
       },
       "app/static/3vjia/h5/source-lock.json": {
         "lines": 774,
         "sha256": "31cda2e38585613ebf749e151baf40f77e5de971147e87480bec6fcfdabc3ac4"
       },
       "app/static/3vjia/h5/style.css": {
-        "lines": 332,
-        "sha256": "6c202989256b718514ebe53ed080fb8b7a3d0dd2c5af3bed5ffd15aea63a5d22"
+        "lines": 349,
+        "sha256": "398d90b17e12f3b8bd595b978a34fbb40510251bc9eefe7fcd8f47a9dd80df8d"
       },
       "app/static/3vjia/h5/vendor-loader.js": {
         "lines": 109,
@@ -11091,12 +11319,12 @@
         "sha256": "9a68a3f504a2c12213010162fe74f2f790f4a0af8f825203d9e8f577c3d3fed2"
       },
       "app/static/admin.css": {
-        "lines": 1027,
-        "sha256": "8d6e1c3bf6ba1e07abfb4c79835898164842c207ad8c5b6b1349d3f8775ae2a4"
+        "lines": 1076,
+        "sha256": "bcbd1a6c7da88ed1b846afcbfd19b5fc7f9953dc93eeb378043420b58b72fc41"
       },
       "app/static/admin.js": {
-        "lines": 2142,
-        "sha256": "23293e769c4d8677081204bd9fbb71961e79bcb7672d61c90e080d9f7a579bbb"
+        "lines": 2147,
+        "sha256": "8af5474a72c403b49d6c7ee2114167d30b29f4bf943527f69b6df057eab80446"
       },
       "app/static/voice-upload-validation.js": {
         "lines": 74,
@@ -11143,8 +11371,8 @@
         "sha256": "a700c507d5dc9fa7b9c51333c605c29095c7fa0fbd5f50a9bae2d6b9f8a4e36c"
       },
       "app/templates/admin/_video_billing.html": {
-        "lines": 102,
-        "sha256": "1b2601365439cda2bd9cd2d8edb89b9a6aa6693142efa9f05b8f2778389e406c"
+        "lines": 110,
+        "sha256": "acfa72fcc2bfd0d33c5af4766513d9a5f5412d230eec20575e10177d451963a8"
       },
       "app/templates/admin/assets.html": {
         "lines": 123,
@@ -11474,9 +11702,13 @@
         "lines": 101,
         "sha256": "1fce0534e37aa5005f97aba88c770da172b5e1e54caa68e7a56caa860cf4bdf5"
       },
+      "app/workflows/operations/video/video_pricing_matrix.py": {
+        "lines": 47,
+        "sha256": "3b045ed5d9e2e370323f03537c61bfe38d1ba86fbd83effa2ca37b6c26edc254"
+      },
       "app/workflows/operations/video/workflow_video_definition.py": {
-        "lines": 133,
-        "sha256": "b64d2eb9bbae1c1c2fae966324a4801765d33798ee72862b7122a9e00cf9a47a"
+        "lines": 140,
+        "sha256": "212d2c0cdbdecf9aa3a32e300a42aeafb78149c0a6ba5fa167474dcbde4ff19c"
       },
       "app/workflows/operations/video/workflow_video_execution.py": {
         "lines": 101,
@@ -11503,8 +11735,8 @@
         "sha256": "fed8e3082cbff30008e78f8664b6acb313387d090782b45951aaa64feb7d5fd6"
       },
       "app/workflows/submissions/workflow_local_video_submission.py": {
-        "lines": 1250,
-        "sha256": "0bd86ad7c031143fd5256cc75c3b66fa91f1336e1db9739b1d5d7ea2a05d853b"
+        "lines": 1282,
+        "sha256": "5d1d00ab418842e69c9eea665674749b337ad41b9ddc8465c4bcbfbd9aaa8f63"
       },
       "app/workflows/submissions/workflow_provider_staging.py": {
         "lines": 646,
@@ -11539,8 +11771,8 @@
         "sha256": "d601b406b67ad74479380a7c1234b98c13ee6ca7f71b0c2c596f065ac3c027fb"
       },
       "app/workflows/workflow_admission.py": {
-        "lines": 4443,
-        "sha256": "e613a4400e0f59b638c299dd6b81d132ca0dd69d3d3011d3f2b6c8dbff54f4b6"
+        "lines": 4453,
+        "sha256": "c9bed87dfbaa4d492bda12b532701e6585c829ea4e7d47cdfe1179ee375c6c7e"
       },
       "app/workflows/workflow_asset_pins.py": {
         "lines": 78,
@@ -11907,12 +12139,12 @@
         "sha256": "7ed9e4c874b83f8c3f4fce949531e8cf3dfe196c7accc3a118f9d602da8c010a"
       },
       "documents/REST_API_INTERFACE.md": {
-        "lines": 10412,
-        "sha256": "04b5396628d1f1d45d1e0de9a249ffca9852242cb82a0fc0912f3292db99bdbb"
+        "lines": 10461,
+        "sha256": "a3a9f851edaffc9f3bb939598f3b779424602bf6a8d6a28bf3491af17393e2e4"
       },
       "documents/THREE_VJIA_INTEGRATION.md": {
-        "lines": 232,
-        "sha256": "652fb2901fa25710f700dd0023bdeff7e02ba1d5676fc111266c42ee03f46b9f"
+        "lines": 256,
+        "sha256": "bf8cd60bb5cd8dc9a20272aaa9d354ebf988ade8f69f8a60199882b572ff6312"
       },
       "documents/ai_copywriting_setup.md": {
         "lines": 68,
@@ -12162,6 +12394,10 @@
         "lines": 84,
         "sha256": "ad2a32fe2d0a1abafa6c7fecd00997fb95996ddca043aa8e21e4ecb0d34df066"
       },
+      "migrations/versions/b7d4e2a9c510_merge_daily_reports_and_video_rate_resolution.py": {
+        "lines": 21,
+        "sha256": "fbad5b6df194364cdbc1c17fcc02b0e664088984f1ec3317ae56428fe4457c3a"
+      },
       "migrations/versions/b7e3a1d9c240_workflow_node_configuration.py": {
         "lines": 170,
         "sha256": "fc29fa31d8d7521ca41b3fc3998781da3ece79614601c938b14d0efa5c5512b0"
@@ -12290,6 +12526,10 @@
         "lines": 46,
         "sha256": "6a44491c16b547a224840b83fe082a990c848e2706d1a3e9031eb2819a7a0186"
       },
+      "migrations/versions/c9e4a7f1b820_add_video_rate_resolution_key.py": {
+        "lines": 105,
+        "sha256": "a68de58ce389abe7362c03eb01ca0d63718930982c2f1e8d5a3505ecb30e8b30"
+      },
       "migrations/versions/c9e4b2a7d650_merge_workflow_and_subscription_heads.py": {
         "lines": 22,
         "sha256": "bb43045f028c9186161b05e6bd3e0a9bb0c6382972aa11bd9c5d394854ecd11c"
@@ -12381,6 +12621,10 @@
       "migrations/versions/d7a4e9c1b620_soft_remove_billing_catalog_entries.py": {
         "lines": 40,
         "sha256": "31f4cfef29e13919c68865bbdf5c60d8e2a298d0b4db972b2c06aa5aa3fca0f3"
+      },
+      "migrations/versions/d7e1f4a9c305_drop_video_rate_resolution_default.py": {
+        "lines": 38,
+        "sha256": "ba6e62b31eb7c77a5f3e1502b641d19b3243627f33aaf3c935871b1d1c306f1d"
       },
       "migrations/versions/d8c4a1f2e930_snapshot_report_image_descriptions.py": {
         "lines": 29,
@@ -12607,8 +12851,8 @@
         "sha256": "e27475ad8a8cf394f4304f94ab8fec1d399acac8f658a3ec292467fdd4c2c0d9"
       },
       "scripts/build_3vjia_h5.py": {
-        "lines": 412,
-        "sha256": "c7640bad9a21d120f50675ae5d30d09fc56c463f3252b00a95bdfc5b7c16d63c"
+        "lines": 420,
+        "sha256": "5b4fbb3669927a45403b7d3b8dd97e8a4272ca606c9b812a9e9a7d4f7b988abc"
       },
       "scripts/check_sdd.py": {
         "lines": 244,
@@ -12791,16 +13035,16 @@
         "sha256": "3091d53dd8deb70d3a9332b74591a7d6222b0ee55976fcf5a9829412d1b99307"
       },
       "tests/test_video_billing_admission.py": {
-        "lines": 447,
-        "sha256": "0682b051bf268b418b7ded488e6caa39f0266e22331abd0793cc4af73ce62d78"
+        "lines": 599,
+        "sha256": "d215776f28dfa13fc359419303789e27d9e64391f717b2bd17fe02d95be54908"
       },
       "tests/test_video_billing_retry_integration.py": {
-        "lines": 145,
-        "sha256": "17871ce2d6e29b82ecdc616a95558e3195c15aad37b17f952140c729977b8a46"
+        "lines": 148,
+        "sha256": "ffa04e6bce4a159074b97974ead62e73fe008b491896a11787503805c587bc26"
       },
       "tests/test_video_member_quota_integration.py": {
         "lines": 169,
-        "sha256": "0eab4889c6368fac5e68db7127bb4f2479db115d987d134fe5c4fc2440ace39b"
+        "sha256": "a8df0eadd4e0093bfe7e7b479c3df87951e6cc39859c653a0d1f944229ca27ad"
       }
     }
   },
@@ -12992,161 +13236,161 @@
       "path": "app/billing/billing_api.py",
       "symbol": "accept_invitation_by_id",
       "line": 1082,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "billing_catalog",
       "line": 288,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "close_owned_payment",
       "line": 855,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "create_subscription",
       "line": 458,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "create_token_purchase",
       "line": 601,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "current_workspace_management",
       "line": 1141,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "decline_invitation_by_id",
       "line": 1104,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "invite_workspace_member",
       "line": 1026,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "payment_detail",
       "line": 753,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "payment_history",
       "line": 893,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "payment_response",
       "line": 120,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "pending_token_purchase_count",
       "line": 207,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "receive_wechat_event",
       "line": 1216,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "received_workspace_invitations",
       "line": 1055,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "refreshed_checkout_response",
       "line": 152,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "refund_history",
       "line": 971,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "refund_response",
       "line": 179,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "remove_member",
       "line": 1200,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "request_payment_refund",
       "line": 920,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "resume_owned_payment",
       "line": 778,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "revoke_outgoing_invitation",
       "line": 1124,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "serialize_billing_order_creation",
       "line": 197,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
       "path": "app/billing/billing_api.py",
       "symbol": "wechat_pay_notification",
       "line": 1393,
-      "sourceSha256": "af91a016db67524cb633d83c15a9a95b3bf8621e3406510ee04c42a7bd1a6889"
+      "sourceSha256": "2f5d77d1beaee7d2e979f4254d7db6359b6d5fa9ec07b349eb0e972c039e6f46"
     },
     {
       "repository": "backend",
@@ -13349,35 +13593,56 @@
       "path": "app/billing/video_billing_api.py",
       "symbol": "preview_discount",
       "line": 103,
-      "sourceSha256": "7957f3e77db3bc2aa86b701c13953fed3ab08f2bdc0da86879ddfb7b8bc221c4"
+      "sourceSha256": "7cbe4ca01a4098cb7591725a4b65fd093330ced0431808505b273dbb7333f391"
     },
     {
       "repository": "backend",
       "path": "app/billing/video_billing_api.py",
       "symbol": "preview_source",
       "line": 50,
-      "sourceSha256": "7957f3e77db3bc2aa86b701c13953fed3ab08f2bdc0da86879ddfb7b8bc221c4"
+      "sourceSha256": "7cbe4ca01a4098cb7591725a4b65fd093330ced0431808505b273dbb7333f391"
     },
     {
       "repository": "backend",
       "path": "app/billing/video_billing_api.py",
       "symbol": "preview_video_billing",
       "line": 131,
-      "sourceSha256": "7957f3e77db3bc2aa86b701c13953fed3ab08f2bdc0da86879ddfb7b8bc221c4"
+      "sourceSha256": "7cbe4ca01a4098cb7591725a4b65fd093330ced0431808505b273dbb7333f391"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/video_billing.py",
+      "symbol": "effective_resolution",
+      "line": 34,
+      "sourceSha256": "1e0d7683aec24ed1820c549a166535246004f14bfc0af994ec8266f7be343ab7"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/video_pricing_catalog.py",
+      "symbol": "video_billing_discovery",
+      "line": 17,
+      "sourceSha256": "ca38c0a5c012e05899a3c0ca4618477e5439573ad0d3f06f6c1aa054b1940a3d"
+    },
+    {
+      "repository": "backend",
+      "path": "app/billing/video_pricing.py",
+      "symbol": "_resolve_charged_resolution",
+      "line": 101,
+      "sourceSha256": "85ac6ff8fc10b020b8c391526da23f637997fff3099ed542eba899dfd2e4dfd0"
     },
     {
       "repository": "backend",
       "path": "app/billing/video_pricing.py",
       "symbol": "calculate_video_price",
-      "line": 122,
-      "sourceSha256": "621b4dbc56604e0b527f923111f0ea451b97a87f65dd28703fe57ccddd5686ad"
+      "line": 164,
+      "sourceSha256": "85ac6ff8fc10b020b8c391526da23f637997fff3099ed542eba899dfd2e4dfd0"
     },
     {
       "repository": "backend",
       "path": "app/billing/video_pricing.py",
       "symbol": "load_video_pricing",
-      "line": 85,
-      "sourceSha256": "621b4dbc56604e0b527f923111f0ea451b97a87f65dd28703fe57ccddd5686ad"
+      "line": 122,
+      "sourceSha256": "85ac6ff8fc10b020b8c391526da23f637997fff3099ed542eba899dfd2e4dfd0"
     },
     {
       "repository": "backend",
@@ -13817,8 +14082,8 @@
       "repository": "backend",
       "path": "app/persistence/db_models.py",
       "symbol": "TokenLedgerEntry",
-      "line": 2156,
-      "sourceSha256": "3770807435929892dfb456894744abc03b5ee1c2418666fbe50897423287f546"
+      "line": 2158,
+      "sourceSha256": "58e4a7b31729ea4ecc3a9ec354f6c2b8738eddc3cbaf5b7f89ddd1a5ea6fcf8c"
     },
     {
       "repository": "backend",
@@ -14062,15 +14327,15 @@
       "repository": "backend",
       "path": "app/workflows/workflow_admission.py",
       "symbol": "admit_legacy_image_compatibility_job",
-      "line": 2857,
-      "sourceSha256": "e613a4400e0f59b638c299dd6b81d132ca0dd69d3d3011d3f2b6c8dbff54f4b6"
+      "line": 2867,
+      "sourceSha256": "c9bed87dfbaa4d492bda12b532701e6585c829ea4e7d47cdfe1179ee375c6c7e"
     },
     {
       "repository": "backend",
       "path": "app/workflows/workflow_admission.py",
       "symbol": "admit_workflow_job",
-      "line": 3291,
-      "sourceSha256": "e613a4400e0f59b638c299dd6b81d132ca0dd69d3d3011d3f2b6c8dbff54f4b6"
+      "line": 3301,
+      "sourceSha256": "c9bed87dfbaa4d492bda12b532701e6585c829ea4e7d47cdfe1179ee375c6c7e"
     },
     {
       "repository": "backend",
@@ -14595,14 +14860,21 @@
       "path": "src/composables/useFloorPlanWorks.ts",
       "symbol": "useFloorPlanWorks",
       "line": 35,
-      "sourceSha256": "6b6850652fed78b0d3dac918d97fd5554f2faedfddc2ce8ac8465250a866de30"
+      "sourceSha256": "bdf9501604288b3d550897c32d9a8e79f2e41c6b9d3e2dc856e652fdd8593001"
     },
     {
       "repository": "frontend",
       "path": "src/pages/projects/index.vue",
       "symbol": "loadProjects",
-      "line": 347,
-      "sourceSha256": "098784fe5f84308eeb0f04fdae27af7a9a462e24c945431c46955b7eaed6c5b0"
+      "line": 380,
+      "sourceSha256": "f4ac53bda589a03aa92be41a8ee36c0f38eab78b281fca376329b97481027cea"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pages/projects/index.vue",
+      "symbol": "refreshDailyStatus",
+      "line": 62,
+      "sourceSha256": "f4ac53bda589a03aa92be41a8ee36c0f38eab78b281fca376329b97481027cea"
     },
     {
       "repository": "frontend",
@@ -14886,6 +15158,13 @@
     },
     {
       "repository": "frontend",
+      "path": "src/pkg-features/pages/video_generation/index.vue",
+      "symbol": "refreshPrice",
+      "line": 273,
+      "sourceSha256": "6517c87b317dc07e6c567bd3f7e06546be0cb30889c50bd7deba9bfcfb7ee021"
+    },
+    {
+      "repository": "frontend",
       "path": "src/pkg-features/pages/voice_summary/index.vue",
       "symbol": "choosePhoneFiles",
       "line": 891,
@@ -14930,8 +15209,8 @@
       "repository": "frontend",
       "path": "src/pkg-features/repositories/designJobSubmit.ts",
       "symbol": "postPrepared",
-      "line": 184,
-      "sourceSha256": "6dc30b6644b233e590e6a08da942b00955f229e0e0b35cf0fab1b0c3a6800b8d"
+      "line": 191,
+      "sourceSha256": "40c3c381e8f856db39647ba9d99964d614a2e80b2020bc52666a414e0dfe1b34"
     },
     {
       "repository": "frontend",
@@ -14949,10 +15228,24 @@
     },
     {
       "repository": "frontend",
+      "path": "src/pkg-features/repositories/threeVjiaDiscovery.ts",
+      "symbol": "prepareThreeVjiaDiscovery",
+      "line": 7,
+      "sourceSha256": "deaadc94db74e9166ca3acae4926e754d1b9cb08923e6ad2524e983427ed7db8"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-features/repositories/threeVjiaImage.ts",
+      "symbol": "prepareThreeVjiaImage",
+      "line": 7,
+      "sourceSha256": "9c507fae99e58ce7b292c70bc1d505704f63c6f90d82009794bb25f66d90a08a"
+    },
+    {
+      "repository": "frontend",
       "path": "src/pkg-features/repositories/videoBilling.ts",
       "symbol": "previewVideoBilling",
       "line": 14,
-      "sourceSha256": "491c13a1145d6c5d4f1528c80f8eb2e5a70c619823df68f9bf72135804f039a3"
+      "sourceSha256": "12d181c70105039228c0514b0665a74e0832761ab69dce1713acd05aa6cceb31"
     },
     {
       "repository": "frontend",
@@ -14970,10 +15263,73 @@
     },
     {
       "repository": "frontend",
+      "path": "src/pkg-features/services/floorPlanHandoff.ts",
+      "symbol": "prepareFloorPlanEditor",
+      "line": 28,
+      "sourceSha256": "422810a3e9729319f8a2b02386a742424148a9ec3dd544ef5df85c887ebfffa3"
+    },
+    {
+      "repository": "frontend",
       "path": "src/pkg-features/services/videoGenerationSubmit.ts",
       "symbol": "submitVideoGeneration",
-      "line": 76,
-      "sourceSha256": "98ed58eff2f67b8624759eae514a85e3d058de84d61f6a6424e15f447b3b808d"
+      "line": 81,
+      "sourceSha256": "d4b7042ec51ae9e43620dca0177ef2de5379c362842dcb04925b3247078143a5"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-plans/services/floorPlanHandoff.ts",
+      "symbol": "prepareFloorPlanPanorama",
+      "line": 32,
+      "sourceSha256": "422810a3e9729319f8a2b02386a742424148a9ec3dd544ef5df85c887ebfffa3"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/components/OwnerReportList.vue",
+      "symbol": "load",
+      "line": 15,
+      "sourceSha256": "7ed440a9a564bcaeff3dcfc7b3931880747944e02b2f35c6bd032cb228e18d3b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/components/OwnerReportList.vue",
+      "symbol": "open",
+      "line": 51,
+      "sourceSha256": "7ed440a9a564bcaeff3dcfc7b3931880747944e02b2f35c6bd032cb228e18d3b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/pages/daily-report/index.vue",
+      "symbol": "acknowledge",
+      "line": 145,
+      "sourceSha256": "f4d553f2054437ede41742ca6486e055ca45e11f2160d4fbefba128de6670e8d"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/pages/daily-report/index.vue",
+      "symbol": "loadHistory",
+      "line": 197,
+      "sourceSha256": "f4d553f2054437ede41742ca6486e055ca45e11f2160d4fbefba128de6670e8d"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/pages/daily-report/index.vue",
+      "symbol": "refresh",
+      "line": 168,
+      "sourceSha256": "f4d553f2054437ede41742ca6486e055ca45e11f2160d4fbefba128de6670e8d"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/pages/daily-report/index.vue",
+      "symbol": "save",
+      "line": 221,
+      "sourceSha256": "f4d553f2054437ede41742ca6486e055ca45e11f2160d4fbefba128de6670e8d"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/pages/daily-report/index.vue",
+      "symbol": "saveComment",
+      "line": 267,
+      "sourceSha256": "f4d553f2054437ede41742ca6486e055ca45e11f2160d4fbefba128de6670e8d"
     },
     {
       "repository": "frontend",
@@ -14988,6 +15344,20 @@
       "symbol": "save",
       "line": 145,
       "sourceSha256": "fa5bba78bd749b905517b83dc0c2368de1bd8e8f50a3f2a7330108b890ad28e7"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/pages/members/index.vue",
+      "symbol": "saveQuota",
+      "line": 109,
+      "sourceSha256": "0ca4d558ed6af256ba111c52a90cea2c189b4fd21051c0fbe204d9d38af4e28b"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/services/dailyReports.ts",
+      "symbol": "apiDailyReports",
+      "line": 90,
+      "sourceSha256": "d664c789824f2d1a926610af8056bb49c1a410acf7d774e4df8dac46ca1e0b2b"
     },
     {
       "repository": "frontend",
@@ -15016,6 +15386,13 @@
       "symbol": "writeSalesStage",
       "line": 27,
       "sourceSha256": "a85760d76231d1e75cceadba12e2eae481b6a2c11e06c643003d80401474b96e"
+    },
+    {
+      "repository": "frontend",
+      "path": "src/pkg-projects/services/saveMemberTokenLimit.ts",
+      "symbol": "saveMemberTokenLimit",
+      "line": 11,
+      "sourceSha256": "ae7adc9a4341895bdf52e2d49026bdd4110a997dd36d881601f47fd4d188e09d"
     },
     {
       "repository": "frontend",
@@ -15070,15 +15447,8 @@
       "repository": "frontend",
       "path": "src/repositories/memberTokenQuota.ts",
       "symbol": "readMyMemberTokenQuota",
-      "line": 38,
-      "sourceSha256": "72323ff85f95c7649062c7061d7b8281efc05d3f8320a1b286dee214a32d4aba"
-    },
-    {
-      "repository": "frontend",
-      "path": "src/repositories/memberTokenQuota.ts",
-      "symbol": "saveMemberTokenLimit",
-      "line": 78,
-      "sourceSha256": "72323ff85f95c7649062c7061d7b8281efc05d3f8320a1b286dee214a32d4aba"
+      "line": 29,
+      "sourceSha256": "41f7020c05823710e78892ecaefa838b0ff5664f697165bf21a9c6825feb2a0e"
     },
     {
       "repository": "frontend",
@@ -15105,8 +15475,8 @@
       "repository": "frontend",
       "path": "src/repositories/projectOverview.ts",
       "symbol": "loadProjectOverview",
-      "line": 111,
-      "sourceSha256": "2bb49a0e113ae4b53041ab1b3c9846d394d7795d02458eaff100fc9b4d85f8f4"
+      "line": 129,
+      "sourceSha256": "b63f5f13a0f536710dcba9dbba7e9e949a77d390590ab2b95cbaf9dc2be694ef"
     },
     {
       "repository": "frontend",
@@ -15142,20 +15512,6 @@
       "symbol": "wechatSessionRepository",
       "line": 88,
       "sourceSha256": "acd3271b43b88b8e7ad67618201cc82ad3bd3b1cffbebddd1b45a813fd5fa7a0"
-    },
-    {
-      "repository": "frontend",
-      "path": "src/repositories/threeVjiaDiscovery.ts",
-      "symbol": "prepareThreeVjiaDiscovery",
-      "line": 7,
-      "sourceSha256": "c0cee1c5cc57ea9e1ffe60e796adbce9e18444a61f93ee166f327b706746224b"
-    },
-    {
-      "repository": "frontend",
-      "path": "src/repositories/threeVjiaImage.ts",
-      "symbol": "prepareThreeVjiaImage",
-      "line": 6,
-      "sourceSha256": "85927c2026f0df40f94bd194afafcb79c05fba7179b34f52c15539f26be15766"
     },
     {
       "repository": "frontend",
@@ -15201,24 +15557,17 @@
     },
     {
       "repository": "frontend",
+      "path": "src/services/dailyReportStatus.ts",
+      "symbol": "loadDailyReportStatus",
+      "line": 7,
+      "sourceSha256": "d58bd7cfd7e4a8bb1ee12e86ecada5c9fb1b473ad27a2a182eca2c17ad9c8b4d"
+    },
+    {
+      "repository": "frontend",
       "path": "src/services/douyinAuth.ts",
       "symbol": "buildRegistrationDouyinLoginRequest",
       "line": 60,
       "sourceSha256": "0fdf5f63c7e01aace1f2b284ee6cfcc830d8022728c0c81dc1211583f4e349c3"
-    },
-    {
-      "repository": "frontend",
-      "path": "src/services/floorPlanHandoff.ts",
-      "symbol": "prepareFloorPlanEditor",
-      "line": 28,
-      "sourceSha256": "422810a3e9729319f8a2b02386a742424148a9ec3dd544ef5df85c887ebfffa3"
-    },
-    {
-      "repository": "frontend",
-      "path": "src/services/floorPlanHandoff.ts",
-      "symbol": "prepareFloorPlanPanorama",
-      "line": 32,
-      "sourceSha256": "422810a3e9729319f8a2b02386a742424148a9ec3dd544ef5df85c887ebfffa3"
     },
     {
       "repository": "frontend",

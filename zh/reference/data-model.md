@@ -52,7 +52,7 @@ flowchart LR
 
 选择回滚镜像前看[恢复流程](/zh/deploy/production)：应用回滚保留前向 schema，不能恢复已移除表或逆转兼容边界。
 
-源码：[app/persistence/db_models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/persistence/db_models.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/assets/asset_input_archival.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)
+源码：[app/persistence/db_models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/persistence/db_models.py) · [app/assets/asset_input_archival.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/assets/asset_input_archival.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py) · [app/core/models.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/models.py)
 
 ## 协作、SDK 与结果不确定的执行记录
 
@@ -62,7 +62,8 @@ flowchart LR
 | 日报记录与成员关系身份 | 日报属于企业成员期间及北京时间日期；保存版本、owner 已读／批注、成员批注已阅分别记录 |
 | `floor_plan_works` | 按 SDK 配置及不透明供应商 Group 保存本地归属；实时标题／封面／户型仍是供应商元数据 |
 | `three_vjia_releases`、`three_vjia_sdk_configurations` | 已发布契约／H5 身份与选定执行配置分开；不再有持久化编辑器会话表 |
-| `video_billing_config` 与已接受商业快照 | 当前版本费率规则与不可变的已接受模型／时长／收费分开 |
+| `video_billing_config`、`video_model_rates`、`video_mode_rules` | 当前配置版本、以 `(model_key, resolution)` 为键的费率，以及各模式的时长规则 |
+| 已接受视频商业快照 | Workflow 保留接受时的模型、分辨率、时长和费用，供执行与符合条件的恢复使用 |
 | Submission／provider UNKNOWN 字段 | 持久化起始／截止／下次查询／次数；重启 worker 不会重新开始恢复计时 |
 
 ```mermaid

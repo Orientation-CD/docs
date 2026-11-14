@@ -39,10 +39,10 @@ Feature价格、套餐权益、赠送与订单金额由服务端决定。客户�
 
 ## 视频采用版本化费用计算
 
-视频价格权威是 `VideoBillingConfig`、`VideoModelRate`、`VideoModeRule`。预览读取来源时长、模型单价和个人折扣，不预留余额、不检查月额度。最终准入核对 `expected_token_cost` 与 `expected_effective_model`，然后同时按钱包和成员额度预留冻结金额。价格变化拒绝不产生新预留；已接纳重放沿用原价格，符合条件的显式重试按新记账代际/月份预留原金额。见[视频费用与重放](/zh/reference/flows/video-billing-flow)。
+视频价格权威是 `VideoBillingConfig`、`VideoModelRate`、`VideoModeRule`。预览读取来源时长、模型与分辨率组合单价和个人折扣，不预留余额、不检查月额度。最终准入核对 `expected_token_cost` 与 `expected_effective_model`，然后同时按钱包和成员额度预留冻结金额。价格变化拒绝不产生新预留；已接纳重放沿用原模型、分辨率和价格，符合条件的显式重试按新记账代际/月份预留原金额。见[视频费用与重放](/zh/reference/flows/video-billing-flow)。
 
-源码：[video_commercial_snapshot](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/video_billing.py#L34) · [tests/test_video_member_quota_integration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/test_video_member_quota_integration.py)。
+源码：[video_commercial_snapshot](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/video_billing.py#L43) · [tests/test_video_member_quota_integration.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/test_video_member_quota_integration.py)。
 
 ---
 
-源码依据 · backend `749e82df`: [app/billing/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/billing.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/billing/member_token_quotas.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/submissions/workflow_submission_retry.py).
+源码依据 · backend `f34b8a4d`: [app/billing/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/billing.py) · [app/billing/member_token_quotas.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/billing/member_token_quotas.py) · [app/workflows/workflow_admission.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_admission.py) · [app/workflows/submissions/workflow_submission_retry.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/submissions/workflow_submission_retry.py).

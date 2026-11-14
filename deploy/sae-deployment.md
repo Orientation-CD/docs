@@ -75,13 +75,13 @@ python -m scripts.maintain_3vjia_h5 gc
 
 Both are dry-run by default. Write mode requires `--apply` and `THREE_VJIA_MAINTENANCE_ENABLED=true` on the designated instance. Its `THREE_VJIA_MAINTENANCE_LOCK_PATH` must be the same actual mounted lock file for CLI and periodic work; identical path strings on different hosts do not coordinate. GC protects latest, active configurations, unfinished executions and in-progress supplier deletions, then resumes manifest-scoped cleanup via RETIRING/DELETED states. It never removes arbitrary Assets or turns publication into activation.
 
-Source: [maintain](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/maintain_3vjia_h5.py#L16) · [reconcile_releases](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/three_vjia/maintenance.py#L297) · [activate_sdk_configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/three_vjia_sdk.py#L70).
+Source: [maintain](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/maintain_3vjia_h5.py#L16) · [reconcile_releases](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/three_vjia/maintenance.py#L297) · [activate_sdk_configuration](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/three_vjia_sdk.py#L70).
 
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Complete operational runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
-- [Immutable image build](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/build-image.sh)
-- [Containerized test deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/run-deploy-container.sh)
-- [Protected deployment implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/deploy/sae/deploy.sh)
+- [Complete operational runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/SAE_DEPLOYMENT_RUNBOOK.md)
+- [Immutable image build](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/build-image.sh)
+- [Containerized test deployment](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/run-deploy-container.sh)
+- [Protected deployment implementation](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/deploy/sae/deploy.sh)

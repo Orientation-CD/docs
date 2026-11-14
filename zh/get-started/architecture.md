@@ -49,8 +49,8 @@ flowchart LR
 
 ## 确认能力属于哪条分支
 
-[对齐状态](/zh/reference/integration-status)现已覆盖已实现的户型／三维家 SDK 路由、指派、销售阶段及仅后端日报。模型供应商、SDK 调用、本地转换共用持久化执行，但配置与恢复边界不同。继续读[输入归档](/zh/reference/flows/asset-upload-flow)、[额度](/zh/reference/flows/member-quota-flow)与[户型](/zh/backend/floor-plans)。
+[对齐状态](/zh/reference/integration-status)现已覆盖已实现的户型／三维家 SDK 路由、指派、销售阶段及小程序日报。模型供应商、SDK 调用、本地转换共用持久化执行，但配置与恢复边界不同。继续读[输入归档](/zh/reference/flows/asset-upload-flow)、[额度](/zh/reference/flows/member-quota-flow)与[户型](/zh/backend/floor-plans)。
 
 ## 源码依据
 
-核对版本：前端 `88c75c1f`、后端 `749e82df`（2026-11-10）。[前端请求层](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/request.ts) · [后端应用装配](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py) · [本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)。
+核对版本：前端 `7f1a3169`、后端 `f34b8a4d`（2026-11-14）。[前端请求层](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/request.ts) · [后端应用装配](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/main.py) · [本地运行手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md)。

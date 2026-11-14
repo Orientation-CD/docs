@@ -77,13 +77,13 @@ python scripts/build_3vjia_h5.py \
 
 The source cache validates pinned supplier input; the owned published package contains bridge/adaptations and explicit approved runtime resources rather than a general vendor-site mirror. Inspect `manifest.json`, contract bytes and release identity. An API health response or successful package build does not activate SDK configuration or prove supplier credentials. For a local MinIO root returning anonymous 403, follow the runbook's narrowly scoped verified static-prefix export; do not make the business bucket public.
 
-Source: [scripts/build_3vjia_h5.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/build_3vjia_h5.py) · [scripts/runbook.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md).
+Source: [scripts/build_3vjia_h5.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/build_3vjia_h5.py) · [scripts/runbook.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md).
 
 ## Source evidence
 
 Verified against the [documented source revisions](/reference/source-revisions). Runtime values and cloud activation must be checked separately.
 
-- [Local stack/runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)
-- [Launcher and ownership-sensitive behavior](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/create_stack.sh)
-- [Session and storage test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/tests/documents/TEST_STRATEGY.md)
-- [Image build and private supplier dependency](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/Dockerfile)
+- [Local stack/runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md)
+- [Launcher and ownership-sensitive behavior](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/create_stack.sh)
+- [Session and storage test policy](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/tests/documents/TEST_STRATEGY.md)
+- [Image build and private supplier dependency](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/Dockerfile)

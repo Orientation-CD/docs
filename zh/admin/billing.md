@@ -20,14 +20,16 @@ Token 套餐区分购买与赠送数量，总赠送量由服务端计算。停�
 
 当前保留服务端全额退款、回调与补偿，小程序申请退款入口仍关闭。后台展示抖音退款异常，但**没有普通人工审批队列或异常解决按钮**。微信退款查询恢复及关联订阅回收存在已记录缺口，不能把异常展示或 mock 成功描述为完整退款运营闭环。完整限制见页末退款合同及 [REST API](/zh/reference/rest-api)。
 
-## 配置视频模型单价与三种模式规则
+## 配置视频模型与分辨率单价
 
-视频计费区独立于通用 Feature 积分字段。配置正整数模型单价、剧本每秒字符数，以及 `script`、`reference_template`、`reference_upload` 三种规则。每种选择按秒 `per_second` 或按次 `per_task`：按次必须有正整数 `fixed_seconds`，按秒必须为空。基础模型不能停用；它的“默认”是已发布基准 8 积分/秒，自定义值必须带自定义标记。其他启用且非自定义模型由服务端按“基础单价 × 模型倍率”向上取整；自定义价格使用明确整数。其他模型被省略/禁用后，从可用价格表移除。
+视频计费区按模型分组，给每个可售分辨率维护启用状态与整数 Token/秒单价。选择默认价时，服务端读取该组合自己的工厂价。选择自定义时，输入正安全整数。停用会移除本次保存后的售价行。`Doubao-Seedance-2.0-mini / 480p` 始终启用，可单独自定义价格。其他组合各自设置。后台仍需要剧本每秒字符数及 `script`、`reference_template`、`reference_upload` 三条模式规则。选择 `per_task` 时提供正整数 `fixed_seconds`，选择 `per_second` 时将它留空。 [app/workflows/operations/video/video_pricing_matrix.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/operations/video/video_pricing_matrix.py) · [build_video_rates](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/video_billing.py#L88) · [admin_save_video_billing](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/video_billing.py#L123)
 
-保存携带显示的 `configuration_version`。`admin_save_video_billing` 校验整套规则，取得视频 Feature 权威锁，原子替换单价/规则并增加版本。旧表单返回 409 `VIDEO_BILLING_CONFIGURATION_STALE`，应重新读取；无效规则返回 422 `VIDEO_BILLING_CONFIGURATION_INVALID`。已接纳快照保留原模型/金额，旧客户预览必须重新确认。
+管理员保存时提交当前 `configuration_version`。后端核验规则后取得视频 Feature 权威锁，在同一事务替换费率和模式规则并递增版本。遇到 409 `VIDEO_BILLING_CONFIGURATION_STALE` 时刷新后再比较修改，422 `VIDEO_BILLING_CONFIGURATION_INVALID` 表示输入组合或规则无效。已接纳快照保存原模型、分辨率和金额。 [客户费用全链路](/zh/reference/flows/video-billing-flow)
 
-对照 [build_video_rates](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/video_billing.py#L110)、[admin_save_video_billing](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/video_billing.py#L150) 与[用户费用链路](/zh/reference/flows/video-billing-flow)。平台积分和供应商余额不是同一种计量。
+迁移把既有单价行归入 `480p`，改用 `(model_key, resolution)` 主键，保留自定义金额，以对应工厂价刷新默认行，并补齐已有配置中的可售组合。随后移除临时 SQL 默认值，要求写入明确指定分辨率。`MiniMax-H3` 只有 `768p` 与 `2k`。名称为 `Seedance-2.5-重制增强` 的模型有工厂价，但迁移不播种它，避免带 `480p` 的新模型进入尚使用旧五模型白名单的目录兼容字段。启用该模型需确认目标 renderer 支持，并考虑已部署客户端版本。 [migrations/versions/c9e4a7f1b820_add_video_rate_resolution_key.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/migrations/versions/c9e4a7f1b820_add_video_rate_resolution_key.py) · [migrations/versions/d7e1f4a9c305_drop_video_rate_resolution_default.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/migrations/versions/d7e1f4a9c305_drop_video_rate_resolution_default.py)
+
+降级检查会在修改数据库前拒绝仍有非 `480p` 档位或旧版模型清单以外的费率行。故障恢复应先核对应用镜像和数据库结构的兼容范围。
 
 ---
 
-代码依据 · backend `749e82df`: [app/admin/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/admin/billing.py) · [app/templates/admin/billing.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/templates/admin/billing.html) · [documents/PAYMENT_REFUNDS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/PAYMENT_REFUNDS.md).
+代码依据 · backend `f34b8a4d`: [app/admin/billing.py](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/admin/billing.py) · [app/templates/admin/billing.html](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/templates/admin/billing.html) · [documents/PAYMENT_REFUNDS.md](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/PAYMENT_REFUNDS.md).

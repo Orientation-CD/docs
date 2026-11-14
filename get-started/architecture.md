@@ -49,8 +49,8 @@ Follow [Quick Start](/get-started/quickstart) for a local acceptance loop and [C
 
 ## Know which branch owns a capability
 
-The [integration map](/reference/integration-status) now includes implemented floor-plan/ThreeVjia SDK routes, assignment, sales stages and API-only daily reports. Model provider calls, SDK calls and local conversion share durable execution but have distinct configuration and recovery boundaries. Follow [input archival](/reference/flows/asset-upload-flow), [quota](/reference/flows/member-quota-flow) and [floor plans](/backend/floor-plans).
+The [integration map](/reference/integration-status) now includes implemented floor-plan/ThreeVjia SDK routes, assignment, sales stages and mini-program daily reports. Model provider calls, SDK calls and local conversion share durable execution but have distinct configuration and recovery boundaries. Follow [input archival](/reference/flows/asset-upload-flow), [quota](/reference/flows/member-quota-flow) and [floor plans](/backend/floor-plans).
 
 ## Source evidence
 
-Documented against frontend `88c75c1f` and backend `749e82df` (2026-11-10). [Frontend request client](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/request.ts) · [Backend application assembly](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py) · [Backend local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md).
+Documented against frontend `7f1a3169` and backend `f34b8a4d` (2026-11-14). [Frontend request client](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/request.ts) · [Backend application assembly](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/main.py) · [Backend local runbook](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md).

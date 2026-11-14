@@ -46,13 +46,13 @@
     ],
     "frontend": [
       {
-        "path": "src/services/floorPlanHandoff.ts",
+        "path": "src/pkg-features/services/floorPlanHandoff.ts",
         "symbol": "prepareFloorPlanEditor"
       }
     ],
     "trigger": {
-      "en": "Open or continue the editor",
-      "zh": "打开或继续编辑器"
+      "en": "Native preparation opens a new editor or continues a Work",
+      "zh": "原生准备页打开新编辑器或继续作品"
     }
   },
   {
@@ -266,7 +266,7 @@
     ],
     "frontend": [
       {
-        "path": "src/services/floorPlanHandoff.ts",
+        "path": "src/pkg-plans/services/floorPlanHandoff.ts",
         "symbol": "prepareFloorPlanPanorama"
       }
     ],
@@ -548,13 +548,13 @@
     ],
     "frontend": [
       {
-        "path": "src/repositories/threeVjiaImage.ts",
+        "path": "src/pkg-features/repositories/threeVjiaImage.ts",
         "symbol": "prepareThreeVjiaImage"
       }
     ],
     "trigger": {
-      "en": "Enter one image Feature",
-      "zh": "进入一个生图 Feature"
+      "en": "Native preparation opens or resumes a ThreeVjia image Feature",
+      "zh": "原生准备页打开或恢复三维家生图功能"
     }
   },
   {
@@ -616,13 +616,13 @@
     ],
     "frontend": [
       {
-        "path": "src/repositories/threeVjiaDiscovery.ts",
+        "path": "src/pkg-features/repositories/threeVjiaDiscovery.ts",
         "symbol": "prepareThreeVjiaDiscovery"
       }
     ],
     "trigger": {
-      "en": "Open inspiration or shopping",
-      "zh": "打开灵感或购物"
+      "en": "Native preparation opens design inspiration or shops",
+      "zh": "原生准备页打开设计灵感或店铺"
     }
   }
 ]

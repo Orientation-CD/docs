@@ -1024,13 +1024,17 @@
     ],
     "frontend": [
       {
-        "path": "src/repositories/memberTokenQuota.ts",
+        "path": "src/pkg-projects/pages/members/index.vue",
+        "symbol": "saveQuota"
+      },
+      {
+        "path": "src/pkg-projects/services/saveMemberTokenLimit.ts",
         "symbol": "saveMemberTokenLimit"
       }
     ],
     "trigger": {
-      "en": "Owner member-management global or individual quota Save.",
-      "zh": "所有者成员管理中保存全局或单人额度。"
+      "en": "Owner saves the global default or a member override in Members and quota.",
+      "zh": "所有者在「成员与额度」保存全局默认或单人成员额度。"
     }
   },
   {
@@ -1050,13 +1054,17 @@
     ],
     "frontend": [
       {
-        "path": "src/repositories/memberTokenQuota.ts",
+        "path": "src/pkg-projects/pages/members/index.vue",
+        "symbol": "saveQuota"
+      },
+      {
+        "path": "src/pkg-projects/services/saveMemberTokenLimit.ts",
         "symbol": "saveMemberTokenLimit"
       }
     ],
     "trigger": {
-      "en": "Owner member-management global or individual quota Save.",
-      "zh": "所有者成员管理中保存全局或单人额度。"
+      "en": "Owner saves the global default or a member override in Members and quota.",
+      "zh": "所有者在「成员与额度」保存全局默认或单人成员额度。"
     }
   }
 ]

@@ -24,6 +24,14 @@
       {
         "path": "app/billing/video_pricing.py",
         "symbol": "calculate_video_price"
+      },
+      {
+        "path": "app/billing/video_billing.py",
+        "symbol": "effective_resolution"
+      },
+      {
+        "path": "app/billing/video_pricing.py",
+        "symbol": "_resolve_charged_resolution"
       }
     ],
     "frontend": [
@@ -34,11 +42,15 @@
       {
         "path": "src/pkg-features/services/videoGenerationSubmit.ts",
         "symbol": "submitVideoGeneration"
+      },
+      {
+        "path": "src/pkg-features/pages/video_generation/index.vue",
+        "symbol": "refreshPrice"
       }
     ],
     "trigger": {
-      "en": "The video form refreshes its fee and the submit service requests a current price before confirmation.",
-      "zh": "视频表单刷新费用，提交服务在确认前重新取得当前费用。"
+      "en": "Video form refreshPrice requests a fee when the model or resolution changes. submitVideoGeneration previews again before confirmation.",
+      "zh": "视频表单在模型或分辨率改变时由 refreshPrice 刷新费用，submitVideoGeneration 在确认前再取得一次预览。"
     }
   }
 ]

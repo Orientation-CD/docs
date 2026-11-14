@@ -57,12 +57,12 @@ features:
 | [YuanZhu-AI](https://github.com/Orientation-CD/YuanZhu-AI) | `main` | `749e82df` |
 | [docs](https://github.com/Orientation-CD/docs) | `main` | 当前双语文档站 |
 
-内容核对日期为 **2026-11-10**。分支已实现不表示部署已开启或完成真机/生产验收。当前公共产品 API 从 `/v1` 开始；源码依据区分客户端 UI 限制与较宽的后端契约。
+内容核对日期为 **2026-11-14**。分支已实现不表示部署已开启或完成真机/生产验收。当前公共产品 API 从 `/v1` 开始；源码依据区分客户端 UI 限制与较宽的后端契约。
 
 ## 源码依据
 
-[前端分组](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/featureGroups.ts) · [前端命令](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/package.json) · [后端契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py) · [本地手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/scripts/runbook.md)。
+[前端分组](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/featureGroups.ts) · [前端命令](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/package.json) · [后端契约](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/models.py) · [本地手册](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/scripts/runbook.md)。
 
 ## 已核验集成边界
 
-本次源码覆盖专业户型／三维家 SDK 执行、成员额度界面、项目指派与独立销售阶段、视频时长／模型计费及后端日报。先看[实际对齐边界](/zh/reference/integration-status)。
+本次源码覆盖小程序企业日报、按模型和分辨率计费的视频、可选视频画幅，以及七项三维家生图的本地草稿。先看[实际对齐边界](/zh/reference/integration-status)。

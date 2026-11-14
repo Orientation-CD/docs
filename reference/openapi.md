@@ -1,6 +1,6 @@
 # OpenAPI and Contract Boundaries
 
-Use the running backend's `/openapi.json` for machine-readable transport schemas and `/docs` for Swagger UI. The pinned [REST client contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md) defines domain errors and retry semantics. These sources serve different purposes.
+Use the running backend's `/openapi.json` for machine-readable transport schemas and `/docs` for Swagger UI. The pinned [REST client contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/REST_API_INTERFACE.md) defines domain errors and retry semantics. These sources serve different purposes.
 
 ## Read a schema from the selected environment
 
@@ -57,7 +57,7 @@ The gateway declares nine methods without permitting every supplier operation un
 
 Verified against the [documented source revisions](/reference/source-revisions).
 
-- [Normative REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/REST_API_INTERFACE.md)
-- [Application router registration](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/main.py)
-- [Public schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/core/models.py)
-- [Conditional mock interfaces](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/documents/MOCK_API_INTERFACE.md)
+- [Normative REST contract](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/REST_API_INTERFACE.md)
+- [Application router registration](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/main.py)
+- [Public schemas](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/core/models.py)
+- [Conditional mock interfaces](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/documents/MOCK_API_INTERFACE.md)

@@ -4,7 +4,7 @@ Reference is a source-reading course. Pick an action you can recognize in the mi
 
 ## A concrete first journey {#first-journey}
 
-Use [the real local-API tutorial](/get-started/quickstart), with simulated external services where configured. Frontend Mock never reaches SQL, Redis or workers. Begin with an ordinary image, then use [the floor-plan chain](/reference/flows/floor-plan-flow) after SDK/H5 configuration. [Integration status](/reference/integration-status) distinguishes client callers from backend-only daily reports.
+Use [the real local-API tutorial](/get-started/quickstart), with simulated external services where configured. Frontend Mock never reaches SQL, Redis or workers. Begin with an ordinary image, then use [the floor-plan chain](/reference/flows/floor-plan-flow) after SDK/H5 configuration. Follow the member and owner paths in the [daily-report walkthrough](/reference/flows/daily-report-flow) for a synchronous enterprise feature.
 
 Choose one image task and keep user ID, workspace ID, uploaded Asset ID, action key and public Job ID. These identities connect processes; filenames and progress percentages do not.
 
@@ -64,10 +64,10 @@ Read a function in this order:
 
 Example starting points:
 
-- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/88c75c1f15cd65f45c7fb09d560df80430ddc198/src/services/request.ts#L370)
-- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/api.py#L1229)
-- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/workflows/workflow_admission.py#L3291)
-- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/749e82df3a51c441335ba6a4db607a98bacbcf97/app/worker.py#L269)
+- [src/services/request.ts → request](https://github.com/Orientation-CD/wechat_mini_program/blob/7f1a3169338c10bd4139c24318f7a35caf86310c/src/services/request.ts#L370)
+- [app/workflows/api.py → create_workflow](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/api.py#L1229)
+- [app/workflows/workflow_admission.py → admit_workflow_job](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/workflows/workflow_admission.py#L3301)
+- [app/worker.py → execute_workflow_submission](https://github.com/Orientation-CD/YuanZhu-AI/blob/f34b8a4d6307c83c6f7bbc905485a4f586d59a99/app/worker.py#L269)
 
 Do not infer the running path from a filename alone. The current API accepts canonical `/v1/workflows`, while some shipped image/audio/video forms still deliberately post to the compatibility `/v1/design-jobs` adapter. The [product route matrix](/reference/flows/workflow-products-flow#frontend-routing) states the actual caller for each branch.
 
